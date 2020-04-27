@@ -1,17 +1,46 @@
 from multiprocessing import Process
 from multiprocessing import Queue
+from dataclasses import dataclass
+from enum import Enum
+
 from arrayqueues.shared_arrays import ArrayQueue
 from lightparam import Parametrized
 
-import nidaqmx
-from nidaqmx.stream_readers import AnalogMultiChannelReader
-from nidaqmx.stream_writers import AnalogMultiChannelWriter
-from nidaqmx.constants import Edge, AcquisitionType, LineGrouping
+try:
+    import nidaqmx
+    from nidaqmx.stream_readers import AnalogMultiChannelReader
+    from nidaqmx.stream_writers import AnalogMultiChannelWriter
+    from nidaqmx.constants import Edge, AcquisitionType, LineGrouping
+
+    dry_run = False
+except ImportError:
+    dry_run = True
 
 
-class Piezo(Parametrized):
-    def __init__(self):
-        pass
+class Waveform(Enum):
+    sine = 1
+    triangle = 2
+
+
+@dataclass
+class XYScanning:
+    vmin: float = 1
+    vmax: float = 0
+    frequency: float = 800
+    waveform: Waveform = Waveform.sine
+
+
+@dataclass
+class PlanarScanning:
+    lateral: XYScanning
+    frontal: XYScanning
+
+
+@dataclass
+class ZScanning:
+    lateral: float = 0
+    frontal: float = 0
+    piezo: float = 0
 
 
 class Scanner(Process):
@@ -22,19 +51,19 @@ class Scanner(Process):
         self.n_samples = n_samples_waveform
         self.sample_rate = sample_rate
 
-    def setup_tasks(self, read_task, write_task_1, write_task_2):
+    def setup_tasks(self, read_task, write_task_z, write_task_xy):
         # Configure the channels
 
         # read channel is only the piezo position on board 1
         read_task.ai_channels.add_ai_voltage_chan("Dev1/ai0:1", min_val=0, max_val=10)
 
         # write channels are on board 1: piezo and z galvos
-        write_task_1.ao_channels.add_ao_voltage_chan(
+        write_task_z.ao_channels.add_ao_voltage_chan(
             "Dev1/ao0:3", min_val=-5, max_val=10
         )
 
         # on board 2: lateral galvos
-        write_task_2.ao_channels.add_ao_voltage_chan(
+        write_task_xy.ao_channels.add_ao_voltage_chan(
             "Dev2/ao0:1", min_val=-5, max_val=10
         )
 
@@ -46,7 +75,7 @@ class Scanner(Process):
             sample_mode=AcquisitionType.CONTINUOUS,
             samps_per_chan=self.n_samples,
         )
-        write_task_1.timing.cfg_samp_clk_timing(
+        write_task_z.timing.cfg_samp_clk_timing(
             rate=self.sample_rate,
             source="OnboardClock",
             active_edge=Edge.RISING,
@@ -54,7 +83,7 @@ class Scanner(Process):
             samps_per_chan=self.n_samples,
         )
 
-        write_task_2.timing.cfg_samp_clk_timing(
+        write_task_xy.timing.cfg_samp_clk_timing(
             rate=self.sample_rate,
             source="OnboardClock",
             active_edge=Edge.RISING,
