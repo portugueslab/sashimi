@@ -1,10 +1,19 @@
 from multiprocessing import Process
-from multiprocessing import Queue
+from multiprocessing import Queue, Event
 from dataclasses import dataclass
 from enum import Enum
 
 from arrayqueues.shared_arrays import ArrayQueue
-from lightparam import Parametrized
+import numpy as np
+
+from typing import Union, Tuple
+
+from lightsheet.waveforms import (
+    TriangleWaveform,
+    ImpulseWaveform,
+    SawtoothWaveform,
+    RecordedWaveform,
+)
 
 try:
     import nidaqmx
@@ -17,9 +26,10 @@ except ImportError:
     dry_run = True
 
 
-class Waveform(Enum):
-    sine = 1
-    triangle = 2
+class ScanningState(Enum):
+    PAUSED = 1
+    PLANAR = 2
+    VOLUMETRIC = 3
 
 
 @dataclass
@@ -27,7 +37,6 @@ class XYScanning:
     vmin: float = 1
     vmax: float = 0
     frequency: float = 800
-    waveform: Waveform = Waveform.sine
 
 
 @dataclass
@@ -37,19 +46,150 @@ class PlanarScanning:
 
 
 @dataclass
-class ZScanning:
+class ZManual:
     lateral: float = 0
     frontal: float = 0
     piezo: float = 0
 
 
+@dataclass
+class ZSynced:
+    piezo: float = 0
+    lateral_sync: Tuple[float, float] = (0.0, 0.0)
+    frontal_sync: Tuple[float, float] = (0.0, 0.0)
+
+
+@dataclass
+class ZScanning:
+    piezo_min: float = 0
+    piezo_max: float = 0
+    frequency: float = 1
+    lateral_sync: Tuple[float, float] = (0.0, 0.0)
+    frontal_sync: Tuple[float, float] = (0.0, 0.0)
+
+
+@dataclass
+class TriggeringSettings:
+    n_planes: int = 0
+
+
+@dataclass
+class ScanSettings:
+    state: ScanningState
+    z: Union[ZScanning, ZManual, ZSynced]
+    xy: PlanarScanning
+    triggering: TriggeringSettings
+
+
+class ScanLoop:
+    def __init__(
+        self,
+        read_task,
+        write_task_z,
+        write_task_xy,
+        stop_event,
+        scan_settings: ScanSettings,
+        n_samples,
+        sample_rate,
+    ):
+
+        self.sample_rate = sample_rate
+        self.n_samples = n_samples
+
+        self.read_task = read_task
+        self.write_task_z = write_task_z
+        self.write_task_xy = write_task_xy
+
+        self.z_writer = AnalogMultiChannelWriter(write_task_z.out_stream)
+        self.xy_writer = AnalogMultiChannelWriter(write_task_xy.out_stream)
+        self.z_reader = AnalogMultiChannelReader(read_task.in_stream)
+
+        self.stop_event = stop_event
+
+        self.read_array = np.zeros(n_samples)
+        self.write_arrays = np.zeros(
+            (6, n_samples)
+        )  # piezo, z lateral, frontal, camera, xy lateral frontal
+
+        self.started = False
+        self.settings = scan_settings
+        self.n_acquired = 0
+
+        self.lateral_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
+
+        self.frontal_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
+
+        self.time = np.arange(self.n_samples) / self.sample_rate
+        self.shifted_time = self.time.copy()
+        self.i_sample = 0
+
+    def loop_condition(self):
+        return not self.stop_event.is_set()
+
+    def check_start(self):
+        if not self.started:
+            self.read_task.start()
+            self.write_task_xy.start()
+            self.write_task_z.start()
+            self.started = True
+
+    def fill_arrays(self):
+        self.shifted_time[:] = self.time + self.i_sample / self.sample_rate
+        self.write_arrays[4, :] = self.lateral_waveform.values(self.shifted_time)
+        self.write_arrays[5, :] = self.frontal_waveform.values(self.shifted_time)
+
+    def write(self):
+        self.z_writer.write_many_sample(self.write_arrays[:4])
+        self.xy_writer.write_many_sample(self.write_arrays[4:])
+
+    def read(self):
+        self.z_reader.read_many_sample(
+            self.read_array, number_of_samples_per_channel=self.n_samples_in, timeout=1,
+        )
+
+    def loop(self):
+        while self.loop_condition():
+            self.fill_arrays()
+            self.write()
+            self.check_start()
+            self.read()
+            self.i_sample += self.n_samples
+
+
+def calc_sync(z, sync_coef):
+    return sync_coef[0] + sync_coef[1] * z
+
+
+class PlanarScanLoop(ScanLoop):
+    def fill_arrays(self):
+        # Fill the z values
+        self.write_arrays[0, :] = self.settings.z.piezo
+        if isinstance(self.settings.z, ZManual):
+            self.write_arrays[1, :] = self.settings.z.lateral
+            self.write_arrays[2, :] = self.settings.z.frontal
+        elif isinstance(self.settings.z, ZSynced):
+            self.write_arrays[1, :] = calc_sync(
+                self.settings.z.piezo, self.settings.z.lateral_sync
+            )
+            self.write_arrays[2, :] = calc_sync(
+                self.settings.z.piezo, self.settings.z.frontal_sync
+            )
+        super().fill_arrays()
+
+
 class Scanner(Process):
     def __init__(self, n_samples_waveform=8000, sample_rate=40000):
         super().__init__()
-        self.control_queue = Queue()
+
+        self.stop_event = Event()
+
+        self.parameter_queue = Queue()
+
         self.waveform_queue = ArrayQueue()
         self.n_samples = n_samples_waveform
         self.sample_rate = sample_rate
+
+        self.scanning_state = ScanningState.PAUSED
 
     def setup_tasks(self, read_task, write_task_z, write_task_xy):
         # Configure the channels
@@ -96,5 +236,18 @@ class Scanner(Process):
             "/Dev1/ao/StartTrigger", Edge.RISING
         )
 
-    def run(self):
+    def retrieve_parameters(self):
         pass
+
+    def run(self):
+        while not self.stop_event.is_set():
+            if self.scanning_state == ScanningState.PAUSED:
+                self.retrieve_parameters()
+                continue
+
+            with nidaqmx.Task() as read_task, nidaqmx.Task() as write_task_z, nidaqmx.Task() as write_task_xy:
+                self.setup_tasks(read_task, write_task_z, write_task_xy)
+                if self.scanning_state == ScanningState.PLANAR:
+                    self.planar_scan_loop()
+                elif self.scanning_state == ScanningState.VOLUMETRIC:
+                    self.volumetric_scan_loop()
