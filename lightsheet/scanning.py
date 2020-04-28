@@ -2,6 +2,7 @@ from multiprocessing import Process
 from multiprocessing import Queue, Event
 from dataclasses import dataclass
 from enum import Enum
+from queue import Empty
 
 from arrayqueues.shared_arrays import ArrayQueue
 import numpy as np
@@ -41,8 +42,8 @@ class XYScanning:
 
 @dataclass
 class PlanarScanning:
-    lateral: XYScanning
-    frontal: XYScanning
+    lateral: XYScanning = XYScanning()
+    frontal: XYScanning = XYScanning()
 
 
 @dataclass
@@ -69,16 +70,16 @@ class ZScanning:
 
 
 @dataclass
-class TriggeringSettings:
+class TriggeringParameters:
     n_planes: int = 0
 
 
 @dataclass
-class ScanSettings:
-    state: ScanningState
-    z: Union[ZScanning, ZManual, ZSynced]
-    xy: PlanarScanning
-    triggering: TriggeringSettings
+class ScanParameters:
+    state: ScanningState = ScanningState.PAUSED
+    z: Union[ZScanning, ZManual, ZSynced] = ZManual()
+    xy: PlanarScanning = PlanarScanning()
+    triggering: TriggeringParameters = TriggeringParameters
 
 
 class ScanLoop:
@@ -88,7 +89,7 @@ class ScanLoop:
         write_task_z,
         write_task_xy,
         stop_event,
-        scan_settings: ScanSettings,
+        settings_queue: Queue,
         n_samples,
         sample_rate,
     ):
@@ -111,17 +112,27 @@ class ScanLoop:
             (6, n_samples)
         )  # piezo, z lateral, frontal, camera, xy lateral frontal
 
+        self.settings_queue = settings_queue
+
+        self.settings = ScanParameters()
+
         self.started = False
-        self.settings = scan_settings
         self.n_acquired = 0
 
         self.lateral_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
-
         self.frontal_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
 
         self.time = np.arange(self.n_samples) / self.sample_rate
         self.shifted_time = self.time.copy()
         self.i_sample = 0
+
+    def update_settings(self):
+        try:
+            self.settings = self.settings_queue.get(timeout=0.001)
+        except Empty:
+            pass
+        self.lateral_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
+        self.frontal_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
 
     def loop_condition(self):
         return not self.stop_event.is_set()
@@ -154,6 +165,7 @@ class ScanLoop:
             self.check_start()
             self.read()
             self.i_sample += self.n_samples
+            self.n_acquired += 0
 
 
 def calc_sync(z, sync_coef):
@@ -175,6 +187,12 @@ class PlanarScanLoop(ScanLoop):
                 self.settings.z.piezo, self.settings.z.frontal_sync
             )
         super().fill_arrays()
+
+
+class VolumetricScanLoop(ScanLoop):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.z_waveform = SawtoothWaveform()
 
 
 class Scanner(Process):
@@ -248,6 +266,17 @@ class Scanner(Process):
             with nidaqmx.Task() as read_task, nidaqmx.Task() as write_task_z, nidaqmx.Task() as write_task_xy:
                 self.setup_tasks(read_task, write_task_z, write_task_xy)
                 if self.scanning_state == ScanningState.PLANAR:
-                    self.planar_scan_loop()
+                    loop = PlanarScanLoop
                 elif self.scanning_state == ScanningState.VOLUMETRIC:
-                    self.volumetric_scan_loop()
+                    loop = VolumetricScanLoop
+
+                l = loop(
+                    read_task,
+                    write_task_z,
+                    write_task_xy,
+                    self.stop_event,
+                    self.parameter_queue,
+                    self.n_samples,
+                    self.sample_rate,
+                )
+                l.loop()

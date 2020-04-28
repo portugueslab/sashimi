@@ -16,7 +16,7 @@ from lightsheet.state import CalibrationState
 
 
 class CalibrationWidget(QWidget):
-    def __init__(self, calibration_state: CalibrationState):
+    def __init__(self, calibration_state: CalibrationState, timer: QTimer):
         super().__init__()
         self.state = calibration_state
         self.setLayout(QVBoxLayout())
@@ -29,6 +29,8 @@ class CalibrationWidget(QWidget):
         self.layout().addWidget(self.btn_add_points)
         self.layout().addWidget(self.btn_rm_points)
         self.layout().addWidget(self.lbl_calibration)
+
+        timer.timeout.connect(self.update_label)
 
     def update_label(self):
         self.lbl_calibration.setText(
@@ -49,14 +51,3 @@ class CalibrationWidget(QWidget):
                 )
             )
         )
-
-
-if __name__ == "__main__":
-    app = QApplication([])
-    st = CalibrationState()
-    wid = CalibrationWidget(st)
-    wid.show()
-    timer = QTimer()
-    timer.timeout.connect(wid.update_label)
-    timer.start()
-    app.exec()

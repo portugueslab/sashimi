@@ -1,7 +1,13 @@
 import numpy as np
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
-from lightsheet.scanning import PlanarScanning, ZScanning, XYScanning
+from lightsheet.scanning import (
+    PlanarScanning,
+    ZScanning,
+    XYScanning,
+    ScanParameters,
+    ScanningState,
+)
 
 
 class PlanarScanningSettings(ParametrizedQt):
@@ -32,9 +38,10 @@ class ZRecordingSettings(ParametrizedQt):
         self.n_skip_dorsal = Param(0, (0, 20))
 
 
-def convert_params(planar: PlanarScanningSettings, zsettings: ZSettings):
-    return (
-        PlanarScanning(
+def convert_calibration_params(planar: PlanarScanningSettings, zsettings: ZSettings):
+    return ScanParameters(
+        state=ScanningState.PLANAR,
+        xy=PlanarScanning(
             lateral=XYScanning(
                 vmin=planar.lateral_range[0],
                 vmax=planar.lateral_range[1],
@@ -46,7 +53,7 @@ def convert_params(planar: PlanarScanningSettings, zsettings: ZSettings):
                 frequency=planar.frontal_frequency,
             ),
         ),
-        ZScanning(**zsettings.params.values),
+        z=ZScanning(**zsettings.params.values),
     )
 
 
