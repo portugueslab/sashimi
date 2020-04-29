@@ -1,6 +1,14 @@
 import visa
+from lightparam import Param
+from lightparam.param_qt import ParametrizedQt
 
 rm = visa.ResourceManager()
+
+
+class LaserSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.laser_power = Param(0, (0, 40), unit="mA")
 
 
 class CoboltLaser:
@@ -39,3 +47,6 @@ class CoboltLaser:
             ]
         )
         return status_string
+
+    def close(self):
+        self.cobolt.close()

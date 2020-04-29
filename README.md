@@ -8,3 +8,11 @@ In the setup mode two things need to be determined:
 2) the piezo-galvo relation
 
 In the running mode the estimated piezo-galvo relation has to be applied.
+
+# TODO
+ - [ ] Camera triggering
+ - [ ] Stytra communication
+ - [ ] Better calibration point management
+ - [ ] Camera display
+ - [ ] Invstigate time shift calculation
+ - [ ] Make the GUI nice

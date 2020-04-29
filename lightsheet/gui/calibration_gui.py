@@ -12,11 +12,11 @@ from PyQt5.QtWidgets import (
     QCheckBox,
 )
 from lightparam.gui import ParameterGui
-from lightsheet.state import CalibrationState
+from lightsheet.state import Calibration
 
 
 class CalibrationWidget(QWidget):
-    def __init__(self, calibration_state: CalibrationState, timer: QTimer):
+    def __init__(self, calibration_state: Calibration, timer: QTimer):
         super().__init__()
         self.state = calibration_state
         self.setLayout(QVBoxLayout())

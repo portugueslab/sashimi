@@ -1,8 +1,12 @@
 from multiprocessing import Process
 from multiprocessing import Queue, Event
 from dataclasses import dataclass
+from dataclasses import asdict
 from enum import Enum
 from queue import Empty
+from copy import deepcopy
+from math import gcd
+from lightsheet.rolling_buffer import RollingBuffer
 
 from arrayqueues.shared_arrays import ArrayQueue
 import numpy as np
@@ -18,13 +22,19 @@ from lightsheet.waveforms import (
 
 try:
     import nidaqmx
-    from nidaqmx.stream_readers import AnalogMultiChannelReader
+    from nidaqmx.stream_readers import (
+        AnalogMultiChannelReader,
+        AnalogSingleChannelReader,
+    )
     from nidaqmx.stream_writers import AnalogMultiChannelWriter
     from nidaqmx.constants import Edge, AcquisitionType, LineGrouping
 
     dry_run = False
 except ImportError:
     dry_run = True
+
+
+PIEZO_SCALE = 1 / 40
 
 
 class ScanningState(Enum):
@@ -48,9 +58,9 @@ class PlanarScanning:
 
 @dataclass
 class ZManual:
+    piezo: float = 0
     lateral: float = 0
     frontal: float = 0
-    piezo: float = 0
 
 
 @dataclass
@@ -72,6 +82,7 @@ class ZScanning:
 @dataclass
 class TriggeringParameters:
     n_planes: int = 0
+    frequency: Union[None, float] = None
 
 
 @dataclass
@@ -79,7 +90,22 @@ class ScanParameters:
     state: ScanningState = ScanningState.PAUSED
     z: Union[ZScanning, ZManual, ZSynced] = ZManual()
     xy: PlanarScanning = PlanarScanning()
-    triggering: TriggeringParameters = TriggeringParameters
+    triggering: TriggeringParameters = TriggeringParameters()
+
+
+def get_last_parameters(parameter_queue, timeout=0.0001):
+    params = None
+    while True:
+        try:
+            params = parameter_queue.get(timeout=timeout)
+        except Empty:
+            break
+    return params
+
+
+def lcm(a, b):
+    """Return lowest common multiple."""
+    return a * b // gcd(a, b)
 
 
 class ScanLoop:
@@ -89,9 +115,11 @@ class ScanLoop:
         write_task_z,
         write_task_xy,
         stop_event,
-        settings_queue: Queue,
+        initial_parameters: ScanParameters,
+        parameter_queue: Queue,
         n_samples,
         sample_rate,
+        waveform_queue: ArrayQueue,
     ):
 
         self.sample_rate = sample_rate
@@ -103,7 +131,7 @@ class ScanLoop:
 
         self.z_writer = AnalogMultiChannelWriter(write_task_z.out_stream)
         self.xy_writer = AnalogMultiChannelWriter(write_task_xy.out_stream)
-        self.z_reader = AnalogMultiChannelReader(read_task.in_stream)
+        self.z_reader = AnalogSingleChannelReader(read_task.in_stream)
 
         self.stop_event = stop_event
 
@@ -112,27 +140,38 @@ class ScanLoop:
             (6, n_samples)
         )  # piezo, z lateral, frontal, camera, xy lateral frontal
 
-        self.settings_queue = settings_queue
+        self.parameter_queue = parameter_queue
+        self.waveform_queue = waveform_queue
 
-        self.settings = ScanParameters()
+        self.parameters = initial_parameters
 
         self.started = False
         self.n_acquired = 0
 
-        self.lateral_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
-        self.frontal_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
+        self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
+        self.frontal_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
 
         self.time = np.arange(self.n_samples) / self.sample_rate
         self.shifted_time = self.time.copy()
         self.i_sample = 0
 
+    def n_samples_period(self):
+        ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
+        ns_frontal = int(round(self.sample_rate / self.frontal_waveform.frequency))
+        return lcm(ns_lateral, ns_frontal)
+
     def update_settings(self):
-        try:
-            self.settings = self.settings_queue.get(timeout=0.001)
-        except Empty:
-            pass
-        self.lateral_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
-        self.frontal_waveform = TriangleWaveform(**self.settings.xy.lateral.asdict())
+        new_params = get_last_parameters(self.parameter_queue)
+        if new_params is not None:
+            self.parameters = new_params
+            self.lateral_waveform = TriangleWaveform(
+                **asdict(self.parameters.xy.lateral)
+            )
+            self.frontal_waveform = TriangleWaveform(
+                **asdict(self.parameters.xy.lateral)
+            )
+            return True
+        return False
 
     def loop_condition(self):
         return not self.stop_event.is_set()
@@ -155,17 +194,21 @@ class ScanLoop:
 
     def read(self):
         self.z_reader.read_many_sample(
-            self.read_array, number_of_samples_per_channel=self.n_samples_in, timeout=1,
+            self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
         )
+        self.read_array[:] = self.read_array / PIEZO_SCALE
 
     def loop(self):
-        while self.loop_condition():
+        while True:
+            self.update_settings()
+            if not self.loop_condition():
+                break
             self.fill_arrays()
             self.write()
             self.check_start()
             self.read()
-            self.i_sample += self.n_samples
-            self.n_acquired += 0
+            self.i_sample = (self.i_sample + self.n_samples) % self.n_samples_period()
+            self.n_acquired += 1
 
 
 def calc_sync(z, sync_coef):
@@ -173,18 +216,35 @@ def calc_sync(z, sync_coef):
 
 
 class PlanarScanLoop(ScanLoop):
+    def loop_condition(self):
+        return (
+            super().loop_condition() and self.parameters.state == ScanningState.PLANAR
+        )
+
+    def n_samples_period(self):
+        if (
+            self.parameters.triggering.frequency is None
+            or self.parameters.triggering.frequency == 0
+        ):
+            return super().n_samples_period()
+        else:
+            n_samples_trigger = int(
+                round(self.sample_rate / self.parameters.triggering.frequency)
+            )
+            return lcm(n_samples_trigger, super().n_samples_period())
+
     def fill_arrays(self):
         # Fill the z values
-        self.write_arrays[0, :] = self.settings.z.piezo
-        if isinstance(self.settings.z, ZManual):
-            self.write_arrays[1, :] = self.settings.z.lateral
-            self.write_arrays[2, :] = self.settings.z.frontal
-        elif isinstance(self.settings.z, ZSynced):
+        self.write_arrays[0, :] = self.parameters.z.piezo * PIEZO_SCALE
+        if isinstance(self.parameters.z, ZManual):
+            self.write_arrays[1, :] = self.parameters.z.lateral
+            self.write_arrays[2, :] = self.parameters.z.frontal
+        elif isinstance(self.parameters.z, ZSynced):
             self.write_arrays[1, :] = calc_sync(
-                self.settings.z.piezo, self.settings.z.lateral_sync
+                self.parameters.z.piezo, self.parameters.z.lateral_sync
             )
             self.write_arrays[2, :] = calc_sync(
-                self.settings.z.piezo, self.settings.z.frontal_sync
+                self.parameters.z.piezo, self.parameters.z.frontal_sync
             )
         super().fill_arrays()
 
@@ -193,6 +253,59 @@ class VolumetricScanLoop(ScanLoop):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.z_waveform = SawtoothWaveform()
+        self.recorded_signal = RollingBuffer(self.n_samples_period())
+        self.current_frequency = 0
+
+    def n_samples_period(self):
+        n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
+        return lcm(n_samples_trigger, super().n_samples_period())
+
+    def update_settings(self):
+        updated = super().update_settings()
+        if not updated:
+            return False
+
+        if self.parameters.state != ScanningState.VOLUMETRIC:
+            return True
+
+        if self.parameters.z.frequency != self.current_frequency:
+            full_period = int(round(self.sample_rate / self.parameters.z.frequency))
+            self.recorded_signal = RollingBuffer(full_period)
+            self.current_frequency = self.parameters.z.frequency
+
+        self.z_waveform = SawtoothWaveform(
+            frequency=self.parameters.z.frequency,
+            vmin=self.parameters.z.piezo_min,
+            vmax=self.parameters.z.piezo_max,
+        )
+        return True
+
+    def read(self):
+        super().read()
+        i_insert = (self.i_sample - self.n_samples) % len(self.recorded_signal.buffer)
+        self.recorded_signal.write(
+            self.read_array[
+                : min(len(self.recorded_signal.buffer), len(self.read_array))
+            ],
+            i_insert,
+        )
+        self.waveform_queue.put(self.recorded_signal.buffer)
+
+    def fill_arrays(self):
+        super().fill_arrays()
+        self.write_arrays[0, :] = (
+            self.z_waveform.values(self.shifted_time) * PIEZO_SCALE
+        )
+        wave_part = self.recorded_signal.read(self.i_sample, self.n_samples)
+        print(wave_part.shape)
+        self.write_arrays[1, :] = (
+            self.parameters.z.lateral_sync[0]
+            + self.parameters.z.lateral_sync[1] * wave_part
+        )
+        self.write_arrays[2, :] = (
+            self.parameters.z.frontal_sync[0]
+            + self.parameters.z.frontal_sync[1] * wave_part
+        )
 
 
 class Scanner(Process):
@@ -203,17 +316,17 @@ class Scanner(Process):
 
         self.parameter_queue = Queue()
 
-        self.waveform_queue = ArrayQueue()
+        self.waveform_queue = ArrayQueue(max_mbytes=100)
         self.n_samples = n_samples_waveform
         self.sample_rate = sample_rate
 
-        self.scanning_state = ScanningState.PAUSED
+        self.parameters = ScanParameters()
 
     def setup_tasks(self, read_task, write_task_z, write_task_xy):
         # Configure the channels
 
         # read channel is only the piezo position on board 1
-        read_task.ai_channels.add_ai_voltage_chan("Dev1/ai0:1", min_val=0, max_val=10)
+        read_task.ai_channels.add_ai_voltage_chan("Dev1/ai0:0", min_val=0, max_val=10)
 
         # write channels are on board 1: piezo and z galvos
         write_task_z.ao_channels.add_ao_voltage_chan(
@@ -255,19 +368,22 @@ class Scanner(Process):
         )
 
     def retrieve_parameters(self):
-        pass
+        new_params = get_last_parameters(self.parameter_queue)
+        if new_params is not None:
+            self.parameters = new_params
 
     def run(self):
         while not self.stop_event.is_set():
-            if self.scanning_state == ScanningState.PAUSED:
+            if self.parameters.state == ScanningState.PAUSED:
                 self.retrieve_parameters()
                 continue
 
             with nidaqmx.Task() as read_task, nidaqmx.Task() as write_task_z, nidaqmx.Task() as write_task_xy:
                 self.setup_tasks(read_task, write_task_z, write_task_xy)
-                if self.scanning_state == ScanningState.PLANAR:
+                if self.parameters.state == ScanningState.PLANAR:
                     loop = PlanarScanLoop
-                elif self.scanning_state == ScanningState.VOLUMETRIC:
+                elif self.parameters.state == ScanningState.VOLUMETRIC:
+                    print("Volume scanning")
                     loop = VolumetricScanLoop
 
                 l = loop(
@@ -275,8 +391,13 @@ class Scanner(Process):
                     write_task_z,
                     write_task_xy,
                     self.stop_event,
+                    self.parameters,
                     self.parameter_queue,
                     self.n_samples,
                     self.sample_rate,
+                    self.waveform_queue,
                 )
                 l.loop()
+                self.parameters = deepcopy(
+                    l.parameters
+                )  # set the paramters to the last ones received in the loop
