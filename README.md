@@ -12,6 +12,7 @@ In the running mode the estimated piezo-galvo relation has to be applied.
 # TODO
  - [ ] Camera triggering
  - [ ] Stytra communication
+ - [ ] Settings saving and management
  - [ ] Better calibration point management
  - [ ] Camera display
  - [ ] Invstigate time shift calculation
