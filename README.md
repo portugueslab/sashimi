@@ -10,9 +10,11 @@ In the setup mode two things need to be determined:
 In the running mode the estimated piezo-galvo relation has to be applied.
 
 # TODO
- - [ ] Camera triggering
- - [ ] Stytra communication
+ - [X] Camera triggering
+ - [X] Stytra communication
  - [ ] Settings saving and management
+ - [ ] Fix non-divisible frame rate bugs
+ - [ ] Single-plane experiments
  - [ ] Better calibration point management
  - [ ] Camera display
  - [ ] Break up scanning.py

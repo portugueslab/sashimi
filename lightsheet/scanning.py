@@ -266,14 +266,20 @@ class VolumetricScanLoop(ScanLoop):
         self.current_frequency = self.parameters.z.frequency
         self.camera_on = True
 
+    def loop_condition(self):
+        return (
+            super().loop_condition()
+            and self.parameters.state == ScanningState.VOLUMETRIC
+        )
+
     def n_samples_period(self):
         n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
         return lcm(n_samples_trigger, super().n_samples_period())
 
-    # def check_start(self):
-    #     super().check_start()
-    #     # if self.parameters.experiment_state == ExperimentPrepareState.START:
-    #     #     self.experiment_start_signal.set()
+    def check_start(self):
+        super().check_start()
+        if self.parameters.experiment_state == ExperimentPrepareState.START:
+            self.experiment_start_signal.set()
 
     def update_settings(self):
         updated = super().update_settings()
@@ -314,7 +320,7 @@ class VolumetricScanLoop(ScanLoop):
             and self.parameters.experiment_state == ExperimentPrepareState.START
         ):
             self.camera_on = True
-            #self.i_sample = 0  # puts it at the beggining of the cycle
+            self.i_sample = 0  # puts it at the beggining of the cycle
 
         return True
 
@@ -327,7 +333,6 @@ class VolumetricScanLoop(ScanLoop):
             ],
             i_insert,
         )
-        print(i_insert)
         self.waveform_queue.put(self.recorded_signal.buffer)
 
     def fill_arrays(self):
@@ -359,7 +364,7 @@ class Scanner(Process):
         self,
         stop_event: Event,
         experiment_start_event,
-        n_samples_waveform=4000,
+        n_samples_waveform=10000,
         sample_rate=40000,
     ):
         super().__init__()

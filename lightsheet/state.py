@@ -203,8 +203,9 @@ class State:
     def toggle_experiment_state(self):
         if self.experiment_state == ExperimentPrepareState.NORMAL:
             self.experiment_state = ExperimentPrepareState.NO_CAMERA
-        if self.experiment_state == ExperimentPrepareState.NO_CAMERA:
+        elif self.experiment_state == ExperimentPrepareState.NO_CAMERA:
             self.experiment_state = ExperimentPrepareState.START
+        self.send_settings()
 
     def send_settings(self):
         if self.status.scanning_state == "Paused":
@@ -221,9 +222,7 @@ class State:
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
-        else:
-            print("Should have not gotten here")
-            return
+
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
         self.stytra_comm.current_settings_queue.put(params)
