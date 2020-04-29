@@ -175,7 +175,7 @@ class ScanLoop:
                 **asdict(self.parameters.xy.lateral)
             )
             self.frontal_waveform = TriangleWaveform(
-                **asdict(self.parameters.xy.lateral)
+                **asdict(self.parameters.xy.frontal)
             )
             return True
         return False
@@ -270,10 +270,10 @@ class VolumetricScanLoop(ScanLoop):
         n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
         return lcm(n_samples_trigger, super().n_samples_period())
 
-    def check_start(self):
-        cs = super().check_start()
-        if self.parameters.experiment_state == ExperimentPrepareState.START:
-            self.experiment_start_signal.set()
+    # def check_start(self):
+    #     super().check_start()
+    #     # if self.parameters.experiment_state == ExperimentPrepareState.START:
+    #     #     self.experiment_start_signal.set()
 
     def update_settings(self):
         updated = super().update_settings()
@@ -284,10 +284,11 @@ class VolumetricScanLoop(ScanLoop):
             return True
 
         if self.parameters.z.frequency != self.current_frequency:
-            full_period = int(round(self.sample_rate / self.parameters.z.frequency))
-            self.recorded_signal = FillingRollingBuffer(full_period)
-            self.camera_pulses = RollingBuffer(full_period)
-            self.current_frequency = self.parameters.z.frequency
+            if self.parameters.z.frequency > 0.1:
+                full_period = int(round(self.sample_rate / self.parameters.z.frequency))
+                self.recorded_signal = FillingRollingBuffer(full_period)
+                self.camera_pulses = RollingBuffer(full_period)
+                self.current_frequency = self.parameters.z.frequency
 
         set_impulses(
             self.camera_pulses.buffer,
@@ -313,7 +314,7 @@ class VolumetricScanLoop(ScanLoop):
             and self.parameters.experiment_state == ExperimentPrepareState.START
         ):
             self.camera_on = True
-            self.i_sample = 0  # puts it at the beggining of the cycle
+            #self.i_sample = 0  # puts it at the beggining of the cycle
 
         return True
 
@@ -324,8 +325,9 @@ class VolumetricScanLoop(ScanLoop):
             self.read_array[
                 : min(len(self.recorded_signal.buffer), len(self.read_array))
             ],
-            self.i_sample,
+            i_insert,
         )
+        print(i_insert)
         self.waveform_queue.put(self.recorded_signal.buffer)
 
     def fill_arrays(self):
@@ -357,7 +359,7 @@ class Scanner(Process):
         self,
         stop_event: Event,
         experiment_start_event,
-        n_samples_waveform=8000,
+        n_samples_waveform=4000,
         sample_rate=40000,
     ):
         super().__init__()

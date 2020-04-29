@@ -4,7 +4,7 @@ from numba import jit
 
 @jit(nopython=True)
 def read_circular(a, i_start, n):
-    output = np.empty(n)
+    output = np.zeros(n)
     n_el = len(a)
     i_read = i_start
     for i_insert in range(n):

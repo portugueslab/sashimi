@@ -56,7 +56,7 @@ class ZRecordingSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
         self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
-        self.frequency = Param(1.0, (0.001, 100), unit="Hz")
+        self.frequency = Param(1.0, (0.1, 100), unit="Hz")
         self.n_planes = Param(10, (1, 100))
         self.i_freeze = Param(-1, (-1, 1000))
         self.n_skip_start = Param(0, (0, 20))
