@@ -23,6 +23,16 @@ def write_circular(a, i_start, data):
         i_insert = (i_insert + 1) % n_el
 
 
+@jit(nopython=True)
+def fill_circular(a, i_start, n_fill, val):
+    # TODO remove redundant writing
+    i_insert = i_start
+    n_el = len(a)
+    for i_read in range(n_fill):
+        a[i_insert] = val
+        i_insert = (i_insert + 1) % n_el
+
+
 class RollingBuffer:
     def __init__(self, length):
         self.buffer = np.zeros(length)
@@ -47,3 +57,16 @@ class RollingBuffer:
         :return:
         """
         write_circular(self.buffer, start, to_write)
+
+
+class FillingRollingBuffer(RollingBuffer):
+    def __init__(self, length):
+        super().__init__(length)
+        self.filled = np.zeros(length, dtype=np.bool)
+
+    def write(self, to_write, start):
+        super().write(to_write, start)
+        fill_circular(self.filled, start, len(to_write), True)
+
+    def is_complete(self):
+        return np.all(self.filled)

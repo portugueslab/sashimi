@@ -15,5 +15,6 @@ In the running mode the estimated piezo-galvo relation has to be applied.
  - [ ] Settings saving and management
  - [ ] Better calibration point management
  - [ ] Camera display
+ - [ ] Break up scanning.py
  - [ ] Invstigate time shift calculation
  - [ ] Make the GUI nice

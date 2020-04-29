@@ -6,19 +6,14 @@ from enum import Enum
 from queue import Empty
 from copy import deepcopy
 from math import gcd
-from lightsheet.rolling_buffer import RollingBuffer
+from lightsheet.rolling_buffer import RollingBuffer, FillingRollingBuffer
 
 from arrayqueues.shared_arrays import ArrayQueue
 import numpy as np
 
 from typing import Union, Tuple
 
-from lightsheet.waveforms import (
-    TriangleWaveform,
-    ImpulseWaveform,
-    SawtoothWaveform,
-    RecordedWaveform,
-)
+from lightsheet.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
 
 try:
     import nidaqmx
@@ -41,6 +36,12 @@ class ScanningState(Enum):
     PAUSED = 1
     PLANAR = 2
     VOLUMETRIC = 3
+
+
+class ExperimentPrepareState(Enum):
+    NORMAL = 1
+    NO_CAMERA = 2
+    START = 3
 
 
 @dataclass
@@ -82,12 +83,16 @@ class ZScanning:
 @dataclass
 class TriggeringParameters:
     n_planes: int = 0
+    n_skip_start: int = 0
+    n_skip_end: int = 0
+    i_freeze: int = -1
     frequency: Union[None, float] = None
 
 
 @dataclass
 class ScanParameters:
     state: ScanningState = ScanningState.PAUSED
+    experiment_state: ExperimentPrepareState = ExperimentPrepareState.NORMAL
     z: Union[ZScanning, ZManual, ZSynced] = ZManual()
     xy: PlanarScanning = PlanarScanning()
     triggering: TriggeringParameters = TriggeringParameters()
@@ -120,6 +125,7 @@ class ScanLoop:
         n_samples,
         sample_rate,
         waveform_queue: ArrayQueue,
+        experiment_start_signal: Event,
     ):
 
         self.sample_rate = sample_rate
@@ -142,6 +148,7 @@ class ScanLoop:
 
         self.parameter_queue = parameter_queue
         self.waveform_queue = waveform_queue
+        self.experiment_start_signal = experiment_start_signal
 
         self.parameters = initial_parameters
 
@@ -253,12 +260,20 @@ class VolumetricScanLoop(ScanLoop):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.z_waveform = SawtoothWaveform()
-        self.recorded_signal = RollingBuffer(self.n_samples_period())
-        self.current_frequency = 0
+        buffer_len = int(round(self.sample_rate / self.parameters.z.frequency))
+        self.recorded_signal = FillingRollingBuffer(buffer_len)
+        self.camera_pulses = RollingBuffer(buffer_len)
+        self.current_frequency = self.parameters.z.frequency
+        self.camera_on = True
 
     def n_samples_period(self):
         n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
         return lcm(n_samples_trigger, super().n_samples_period())
+
+    def check_start(self):
+        cs = super().check_start()
+        if self.parameters.experiment_state == ExperimentPrepareState.START:
+            self.experiment_start_signal.set()
 
     def update_settings(self):
         updated = super().update_settings()
@@ -270,14 +285,36 @@ class VolumetricScanLoop(ScanLoop):
 
         if self.parameters.z.frequency != self.current_frequency:
             full_period = int(round(self.sample_rate / self.parameters.z.frequency))
-            self.recorded_signal = RollingBuffer(full_period)
+            self.recorded_signal = FillingRollingBuffer(full_period)
+            self.camera_pulses = RollingBuffer(full_period)
             self.current_frequency = self.parameters.z.frequency
+
+        set_impulses(
+            self.camera_pulses.buffer,
+            self.parameters.triggering.n_planes,
+            n_skip_start=self.parameters.triggering.n_skip_start,
+            n_skip_end=self.parameters.triggering.n_skip_end,
+            i_freeze=self.parameters.triggering.i_freeze,
+        )
 
         self.z_waveform = SawtoothWaveform(
             frequency=self.parameters.z.frequency,
             vmin=self.parameters.z.piezo_min,
             vmax=self.parameters.z.piezo_max,
         )
+
+        if (
+            self.camera_on
+            and self.parameters.experiment_state == ExperimentPrepareState.NO_CAMERA
+        ):
+            self.camera_on = False
+        if (
+            not self.camera_on
+            and self.parameters.experiment_state == ExperimentPrepareState.START
+        ):
+            self.camera_on = True
+            self.i_sample = 0  # puts it at the beggining of the cycle
+
         return True
 
     def read(self):
@@ -287,7 +324,7 @@ class VolumetricScanLoop(ScanLoop):
             self.read_array[
                 : min(len(self.recorded_signal.buffer), len(self.read_array))
             ],
-            i_insert,
+            self.i_sample,
         )
         self.waveform_queue.put(self.recorded_signal.buffer)
 
@@ -296,23 +333,37 @@ class VolumetricScanLoop(ScanLoop):
         self.write_arrays[0, :] = (
             self.z_waveform.values(self.shifted_time) * PIEZO_SCALE
         )
-        wave_part = self.recorded_signal.read(self.i_sample, self.n_samples)
-        print(wave_part.shape)
-        self.write_arrays[1, :] = (
-            self.parameters.z.lateral_sync[0]
-            + self.parameters.z.lateral_sync[1] * wave_part
-        )
-        self.write_arrays[2, :] = (
-            self.parameters.z.frontal_sync[0]
-            + self.parameters.z.frontal_sync[1] * wave_part
-        )
+        if self.recorded_signal.is_complete():
+            wave_part = self.recorded_signal.read(self.i_sample, self.n_samples)
+            self.write_arrays[1, :] = (
+                self.parameters.z.lateral_sync[0]
+                + self.parameters.z.lateral_sync[1] * wave_part
+            )
+            self.write_arrays[2, :] = (
+                self.parameters.z.frontal_sync[0]
+                + self.parameters.z.frontal_sync[1] * wave_part
+            )
+
+        if self.camera_on:
+            self.write_arrays[3, :] = self.camera_pulses.read(
+                self.i_sample, self.n_samples
+            )
+        else:
+            self.write_arrays[3, :] = 0
 
 
 class Scanner(Process):
-    def __init__(self, n_samples_waveform=8000, sample_rate=40000):
+    def __init__(
+        self,
+        stop_event: Event,
+        experiment_start_event,
+        n_samples_waveform=8000,
+        sample_rate=40000,
+    ):
         super().__init__()
 
-        self.stop_event = Event()
+        self.stop_event = stop_event
+        self.experiment_start_event = experiment_start_event
 
         self.parameter_queue = Queue()
 
@@ -383,10 +434,9 @@ class Scanner(Process):
                 if self.parameters.state == ScanningState.PLANAR:
                     loop = PlanarScanLoop
                 elif self.parameters.state == ScanningState.VOLUMETRIC:
-                    print("Volume scanning")
                     loop = VolumetricScanLoop
 
-                l = loop(
+                scanloop = loop(
                     read_task,
                     write_task_z,
                     write_task_xy,
@@ -396,8 +446,9 @@ class Scanner(Process):
                     self.n_samples,
                     self.sample_rate,
                     self.waveform_queue,
+                    self.experiment_start_event,
                 )
-                l.loop()
+                scanloop.loop()
                 self.parameters = deepcopy(
-                    l.parameters
+                    scanloop.parameters
                 )  # set the paramters to the last ones received in the loop

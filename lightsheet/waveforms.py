@@ -75,7 +75,7 @@ class ImpulseWaveform(Waveform):
 
 @jit(nopython=True, cache=True)
 def make_impulses(t, low, high, pulse_times, period):
-    """ Make the camera trigger timing. Posibillity of unequal timing, to
+    """ Make the camera trigger timing. Possibility of unequal timing, to
     skip blurry/unequally spaced frames
 
     :param t:
@@ -99,3 +99,14 @@ def make_impulses(t, low, high, pulse_times, period):
                 result[idx_set] = high
 
     return result
+
+
+@jit(nopython=True)
+def set_impulses(buffer, n_planes, n_skip_start, n_skip_end, i_freeze=-1, high=5):
+    buffer[:] = 0
+    n_between_planes = int(round(len(buffer) / n_planes))
+    if i_freeze > 0:
+        buffer[i_freeze * n_between_planes] = high
+    else:
+        for i in range(n_skip_start, n_planes - n_skip_end):
+            buffer[i * n_between_planes] = high

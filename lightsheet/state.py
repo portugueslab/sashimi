@@ -10,9 +10,12 @@ from lightsheet.scanning import (
     ZManual,
     XYScanning,
     ScanParameters,
+    TriggeringParameters,
     ScanningState,
+    ExperimentPrepareState,
 )
-from copy import deepcopy
+from lightsheet.stytra_comm import StytraCom
+from multiprocessing import Event
 
 
 class ScanningSettings(ParametrizedQt):
@@ -52,11 +55,12 @@ class ZSetting(ParametrizedQt):
 class ZRecordingSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
-        self.scan_range = Param((0.0, 10.0), (0.0, 400.0), unit="um")
+        self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
         self.frequency = Param(1.0, (0.001, 100), unit="Hz")
-        self.n_planes_total = Param(10, (1, 100))
-        self.n_skip_ventral = Param(0, (0, 20))
-        self.n_skip_dorsal = Param(0, (0, 20))
+        self.n_planes = Param(10, (1, 100))
+        self.i_freeze = Param(-1, (-1, 1000))
+        self.n_skip_start = Param(0, (0, 20))
+        self.n_skip_end = Param(0, (0, 20))
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -155,15 +159,32 @@ def convert_volume_params(
             lateral_sync=tuple(calibration.calibration[0]),
             frontal_sync=tuple(calibration.calibration[1]),
         ),
+        triggering=TriggeringParameters(
+            n_planes=z_setting.n_planes,
+            n_skip_start=z_setting.n_skip_start,
+            n_skip_end=z_setting.n_skip_end,
+            i_freeze=z_setting.i_freeze,
+            frequency=None,
+        ),
     )
 
 
 class State:
     def __init__(self):
-        self.scanner = Scanner()
+        self.stop_event = Event()
+        self.experiment_start_event = Event()
+        self.experiment_state = ExperimentPrepareState.NORMAL
+        self.scanner = Scanner(
+            stop_event=self.stop_event,
+            experiment_start_event=self.experiment_start_event,
+        )
         self.status = ScanningSettings()
         self.planar_setting = PlanarScanningSettings()
         self.laser_settings = LaserSettings()
+        self.stytra_comm = StytraCom(
+            stop_event=self.stop_event,
+            experiment_start_event=self.experiment_start_event,
+        )
 
         self.z_setting = ZSetting()
         self.volume_setting = ZRecordingSettings()
@@ -177,6 +198,13 @@ class State:
 
         self.laser = CoboltLaser()
         self.scanner.start()
+        self.stytra_comm.start()
+
+    def toggle_experiment_state(self):
+        if self.experiment_state == ExperimentPrepareState.NORMAL:
+            self.experiment_state = ExperimentPrepareState.NO_CAMERA
+        if self.experiment_state == ExperimentPrepareState.NO_CAMERA:
+            self.experiment_state = ExperimentPrepareState.START
 
     def send_settings(self):
         if self.status.scanning_state == "Paused":
@@ -196,7 +224,11 @@ class State:
         else:
             print("Should have not gotten here")
             return
-        self.scanner.parameter_queue.put(deepcopy(params))
+        params.experiment_state = self.experiment_state
+        self.scanner.parameter_queue.put(params)
+        self.stytra_comm.current_settings_queue.put(params)
+        if params.experiment_state == ExperimentPrepareState.START:
+            self.experiment_state = ExperimentPrepareState.NORMAL
 
     def wrap_up(self):
         self.scanner.stop_event.set()
