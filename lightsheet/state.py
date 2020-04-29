@@ -40,9 +40,9 @@ class CalibrationZSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "z_control"
-        self.piezo = Param(0.0, (0.0, 400.0), unit="um")
-        self.lateral = Param(0.0, (-2.0, 2.0))
-        self.frontal = Param(0.0, (-2.0, 2.0))
+        self.piezo = Param(0.0, (0.0, 400.0), unit="um", gui="slider")
+        self.lateral = Param(0.0, (-2.0, 2.0), gui="slider")
+        self.frontal = Param(0.0, (-2.0, 2.0), gui="slider")
 
 
 class ZSetting(ParametrizedQt):
@@ -114,7 +114,7 @@ class Calibration:
 
         calibration_data = np.array(self.calibrations_points)
         piezo_val = np.pad(
-            calibration_data[:, 0:1], ((0, 0), (1, 0)), constant_values=1.0
+            calibration_data[:, 0:1], ((0, 0), (1, 0)), constant_values=1.0, mode="constant"
         )
         lateral_val = calibration_data[:, 1]
         frontal_val = calibration_data[:, 2]
