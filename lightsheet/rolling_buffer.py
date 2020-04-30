@@ -6,7 +6,7 @@ from numba import jit
 def read_circular(a, i_start, n):
     output = np.zeros(n)
     n_el = len(a)
-    i_read = i_start
+    i_read = i_start % len(a)
     for i_insert in range(n):
         output[i_insert] = a[i_read]
         i_read = (i_read + 1) % n_el
@@ -16,7 +16,7 @@ def read_circular(a, i_start, n):
 @jit(nopython=True)
 def write_circular(a, i_start, data):
     # TODO remove redundant writing
-    i_insert = i_start
+    i_insert = i_start % len(a)
     n_el = len(a)
     for i_read in range(len(data)):
         a[i_insert] = data[i_read]

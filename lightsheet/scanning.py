@@ -7,7 +7,7 @@ from queue import Empty
 from copy import deepcopy
 from math import gcd
 from lightsheet.rolling_buffer import RollingBuffer, FillingRollingBuffer
-
+from warnings import warn
 from arrayqueues.shared_arrays import ArrayQueue
 import numpy as np
 
@@ -340,20 +340,20 @@ class VolumetricScanLoop(ScanLoop):
         self.write_arrays[0, :] = (
             self.z_waveform.values(self.shifted_time) * PIEZO_SCALE
         )
+        i_sample = self.i_sample % len(self.recorded_signal.buffer)
         if self.recorded_signal.is_complete():
-            wave_part = self.recorded_signal.read(self.i_sample, self.n_samples)
-            self.write_arrays[1, :] = (
-                self.parameters.z.lateral_sync[0]
-                + self.parameters.z.lateral_sync[1] * wave_part
-            )
-            self.write_arrays[2, :] = (
-                self.parameters.z.frontal_sync[0]
-                + self.parameters.z.frontal_sync[1] * wave_part
-            )
+            wave_part = self.recorded_signal.read(i_sample, self.n_samples)
+            max_wave, min_wave = (np.max(wave_part), np.min(wave_part))
+            if (-2 < calc_sync(min_wave, self.parameters.z.lateral_sync) < 2 and
+                -2 < calc_sync(max_wave, self.parameters.z.lateral_sync) < 2):
+                self.write_arrays[1, :] = calc_sync(wave_part, self.parameters.z.lateral_sync)
+            if (-2 < calc_sync(min_wave, self.parameters.z.frontal_sync) < 2 and
+                -2 < calc_sync(max_wave, self.parameters.z.frontal_sync) < 2):
+                self.write_arrays[2, :] = calc_sync(wave_part, self.parameters.z.frontal_sync)
 
         if self.camera_on:
             self.write_arrays[3, :] = self.camera_pulses.read(
-                self.i_sample, self.n_samples
+                i_sample, self.n_samples
             )
         else:
             self.write_arrays[3, :] = 0
@@ -455,7 +455,10 @@ class Scanner(Process):
                     self.waveform_queue,
                     self.experiment_start_event,
                 )
-                scanloop.loop()
+                try:
+                    scanloop.loop()
+                except nidaqmx.errors.DaqError as e:
+                    warn("NI error " + e.__repr__())
                 self.parameters = deepcopy(
                     scanloop.parameters
                 )  # set the paramters to the last ones received in the loop

@@ -24,7 +24,8 @@ class LaserControlWidget(QWidget):
 
         self.main_layout.addWidget(self.lbl_text)
         self.main_layout.addWidget(self.btn_off)
-        self.main_layout.addWidget(ParameterGui(self.parameters))
+        self.wid_settings = ParameterGui(self.parameters)
+        self.main_layout.addWidget(self.wid_settings)
 
         self.main_layout.setContentsMargins(0, 0, 0, 0)
 

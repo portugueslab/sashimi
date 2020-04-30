@@ -1,6 +1,6 @@
 import numpy as np
 from lightparam.param_qt import ParametrizedQt
-from lightparam import Param
+from lightparam import Param, ParameterTree
 from lightsheet.hardware.laser import CoboltLaser, LaserSettings
 from lightsheet.scanning import (
     Scanner,
@@ -16,20 +16,21 @@ from lightsheet.scanning import (
 )
 from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
-
+import json
 
 class ScanningSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
+        self.name = "general/scanning_state"
         self.scanning_state = Param(
-            "Paused", ["Paused", "Calibration", "Planar scanning", "Volume"],
+            "Paused", ["Paused", "Calibration", "Planar", "Volume"],
         )
 
 
 class PlanarScanningSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
-        self.name = "planar"
+        self.name = "scanning/planar_scanning"
         self.lateral_range = Param((0, 0.5), (-2, 2))
         self.lateral_frequency = Param(500.0, (10, 1000), unit="Hz")
         self.frontal_range = Param((0, 0.5), (-2, 2))
@@ -39,22 +40,24 @@ class PlanarScanningSettings(ParametrizedQt):
 class CalibrationZSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
-        self.name = "z_control"
+        self.name = "scanning/z_manual"
         self.piezo = Param(0.0, (0.0, 400.0), unit="um", gui="slider")
         self.lateral = Param(0.0, (-2.0, 2.0), gui="slider")
         self.frontal = Param(0.0, (-2.0, 2.0), gui="slider")
 
 
-class ZSetting(ParametrizedQt):
+class SinglePlaneSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
-        self.name = "z_control"
+        self.name = "scanning/z_single_plane"
         self.piezo = Param(0.0, (0.0, 400.0), unit="um")
+        self.frequency = Param(1.0, (0.1, 100), unit="Hz")
 
 
 class ZRecordingSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
+        self.name = "scanning/volumetric_recording"
         self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
         self.frequency = Param(1.0, (0.1, 100), unit="Hz")
         self.n_planes = Param(10, (1, 100))
@@ -89,12 +92,13 @@ def convert_calibration_params(
     return sp
 
 
-class Calibration:
+class Calibration(ParametrizedQt):
     def __init__(self):
         super().__init__()
+        self.name = "general/calibration"
         self.z_settings = CalibrationZSettings()
         self.calibrations_points = []
-        self.calibration = [(0, 0.01), (0, 0.01)]
+        self.calibration = Param([(0, 0.01), (0, 0.01)], gui=False)
 
     def add_calibration_point(self):
         self.calibrations_points.append(
@@ -131,16 +135,17 @@ class Calibration:
 
 
 def convert_single_plane_params(
-    planar: PlanarScanningSettings, z_setting: ZSetting, calibration: Calibration
+    planar: PlanarScanningSettings, single_plane_setting: SinglePlaneSettings, calibration: Calibration
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
         xy=convert_planar_params(planar),
         z=ZSynced(
-            piezo=z_setting.piezo,
+            piezo=single_plane_setting.piezo,
             lateral_sync=tuple(calibration.calibration[0]),
             frontal_sync=tuple(calibration.calibration[1]),
         ),
+        triggering=TriggeringParameters(frequency=single_plane_setting.frequency)
     )
 
 
@@ -179,6 +184,9 @@ class State:
             experiment_start_event=self.experiment_start_event,
         )
         self.status = ScanningSettings()
+
+        self.settings_tree = ParameterTree()
+
         self.planar_setting = PlanarScanningSettings()
         self.laser_settings = LaserSettings()
         self.stytra_comm = StytraCom(
@@ -186,19 +194,30 @@ class State:
             experiment_start_event=self.experiment_start_event,
         )
 
-        self.z_setting = ZSetting()
+        self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
         self.calibration = Calibration()
+
+        for setting in [self.planar_setting, self.laser_settings, self.single_plane_settings, self.volume_setting, self.calibration, self.calibration.z_settings]:
+            self.settings_tree.add(setting)
 
         self.status.sig_param_changed.connect(self.send_settings)
         self.planar_setting.sig_param_changed.connect(self.send_settings)
         self.calibration.z_settings.sig_param_changed.connect(self.send_settings)
-        self.z_setting.sig_param_changed.connect(self.send_settings)
+        self.single_plane_settings.sig_param_changed.connect(self.send_settings)
         self.volume_setting.sig_param_changed.connect(self.send_settings)
 
         self.laser = CoboltLaser()
         self.scanner.start()
         self.stytra_comm.start()
+
+    def restore_tree(self, restore_file):
+        with open(restore_file, "r") as f:
+            self.settings_tree.deserialize(json.load(f))
+
+    def save_tree(self, save_file):
+        with open(save_file, "w") as f:
+            json.dump(self.settings_tree.serialize(), f)
 
     def toggle_experiment_state(self):
         if self.experiment_state == ExperimentPrepareState.NORMAL:
@@ -216,7 +235,7 @@ class State:
             )
         elif self.status.scanning_state == "Planar":
             params = convert_planar_params(
-                self.planar_setting, self.z_setting, self.calibration
+                self.planar_setting, self.single_plane_settings, self.calibration
             )
         elif self.status.scanning_state == "Volume":
             params = convert_volume_params(

@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 from lightsheet.gui.calibration_gui import CalibrationWidget
 from lightsheet.gui.scanning_gui import PlanarScanningWidget, VolumeScanningWidget
 from lightsheet.gui.laser_gui import LaserControlWidget
+from lightsheet.gui.save_settings_gui import SavingWidget
 from lightsheet.state import State
 from lightparam import Param
 from lightparam.gui import ParameterGui
@@ -25,6 +26,12 @@ class ContainerWidget(QWidget):
         self.wid_status = ParameterGui(st.status)
         self.st.status.sig_param_changed.connect(self.refresh_visible)
 
+        self.left_layout = QVBoxLayout()
+
+        self.wid_save = SavingWidget(st)
+        self.left_layout.addWidget(self.wid_save)
+        self.wid_save.sig_params_loaded.connect(self.refresh_param_values)
+
         self.full_layout.addWidget(self.wid_status)
 
         self.control_layout = QHBoxLayout()
@@ -35,7 +42,8 @@ class ContainerWidget(QWidget):
         self.wid_calib = CalibrationWidget(st.calibration, self.timer)
         self.wid_volume = VolumeScanningWidget(st, self.timer)
 
-        self.control_layout.addWidget(self.wid_laser)
+        self.left_layout.addWidget(self.wid_laser)
+        self.control_layout.addLayout(self.left_layout)
         self.control_layout.addWidget(self.wid_scan)
         self.control_layout.addWidget(self.wid_calib)
         self.control_layout.addWidget(self.wid_volume)
@@ -58,6 +66,13 @@ class ContainerWidget(QWidget):
     def closeEvent(self, a0) -> None:
         self.st.wrap_up()
         a0.accept()
+
+    def refresh_param_values(self):
+        # TODO should be possible with lightparam, when it's implemented there remove here
+        self.wid_laser.wid_settings.refresh_widgets()
+        self.wid_scan.wid_planar.refresh_widgets()
+        self.wid_calib.refresh_widgets()
+        self.wid_volume.wid_volume.refresh_widgets()
 
 
 if __name__ == "__main__":

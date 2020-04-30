@@ -20,7 +20,8 @@ class CalibrationWidget(QWidget):
         super().__init__()
         self.state = calibration_state
         self.setLayout(QVBoxLayout())
-        self.layout().addWidget(ParameterGui(self.state.z_settings))
+        self.wid_settings = ParameterGui(self.state.z_settings)
+        self.layout().addWidget(self.wid_settings)
         self.btn_add_points = QPushButton("+")
         self.btn_add_points.clicked.connect(self.state.add_calibration_point)
         self.btn_rm_points = QPushButton("-")
@@ -31,6 +32,10 @@ class CalibrationWidget(QWidget):
         self.layout().addWidget(self.lbl_calibration)
 
         timer.timeout.connect(self.update_label)
+
+    def refresh_widgets(self):
+        self.wid_settings.refresh_widgets()
+        self.update_label()
 
     def update_label(self):
         self.lbl_calibration.setText(
@@ -45,7 +50,7 @@ class CalibrationWidget(QWidget):
                     ["not enough points"]
                     if self.state.calibration is None
                     else [
-                        "offset: {:0.3f} amplitude {:0.3f}".format(*list(calib_row))
+                        "offset: {:0.5f} amplitude {:0.5f}".format(*list(calib_row))
                         for calib_row in self.state.calibration
                     ]
                 )

@@ -23,7 +23,6 @@ STATE_TEXTS = {
     ExperimentPrepareState.START: "Recording started",
 }
 
-
 class VolumeScanningWidget(QWidget):
     def __init__(self, state, timer):
         super().__init__()
