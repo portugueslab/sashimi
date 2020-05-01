@@ -234,7 +234,7 @@ class State:
                 self.planar_setting, self.calibration.z_settings
             )
         elif self.status.scanning_state == "Planar":
-            params = convert_planar_params(
+            params = convert_single_plane_params(
                 self.planar_setting, self.single_plane_settings, self.calibration
             )
         elif self.status.scanning_state == "Volume":

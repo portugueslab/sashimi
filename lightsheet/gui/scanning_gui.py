@@ -23,6 +23,16 @@ STATE_TEXTS = {
     ExperimentPrepareState.START: "Recording started",
 }
 
+
+class SinglePlaneScanningWidget(QWidget):
+    def __init__(self, state):
+        super().__init__()
+        self.state = state
+        self.setLayout(QVBoxLayout())
+        self.wid_singleplane = ParameterGui(state.single_plane_settings)
+        self.layout().addWidget(self.wid_singleplane)
+
+
 class VolumeScanningWidget(QWidget):
     def __init__(self, state, timer):
         super().__init__()
