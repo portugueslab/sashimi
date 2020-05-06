@@ -310,6 +310,15 @@ class HamamatsuCamera(object):
         self.max_height = self.getPropertyValue("image_height")[0]
 
 
+    @property
+    def exposure(self):
+        return self.getPropertyValue("exposure_time")
+
+    @exposure.setter
+    def exposure(self, exp_time):
+        self.setPropertyValue("exposure_time", exp_time)
+
+
     def captureSetup(self):
         """
         Capture setup (internal use only). This is called at the start
