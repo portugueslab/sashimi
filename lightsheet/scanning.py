@@ -148,7 +148,7 @@ class ScanLoop:
 
         self.parameter_queue = parameter_queue
         self.waveform_queue = waveform_queue
-        self.experiment_start_signal = experiment_start_signal
+        self.experiment_start_event = experiment_start_signal
 
         self.parameters = initial_parameters
 
@@ -279,7 +279,8 @@ class VolumetricScanLoop(ScanLoop):
     def check_start(self):
         super().check_start()
         if self.parameters.experiment_state == ExperimentPrepareState.START:
-            self.experiment_start_signal.set()
+            self.experiment_start_event.set()
+            self.parameters.experiment_state = ExperimentPrepareState.NORMAL
 
     def update_settings(self):
         updated = super().update_settings()

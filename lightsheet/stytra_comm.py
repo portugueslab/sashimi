@@ -9,7 +9,7 @@ def clean_json(d):
     if isinstance(d, dict):
         cleaned = dict()
         for key, value in d.items():
-            cleaned = clean_json(value)
+            cleaned[key] = clean_json(value)
         return cleaned
     elif isinstance(d, Enum):
         return d.name
@@ -46,13 +46,14 @@ class StytraCom(Process):
                 zmq_context = zmq.Context()
                 with zmq_context.socket(zmq.REQ) as zmq_socket:
                     zmq_socket.connect(self.zmq_tcp_address)
-                    zmq_socket.send_json(clean_json(asdict(self.current_settings)))
+                    saved_data = dict(lightsheet=clean_json(asdict(self.current_settings)))
+                    zmq_socket.send_json(saved_data)
                     poller = zmq.Poller()
                     poller.register(zmq_socket, zmq.POLLIN)
                     duration = None
                     if poller.poll(1000):
                         duration = zmq_socket.recv_json()
                     self.stytra_data_queue.put(duration)
+                    self.start_stytra.clear()
                     zmq_socket.close()
                     zmq_context.destroy()
-                self.start_stytra.clear()

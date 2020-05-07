@@ -9,6 +9,7 @@ class CameraProcessState(Enum):
     FREE = 0
     TRIGGERED = 1
 
+
 class CameraProcess(Process):
     def __init__(self, stop_event: Event, max_mbytes_queue=500):
         super().__init__()
@@ -23,3 +24,6 @@ class CameraProcess(Process):
         self.initialize_camera()
         while not self.stop_event.is_set():
             pass
+
+    def close_camera(self):
+        pass

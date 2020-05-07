@@ -50,7 +50,7 @@ class SinglePlaneSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "scanning/z_single_plane"
-        self.piezo = Param(0.0, (0.0, 400.0), unit="um")
+        self.piezo = Param(0.0, (0.0, 400.0), unit="um", gui="slider")
         self.frequency = Param(1.0, (0.1, 100), unit="Hz")
 
 

@@ -1,6 +1,5 @@
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import (
-    QApplication,
     QWidget,
     QRadioButton,
     QHBoxLayout,
@@ -82,12 +81,3 @@ class ContainerWidget(QWidget):
         self.wid_scan.wid_planar.refresh_widgets()
         self.wid_calib.refresh_widgets()
         self.wid_volume.wid_volume.refresh_widgets()
-
-
-if __name__ == "__main__":
-    app = QApplication([])
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    st = State()
-    wid = ContainerWidget(st)
-    wid.show()
-    app.exec()

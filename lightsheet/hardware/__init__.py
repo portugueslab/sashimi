@@ -1,4 +1,4 @@
-from lightsheet.hardware.hamamatsu_camera import HamamatsuCamera
+#from lightsheet.hardware.hamamatsu_camera import HamamatsuCamera
 import pyqtgraph as pg
 from time import sleep
 
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     cam.setACQMode("fixed_length", 5)
     cam.startAcquisition()
 
-    sleep(2)
+    sleep(1)
 
     fr, dims = cam.getFrames()
 
