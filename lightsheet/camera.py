@@ -2,7 +2,7 @@ from multiprocessing import Process, Queue, Event
 from enum import Enum
 
 from arrayqueues.shared_arrays import ArrayQueue
-from lightsheet.hardware.hamamatsu_camera import HamamatsuCamera
+from lightsheet.hardware.hamamatsu_camera import HamamatsuCameraMR
 
 
 class CameraProcessState(Enum):
@@ -18,12 +18,17 @@ class CameraProcess(Process):
         self.camera = None
 
     def initialize_camera(self):
-        self.camera = HamamatsuCamera()
+        self.camera = HamamatsuCameraMR(camera_id=0)
 
     def run(self):
         self.initialize_camera()
+        self.camera.setACQMode("run_till_abort")
         while not self.stop_event.is_set():
             pass
 
+    def stop(self):
+        self.camera.stopAcquisition()
+
+
     def close_camera(self):
-        pass
+        self.camera.shutdown()
