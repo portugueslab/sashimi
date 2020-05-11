@@ -1,4 +1,5 @@
 import numpy as np
+from arrayqueues.shared_arrays import ArrayQueue
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
 from lightsheet.hardware.laser import CoboltLaser, LaserSettings
@@ -17,6 +18,8 @@ from lightsheet.scanning import (
 from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
 import json
+from lightsheet.camera import CameraProcess
+from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 
 class ScanningSettings(ParametrizedQt):
     def __init__(self):
@@ -194,6 +197,11 @@ class State:
             experiment_start_event=self.experiment_start_event,
         )
 
+        self.save_status: Optional[SavingStatus] = None
+
+        self.save_queue = ArrayQueue(max_mbytes=800)
+        self.saver = StackSaver(self.scanner.stop_event, self.save_queue)
+
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
         self.calibration = Calibration()
@@ -210,6 +218,8 @@ class State:
         self.laser = CoboltLaser()
         self.scanner.start()
         self.stytra_comm.start()
+        self.camera = CameraProcess(self.stop_event, self.status)
+        self.camera.run()
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -252,3 +262,18 @@ class State:
         self.scanner.stop_event.set()
         self.scanner.join(timeout=10)
         self.laser.close()
+        self.camera.close_camera()
+
+    def get_image(self):
+        try:
+            image = -self.camera.image_queue.get(timeout=0.001)
+            if self.saver.saving_signal.is_set():
+                if (
+                        self.save_status is not None
+                        and self.save_status.i_t + 1 == self.save_status.target_params.n_t
+                ):
+                    self.wrap_up()
+                self.save_queue.put(image)
+            return image
+        except Empty:
+            return None

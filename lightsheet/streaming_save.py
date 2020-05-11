@@ -24,12 +24,11 @@ class SavingStatus:
 
 
 class StackSaver(Process):
-    def __init__(self, stop_signal, data_queue, n_frames_queue):
+    def __init__(self, stop_signal, data_queue):
         super().__init__()
         self.stop_signal = stop_signal
         self.data_queue = data_queue
         self.saving_signal = Event()
-        self.n_frames_queue = n_frames_queue
         self.saving = False
         self.saving_parameter_queue = Queue()
         self.save_parameters: Optional[SavingParameters] = None
@@ -71,7 +70,6 @@ class StackSaver(Process):
         ):
             self.receive_save_parameters()
             try:
-                self.update_n_t(self.n_frames_queue.get(timeout=0.001))
                 n_total = self.save_parameters.n_t
             except Empty:
                 pass
@@ -93,13 +91,6 @@ class StackSaver(Process):
         Conversion into a format appropriate for saving
         """
         return frame
-
-    def update_n_t(self, n_t):
-        if n_t != self.save_parameters.n_t:
-            self.save_parameters.n_t = n_t
-            old_data = self.current_data[: self.i_in_chunk, :, :, :].copy()
-            self.current_data = np.empty((n_t, *self.current_data.shape[1:]))
-            self.current_data[: self.i_in_chunk, :, :, :] = old_data
 
     def fill_dataset(self, frame):
         self.current_data[self.i_in_chunk, 0, :, :] = self.cast(frame)
