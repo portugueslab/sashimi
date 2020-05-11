@@ -846,7 +846,7 @@ class HamamatsuCameraMR(HamamatsuCamera):
         for n in self.newFrames():
             frames.append(self.hcam_data[n])
 
-        return [frames, [self.frame_x, self.frame_y]]
+        return frames
 
     def startAcquisition(self):
         """
@@ -1071,9 +1071,9 @@ if (__name__ == "__main__"):
             hcam.startAcquisition()
             received_frames = 0
             for n_grab in range(test_size):
-                [buffer_frames, dims] = hcam.getFrames()
+                buffer_frames = hcam.getFrames()
                 for frame in buffer_frames:
-                    # print("Apollo found " + str(len(buffer_frames)) + " frames with dimensions " + str(dims))
+                    # print("Apollo found " + str(len(buffer_frames)))
                     # print("Frame " + str(n_grab + 1) + ": " + str(frame[0:5]))
                     received_frames += 1
             end = time.time()
