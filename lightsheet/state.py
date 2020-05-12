@@ -1,5 +1,7 @@
 import numpy as np
 from arrayqueues.shared_arrays import ArrayQueue
+from queue import Empty
+from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
 from lightsheet.hardware.laser import CoboltLaser, LaserSettings
@@ -20,6 +22,7 @@ from multiprocessing import Event
 import json
 from lightsheet.camera import CameraProcess
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
+
 
 class ScanningSettings(ParametrizedQt):
     def __init__(self):
@@ -85,7 +88,7 @@ def convert_planar_params(planar: PlanarScanningSettings):
 
 
 def convert_calibration_params(
-    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
+        planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
         state=ScanningState.PLANAR,
@@ -138,7 +141,7 @@ class Calibration(ParametrizedQt):
 
 
 def convert_single_plane_params(
-    planar: PlanarScanningSettings, single_plane_setting: SinglePlaneSettings, calibration: Calibration
+        planar: PlanarScanningSettings, single_plane_setting: SinglePlaneSettings, calibration: Calibration
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -153,9 +156,9 @@ def convert_single_plane_params(
 
 
 def convert_volume_params(
-    planar: PlanarScanningSettings,
-    z_setting: ZRecordingSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        z_setting: ZRecordingSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
@@ -206,7 +209,8 @@ class State:
         self.volume_setting = ZRecordingSettings()
         self.calibration = Calibration()
 
-        for setting in [self.planar_setting, self.laser_settings, self.single_plane_settings, self.volume_setting, self.calibration, self.calibration.z_settings]:
+        for setting in [self.planar_setting, self.laser_settings, self.single_plane_settings, self.volume_setting,
+                        self.calibration, self.calibration.z_settings]:
             self.settings_tree.add(setting)
 
         self.status.sig_param_changed.connect(self.send_settings)

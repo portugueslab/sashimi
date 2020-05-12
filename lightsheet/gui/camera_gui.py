@@ -51,7 +51,6 @@ class LightsheetViewer(QMainWindow):
 
     def update(self):
         self.image_display.update()
-        self.experiment_widget.update()
 
     def closeEvent(self, event) -> None:
         self.state.wrap_up()
