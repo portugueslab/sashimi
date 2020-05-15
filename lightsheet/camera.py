@@ -4,20 +4,22 @@ from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
 from lightsheet.hardware.hamamatsu_camera import HamamatsuCameraMR
 from dataclasses import dataclass, fields
+import time
 
 
 class CameraProcessState(Enum):
     FREE = 0
     TRIGGERED = 1
 
+@dataclass()
 class CameraParams:
-    exposure: float = 0.06
+    exposure_time: float = 0.06
     subarray_hsize: int = 2048
     subarray_vsize: int = 2048
     subarray_hpos: int = 0
     subarray_vpos: int = 0
     # TODO: Restrict binning to possible values: 1x1 (1), 2x2 (2) or 4x4 (4)
-    binning: dict = {'1x1': 1, '2x2': 2, '4x4': 4}
+    binning: dict = 1
 
 
 @dataclass
@@ -31,7 +33,7 @@ class CameraProcess(Process):
     def __init__(self, stop_event: Event, max_mbytes_queue=500, camera_id=0):
         super().__init__()
         self.stop_event = stop_event
-        self.image_queue = ArrayQueue(max_mbytes=max_mbytes_queue)
+        self.image_queue = ArrayQueue(500)
         self.camera_id = camera_id
         self.camera = None
         self.info = None
@@ -45,7 +47,7 @@ class CameraProcess(Process):
     # TODO: Get param info
     def get_param_value(self):
         # FIXME: Access subclass
-        for param in self.parameters.image_params:
+        for param in fields(self.parameters.image_params):
             newparams = self.camera.getPropertyValue(param.name)[0]
 
     def initialize_camera(self):
@@ -62,7 +64,9 @@ class CameraProcess(Process):
         if self.parameters.run_mode == CameraProcessState.FREE:
             while not self.stop_event.is_set():
                 frames = self.camera.getFrames()
-                self.image_queue.put(frames)
+                for frame in frames:
+                    frame = frame.getData()
+                    self.image_queue.put(frame)
             self.camera.stopAcquisition()
         if self.parameters.run_mode == CameraProcessState.TRIGGERED:
             # FIXME: Set trigger
