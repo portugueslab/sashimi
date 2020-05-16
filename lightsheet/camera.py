@@ -2,14 +2,16 @@ from multiprocessing import Process, Queue, Event
 from enum import Enum
 
 from arrayqueues.shared_arrays import ArrayQueue
-from lightsheet.hardware.hamamatsu_camera import HamamatsuCameraMR
+from lightsheet.hardware.hamamatsu_camera import *
 from dataclasses import dataclass, fields
 import time
+import numpy as np
 
 
 class CameraProcessState(Enum):
     FREE = 0
     TRIGGERED = 1
+
 
 @dataclass()
 class CameraParams:
@@ -28,12 +30,11 @@ class ScanParameters:
     image_params: CameraParams = CameraParams()
 
 
-
 class CameraProcess(Process):
-    def __init__(self, stop_event: Event, max_mbytes_queue=500, camera_id=0):
+    def __init__(self, stop_event, camera_id=0, max_queue_size=200):
         super().__init__()
-        self.stop_event = stop_event
-        self.image_queue = ArrayQueue(500)
+        self.stop_event = Event()
+        self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.camera_id = camera_id
         self.camera = None
         self.info = None
@@ -60,20 +61,25 @@ class CameraProcess(Process):
     def run(self):
         self.initialize_camera()
         self.camera.setACQMode("run_till_abort")
+        self.camera.setPropertyValue('binning', 2)
+        self.camera.setPropertyValue('subarray_hsize', 2000)
+        self.camera.setPropertyValue('subarray_vsize', 2000)
+        self.camera.setPropertyValue('exposure_time', 0.5)
+        print('internal_frame_rate: ', self.camera.getPropertyValue('internal_frame_rate')[0])
         self.camera.startAcquisition()
         if self.parameters.run_mode == CameraProcessState.FREE:
             while not self.stop_event.is_set():
                 frames = self.camera.getFrames()
                 for frame in frames:
-                    frame = frame.getData()
+                    frame = np.reshape(frame.getData(), (1000, 1000))
                     self.image_queue.put(frame)
+                    # self.stop_event.set()
             self.camera.stopAcquisition()
         if self.parameters.run_mode == CameraProcessState.TRIGGERED:
             # FIXME: Set trigger
             while not self.stop_event.is_set():
                 frames = self.camera.getFrames()
                 self.image_queue.put(frames)
-
 
     def close_camera(self):
         self.camera.shutdown()

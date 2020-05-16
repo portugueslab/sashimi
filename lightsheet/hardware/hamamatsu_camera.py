@@ -1039,9 +1039,9 @@ if (__name__ == "__main__"):
                 contFrames = hcam.getFrames()
                 hcam.stopAcquisition()
 
-        if True:
+        if False:
             from colorama import Fore, Style
-            test_size = 10
+            test_size = 100
             hcam.setPropertyValue("exposure_time", 0.004)
             hcam.setPropertyValue("binning", "1x1")
             # hcam.setPropertyValue("subarray_hpos", 512)
@@ -1075,6 +1075,8 @@ if (__name__ == "__main__"):
                 for frame in buffer_frames:
                     print("Apollo found " + str(len(buffer_frames)))
                     print("Frame " + str(n_grab + 1) + ": " + str(frame[0:5]))
+                    frame = frame.getData()
+                    print(frame.shape)
                     received_frames += 1
             end = time.time()
             print("\n Total time: {:.3} seconds".format(end-start))

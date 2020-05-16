@@ -9,6 +9,7 @@ from lightsheet.gui.calibration_gui import CalibrationWidget
 from lightsheet.gui.scanning_gui import PlanarScanningWidget, VolumeScanningWidget, SinglePlaneScanningWidget
 from lightsheet.gui.laser_gui import LaserControlWidget
 from lightsheet.gui.save_settings_gui import SavingWidget
+from lightsheet.gui.camera_gui import ViewingWidget
 from lightsheet.state import State
 from lightparam import Param
 from lightparam.gui import ParameterGui
@@ -36,6 +37,7 @@ class ContainerWidget(QWidget):
         self.control_layout = QHBoxLayout()
         self.full_layout.addLayout(self.control_layout)
 
+        self.wid_display = ViewingWidget(st, self.timer)
         self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_calib = CalibrationWidget(st.calibration, self.timer)
@@ -48,6 +50,7 @@ class ContainerWidget(QWidget):
         self.control_layout.addWidget(self.wid_calib)
         self.control_layout.addWidget(self.wid_single_plane)
         self.control_layout.addWidget(self.wid_volume)
+        self.full_layout.addWidget(self.wid_display)
 
         self.setLayout(self.full_layout)
         self.refresh_visible()

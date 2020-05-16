@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (
     QWidget,
     QMainWindow,
     QVBoxLayout,
+    QPushButton
 )
 import pyqtgraph as pg
 import qdarkstyle
@@ -11,17 +12,28 @@ from lightsheet.state import State
 
 
 class ViewingWidget(QWidget):
-    def __init__(self, state):
+    def __init__(self, state, timer):
         super().__init__()
+
         self.state = state
         self.setLayout(QVBoxLayout())
         self.image_viewer = pg.ImageView()
         self.image_viewer.ui.roiBtn.hide()
         self.image_viewer.ui.menuBtn.hide()
+
+        self.start_button = QPushButton("ON")
+        self.start_button.clicked.connect(self.toggle)
+
         self.layout().addWidget(self.image_viewer)
+        self.layout().addWidget(self.start_button)
         self.first_image = True
 
-    def update(self) -> None:
+        timer.timeout.connect(self.refresh)
+
+    def toggle(self):
+        self.state.camera.run()
+
+    def refresh(self) -> None:
         current_image = self.state.get_image()
         if current_image is None:
             return
@@ -35,31 +47,3 @@ class ViewingWidget(QWidget):
         self.first_image = False
 
 
-# TODO: Delete this part in the bottom, it is just for testing
-
-class LightsheetViewer(QMainWindow):
-    def __init__(self):
-        super().__init__()
-
-        self.state = State()
-        self.image_display = ViewingWidget(self.state)
-        self.setCentralWidget(self.image_display)
-
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update)
-        self.timer.start()
-
-    def update(self):
-        self.image_display.update()
-
-    def closeEvent(self, event) -> None:
-        self.state.wrap_up()
-        event.accept()
-
-
-if __name__ == "__main__":
-    app = QApplication([])
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    viewer = LightsheetViewer()
-    viewer.show()
-    app.exec_()

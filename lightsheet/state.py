@@ -222,8 +222,7 @@ class State:
         self.laser = CoboltLaser()
         self.scanner.start()
         self.stytra_comm.start()
-        self.camera = CameraProcess(self.stop_event, self.status)
-        self.camera.run()
+        self.camera = CameraProcess(self.stop_event)
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -270,14 +269,14 @@ class State:
 
     def get_image(self):
         try:
-            image = -self.camera.image_queue.get(timeout=0.001)
-            if self.saver.saving_signal.is_set():
-                if (
-                        self.save_status is not None
-                        and self.save_status.i_t + 1 == self.save_status.target_params.n_t
-                ):
-                    self.wrap_up()
-                self.save_queue.put(image)
+            image = self.camera.image_queue.get(timeout=0.001)
+            #if self.saver.saving_signal.is_set():
+             #   if (
+             #           self.save_status is not None
+             #           and self.save_status.i_t + 1 == self.save_status.target_params.n_t
+            #    ):
+            #        self.wrap_up()
+            #    self.save_queue.put(image)
             return image
         except Empty:
             return None
