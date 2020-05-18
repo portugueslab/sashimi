@@ -21,17 +21,17 @@ class ViewingWidget(QWidget):
         self.image_viewer.ui.roiBtn.hide()
         self.image_viewer.ui.menuBtn.hide()
 
-        #self.start_button = QPushButton("ON")
-        #self.start_button.clicked.connect(self.toggle)
+        self.save_button = QPushButton("ON")
+        self.save_button.clicked.connect(self.toggle)
 
         self.layout().addWidget(self.image_viewer)
-        #self.layout().addWidget(self.start_button)
+        self.layout().addWidget(self.save_button)
         self.first_image = True
 
         timer.timeout.connect(self.refresh)
 
-    #def toggle(self):
-     #   self.state.camera.run()
+    def toggle(self):
+        self.state.saver.set()
 
     def refresh(self) -> None:
         current_image = self.state.get_image()

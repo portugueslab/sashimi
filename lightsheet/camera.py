@@ -31,7 +31,7 @@ class ScanParameters:
 
 
 class CameraProcess(Thread):
-    def __init__(self, camera_id=0, max_queue_size=200):
+    def __init__(self, camera_id=0, max_queue_size=500):
         super().__init__()
         self.stop_event = Event()
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
@@ -73,18 +73,12 @@ class CameraProcess(Thread):
                 for frame in frames:
                     frame = np.reshape(frame.getData(), (1000, 1000))
                     self.image_queue.put(frame)
-                    print("I am running")
-                    # self.stop_event.set()
             self.camera.stopAcquisition()
         if self.parameters.run_mode == CameraProcessState.TRIGGERED:
             # FIXME: Set trigger
             while not self.stop_event.is_set():
                 frames = self.camera.getFrames()
                 self.image_queue.put(frames)
-
-        # TODO: Is this return necessary?
-
-        return
 
     def close_camera(self):
         self.camera.shutdown()

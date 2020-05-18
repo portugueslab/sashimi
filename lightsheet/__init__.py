@@ -2,7 +2,6 @@ from PyQt5.QtWidgets import QApplication
 import qdarkstyle
 from lightsheet.state import State
 from lightsheet.gui.main_gui import ContainerWidget
-from lightsheet.camera import CameraProcess
 
 if __name__ == "__main__":
     app = QApplication([])
