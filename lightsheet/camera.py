@@ -81,5 +81,9 @@ class CameraProcess(Process):
                 frames = self.camera.getFrames()
                 self.image_queue.put(frames)
 
+        # TODO: Is this return necessary?
+
+        return
+
     def close_camera(self):
         self.camera.shutdown()

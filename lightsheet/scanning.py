@@ -462,4 +462,4 @@ class Scanner(Process):
                     warn("NI error " + e.__repr__())
                 self.parameters = deepcopy(
                     scanloop.parameters
-                )  # set the paramters to the last ones received in the loop
+                )  # set the parameters to the last ones received in the loop
