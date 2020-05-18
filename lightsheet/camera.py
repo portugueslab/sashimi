@@ -1,6 +1,6 @@
 from multiprocessing import Process, Queue, Event
 from enum import Enum
-
+from threading import Thread
 from arrayqueues.shared_arrays import ArrayQueue
 from lightsheet.hardware.hamamatsu_camera import *
 from dataclasses import dataclass, fields
@@ -13,7 +13,7 @@ class CameraProcessState(Enum):
     TRIGGERED = 1
 
 
-@dataclass()
+@dataclass
 class CameraParams:
     exposure_time: float = 0.06
     subarray_hsize: int = 2048
@@ -30,8 +30,8 @@ class ScanParameters:
     image_params: CameraParams = CameraParams()
 
 
-class CameraProcess(Process):
-    def __init__(self, stop_event, camera_id=0, max_queue_size=200):
+class CameraProcess(Thread):
+    def __init__(self, camera_id=0, max_queue_size=200):
         super().__init__()
         self.stop_event = Event()
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
@@ -73,6 +73,7 @@ class CameraProcess(Process):
                 for frame in frames:
                     frame = np.reshape(frame.getData(), (1000, 1000))
                     self.image_queue.put(frame)
+                    print("I am running")
                     # self.stop_event.set()
             self.camera.stopAcquisition()
         if self.parameters.run_mode == CameraProcessState.TRIGGERED:

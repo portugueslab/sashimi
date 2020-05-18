@@ -314,6 +314,7 @@ class HamamatsuCamera(object):
         self.properties = self.getCameraProperties()
 
         # Get camera max width, height.
+
         self.max_width = self.getPropertyValue("image_width")[0]
         self.max_height = self.getPropertyValue("image_height")[0]
 
@@ -1039,7 +1040,7 @@ if (__name__ == "__main__"):
                 contFrames = hcam.getFrames()
                 hcam.stopAcquisition()
 
-        if False:
+        if True:
             from colorama import Fore, Style
             test_size = 100
             hcam.setPropertyValue("exposure_time", 0.004)

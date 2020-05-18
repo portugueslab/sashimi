@@ -220,7 +220,7 @@ class State:
         self.volume_setting.sig_param_changed.connect(self.send_settings)
 
         self.laser = CoboltLaser()
-        self.camera = CameraProcess(self.stop_event)
+        self.camera = CameraProcess()
 
         self.camera.start()
         self.scanner.start()
@@ -268,8 +268,8 @@ class State:
         self.scanner.join(timeout=10)
         self.laser.close()
         # FIXME: Not sure this will terminate the camera process and disconnect it properly
-        self.camera.close_camera()
-        self.camera.terminate()
+        # self.camera.close_camera()
+        # self.camera.terminate()
         self.camera.join(timeout=10)
 
     def get_image(self):
