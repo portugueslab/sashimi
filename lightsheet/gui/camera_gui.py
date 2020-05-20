@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import (
 )
 import pyqtgraph as pg
 import qdarkstyle
-from lightsheet.state import State
 
 
 class ViewingWidget(QWidget):
@@ -16,34 +15,45 @@ class ViewingWidget(QWidget):
         super().__init__()
 
         self.state = state
+        self.timer = timer
+        self.refresh_timer = QTimer()
         self.setLayout(QVBoxLayout())
         self.image_viewer = pg.ImageView()
         self.image_viewer.ui.roiBtn.hide()
         self.image_viewer.ui.menuBtn.hide()
 
-        self.save_button = QPushButton("ON")
+        self.save_button = QPushButton("Start saving")
         self.save_button.clicked.connect(self.toggle)
 
         self.layout().addWidget(self.image_viewer)
         self.layout().addWidget(self.save_button)
         self.first_image = True
+        self.refresh_display = True
 
-        timer.timeout.connect(self.refresh)
+        self.refresh_timer.start(200)
+
+        self.timer.timeout.connect(self.refresh)
+        self.refresh_timer.timeout.connect(self.display_new_image)
 
     def toggle(self):
-        self.state.saver.set()
+        self.state.saver.saving_signal.set()
 
     def refresh(self) -> None:
         current_image = self.state.get_image()
         if current_image is None:
             return
 
-        self.image_viewer.setImage(
-            current_image,
-            autoLevels=self.first_image,
-            autoRange=self.first_image,
-            autoHistogramRange=self.first_image,
-        )
-        self.first_image = False
+        if self.refresh_display:
+            self.image_viewer.setImage(
+                current_image,
+                autoLevels=self.first_image,
+                autoRange=self.first_image,
+                autoHistogramRange=self.first_image,
+            )
+            self.first_image = False
+            self.refresh_display = False
+
+    def display_new_image(self):
+        self.refresh_display = True
 
 

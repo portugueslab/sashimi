@@ -7,6 +7,7 @@ import flammkuchen as fl
 import numpy as np
 import shutil
 import json
+from arrayqueues.shared_arrays import ArrayQueue
 
 
 @dataclass
@@ -24,10 +25,10 @@ class SavingStatus:
 
 
 class StackSaver(Process):
-    def __init__(self, stop_signal, data_queue):
+    def __init__(self, stop_signal):
         super().__init__()
         self.stop_signal = stop_signal
-        self.data_queue = data_queue
+        self.save_queue = ArrayQueue()
         self.saving_signal = Event()
         self.saving = False
         self.saving_parameter_queue = Queue()
@@ -74,7 +75,7 @@ class StackSaver(Process):
             except Empty:
                 pass
             try:
-                frame = self.data_queue.get(timeout=0.01)
+                frame = self.save_queue.get(timeout=0.01)
                 self.fill_dataset(frame)
                 i_received += 1
             except Empty:

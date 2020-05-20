@@ -64,7 +64,7 @@ class CameraProcess(Thread):
         self.camera.setPropertyValue('binning', 2)
         self.camera.setPropertyValue('subarray_hsize', 2000)
         self.camera.setPropertyValue('subarray_vsize', 2000)
-        self.camera.setPropertyValue('exposure_time', 0.5)
+        self.camera.setPropertyValue('exposure_time', 0.05)
         print('internal_frame_rate: ', self.camera.getPropertyValue('internal_frame_rate')[0])
         self.camera.startAcquisition()
         if self.parameters.run_mode == CameraProcessState.FREE:

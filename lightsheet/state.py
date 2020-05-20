@@ -203,7 +203,7 @@ class State:
         self.save_status: Optional[SavingStatus] = None
 
         self.save_queue = ArrayQueue(max_mbytes=800)
-        self.saver = StackSaver(self.scanner.stop_event, self.save_queue)
+        self.saver = StackSaver(self.scanner.stop_event)
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
