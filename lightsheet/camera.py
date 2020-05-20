@@ -78,7 +78,10 @@ class CameraProcess(Thread):
             # FIXME: Set trigger
             while not self.stop_event.is_set():
                 frames = self.camera.getFrames()
-                self.image_queue.put(frames)
+                for frame in frames:
+                    frame = np.reshape(frame.getData(), (1000, 1000))
+                    self.image_queue.put(frame)
+            self.camera.stopAcquisition()
 
     def close_camera(self):
         self.camera.shutdown()

@@ -8,6 +8,8 @@ from PyQt5.QtWidgets import (
 )
 import pyqtgraph as pg
 import qdarkstyle
+from lightparam.gui import ParameterGui
+from lightsheet.state import BinningOptions
 
 
 class ViewingWidget(QWidget):
@@ -18,14 +20,19 @@ class ViewingWidget(QWidget):
         self.timer = timer
         self.refresh_timer = QTimer()
         self.setLayout(QVBoxLayout())
+
         self.image_viewer = pg.ImageView()
         self.image_viewer.ui.roiBtn.hide()
         self.image_viewer.ui.menuBtn.hide()
 
+        self.wid_binning = ParameterGui(self.state.binning)
+
+        # TODO: This button is only for debugging purposes. It will be triggered with start of adquisition
         self.save_button = QPushButton("Start saving")
         self.save_button.clicked.connect(self.toggle)
 
         self.layout().addWidget(self.image_viewer)
+        self.layout().addWidget(self.wid_binning)
         self.layout().addWidget(self.save_button)
         self.first_image = True
         self.refresh_display = True
@@ -55,5 +62,11 @@ class ViewingWidget(QWidget):
 
     def display_new_image(self):
         self.refresh_display = True
+
+
+    # TODO: Remove this function if we can do everything with lightparam
+    def update_property(self):
+        pass
+
 
 

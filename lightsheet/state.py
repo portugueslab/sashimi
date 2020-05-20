@@ -72,6 +72,22 @@ class ZRecordingSettings(ParametrizedQt):
         self.n_skip_end = Param(0, (0, 20))
 
 
+class BinningOptions(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "camera/binning"
+        self.binning = Param(
+            "1x1", ["1x1", "2x2", "4x4"],
+        )
+
+
+class CameraSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "camera/parameters"
+        self.exposure = Param(0.06, (0.002, 1), unit="seconds")
+
+
 def convert_planar_params(planar: PlanarScanningSettings):
     return PlanarScanning(
         lateral=XYScanning(
@@ -191,6 +207,12 @@ class State:
         )
         self.status = ScanningSettings()
 
+        self.laser = CoboltLaser()
+        self.camera = CameraProcess()
+
+        self.binning = BinningOptions()
+        self.camera_status = CameraSettings()
+
         self.settings_tree = ParameterTree()
 
         self.planar_setting = PlanarScanningSettings()
@@ -219,8 +241,7 @@ class State:
         self.single_plane_settings.sig_param_changed.connect(self.send_settings)
         self.volume_setting.sig_param_changed.connect(self.send_settings)
 
-        self.laser = CoboltLaser()
-        self.camera = CameraProcess()
+        self
 
         self.camera.start()
         self.scanner.start()
