@@ -85,3 +85,28 @@ class CameraProcess(Thread):
 
     def close_camera(self):
         self.camera.shutdown()
+
+
+class FakeCameraProcess(Thread):
+    '''
+    This class is for debugging (e.g. when camera is not connected to computer)
+    '''
+    def __init__(self, camera_id=0, max_queue_size=500):
+        super().__init__()
+        self.stop_event = Event()
+        self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
+        self.camera_id = camera_id
+        self.camera = None
+        self.info = None
+        self.parameters = ScanParameters
+
+    def initialize_camera(self):
+        pass
+
+    def run(self):
+        self.initialize_camera()
+        if self.parameters.run_mode == CameraProcessState.FREE:
+            while not self.stop_event.is_set():
+                time.sleep(0.1)
+                frame = np.random.random(size=(500, 500))
+                self.image_queue.put(frame)

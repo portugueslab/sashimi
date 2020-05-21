@@ -25,14 +25,14 @@ class ViewingWidget(QWidget):
         self.image_viewer.ui.roiBtn.hide()
         self.image_viewer.ui.menuBtn.hide()
 
-        self.wid_binning = ParameterGui(self.state.binning)
+        self.wid_camera_properties = ParameterGui(self.state.camera_status)
 
         # TODO: This button is only for debugging purposes. It will be triggered with start of adquisition
         self.save_button = QPushButton("Start saving")
         self.save_button.clicked.connect(self.toggle)
 
         self.layout().addWidget(self.image_viewer)
-        self.layout().addWidget(self.wid_binning)
+        self.layout().addWidget(self.wid_camera_properties)
         self.layout().addWidget(self.save_button)
         self.first_image = True
         self.refresh_display = True
