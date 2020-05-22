@@ -20,7 +20,7 @@ from lightsheet.scanning import (
 from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
 import json
-from lightsheet.camera import CameraProcess
+from lightsheet.camera import CameraProcess, CamParameters
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 
 
@@ -215,8 +215,8 @@ class State:
 
         self.save_status: Optional[SavingStatus] = None
 
-        self.save_queue = ArrayQueue(max_mbytes=800)
-        self.saver = StackSaver(self.scanner.stop_event)
+        #self.save_queue = ArrayQueue(max_mbytes=800)
+        self.saver = StackSaver(self.stop_event)
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
@@ -231,10 +231,12 @@ class State:
         self.calibration.z_settings.sig_param_changed.connect(self.send_settings)
         self.single_plane_settings.sig_param_changed.connect(self.send_settings)
         self.volume_setting.sig_param_changed.connect(self.send_settings)
+        self.camera_properties.sig_param_changed.connect(self.send_settings)
 
         self.camera.start()
         self.scanner.start()
         self.stytra_comm.start()
+        self.saver.start()
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -269,6 +271,7 @@ class State:
 
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
+        self.camera.parameter_queue.put(self.camera_properties)
         self.stytra_comm.current_settings_queue.put(params)
         if params.experiment_state == ExperimentPrepareState.START:
             self.experiment_state = ExperimentPrepareState.NORMAL
@@ -277,7 +280,7 @@ class State:
         self.scanner.stop_event.set()
         self.scanner.join(timeout=10)
         self.laser.close()
-        # FIXME: Not sure this will terminate the camera process and disconnect it properly
+        # FIXME: Not sure this will properly terminate the camera process
         self.camera.terminate()
         self.camera.join(timeout=10)
         # self.camera.close_camera()
@@ -291,7 +294,7 @@ class State:
                         and self.save_status.i_t + 1 == self.save_status.target_params.n_t
                 ):
                     self.wrap_up()
-                self.save_queue.put(image)
+                self.saver.save_queue.put(image)
             return image
         except Empty:
             return None

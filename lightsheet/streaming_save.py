@@ -8,12 +8,13 @@ import numpy as np
 import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
+from threading import Thread
 
 
 @dataclass
 class SavingParameters:
-    output_dir: Path
-    n_t: int = 10000
+    output_dir= "C:/Users/portugueslab/desktop/temporal_saving"
+    n_t: int = 100
     chunk_size: int = 100
 
 
@@ -24,20 +25,20 @@ class SavingStatus:
     i_chunk: int = 0
 
 
-class StackSaver(Process):
+class StackSaver(Thread):
     def __init__(self, stop_signal):
         super().__init__()
         self.stop_signal = stop_signal
-        self.save_queue = ArrayQueue()
+        self.save_queue = ArrayQueue(1000)
         self.saving_signal = Event()
         self.saving = False
         self.saving_parameter_queue = Queue()
-        self.save_parameters: Optional[SavingParameters] = None
+        self.save_parameters: Optional[SavingParameters] = SavingParameters()
         self.i_in_chunk = 0
         self.i_chunk = 0
         self.current_data = None
         self.saved_status_queue = Queue()
-        self.dtype = np.float32
+        self.dtype = np.uint16
 
     def run(self):
         while not self.stop_signal.is_set():
@@ -48,6 +49,7 @@ class StackSaver(Process):
 
     def save_loop(self):
         # remove files if some are found at the save location
+        Path(self.save_parameters.output_dir).mkdir(parents=True, exist_ok=True)
         if (
                 Path(self.save_parameters.output_dir) / "original" / "stack_metadata.json"
         ).is_file():
@@ -60,8 +62,8 @@ class StackSaver(Process):
         self.i_in_chunk = 0
         self.i_chunk = 0
         self.current_data = np.empty(
-            (self.save_parameters.n_t, 1, *self.save_parameters.chunk_size),
-            dtype=self.dtype,
+            (self.save_parameters.n_t, 1, 1024, 1024),
+            dtype=self.dtype
         )
         n_total = self.save_parameters.n_t
         while (
@@ -69,11 +71,11 @@ class StackSaver(Process):
                 and self.saving_signal.is_set()
                 and not self.stop_signal.is_set()
         ):
-            self.receive_save_parameters()
-            try:
-                n_total = self.save_parameters.n_t
-            except Empty:
-                pass
+            #self.receive_save_parameters()
+            #try:
+            #    n_total = self.save_parameters.n_t
+            #except Empty:
+            #    pass
             try:
                 frame = self.save_queue.get(timeout=0.01)
                 self.fill_dataset(frame)
@@ -94,7 +96,7 @@ class StackSaver(Process):
         return frame
 
     def fill_dataset(self, frame):
-        self.current_data[self.i_in_chunk, 0, :, :] = self.cast(frame)
+        self.current_data[self.i_in_chunk, 0, :] = self.cast(frame)
         self.i_in_chunk += 1
         self.saved_status_queue.put(
             SavingStatus(
