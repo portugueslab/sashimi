@@ -9,8 +9,17 @@ from PyQt5.QtWidgets import (
 import pyqtgraph as pg
 import qdarkstyle
 from lightparam.gui import ParameterGui
+from lightparam.param_qt import ParametrizedQt
+from lightparam import Param
 import time
 import numpy as np
+
+
+class DisplaySettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "display_settings"
+        self.replay_rate = Param(5, (1, 10))
 
 
 class ViewingWidget(QWidget):
@@ -26,23 +35,33 @@ class ViewingWidget(QWidget):
         self.image_viewer.ui.roiBtn.hide()
         self.image_viewer.ui.menuBtn.hide()
 
+        self.display_settings = DisplaySettings()
+
         self.wid_camera_properties = ParameterGui(self.state.camera_properties)
+        self.wid_display_settings = ParameterGui(self.display_settings)
 
         # TODO: This button is only for debugging purposes. It will be triggered with start of adquisition
         self.save_button = QPushButton("Start saving")
 
         self.layout().addWidget(self.image_viewer)
+        self.layout().addWidget(self.wid_display_settings)
         self.layout().addWidget(self.wid_camera_properties)
         self.layout().addWidget(self.save_button)
         self.first_image = True
         self.refresh_display = True
 
         # ms for display clock. Currently 5 fps replay
-        self.refresh_timer.start(200)
+        self.refresh_timer.start(int(1/self.display_settings.replay_rate))
 
         self.timer.timeout.connect(self.refresh)
         self.refresh_timer.timeout.connect(self.display_new_image)
         self.save_button.clicked.connect(self.toggle)
+        # FIXME: This does not work to update refresh rate from widget
+        # self.display_settings.sig_param_changed(self.update_replay_rate())
+
+    def update_replay_rate(self):
+        self.refresh_timer.stop()
+        self.refresh_timer.start(int(1 / self.display_settings.replay_rate))
 
     def toggle(self):
         self.state.saver.saving_signal.set()
@@ -66,10 +85,6 @@ class ViewingWidget(QWidget):
     def display_new_image(self):
         self.refresh_display = True
 
-
     # TODO: Remove this function if we can do everything with lightparam
     def update_property(self):
         pass
-
-
-

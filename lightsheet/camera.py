@@ -86,9 +86,9 @@ class CameraProcess(Thread):
                               int(self.camera.getPropertyValue("subarray_vsize")[0] / self.camera.getPropertyValue("binning")[0]))
         if self.parameters.run_mode == CameraProcessState.FREE:
             while not self.stop_event.is_set():
-                new_params = get_last_parameters(self.parameter_queue)
-                if new_params is not None:
-                    self.parameters = new_params
+               # new_params = get_last_parameters(self.parameter_queue)
+                #if new_params is not None:
+                 #   self.parameters = new_params
                 frames = self.camera.getFrames()
                 for frame in frames:
                     frame = np.reshape(frame.getData(), self.subarray_size)
@@ -97,11 +97,7 @@ class CameraProcess(Thread):
         if self.parameters.run_mode == CameraProcessState.TRIGGERED:
             # FIXME: Set trigger
             while not self.stop_event.is_set():
-                frames = self.camera.getFrames()
-                for frame in frames:
-                    frame = np.reshape(frame.getData(), (1000, 1000))
-                    self.image_queue.put(frame)
-            self.camera.stopAcquisition()
+                pass
 
     def close_camera(self):
         self.camera.shutdown()

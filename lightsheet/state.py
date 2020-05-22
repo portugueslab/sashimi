@@ -283,7 +283,6 @@ class State:
         # FIXME: Not sure this will properly terminate the camera process
         self.camera.terminate()
         self.camera.join(timeout=10)
-        # self.camera.close_camera()
 
     def get_image(self):
         try:
