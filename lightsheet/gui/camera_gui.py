@@ -51,17 +51,17 @@ class ViewingWidget(QWidget):
         self.refresh_display = True
 
         # ms for display clock. Currently 5 fps replay
-        self.refresh_timer.start(int(1/self.display_settings.replay_rate))
+        self.refresh_timer.start(int(1000/self.display_settings.replay_rate))
 
         self.timer.timeout.connect(self.refresh)
         self.refresh_timer.timeout.connect(self.display_new_image)
         self.save_button.clicked.connect(self.toggle)
-        # FIXME: This does not work to update refresh rate from widget
-        # self.display_settings.sig_param_changed(self.update_replay_rate())
+        # FIXME: This does not work -- update refresh rate from widget
+        self.display_settings.sig_param_changed.connect(self.update_replay_rate)
 
     def update_replay_rate(self):
-        self.refresh_timer.stop()
-        self.refresh_timer.start(int(1 / self.display_settings.replay_rate))
+        print(self.display_settings.replay_rate)
+        self.refresh_timer.setInterval(int(1000/self.display_settings.replay_rate))
 
     def toggle(self):
         self.state.saver.saving_signal.set()
@@ -72,7 +72,6 @@ class ViewingWidget(QWidget):
             return
 
         if self.refresh_display:
-            # print(current_image.shape)
             self.image_viewer.setImage(
                 current_image,
                 autoLevels=self.first_image,
