@@ -16,7 +16,7 @@ class CameraProcessState(Enum):
 @dataclass
 class HamamatsuCameraParams:
     # min 0.002 max... 1?
-    exposure_time: float = 0.20
+    exposure_time: float = 60
     # max 2048
     subarray_hsize: int = 2000
     subarray_vsize: int = 2000
@@ -67,7 +67,7 @@ class CameraProcess(Thread):
 
             if self.parameters.image_params.exposure_time != new_params.image_params.exposure_time:
                 self.camera.stopAcquisition()
-                self.camera.setPropertyValue('exposure_time', self.parameters.image_params.binning)
+                self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.image_params.binning)
                 self.camera.startAcquisition()
 
             # TODO: Add subarray updates
@@ -86,7 +86,7 @@ class CameraProcess(Thread):
         self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
         self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
         self.camera.setPropertyValue('subarray_vsize', self.parameters.image_params.subarray_vsize)
-        self.camera.setPropertyValue('exposure_time', self.parameters.image_params.exposure_time)
+        self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.image_params.exposure_time)
         self.subarray_size = (
         int(self.camera.getPropertyValue("subarray_hsize")[0] / self.camera.getPropertyValue("binning")[0]),
         int(self.camera.getPropertyValue("subarray_vsize")[0] / self.camera.getPropertyValue("binning")[0]))
