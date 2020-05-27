@@ -16,7 +16,7 @@ class CameraProcessState(Enum):
 @dataclass
 class HamamatsuCameraParams:
     # min 0.002 max... 1?
-    exposure_time: float = 0.060
+    exposure_time: float = 0.20
     # max 2048
     subarray_hsize: int = 2000
     subarray_vsize: int = 2000
@@ -54,54 +54,66 @@ class CameraProcess(Thread):
         self.info = None
         self.parameters = CamParameters
 
-    def set_params(self):
-        # FIXME: Access subclass
-        for param in fields(self.parameters.image_params):
-            self.camera.setPropertyValue(param.name, param.value)
-
-    # TODO: Get param info
-    def get_param_value(self):
-        # FIXME: Access subclass
-        for param in fields(self.parameters.image_params):
-            newparams = self.camera.getPropertyValue(param.name)[0]
-
     def update_settings(self):
+        new_params: CamParameters
+
         new_params = get_last_parameters(self.parameter_queue)
         if new_params is not None:
+
+            if self.parameters.image_params.binning != new_params.image_params.binning:
+                self.camera.stopAcquisition()
+                self.camera.setPropertyValue('binning', self.parameters.image_params.binning)
+                self.camera.startAcquisition()
+
+            if self.parameters.image_params.exposure_time != new_params.image_params.exposure_time:
+                self.camera.stopAcquisition()
+                self.camera.setPropertyValue('exposure_time', self.parameters.image_params.binning)
+                self.camera.startAcquisition()
+
+            # TODO: Add subarray updates
+
             self.parameters = new_params
 
 
     def initialize_camera(self):
         self.camera = HamamatsuCameraMR(camera_id=self.camera_id)
         self.info = self.camera.getModelInfo(self.camera_id)
+        self.set_Hamamatsu_running_mode()
+        self.send_params_to_Hamamatsu()
+
+    def send_params_to_Hamamatsu(self):
+        self.camera.setPropertyValue('binning', self.parameters.image_params.binning)
+        self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
+        self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
+        self.camera.setPropertyValue('subarray_vsize', self.parameters.image_params.subarray_vsize)
+        self.camera.setPropertyValue('exposure_time', self.parameters.image_params.exposure_time)
+        self.subarray_size = (
+        int(self.camera.getPropertyValue("subarray_hsize")[0] / self.camera.getPropertyValue("binning")[0]),
+        int(self.camera.getPropertyValue("subarray_vsize")[0] / self.camera.getPropertyValue("binning")[0]))
+
+    def set_Hamamatsu_running_mode(self):
         # TODO: figure out what is this
         self.camera.setPropertyValue("defect_correct_mode", 1)
+        self.camera.setACQMode("run_till_abort")
+        self.camera.setSubArrayMode()
 
     # TODO: Figure out how to trigger each camera frame
     def run(self):
         self.initialize_camera()
-        self.camera.setACQMode("run_till_abort")
-        self.camera.setPropertyValue('binning', self.parameters.image_params.binning)
-        self.camera.setSubArrayMode()
-        self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
-        self.camera.setPropertyValue('subarray_vsize', self.parameters.image_params.subarray_vsize)
-        self.camera.setPropertyValue('exposure_time', self.parameters.image_params.exposure_time)
-        print('internal_frame_rate: ', self.camera.getPropertyValue('internal_frame_rate')[0])
-        self.camera.startAcquisition()
-        self.subarray_size = (int(self.camera.getPropertyValue("subarray_hsize")[0] / self.camera.getPropertyValue("binning")[0]),
-                              int(self.camera.getPropertyValue("subarray_vsize")[0] / self.camera.getPropertyValue("binning")[0]))
+
         if self.parameters.run_mode == CameraProcessState.FREE:
+            self.camera.startAcquisition()
             while not self.stop_event.is_set():
-               # new_params = get_last_parameters(self.parameter_queue)
-                #if new_params is not None:
-                 #   self.parameters = new_params
+                self.update_settings()
                 frames = self.camera.getFrames()
-                for frame in frames:
-                    frame = np.reshape(frame.getData(), self.subarray_size)
-                    self.image_queue.put(frame)
+                if frames is not None:
+                    for frame in frames:
+                        frame = np.reshape(frame.getData(), self.subarray_size)
+                        self.image_queue.put(frame)
             self.camera.stopAcquisition()
+
         if self.parameters.run_mode == CameraProcessState.TRIGGERED:
-            # FIXME: Set trigger
+            # TODO: Figure out how to trigger each camera frame
             while not self.stop_event.is_set():
                 pass
 
@@ -122,7 +134,7 @@ class FakeCameraProcess(Thread):
         self.camera_id = camera_id
         self.camera = None
         self.info = None
-        self.parameters = ScanParameters
+        self.parameters = CamParameters
 
     def initialize_camera(self):
         pass

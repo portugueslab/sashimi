@@ -78,7 +78,7 @@ class CameraSettings(ParametrizedQt):
         super().__init__()
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
-        self.binning = Param("1x1", ["1x1", "2x2", "4x4"])
+        self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
 
 
 def convert_planar_params(planar: PlanarScanningSettings):

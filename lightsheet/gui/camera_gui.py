@@ -49,7 +49,7 @@ class ViewingWidget(QWidget):
         self.layout().addWidget(self.wid_display_settings)
         self.layout().addWidget(self.wid_camera_properties)
         self.layout().addWidget(self.save_button)
-        self.first_image = True
+        self.is_first_image = True
         self.refresh_display = True
 
         # ms for display clock. Currently 5 fps replay
@@ -71,14 +71,15 @@ class ViewingWidget(QWidget):
         if current_image is None:
             return
 
+        # FIXME: I broke in tears when camera params change
         if self.refresh_display:
             self.image_viewer.setImage(
                 current_image,
-                autoLevels=self.first_image,
-                autoRange=self.first_image,
-                autoHistogramRange=self.first_image,
+                autoLevels=self.is_first_image,
+                autoRange=self.is_first_image,
+                autoHistogramRange=self.is_first_image,
             )
-            self.first_image = False
+            self.is_first_image = False
             self.refresh_display = False
 
     def display_new_image(self):
