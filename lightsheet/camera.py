@@ -14,7 +14,7 @@ class CameraProcessState(Enum):
 
 
 @dataclass
-class CameraParams:
+class HamamatsuCameraParams:
     # min 0.002 max... 1?
     exposure_time: float = 0.060
     # max 2048
@@ -22,7 +22,7 @@ class CameraParams:
     subarray_vsize: int = 2000
     subarray_hpos: int = 0
     subarray_vpos: int = 0
-    binning: dict = 2
+    binning: int = 2
     # image_height: int = 2048
     # image_width: int = 2048
 
@@ -30,7 +30,7 @@ class CameraParams:
 @dataclass
 class CamParameters:
     run_mode: CameraProcessState = CameraProcessState.FREE
-    image_params: CameraParams = CameraParams()
+    image_params: HamamatsuCameraParams = HamamatsuCameraParams()
 
 
 def get_last_parameters(parameter_queue, timeout=0.001):
@@ -64,6 +64,12 @@ class CameraProcess(Thread):
         # FIXME: Access subclass
         for param in fields(self.parameters.image_params):
             newparams = self.camera.getPropertyValue(param.name)[0]
+
+    def update_settings(self):
+        new_params = get_last_parameters(self.parameter_queue)
+        if new_params is not None:
+            self.parameters = new_params
+
 
     def initialize_camera(self):
         self.camera = HamamatsuCameraMR(camera_id=self.camera_id)
@@ -102,6 +108,8 @@ class CameraProcess(Thread):
     def close_camera(self):
         self.camera.shutdown()
 
+
+# TODO: Get rid of this once camera works properly
 
 class FakeCameraProcess(Thread):
     '''

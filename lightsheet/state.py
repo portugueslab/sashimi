@@ -20,7 +20,7 @@ from lightsheet.scanning import (
 from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
 import json
-from lightsheet.camera import CameraProcess, CamParameters
+from lightsheet.camera import CameraProcess, CamParameters, HamamatsuCameraParams
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 
 
@@ -72,6 +72,7 @@ class ZRecordingSettings(ParametrizedQt):
         self.n_skip_end = Param(0, (0, 20))
 
 
+# TODO: Add subarray parameters
 class CameraSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
@@ -148,6 +149,25 @@ class Calibration(ParametrizedQt):
         return True
 
 
+# TODO: Add subarray parameters
+def convert_camera_params(camera_parameters: CameraSettings):
+    if camera_parameters.binning == "1x1":
+        binning = 1
+    elif camera_parameters.binning == "2x2":
+        binning = 2
+    elif camera_parameters.binning == "4x4":
+        binning = 4
+    # set binning 2x2 by default
+    else:
+        binning = 2
+    return CamParameters(
+        image_params=HamamatsuCameraParams(
+            exposure_time=camera_parameters.exposure,
+            binning=binning
+        )
+    )
+
+
 def convert_single_plane_params(
         planar: PlanarScanningSettings, single_plane_setting: SinglePlaneSettings, calibration: Calibration
 ):
@@ -215,7 +235,7 @@ class State:
 
         self.save_status: Optional[SavingStatus] = None
 
-        #self.save_queue = ArrayQueue(max_mbytes=800)
+        # self.save_queue = ArrayQueue(max_mbytes=800)
         self.saver = StackSaver(self.stop_event)
 
         self.single_plane_settings = SinglePlaneSettings()
@@ -271,7 +291,8 @@ class State:
 
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
-        self.camera.parameter_queue.put(self.camera_properties)
+        camera_params = convert_camera_params(self.camera_properties)
+        self.camera.parameter_queue.put(camera_params)
         self.stytra_comm.current_settings_queue.put(params)
         if params.experiment_state == ExperimentPrepareState.START:
             self.experiment_state = ExperimentPrepareState.NORMAL
