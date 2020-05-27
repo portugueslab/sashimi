@@ -54,6 +54,8 @@ class CameraProcess(Thread):
         self.info = None
         self.parameters = CamParameters
 
+        self.initialize_camera()
+
     def update_settings(self):
         new_params: CamParameters
 
@@ -61,25 +63,22 @@ class CameraProcess(Thread):
         if new_params is not None:
 
             if self.parameters.image_params.binning != new_params.image_params.binning:
-                self.camera.stopAcquisition()
-                self.camera.setPropertyValue('binning', self.parameters.image_params.binning)
-                self.camera.startAcquisition()
+                self.stop_event.set()
+                self.stop_event.clear()
 
             if self.parameters.image_params.exposure_time != new_params.image_params.exposure_time:
-                self.camera.stopAcquisition()
-                self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.image_params.binning)
-                self.camera.startAcquisition()
+                self.stop_event.set()
+                self.stop_event.clear()
 
             # TODO: Add subarray updates
 
             self.parameters = new_params
+            self.run()
 
 
     def initialize_camera(self):
         self.camera = HamamatsuCameraMR(camera_id=self.camera_id)
         self.info = self.camera.getModelInfo(self.camera_id)
-        self.set_Hamamatsu_running_mode()
-        self.send_params_to_Hamamatsu()
 
     def send_params_to_Hamamatsu(self):
         self.camera.setPropertyValue('binning', self.parameters.image_params.binning)
@@ -99,8 +98,8 @@ class CameraProcess(Thread):
 
     # TODO: Figure out how to trigger each camera frame
     def run(self):
-        self.initialize_camera()
-
+        self.set_Hamamatsu_running_mode()
+        self.send_params_to_Hamamatsu()
         if self.parameters.run_mode == CameraProcessState.FREE:
             self.camera.startAcquisition()
             while not self.stop_event.is_set():

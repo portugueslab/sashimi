@@ -37,8 +37,6 @@ class ViewingWidget(QWidget):
 
         self.display_settings = DisplaySettings()
 
-        # FIXME: Camera properties parameters --> Camera API object
-
         self.wid_camera_properties = ParameterGui(self.state.camera_properties)
         self.wid_display_settings = ParameterGui(self.display_settings)
 
@@ -71,7 +69,6 @@ class ViewingWidget(QWidget):
         if current_image is None:
             return
 
-        # FIXME: I broke in tears when camera params change
         if self.refresh_display:
             self.image_viewer.setImage(
                 current_image,
