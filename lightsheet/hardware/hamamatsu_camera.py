@@ -769,7 +769,7 @@ class HamamatsuCamera(object):
                                                 DCAMCAP_START_SNAP),
                              "dcamcap_start")
 
-    def stopAcquisition(self):
+    def stopAcquisition(self, print_backlog=False):
         """
         Stop data acquisition.
         """
@@ -778,7 +778,8 @@ class HamamatsuCamera(object):
         self.checkStatus(dcam.dcamcap_stop(self.camera_handle),
                          "dcamcap_stop")
 
-        print("max camera backlog was", self.max_backlog, "of", self.number_image_buffers)
+        if print_backlog:
+            print("max camera backlog was", self.max_backlog, "of", self.number_image_buffers)
         self.max_backlog = 0
 
         # Free image buffers.
