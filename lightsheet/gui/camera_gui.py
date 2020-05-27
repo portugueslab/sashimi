@@ -37,6 +37,8 @@ class ViewingWidget(QWidget):
 
         self.display_settings = DisplaySettings()
 
+        # FIXME: Camera properties parameters --> Camera API object
+
         self.wid_camera_properties = ParameterGui(self.state.camera_properties)
         self.wid_display_settings = ParameterGui(self.display_settings)
 
@@ -56,11 +58,9 @@ class ViewingWidget(QWidget):
         self.timer.timeout.connect(self.refresh)
         self.refresh_timer.timeout.connect(self.display_new_image)
         self.save_button.clicked.connect(self.toggle)
-        # FIXME: This does not work -- update refresh rate from widget
         self.display_settings.sig_param_changed.connect(self.update_replay_rate)
 
     def update_replay_rate(self):
-        print(self.display_settings.replay_rate)
         self.refresh_timer.setInterval(int(1000/self.display_settings.replay_rate))
 
     def toggle(self):

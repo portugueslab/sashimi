@@ -223,7 +223,7 @@ class State:
         self.calibration = Calibration()
 
         for setting in [self.planar_setting, self.laser_settings, self.single_plane_settings, self.volume_setting,
-                        self.calibration, self.calibration.z_settings]:
+                        self.calibration, self.calibration.z_settings, self.camera_properties]:
             self.settings_tree.add(setting)
 
         self.status.sig_param_changed.connect(self.send_settings)
