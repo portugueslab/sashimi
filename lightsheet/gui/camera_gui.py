@@ -21,6 +21,8 @@ class DisplaySettings(ParametrizedQt):
         self.name = "display_settings"
         self.replay_rate = Param(5, (1, 10))
 
+#TODO: Add information from the camera for the user e.g. frame rate
+
 
 class ViewingWidget(QWidget):
     def __init__(self, state, timer):
@@ -81,7 +83,3 @@ class ViewingWidget(QWidget):
 
     def display_new_image(self):
         self.refresh_display = True
-
-    # TODO: Remove this function if we can do everything with lightparam
-    def update_property(self):
-        pass
