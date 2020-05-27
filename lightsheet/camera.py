@@ -18,13 +18,14 @@ class HamamatsuCameraParams:
     # min 0.002 max... 1?
     exposure_time: float = 60
     # max 2048
-    subarray_hsize: int = 2000
-    subarray_vsize: int = 2000
+    subarray_hsize: int = 2048
+    subarray_vsize: int = 2048
     subarray_hpos: int = 0
     subarray_vpos: int = 0
     binning: int = 2
-    # image_height: int = 2048
-    # image_width: int = 2048
+    image_height: int = 2048
+    image_width: int = 2048
+    frame_shape: tuple = (2048, 2048)
 
 
 @dataclass
@@ -86,9 +87,11 @@ class CameraProcess(Thread):
         self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
         self.camera.setPropertyValue('subarray_vsize', self.parameters.image_params.subarray_vsize)
         self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.image_params.exposure_time)
-        self.subarray_size = (
+
+        self.parameters.image_params.frame_shape = (
         int(self.camera.getPropertyValue("subarray_hsize")[0] / self.camera.getPropertyValue("binning")[0]),
-        int(self.camera.getPropertyValue("subarray_vsize")[0] / self.camera.getPropertyValue("binning")[0]))
+        int(self.camera.getPropertyValue("subarray_vsize")[0] / self.camera.getPropertyValue("binning")[0])
+        )
 
     def set_Hamamatsu_running_mode(self):
         # TODO: figure out what is this
@@ -107,7 +110,7 @@ class CameraProcess(Thread):
                 frames = self.camera.getFrames()
                 if frames is not None:
                     for frame in frames:
-                        frame = np.reshape(frame.getData(), self.subarray_size)
+                        frame = np.reshape(frame.getData(), self.parameters.image_params.frame_shape)
                         self.image_queue.put(frame)
             self.camera.stopAcquisition()
 
