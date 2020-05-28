@@ -8,6 +8,7 @@ import time
 import numpy as np
 from queue import Empty
 
+
 class CameraProcessState(Enum):
     FREE = 0
     TRIGGERED = 1
@@ -15,9 +16,7 @@ class CameraProcessState(Enum):
 
 @dataclass
 class HamamatsuCameraParams:
-    # min 0.002 max... 1?
     exposure_time: float = 60
-    # max 2048
     subarray_hsize: int = 2048
     subarray_vsize: int = 2048
     subarray_hpos: int = 0
@@ -26,6 +25,7 @@ class HamamatsuCameraParams:
     image_height: int = 2048
     image_width: int = 2048
     frame_shape: tuple = (2048, 2048)
+    internal_frame_rate: float = None
 
 
 @dataclass
@@ -50,6 +50,7 @@ class CameraProcess(Thread):
         self.stop_event = Event()
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.parameter_queue = Queue()
+        self.reverse_parameter_queue = Queue()
         self.camera_id = camera_id
         self.camera = None
         self.info = None
@@ -76,22 +77,24 @@ class CameraProcess(Thread):
             self.parameters = new_params
             self.run()
 
-
     def initialize_camera(self):
         self.camera = HamamatsuCameraMR(camera_id=self.camera_id)
         self.info = self.camera.getModelInfo(self.camera_id)
 
-    def send_params_to_Hamamatsu(self):
+    def Hamamatsu_send_receive_properties(self):
         self.camera.setPropertyValue('binning', self.parameters.image_params.binning)
         self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
         self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
         self.camera.setPropertyValue('subarray_vsize', self.parameters.image_params.subarray_vsize)
         self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.image_params.exposure_time)
 
+        self.parameters.image_params.internal_frame_rate = self.camera.getPropertyValue("internal_frame_rate")[0]
         self.parameters.image_params.frame_shape = (
-        int(self.camera.getPropertyValue("subarray_hsize")[0] / self.camera.getPropertyValue("binning")[0]),
-        int(self.camera.getPropertyValue("subarray_vsize")[0] / self.camera.getPropertyValue("binning")[0])
+            int(self.camera.getPropertyValue("subarray_hsize")[0] / self.camera.getPropertyValue("binning")[0]),
+            int(self.camera.getPropertyValue("subarray_vsize")[0] / self.camera.getPropertyValue("binning")[0])
         )
+
+        self.reverse_parameter_queue.put(self.parameters.image_params.internal_frame_rate)
 
     def set_Hamamatsu_running_mode(self):
         # TODO: figure out what is this
@@ -102,7 +105,7 @@ class CameraProcess(Thread):
     # TODO: Figure out how to trigger each camera frame
     def run(self):
         self.set_Hamamatsu_running_mode()
-        self.send_params_to_Hamamatsu()
+        self.Hamamatsu_send_receive_properties()
         if self.parameters.run_mode == CameraProcessState.FREE:
             self.camera.startAcquisition()
             while not self.stop_event.is_set():
@@ -129,6 +132,7 @@ class FakeCameraProcess(Thread):
     '''
     This class is for debugging (e.g. when camera is not connected to computer)
     '''
+
     def __init__(self, camera_id=0, max_queue_size=500):
         super().__init__()
         self.stop_event = Event()

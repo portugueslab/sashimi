@@ -4,7 +4,8 @@ from PyQt5.QtWidgets import (
     QWidget,
     QMainWindow,
     QVBoxLayout,
-    QPushButton
+    QPushButton,
+    QLabel
 )
 import pyqtgraph as pg
 import qdarkstyle
@@ -42,6 +43,8 @@ class ViewingWidget(QWidget):
         self.wid_camera_properties = ParameterGui(self.state.camera_properties)
         self.wid_display_settings = ParameterGui(self.display_settings)
 
+        self.lbl_camera_info = QLabel()
+
         # TODO: This button is only for debugging purposes. It will be triggered with start of adquisition
         self.save_button = QPushButton("Start saving")
 
@@ -49,6 +52,7 @@ class ViewingWidget(QWidget):
         self.layout().addWidget(self.wid_display_settings)
         self.layout().addWidget(self.wid_camera_properties)
         self.layout().addWidget(self.save_button)
+        self.layout().addWidget(self.lbl_camera_info)
         self.is_first_image = True
         self.refresh_display = True
 
@@ -59,6 +63,7 @@ class ViewingWidget(QWidget):
         self.refresh_timer.timeout.connect(self.display_new_image)
         self.save_button.clicked.connect(self.toggle)
         self.display_settings.sig_param_changed.connect(self.update_replay_rate)
+        self.wid_camera_properties.sig_param_changed.connect(self.update_camera_info)
 
     def update_replay_rate(self):
         self.refresh_timer.setInterval(int(1000/self.display_settings.replay_rate))
@@ -83,3 +88,7 @@ class ViewingWidget(QWidget):
 
     def display_new_image(self):
         self.refresh_display = True
+
+    def update_camera_info(self):
+        camera_info = self.state.get_camera_settings()
+        self.lbl_camera_info.setText("Internal frame rate: " + camera_info)

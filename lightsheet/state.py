@@ -318,3 +318,10 @@ class State:
             return image
         except Empty:
             return None
+
+    def get_camera_settings(self):
+        try:
+            camera_settings = self.camera.reverse_parameter_queue.get()
+            return camera_settings
+        except Empty:
+            return None
