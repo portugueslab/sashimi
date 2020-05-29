@@ -13,9 +13,9 @@ from threading import Thread
 
 @dataclass
 class SavingParameters:
-    output_dir= "C:/Users/portugueslab/desktop/temporal_saving"
-    n_t: int = 100
-    chunk_size: int = 100
+    output_dir: Path = r"C:/Users/portugueslab/desktop/temporal_saving"
+    n_t: int = 1000
+    chunk_size: int = 1000
 
 
 @dataclass
@@ -26,10 +26,10 @@ class SavingStatus:
 
 
 class StackSaver(Thread):
-    def __init__(self, stop_signal):
+    def __init__(self, stop_signal, max_queue_size=1000):
         super().__init__()
         self.stop_signal = stop_signal
-        self.save_queue = ArrayQueue(1000)
+        self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.saving_signal = Event()
         self.saving = False
         self.saving_parameter_queue = Queue()
@@ -61,6 +61,7 @@ class StackSaver(Thread):
         i_received = 0
         self.i_in_chunk = 0
         self.i_chunk = 0
+        # FIXME: 1024 x 1024 is only for 2x2 binning. Extract info from camera param Queue
         self.current_data = np.empty(
             (self.save_parameters.n_t, 1, 1024, 1024),
             dtype=self.dtype

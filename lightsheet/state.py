@@ -22,6 +22,18 @@ from multiprocessing import Event
 import json
 from lightsheet.camera import CameraProcess, CamParameters, HamamatsuCameraParams
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
+from pathlib import Path
+
+
+class SaveSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "experiment_settings"
+        # FIXME: One has to specify upper limit of Param so we set a ridiculously high number
+        # FIXME #2: Can we put commas to separate orders of magnitude please?
+        self.n_frames = Param(1000, (1, 10000000))
+        self.chunk_size = Param(1000, (1, 10000))
+        self.save_dir = Param(r"C:/Users/portugueslab/desktop/temporal_saving", gui=False)
 
 
 class ScanningSettings(ParametrizedQt):
@@ -223,6 +235,7 @@ class State:
         self.camera = CameraProcess()
 
         self.camera_properties = CameraSettings()
+        self.save_settings = SaveSettings()
 
         self.settings_tree = ParameterTree()
 
@@ -302,7 +315,7 @@ class State:
         self.scanner.join(timeout=10)
         self.laser.close()
         # FIXME: Not sure this will properly terminate the camera process
-        self.camera.terminate()
+        # self.camera.terminate()
         self.camera.join(timeout=10)
 
     def get_image(self):
@@ -325,3 +338,20 @@ class State:
             return camera_settings
         except Empty:
             return None
+
+    def send_save_params(self):
+        self.saver.saving_parameter_queue.put(
+            SavingParameters(
+                output_dir=Path(self.save_settings.save_dir),
+                n_t=int(self.save_settings.n_frames),
+                chunk_size=int(self.save_settings.chunk_size)
+            )
+        )
+
+    def get_save_status(self) -> Optional[SavingStatus]:
+        try:
+            self.save_status = self.saver.saved_status_queue.get(timeout=0.001)
+            return self.save_status
+        except Empty:
+            pass
+        return None

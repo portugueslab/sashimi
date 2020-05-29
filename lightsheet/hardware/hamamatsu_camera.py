@@ -925,7 +925,7 @@ class HamamatsuCameraMR(HamamatsuCamera):
                                                   DCAMBUF_ATTACHKIND_FRAME),
                              "dcambuf_release")
 
-        print("max camera backlog was:", self.max_backlog)
+        # print("max camera backlog was:", self.max_backlog)
         self.max_backlog = 0
 
 

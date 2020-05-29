@@ -45,7 +45,7 @@ def get_last_parameters(parameter_queue, timeout=0.001):
 
 
 class CameraProcess(Thread):
-    def __init__(self, camera_id=0, max_queue_size=500):
+    def __init__(self, camera_id=0, max_queue_size=1000):
         super().__init__()
         self.stop_event = Event()
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)

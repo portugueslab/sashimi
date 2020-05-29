@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QVBoxLayout,
     QPushButton,
-    QLabel
+    QLabel,
+    QProgressBar
 )
 import pyqtgraph as pg
 import qdarkstyle
@@ -21,8 +22,6 @@ class DisplaySettings(ParametrizedQt):
         super().__init__()
         self.name = "display_settings"
         self.replay_rate = Param(5, (1, 10))
-
-#TODO: Add information from the camera for the user e.g. frame rate
 
 
 class ViewingWidget(QWidget):
@@ -45,28 +44,35 @@ class ViewingWidget(QWidget):
 
         self.lbl_camera_info = QLabel()
 
+        self.stack_progress = QProgressBar()
+        self.chunk_progress = QProgressBar()
+        self.chunk_progress.setFormat("Frame %v of %m")
+        self.stack_progress.setFormat("Plane %v of %m")
+
         # TODO: This button is only for debugging purposes. It will be triggered with start of adquisition
         self.save_button = QPushButton("Start saving")
 
         self.layout().addWidget(self.image_viewer)
         self.layout().addWidget(self.wid_display_settings)
         self.layout().addWidget(self.wid_camera_properties)
-        self.layout().addWidget(self.save_button)
         self.layout().addWidget(self.lbl_camera_info)
+        self.layout().addWidget(self.save_button)
         self.is_first_image = True
         self.refresh_display = True
 
         # ms for display clock. Currently 5 fps replay
-        self.refresh_timer.start(int(1000/self.display_settings.replay_rate))
+        self.refresh_timer.start(int(1000 / self.display_settings.replay_rate))
 
         self.timer.timeout.connect(self.refresh)
         self.refresh_timer.timeout.connect(self.display_new_image)
         self.save_button.clicked.connect(self.toggle)
         self.display_settings.sig_param_changed.connect(self.update_replay_rate)
-        self.wid_camera_properties.sig_param_changed.connect(self.update_camera_info)
+        self.state.camera_properties.sig_param_changed.connect(self.update_camera_info)
+
+        # self.update_camera_info()
 
     def update_replay_rate(self):
-        self.refresh_timer.setInterval(int(1000/self.display_settings.replay_rate))
+        self.refresh_timer.setInterval(int(1000 / self.display_settings.replay_rate))
 
     def toggle(self):
         self.state.saver.saving_signal.set()
@@ -86,9 +92,16 @@ class ViewingWidget(QWidget):
             self.is_first_image = False
             self.refresh_display = False
 
+        sstatus = self.state.get_save_status()
+        if sstatus is not None:
+            self.chunk_progress.setMaximum(sstatus.target_params.chunk_size)
+            self.chunk_progress.setValue(sstatus.i_chunk)
+            self.stack_progress.setMaximum(sstatus.target_params.n_t)
+            self.stack_progress.setValue(sstatus.i_t)
+
     def display_new_image(self):
         self.refresh_display = True
 
     def update_camera_info(self):
         camera_info = self.state.get_camera_settings()
-        self.lbl_camera_info.setText("Internal frame rate: " + camera_info)
+        self.lbl_camera_info.setText("Internal frame rate: " + str(camera_info))

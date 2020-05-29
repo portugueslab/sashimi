@@ -8,8 +8,9 @@ from PyQt5.QtWidgets import (
 from lightsheet.gui.calibration_gui import CalibrationWidget
 from lightsheet.gui.scanning_gui import PlanarScanningWidget, VolumeScanningWidget, SinglePlaneScanningWidget
 from lightsheet.gui.laser_gui import LaserControlWidget
-from lightsheet.gui.save_settings_gui import SavingWidget
+from lightsheet.gui.save_settings_gui import SavingSettingsWidget
 from lightsheet.gui.camera_gui import ViewingWidget
+from lightsheet.gui.save_gui import SaveWidget
 from lightsheet.state import State
 from lightparam import Param
 from lightparam.gui import ParameterGui
@@ -28,9 +29,9 @@ class ContainerWidget(QWidget):
 
         self.left_layout = QVBoxLayout()
 
-        self.wid_save = SavingWidget(st)
-        self.left_layout.addWidget(self.wid_save)
-        self.wid_save.sig_params_loaded.connect(self.refresh_param_values)
+        self.wid_save_settings = SavingSettingsWidget(st)
+        self.left_layout.addWidget(self.wid_save_settings)
+        self.wid_save_settings.sig_params_loaded.connect(self.refresh_param_values)
 
         self.full_layout.addWidget(self.wid_status)
 
@@ -38,6 +39,7 @@ class ContainerWidget(QWidget):
         self.full_layout.addLayout(self.control_layout)
 
         self.wid_display = ViewingWidget(st, self.timer)
+        self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_calib = CalibrationWidget(st.calibration, self.timer)
@@ -51,6 +53,7 @@ class ContainerWidget(QWidget):
         self.control_layout.addWidget(self.wid_single_plane)
         self.control_layout.addWidget(self.wid_volume)
         self.full_layout.addWidget(self.wid_display)
+        self.full_layout.addWidget(self.wid_save_options)
 
         self.setLayout(self.full_layout)
         self.refresh_visible()
