@@ -63,7 +63,6 @@ class StackSaver(Thread):
         i_received = 0
         self.i_in_chunk = 0
         self.i_chunk = 0
-        # FIXME: 1024 x 1024 is only for 2x2 binning. Extract info from camera param Queue
         self.current_data = np.empty(
             (self.save_parameters.n_t, 1, *self.save_parameters.frame_shape),
             dtype=self.dtype

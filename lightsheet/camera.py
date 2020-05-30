@@ -111,6 +111,10 @@ class CameraProcess(Thread):
             self.parameters.run_mode = CameraProcessState.EXTERNAL_TRIGGER
             self.external_trigger_mode_event.clear()
 
+        if self.internal_trigger_mode_event.is_set():
+            self.parameters.run_mode = CameraProcessState.INTERNAL_TRIGGER
+            self.internal_trigger_mode_event.clear()
+
         if self.parameters.run_mode == CameraProcessState.FREE:
             self.camera.setPropertyValue("trigger_source", 1)
             self.camera.startAcquisition()
@@ -124,7 +128,7 @@ class CameraProcess(Thread):
             self.camera.stopAcquisition()
 
         if self.parameters.run_mode == CameraProcessState.EXTERNAL_TRIGGER:
-            # self.camera.setPropertyValue("trigger_source", 2)
+            self.camera.setPropertyValue("trigger_source", 2)
             while not self.stop_event.is_set():
                 self.camera.startAcquisition()
                 while not self.stop_event.is_set():
@@ -136,11 +140,9 @@ class CameraProcess(Thread):
                             self.image_queue.put(frame)
                 self.camera.stopAcquisition()
 
-        # FIXME: Internal trigger for plane mode
+        # FIXME: Internal trigger for plane mode or synchronize, somehow, with Stytra
         if self.parameters.run_mode == CameraProcessState.INTERNAL_TRIGGER:
-            # self.camera.setPropertyValue("trigger_source", 3)
-            # self.camera.setPropertyValue("trigger_mode", 6)
-            # self.camera.setPropertyValue("trigger_times", 500)
+            self.camera.setPropertyValue("trigger_source", 1)
             while not self.stop_event.is_set():
                 self.camera.startAcquisition()
                 while not self.stop_event.is_set():
