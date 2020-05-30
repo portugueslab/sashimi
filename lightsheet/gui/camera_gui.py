@@ -50,7 +50,7 @@ class ViewingWidget(QWidget):
         self.stack_progress.setFormat("Plane %v of %m")
 
         # TODO: This button is only for debugging purposes. It will be triggered with start of adquisition
-        self.save_button = QPushButton("Start saving")
+        self.save_button = QPushButton("Save frames")
 
         self.layout().addWidget(self.image_viewer)
         self.layout().addWidget(self.wid_display_settings)
@@ -59,6 +59,8 @@ class ViewingWidget(QWidget):
         self.layout().addWidget(self.save_button)
         self.is_first_image = True
         self.refresh_display = True
+
+        self.update_camera_info()
 
         # ms for display clock. Currently 5 fps replay
         self.refresh_timer.start(int(1000 / self.display_settings.replay_rate))
@@ -104,4 +106,4 @@ class ViewingWidget(QWidget):
 
     def update_camera_info(self):
         camera_info = self.state.get_camera_settings()
-        self.lbl_camera_info.setText("Internal frame rate: " + str(camera_info))
+        self.lbl_camera_info.setText("Internal frame rate: " + str(round(camera_info, 2)))

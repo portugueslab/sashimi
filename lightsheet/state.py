@@ -265,6 +265,7 @@ class State:
         self.single_plane_settings.sig_param_changed.connect(self.send_settings)
         self.volume_setting.sig_param_changed.connect(self.send_settings)
         self.camera_properties.sig_param_changed.connect(self.send_settings)
+        self.save_settings.sig_param_changed.connect(self.send_save_params)
 
         self.camera.start()
         self.scanner.start()

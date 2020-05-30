@@ -945,7 +945,7 @@ if (__name__ == "__main__"):
         print("camera 0 model:", hcam.getModelInfo(0))
 
         # List support properties.
-        if False:
+        if True:
             print("Supported properties:")
             props = hcam.getProperties()
             for i, id_name in enumerate(sorted(props.keys())):
@@ -1041,7 +1041,7 @@ if (__name__ == "__main__"):
                 contFrames = hcam.getFrames()
                 hcam.stopAcquisition()
 
-        if True:
+        if False:
             from colorama import Fore, Style
             test_size = 100
             hcam.setPropertyValue("exposure_time", 0.004)
@@ -1086,7 +1086,6 @@ if (__name__ == "__main__"):
             print("Apollo found {} frames out of {} requested".format(received_frames, test_size))
             assert test_size == received_frames
             print(Fore.YELLOW + "\n Test completed. Success")
-
 
 #
 # The MIT License

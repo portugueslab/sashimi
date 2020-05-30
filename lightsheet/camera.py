@@ -102,7 +102,6 @@ class CameraProcess(Thread):
         self.camera.setACQMode("run_till_abort")
         self.camera.setSubArrayMode()
 
-    # TODO: Figure out how to trigger each camera frame
     def run(self):
         self.set_Hamamatsu_running_mode()
         self.Hamamatsu_send_receive_properties()
@@ -120,35 +119,16 @@ class CameraProcess(Thread):
         if self.parameters.run_mode == CameraProcessState.TRIGGERED:
             # TODO: Figure out how to trigger each camera frame
             while not self.stop_event.is_set():
-                pass
+                self.camera.setPropertyValue("trigger_source", 2)
+                self.camera.startAcquisition()
+                while not self.stop_event.is_set():
+                    self.update_settings()
+                    frames = self.camera.getFrames()
+                    if frames is not None:
+                        for frame in frames:
+                            frame = np.reshape(frame.getData(), self.parameters.image_params.frame_shape)
+                            self.image_queue.put(frame)
+                self.camera.stopAcquisition()
 
     def close_camera(self):
         self.camera.shutdown()
-
-
-# TODO: Get rid of this once camera works properly
-
-class FakeCameraProcess(Thread):
-    '''
-    This class is for debugging (e.g. when camera is not connected to computer)
-    '''
-
-    def __init__(self, camera_id=0, max_queue_size=500):
-        super().__init__()
-        self.stop_event = Event()
-        self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
-        self.camera_id = camera_id
-        self.camera = None
-        self.info = None
-        self.parameters = CamParameters
-
-    def initialize_camera(self):
-        pass
-
-    def run(self):
-        self.initialize_camera()
-        if self.parameters.run_mode == CameraProcessState.FREE:
-            while not self.stop_event.is_set():
-                time.sleep(0.1)
-                frame = np.random.random(size=(500, 500))
-                self.image_queue.put(frame)
