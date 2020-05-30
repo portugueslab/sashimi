@@ -33,7 +33,7 @@ class SaveSettings(ParametrizedQt):
         # FIXME #2: Can we put commas to separate orders of magnitude please?
         self.n_frames = Param(1000, (1, 10000000))
         self.chunk_size = Param(1000, (1, 10000))
-        self.save_dir = Param(r"C:/Users/portugueslab/desktop/temporal_saving", gui=False)
+        self.save_dir = Param(r"F:/Vilim", gui=False)
 
 
 class ScanningSettings(ParametrizedQt):
@@ -285,6 +285,7 @@ class State:
             self.experiment_state = ExperimentPrepareState.NO_CAMERA
         elif self.experiment_state == ExperimentPrepareState.NO_CAMERA:
             self.experiment_state = ExperimentPrepareState.START
+            self.saver.saving_signal.set()
         self.send_settings()
 
     def send_settings(self):
@@ -298,10 +299,12 @@ class State:
             params = convert_single_plane_params(
                 self.planar_setting, self.single_plane_settings, self.calibration
             )
+            self.camera.internal_trigger_mode_event.set()
         elif self.status.scanning_state == "Volume":
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
+            self.camera.external_trigger_mode_event.set()
 
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
@@ -313,8 +316,12 @@ class State:
 
     def wrap_up(self):
         self.scanner.stop_event.set()
-        self.scanner.join(timeout=10)
+        self.camera.stop_event.set()
+        self.saver.stop_signal.set()
         self.laser.close()
+        self.camera.close_camera()
+        self.scanner.join(timeout=10)
+        self.saver.join(timeout=10)
         # FIXME: Not sure this will properly terminate the camera process
         # self.camera.terminate()
         self.camera.join(timeout=10)

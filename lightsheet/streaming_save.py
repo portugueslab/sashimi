@@ -13,7 +13,7 @@ from threading import Thread
 
 @dataclass
 class SavingParameters:
-    output_dir: Path = r"C:/Users/portugueslab/desktop/temporal_saving"
+    output_dir: Path = r"F:/Vilim"
     n_t: int = 1000
     chunk_size: int = 1000
 
