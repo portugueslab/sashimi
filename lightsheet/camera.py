@@ -95,7 +95,7 @@ class CameraProcess(Thread):
             int(self.camera.getPropertyValue("subarray_vsize")[0] / self.camera.getPropertyValue("binning")[0])
         )
 
-        self.reverse_parameter_queue.put(self.parameters.image_params.internal_frame_rate)
+        self.reverse_parameter_queue.put(self.parameters)
 
     def set_Hamamatsu_running_mode(self):
         # TODO: figure out what is this
@@ -124,7 +124,7 @@ class CameraProcess(Thread):
             self.camera.stopAcquisition()
 
         if self.parameters.run_mode == CameraProcessState.EXTERNAL_TRIGGER:
-            self.camera.setPropertyValue("trigger_source", 2)
+            # self.camera.setPropertyValue("trigger_source", 2)
             while not self.stop_event.is_set():
                 self.camera.startAcquisition()
                 while not self.stop_event.is_set():

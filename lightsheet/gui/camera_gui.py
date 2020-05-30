@@ -105,5 +105,6 @@ class ViewingWidget(QWidget):
         self.refresh_display = True
 
     def update_camera_info(self):
-        camera_info = self.state.get_camera_settings()
-        self.lbl_camera_info.setText("Internal frame rate: " + str(round(camera_info, 2)))
+        current_camera_settings = self.state.get_camera_settings()
+        frame_rate = current_camera_settings.image_params.internal_frame_rate
+        self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))

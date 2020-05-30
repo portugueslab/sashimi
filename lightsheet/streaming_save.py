@@ -16,6 +16,7 @@ class SavingParameters:
     output_dir: Path = r"F:/Vilim"
     n_t: int = 1000
     chunk_size: int = 1000
+    frame_shape: tuple = (1024, 1024)
 
 
 @dataclass
@@ -38,6 +39,7 @@ class StackSaver(Thread):
         self.i_chunk = 0
         self.current_data = None
         self.saved_status_queue = Queue()
+        self.frame_shape = None
         self.dtype = np.uint16
 
     def run(self):
@@ -63,7 +65,7 @@ class StackSaver(Thread):
         self.i_chunk = 0
         # FIXME: 1024 x 1024 is only for 2x2 binning. Extract info from camera param Queue
         self.current_data = np.empty(
-            (self.save_parameters.n_t, 1, 1024, 1024),
+            (self.save_parameters.n_t, 1, *self.save_parameters.frame_shape),
             dtype=self.dtype
         )
         n_total = self.save_parameters.n_t
@@ -72,11 +74,11 @@ class StackSaver(Thread):
                 and self.saving_signal.is_set()
                 and not self.stop_signal.is_set()
         ):
-            #self.receive_save_parameters()
-            #try:
-            #    n_total = self.save_parameters.n_t
-            #except Empty:
-            #    pass
+            self.receive_save_parameters()
+            try:
+                n_total = self.save_parameters.n_t
+            except Empty:
+                pass
             try:
                 frame = self.save_queue.get(timeout=0.01)
                 self.fill_dataset(frame)

@@ -247,8 +247,8 @@ class State:
         )
 
         self.save_status: Optional[SavingStatus] = None
+        self.camera_settings = None
 
-        # self.save_queue = ArrayQueue(max_mbytes=800)
         self.saver = StackSaver(self.stop_event)
 
         self.single_plane_settings = SinglePlaneSettings()
@@ -342,8 +342,8 @@ class State:
 
     def get_camera_settings(self):
         try:
-            camera_settings = self.camera.reverse_parameter_queue.get()
-            return camera_settings
+            self.camera_settings = self.camera.reverse_parameter_queue.get()
+            return self.camera_settings
         except Empty:
             return None
 
@@ -352,7 +352,8 @@ class State:
             SavingParameters(
                 output_dir=Path(self.save_settings.save_dir),
                 n_t=int(self.save_settings.n_frames),
-                chunk_size=int(self.save_settings.chunk_size)
+                chunk_size=int(self.save_settings.chunk_size),
+                frame_shape=self.camera_settings.image_params.frame_shape
             )
         )
 
