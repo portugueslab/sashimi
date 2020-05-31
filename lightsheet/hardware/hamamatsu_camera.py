@@ -945,7 +945,7 @@ if (__name__ == "__main__"):
         print("camera 0 model:", hcam.getModelInfo(0))
 
         # List support properties.
-        if True:
+        if False:
             print("Supported properties:")
             props = hcam.getProperties()
             for i, id_name in enumerate(sorted(props.keys())):
@@ -1086,6 +1086,15 @@ if (__name__ == "__main__"):
             print("Apollo found {} frames out of {} requested".format(received_frames, test_size))
             assert test_size == received_frames
             print(Fore.YELLOW + "\n Test completed. Success")
+
+        if True:
+            size = 2044
+            size = size - (size % 4)
+            print(size)
+
+            hcam.setPropertyValue("subarray_hsize", size)
+            print("Subarray horizontal size: ", hcam.getPropertyValue("subarray_hsize")[0])
+
 
 #
 # The MIT License

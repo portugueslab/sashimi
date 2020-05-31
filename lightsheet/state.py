@@ -91,6 +91,12 @@ class CameraSettings(ParametrizedQt):
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
+        self.subarray_hsize = Param(2048, (4, 2048), gui=False)
+        self.subarray_vsize = Param(2048, (4, 2048), gui=False)
+        self.subarray_hpos = Param(0, (0, 2044), gui=False)
+        self.subarray_vpos = Param(0, (0, 2044), gui=False)
+        self.image_height = Param(2048, (4, 2048), gui=False)
+        self.image_width = Param(2048, (4, 2048), gui=False)
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -172,12 +178,19 @@ def convert_camera_params(camera_parameters: CameraSettings):
     # set binning 2x2 by default
     else:
         binning = 2
+    print(camera_parameters.subarray_hpos)
+    print(camera_parameters.subarray_vsize)
     return CamParameters(
         image_params=HamamatsuCameraParams(
             exposure_time=camera_parameters.exposure,
-            binning=binning
+            binning=binning,
+            subarray_hpos=camera_parameters.subarray_hpos,
+            subarray_vpos=camera_parameters.subarray_vpos,
+            subarray_vsize=camera_parameters.subarray_vsize,
+            subarray_hsize=camera_parameters.subarray_hsize
         )
     )
+
 
 
 def convert_single_plane_params(
@@ -247,7 +260,7 @@ class State:
         )
 
         self.save_status: Optional[SavingStatus] = None
-        self.camera_settings = None
+        self.current_camera_settings = None
 
         self.saver = StackSaver(self.stop_event)
 
@@ -322,7 +335,6 @@ class State:
         self.camera.close_camera()
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)
-        # FIXME: Not sure this will properly terminate the camera process
         # self.camera.terminate()
         self.camera.join(timeout=10)
 
@@ -342,8 +354,8 @@ class State:
 
     def get_camera_settings(self):
         try:
-            self.camera_settings = self.camera.reverse_parameter_queue.get()
-            return self.camera_settings
+            self.current_camera_settings = self.camera.reverse_parameter_queue.get()
+            return self.current_camera_settings
         except Empty:
             return None
 
@@ -353,7 +365,7 @@ class State:
                 output_dir=Path(self.save_settings.save_dir),
                 n_t=int(self.save_settings.n_frames),
                 chunk_size=int(self.save_settings.chunk_size),
-                frame_shape=self.camera_settings.image_params.frame_shape
+                frame_shape=self.current_camera_settings.image_params.frame_shape
             )
         )
 

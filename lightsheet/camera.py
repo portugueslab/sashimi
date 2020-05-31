@@ -74,7 +74,25 @@ class CameraProcess(Thread):
                 self.stop_event.set()
                 self.stop_event.clear()
 
-            # TODO: Add subarray updates
+            if (self.parameters.image_params.subarray_vsize != self.parameters.image_params.subarray_vsize) or\
+                    (self.parameters.image_params.subarray_hsize != self.parameters.image_params.subarray_hsize) or\
+                    (self.parameters.image_params.subarray_vpos != self.parameters.image_params.subarray_vpos) or\
+                    (self.parameters.image_params.subarray_hpos != self.parameters.image_params.subarray_hpos):
+
+                self.stop_event.set()
+
+                # this is because SDK functions in C# for these variables go on steps of 4
+
+                self.parameters.image_params.subarray_vsize =\
+                    self.parameters.image_params.subarray_vsize -(self.parameters.image_params.subarray_vsize % 4)
+                self.parameters.image_params.subarray_hsize = \
+                    self.parameters.image_params.subarray_hsize - (self.parameters.image_params.subarray_hsize % 4)
+                self.parameters.image_params.subarray_vpos = \
+                    self.parameters.image_params.subarray_vpos - (self.parameters.image_params.subarray_vpos % 4)
+                self.parameters.image_params.subarray_hpos = \
+                    self.parameters.image_params.subarray_hpos - (self.parameters.image_params.subarray_hpos % 4)
+
+                self.stop_event.clear()
 
             self.parameters = new_params
             self.run()
@@ -84,10 +102,11 @@ class CameraProcess(Thread):
 
     def Hamamatsu_send_receive_properties(self):
         self.camera.setPropertyValue('binning', self.parameters.image_params.binning)
-        self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
-        self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
-        self.camera.setPropertyValue('subarray_vsize', self.parameters.image_params.subarray_vsize)
         self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.image_params.exposure_time)
+        self.camera.setPropertyValue('subarray_vsize', self.parameters.image_params.subarray_vsize)
+        self.camera.setPropertyValue('subarray_hsize', self.parameters.image_params.subarray_hsize)
+        self.camera.setPropertyValue('subarray_vpos', self.parameters.image_params.subarray_vpos)
+        self.camera.setPropertyValue('subarray_hpos', self.parameters.image_params.subarray_hpos)
 
         self.parameters.image_params.internal_frame_rate = self.camera.getPropertyValue("internal_frame_rate")[0]
         self.parameters.image_params.frame_shape = (

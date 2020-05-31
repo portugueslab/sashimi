@@ -8,13 +8,14 @@ from PyQt5.QtWidgets import (
     QLabel,
     QProgressBar
 )
-import pyqtgraph
+import pyqtgraph as pg
 import qdarkstyle
 from lightparam.gui import ParameterGui
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
 import time
 import numpy as np
+from pyqtgraph.graphicsItems.ROI import ROI
 
 
 class DisplaySettings(ParametrizedQt):
@@ -33,9 +34,11 @@ class ViewingWidget(QWidget):
         self.refresh_timer = QTimer()
         self.setLayout(QVBoxLayout())
 
-        self.image_viewer = pyqtgraph.ImageView()
-        self.roi = self.image_viewer.getRoiPlot()
-        # self.roi = pyqtgraph.ROI(pos=(50, 50), size=(10, 10))
+        self.image_viewer = pg.ImageView()
+        self.roi = ROI(pos=[100, 100], size=500)
+        self.roi.addScaleHandle([1, 1], [0, 0])
+        self.image_viewer.view.addItem(self.roi)
+
         self.image_viewer.ui.roiBtn.hide()
         self.image_viewer.ui.menuBtn.hide()
 
@@ -46,20 +49,20 @@ class ViewingWidget(QWidget):
 
         self.lbl_camera_info = QLabel()
 
-        #TODO: Add to layout
         self.stack_progress = QProgressBar()
         self.chunk_progress = QProgressBar()
         self.chunk_progress.setFormat("Chunk %v of %m")
-        self.stack_progress.setFormat("Frame %v of %m")
+        self.stack_progress.setFormat("Frame in chunk %v of %m")
 
         self.set_roi_button = QPushButton("set ROI")
+        self.set_full_size_frame_button = QPushButton("set full size frame")
 
         self.layout().addWidget(self.image_viewer)
-        self.layout().addWidget(self.roi)
         self.layout().addWidget(self.wid_display_settings)
         self.layout().addWidget(self.wid_camera_properties)
         self.layout().addWidget(self.lbl_camera_info)
         self.layout().addWidget(self.set_roi_button)
+        self.layout().addWidget(self.set_full_size_frame_button)
         self.layout().addWidget(self.chunk_progress)
         self.layout().addWidget(self.stack_progress)
 
@@ -77,6 +80,7 @@ class ViewingWidget(QWidget):
         self.timer.timeout.connect(self.refresh)
         self.refresh_timer.timeout.connect(self.display_new_image)
         self.set_roi_button.clicked.connect(self.set_roi)
+        self.set_full_size_frame_button.clicked.connect(self.set_full_size_frame)
         self.display_settings.sig_param_changed.connect(self.update_replay_rate)
         self.state.camera_properties.sig_param_changed.connect(self.update_camera_info)
         # FIXME: Display frame rate correctly in volumetric scan
@@ -87,7 +91,19 @@ class ViewingWidget(QWidget):
 
     # TODO: Give functionality to ROI selection i.e extract position and size, pass to Camera process/thread bia Queue
     def set_roi(self):
-        pass
+        roi_size = self.roi.size()
+        roi_pos = self.roi.pos()
+        self.state.camera_properties.subarray_hsize = roi_size.x()
+        self.state.camera_properties.subarray_vsize = roi_size.y()
+        self.state.camera_properties.subarray_hpos = roi_pos.x()
+        self.state.camera_properties.subarray_vpos = roi_pos.y()
+
+    # TODO: Give functionality to full_size_frame button
+    def set_full_size_frame(self):
+        self.state.camera_properties.subarray_hsize = self.state.camera_properties.image_height
+        self.state.camera_properties.subarray_vsize = self.state.camera_properties.image_width
+        self.state.camera_properties.subarray_hpos = 0
+        self.state.camera_properties.subarray_vpos = 0
 
     def refresh(self) -> None:
         current_image = self.state.get_image()
