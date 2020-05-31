@@ -98,8 +98,6 @@ class CameraProcess(Thread):
         self.reverse_parameter_queue.put(self.parameters)
 
     def set_Hamamatsu_running_mode(self):
-        # TODO: figure out what is this
-        self.camera.setPropertyValue("defect_correct_mode", 1)
         self.camera.setACQMode("run_till_abort")
         self.camera.setSubArrayMode()
 
