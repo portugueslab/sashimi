@@ -91,13 +91,7 @@ class CameraSettings(ParametrizedQt):
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
-        self.subarray_hsize = Param(2048, (4, 2048), gui=False)
-        self.subarray_vsize = Param(2048, (4, 2048), gui=False)
-        self.subarray_hpos = Param(0, (0, 2044), gui=False)
-        self.subarray_vpos = Param(0, (0, 2044), gui=False)
-        self.image_height = Param(2048, (4, 2048), gui=False)
-        self.image_width = Param(2048, (4, 2048), gui=False)
-
+        self.subarray = Param([2048, 2048, 0, 0])  # order of params here is [hsize, vsize, hpos, vpos]
 
 def convert_planar_params(planar: PlanarScanningSettings):
     return PlanarScanning(
@@ -178,16 +172,22 @@ def convert_camera_params(camera_parameters: CameraSettings):
     # set binning 2x2 by default
     else:
         binning = 2
-    print(camera_parameters.subarray_hpos)
-    print(camera_parameters.subarray_vsize)
+
+    subarray_params_list = camera_parameters.subarray
+
+    hsize = subarray_params_list[0]
+    vsize = subarray_params_list[1]
+    hpos = subarray_params_list[2]
+    vpos = subarray_params_list[3]
+
     return CamParameters(
         image_params=HamamatsuCameraParams(
             exposure_time=camera_parameters.exposure,
             binning=binning,
-            subarray_hpos=camera_parameters.subarray_hpos,
-            subarray_vpos=camera_parameters.subarray_vpos,
-            subarray_vsize=camera_parameters.subarray_vsize,
-            subarray_hsize=camera_parameters.subarray_hsize
+            subarray_hpos=hpos,
+            subarray_vpos=vpos,
+            subarray_vsize=vsize,
+            subarray_hsize=hsize
         )
     )
 

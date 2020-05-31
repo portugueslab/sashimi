@@ -16,6 +16,7 @@ from lightparam import Param
 import time
 import numpy as np
 from pyqtgraph.graphicsItems.ROI import ROI
+from lightsheet.state import CameraSettings
 
 
 class DisplaySettings(ParametrizedQt):
@@ -33,6 +34,7 @@ class ViewingWidget(QWidget):
         self.timer = timer
         self.refresh_timer = QTimer()
         self.setLayout(QVBoxLayout())
+        self.current_camera_settings: CameraSettings
 
         self.image_viewer = pg.ImageView()
         self.roi = ROI(pos=[100, 100], size=500)
@@ -89,21 +91,18 @@ class ViewingWidget(QWidget):
     def update_replay_rate(self):
         self.refresh_timer.setInterval(int(1000 / self.display_settings.replay_rate))
 
-    # TODO: Give functionality to ROI selection i.e extract position and size, pass to Camera process/thread bia Queue
     def set_roi(self):
         roi_size = self.roi.size()
         roi_pos = self.roi.pos()
-        self.state.camera_properties.subarray_hsize = roi_size.x()
-        self.state.camera_properties.subarray_vsize = roi_size.y()
-        self.state.camera_properties.subarray_hpos = roi_pos.x()
-        self.state.camera_properties.subarray_vpos = roi_pos.y()
+        self.state.camera_properties.subarray = [roi_size.x(), roi_size.y(), roi_pos.x(), roi_pos.y()]
 
-    # TODO: Give functionality to full_size_frame button
     def set_full_size_frame(self):
-        self.state.camera_properties.subarray_hsize = self.state.camera_properties.image_height
-        self.state.camera_properties.subarray_vsize = self.state.camera_properties.image_width
-        self.state.camera_properties.subarray_hpos = 0
-        self.state.camera_properties.subarray_vpos = 0
+        self.state.camera_properties.subarray = [
+            self.current_camera_settings.image_params.image_width,
+            self.current_camera_settings.image_params.image_height,
+            0,
+            0
+        ]
 
     def refresh(self) -> None:
         current_image = self.state.get_image()
@@ -134,6 +133,6 @@ class ViewingWidget(QWidget):
         self.refresh_display = True
 
     def update_camera_info(self):
-        current_camera_settings = self.state.get_camera_settings()
-        frame_rate = current_camera_settings.image_params.internal_frame_rate
+        self.current_camera_settings = self.state.get_camera_settings()
+        frame_rate = self.current_camera_settings.image_params.internal_frame_rate
         self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))
