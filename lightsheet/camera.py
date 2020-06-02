@@ -45,9 +45,9 @@ def get_last_parameters(parameter_queue, timeout=0.001): # put in thecolonel
 
 
 class CameraProcess(Process):
-    def __init__(self, camera_id=0, max_queue_size=1000):
+    def __init__(self, stop_event, camera_id=0, max_queue_size=500):
         super().__init__()
-        self.stop_event = Event() # the camera process needs to receive the stop_event form the state, so it knows when the program is ovver.
+        self.stop_event = stop_event
         self.external_trigger_mode_event = Event() # these are exclusive, no need for two events
         self.internal_trigger_mode_event = Event()
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
@@ -126,6 +126,9 @@ class CameraProcess(Process):
         self.set_Hamamatsu_running_mode()
         self.hamamatsu_send_receive_properties()
 
+        while not self.stop_event.is_set():
+
+        # TODO: These 2 events are a mess. Better by queues
         if self.external_trigger_mode_event.is_set():
             self.parameters.run_mode = CameraProcessState.EXTERNAL_TRIGGER
             self.external_trigger_mode_event.clear()

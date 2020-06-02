@@ -243,7 +243,7 @@ class State:
         self.status = ScanningSettings()
 
         self.laser = CoboltLaser()
-        self.camera = CameraProcess()
+        self.camera = CameraProcess(self.stop_event)
 
         self.camera_properties = CameraSettings()
         self.save_settings = SaveSettings()

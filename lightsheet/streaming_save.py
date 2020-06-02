@@ -28,7 +28,7 @@ class SavingStatus:
 
 
 class StackSaver(Process):
-    def __init__(self, stop_signal, max_queue_size=1000):
+    def __init__(self, stop_signal, max_queue_size=500):
         super().__init__()
         self.stop_signal = stop_signal
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
