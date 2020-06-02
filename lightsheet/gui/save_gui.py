@@ -18,10 +18,10 @@ class SaveWidget(QWidget):
         self.timer = timer
         self.setLayout(QVBoxLayout())
 
-        self.save_options_gui = ParameterGui(state.save_settings)
+        self.wid_save_options = ParameterGui(state.save_settings)
         self.save_location_button = QPushButton()
 
-        self.layout().addWidget(self.save_options_gui)
+        self.layout().addWidget(self.wid_save_options)
         self.layout().addWidget(self.save_location_button)
 
         self.set_locationbutton()

@@ -87,5 +87,6 @@ class ContainerWidget(QWidget):
         self.wid_scan.wid_planar.refresh_widgets()
         self.wid_calib.refresh_widgets()
         self.wid_volume.wid_volume.refresh_widgets()
-        # Uncomment the line below if having trouble updating camera parameters (?)
-        # self.wid_display.wid_camera_properties.refresh_widgets()
+        self.wid_display.wid_camera_properties.refresh_widgets()
+        self.wid_display.wid_display_settings.refresh_widgets()
+        self.wid_save_options.wid_save_options.refresh_widgets()

@@ -84,7 +84,6 @@ class ZRecordingSettings(ParametrizedQt):
         self.n_skip_end = Param(0, (0, 20))
 
 
-# TODO: Add subarray parameters
 class CameraSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
@@ -269,7 +268,7 @@ class State:
         self.calibration = Calibration()
 
         for setting in [self.planar_setting, self.laser_settings, self.single_plane_settings, self.volume_setting,
-                        self.calibration, self.calibration.z_settings, self.camera_properties]:
+                        self.calibration, self.calibration.z_settings, self.camera_properties, self.save_settings]:
             self.settings_tree.add(setting)
 
         self.status.sig_param_changed.connect(self.send_settings)
@@ -285,6 +284,7 @@ class State:
         self.stytra_comm.start()
         self.saver.start()
 
+    # FIXME: Restoring the tree correctly updates camera settings but it is not reflected in GUI controllers
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
             self.settings_tree.deserialize(json.load(f))
