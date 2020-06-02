@@ -1,9 +1,11 @@
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
     QWidget,
     QRadioButton,
     QHBoxLayout,
     QVBoxLayout,
+    QMainWindow,
+    QDockWidget
 )
 from lightsheet.gui.calibration_gui import CalibrationWidget
 from lightsheet.gui.scanning_gui import PlanarScanningWidget, VolumeScanningWidget, SinglePlaneScanningWidget
@@ -17,26 +19,29 @@ from lightparam.gui import ParameterGui
 import qdarkstyle
 
 
-class ContainerWidget(QWidget):
+class DockedWidget(QDockWidget):
+    def __init__(self, widget=None, layout=None, title=""):
+        super().__init__()
+        if widget is not None:
+            self.setWidget(widget)
+        else:
+            self.setWidget(QWidget())
+            self.widget().setLayout(layout)
+        if title != "":
+            self.setWindowTitle(title)
+
+
+class ContainerWidget(QMainWindow):
     def __init__(self, st: State):
         super().__init__()
         self.st = st
         self.timer = QTimer()
 
-        self.full_layout = QVBoxLayout()
         self.wid_status = ParameterGui(st.status)
         self.st.status.sig_param_changed.connect(self.refresh_visible)
 
-        self.left_layout = QVBoxLayout()
-
         self.wid_save_settings = SavingSettingsWidget(st)
-        self.left_layout.addWidget(self.wid_save_settings)
         self.wid_save_settings.sig_params_loaded.connect(self.refresh_param_values)
-
-        self.full_layout.addWidget(self.wid_status)
-
-        self.control_layout = QHBoxLayout()
-        self.full_layout.addLayout(self.control_layout)
 
         self.wid_display = ViewingWidget(st, self.timer)
         self.wid_save_options = SaveWidget(st, self.timer)
@@ -46,16 +51,41 @@ class ContainerWidget(QWidget):
         self.wid_single_plane = SinglePlaneScanningWidget(st)
         self.wid_volume = VolumeScanningWidget(st, self.timer)
 
-        self.left_layout.addWidget(self.wid_laser)
-        self.control_layout.addLayout(self.left_layout)
-        self.control_layout.addWidget(self.wid_scan)
-        self.control_layout.addWidget(self.wid_calib)
-        self.control_layout.addWidget(self.wid_single_plane)
-        self.control_layout.addWidget(self.wid_volume)
-        self.full_layout.addWidget(self.wid_display)
-        self.full_layout.addWidget(self.wid_save_options)
+        self.setCentralWidget(self.wid_display)
 
-        self.setLayout(self.full_layout)
+        self.addDockWidget(
+            Qt.LeftDockWidgetArea,
+            DockedWidget(widget=self.wid_status, title="Mode")
+        )
+        self.addDockWidget(
+            Qt.LeftDockWidgetArea,
+            DockedWidget(widget=self.wid_laser, title="Laser control")
+        )
+        self.addDockWidget(
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_scan, title="Scanning settings")
+        )
+        self.addDockWidget(
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_calib, title="Calibration")
+        )
+        self.addDockWidget(
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_single_plane, title="Single plane")
+        )
+        self.addDockWidget(
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_volume, title="Volume")
+        )
+        self.addDockWidget(
+            Qt.LeftDockWidgetArea,
+            DockedWidget(widget=self.wid_save_options, title="Saving options")
+        )
+        self.addDockWidget(
+            Qt.LeftDockWidgetArea,
+            DockedWidget(widget=self.wid_save_settings, title="Parameter tree")
+        )
+
         self.refresh_visible()
         self.timer.start()
 

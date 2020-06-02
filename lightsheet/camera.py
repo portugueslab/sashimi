@@ -94,6 +94,10 @@ class CameraProcess(Thread):
 
                 self.stop_event.clear()
 
+            if self.external_trigger_mode_event.is_set():
+                self.stop_event.set()
+                self.stop_event.clear()
+
             self.parameters = new_params
             self.run()
 

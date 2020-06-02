@@ -26,7 +26,7 @@ class SavingStatus:
     i_chunk: int = 0
 
 
-class StackSaver(Thread):
+class StackSaver(Process):
     def __init__(self, stop_signal, max_queue_size=1000):
         super().__init__()
         self.stop_signal = stop_signal
