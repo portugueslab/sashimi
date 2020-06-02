@@ -1,8 +1,7 @@
 from multiprocessing import Process, Queue, Event
 from enum import Enum
-from threading import Thread
 from arrayqueues.shared_arrays import ArrayQueue
-from lightsheet.hardware.hamamatsu_camera import *
+from lightsheet.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
 from dataclasses import dataclass, fields
 import time
 import numpy as np
@@ -35,7 +34,7 @@ class CamParameters:
     image_params: HamamatsuCameraParams = HamamatsuCameraParams()
 
 
-def get_last_parameters(parameter_queue, timeout=0.001):
+def get_last_parameters(parameter_queue, timeout=0.001): # put in thecolonel
     params = None
     while True:
         try:
@@ -45,20 +44,18 @@ def get_last_parameters(parameter_queue, timeout=0.001):
     return params
 
 
-class CameraProcess(Thread):
+class CameraProcess(Process):
     def __init__(self, camera_id=0, max_queue_size=1000):
         super().__init__()
-        self.stop_event = Event()
-        self.external_trigger_mode_event = Event()
+        self.stop_event = Event() # the camera process needs to receive the stop_event form the state, so it knows when the program is ovver.
+        self.external_trigger_mode_event = Event() # these are exclusive, no need for two events
         self.internal_trigger_mode_event = Event()
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.parameter_queue = Queue()
         self.reverse_parameter_queue = Queue()
         self.camera_id = camera_id
         self.camera = None
-        self.parameters = CamParameters
-
-        self.initialize_camera()
+        self.parameters = CamParameters()
 
     def update_settings(self):
         new_params: CamParameters
@@ -81,10 +78,8 @@ class CameraProcess(Thread):
 
                 self.stop_event.set()
 
-                # this is because SDK functions in C# for these variables go on steps of 4
-
-                new_params.image_params.subarray_vsize =\
-                    new_params.image_params.subarray_vsize -(new_params.image_params.subarray_vsize % 4)
+                # quantizing the ROI dims in multiples of 4, TODO loop
+                new_params.image_params.subarray_vsize = (new_params.image_params.subarray_vsize // 4) * 4
                 new_params.image_params.subarray_hsize = \
                     new_params.image_params.subarray_hsize - (new_params.image_params.subarray_hsize % 4)
                 new_params.image_params.subarray_vpos = \
@@ -99,12 +94,12 @@ class CameraProcess(Thread):
                 self.stop_event.clear()
 
             self.parameters = new_params
-            self.run()
 
-    def initialize_camera(self):
-        self.camera = HamamatsuCameraMR(camera_id=self.camera_id)
+    def initialize_camera(self, dcam):
+        self.camera = HamamatsuCameraMR(dcam, camera_id=self.camera_id)
 
-    def Hamamatsu_send_receive_properties(self):
+    def hamamatsu_send_receive_properties(self):
+        # this can be simplified by making the API nice
         self.camera.setPropertyValue('binning', self.parameters.image_params.binning)
         self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.image_params.exposure_time)
         self.camera.setPropertyValue('subarray_vpos', self.parameters.image_params.subarray_vpos)
@@ -125,8 +120,11 @@ class CameraProcess(Thread):
         self.camera.setSubArrayMode()
 
     def run(self):
+        self.dcam_api = DCamAPI()
+
+        self.initialize_camera(self.dcam_api.dcam)
         self.set_Hamamatsu_running_mode()
-        self.Hamamatsu_send_receive_properties()
+        self.hamamatsu_send_receive_properties()
 
         if self.external_trigger_mode_event.is_set():
             self.parameters.run_mode = CameraProcessState.EXTERNAL_TRIGGER

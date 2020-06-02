@@ -15,6 +15,7 @@ from threading import Thread
 class SavingParameters:
     output_dir: Path = r"F:/Vilim"
     n_t: int = 1000
+    n_planes: int = 1
     chunk_size: int = 1000
     frame_shape: tuple = (1024, 1024)
 
@@ -37,6 +38,7 @@ class StackSaver(Process):
         self.save_parameters: Optional[SavingParameters] = SavingParameters()
         self.i_in_chunk = 0
         self.i_chunk = 0
+        self.i_plane = 0
         self.current_data = None
         self.saved_status_queue = Queue()
         self.frame_shape = None
@@ -63,8 +65,9 @@ class StackSaver(Process):
         i_received = 0
         self.i_in_chunk = 0
         self.i_chunk = 0
+        self.i_plane = 0
         self.current_data = np.empty(
-            (self.save_parameters.n_t, 1, *self.save_parameters.frame_shape),
+            (self.save_parameters.n_t, self.save_parameters.n_planes, *self.save_parameters.frame_shape),
             dtype=self.dtype
         )
         n_total = self.save_parameters.n_t
@@ -98,8 +101,13 @@ class StackSaver(Process):
         return frame
 
     def fill_dataset(self, frame):
-        self.current_data[self.i_in_chunk, 0, :] = self.cast(frame)
-        self.i_in_chunk += 1
+        self.current_data[self.i_in_chunk, self.i_plane, :, :] = self.cast(frame) # why is there a zero
+
+        self.i_plane += 1
+        if self.i_plane >= self.save_parameters.n_planes:
+            self.i_plane = 0
+            self.i_in_chunk += 1
+
         self.saved_status_queue.put(
             SavingStatus(
                 target_params=self.save_parameters,

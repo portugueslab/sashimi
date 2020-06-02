@@ -29,10 +29,8 @@ class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "experiment_settings"
-        # FIXME: One has to specify upper limit of Param so we set a ridiculously high number
-        # FIXME #2: Can we put commas to separate orders of magnitude please?
-        self.n_frames = Param(1000, (1, 10000000))
-        self.chunk_size = Param(1000, (1, 10000))
+        self.n_frames = Param(1000, (1, 10_000_000))
+        self.chunk_size = Param(1000, (1, 10_000))
         self.save_dir = Param(r"F:/Vilim", gui=False)
 
 
@@ -91,6 +89,7 @@ class CameraSettings(ParametrizedQt):
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
         self.subarray = Param([2048, 2048, 0, 0])  # order of params here is [hsize, vsize, hpos, vpos]
+
 
 def convert_planar_params(planar: PlanarScanningSettings):
     return PlanarScanning(
@@ -335,7 +334,6 @@ class State:
         self.camera.close_camera()
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)
-        # self.camera.terminate()
         self.camera.join(timeout=10)
 
     def get_image(self):
