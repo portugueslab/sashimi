@@ -795,6 +795,7 @@ class HamamatsuCamera(object):
         """
         Close down the connection to the camera.
         """
+        self.stopAcquisition()
         self.checkStatus(self.dcam.dcamwait_close(self.wait_handle),
                          "dcamwait_close")
         self.checkStatus(self.dcam.dcamdev_close(self.camera_handle),

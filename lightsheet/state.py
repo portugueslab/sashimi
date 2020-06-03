@@ -1,5 +1,4 @@
 import numpy as np
-from arrayqueues.shared_arrays import ArrayQueue
 from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
@@ -20,9 +19,11 @@ from lightsheet.scanning import (
 from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
 import json
-from lightsheet.camera import CameraProcess, CamParameters, HamamatsuCameraParams
+from lightsheet.camera import CameraProcess, CamParameters
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
+from multiprocessing import Queue
+from copy import copy
 
 
 class SaveSettings(ParametrizedQt):
@@ -158,35 +159,21 @@ class Calibration(ParametrizedQt):
 
         return True
 
-
-# TODO: Add subarray parameters
-def convert_camera_params(camera_parameters: CameraSettings):
-    if camera_parameters.binning == "1x1":
+def convert_camera_params(camera_settings: CameraSettings):
+    if camera_settings.binning == "1x1":
         binning = 1
-    elif camera_parameters.binning == "2x2":
+    elif camera_settings.binning == "2x2":
         binning = 2
-    elif camera_parameters.binning == "4x4":
+    elif camera_settings.binning == "4x4":
         binning = 4
     # set binning 2x2 by default
     else:
         binning = 2
 
-    subarray_params_list = camera_parameters.subarray
-
-    hsize = subarray_params_list[0]
-    vsize = subarray_params_list[1]
-    hpos = subarray_params_list[2]
-    vpos = subarray_params_list[3]
-
     return CamParameters(
-        image_params=HamamatsuCameraParams(
-            exposure_time=camera_parameters.exposure,
-            binning=binning,
-            subarray_hpos=hpos,
-            subarray_vpos=vpos,
-            subarray_vsize=vsize,
-            subarray_hsize=hsize
-        )
+        exposure_time=camera_settings.exposure,
+        binning=binning,
+        subarray=camera_settings.subarray
     )
 
 
@@ -243,9 +230,12 @@ class State:
         self.status = ScanningSettings()
 
         self.laser = CoboltLaser()
-        self.camera = CameraProcess(self.stop_event)
+        self.camera = CameraProcess(
+            experiment_start_event=self.experiment_start_event,
+            stop_event=self.stop_event,
+        )
 
-        self.camera_properties = CameraSettings()
+        self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
 
         self.settings_tree = ParameterTree()
@@ -258,7 +248,7 @@ class State:
         )
 
         self.save_status: Optional[SavingStatus] = None
-        self.current_camera_settings = None
+        self.current_camera_settings = copy(self.camera_settings)
 
         self.saver = StackSaver(self.stop_event)
 
@@ -267,7 +257,7 @@ class State:
         self.calibration = Calibration()
 
         for setting in [self.planar_setting, self.laser_settings, self.single_plane_settings, self.volume_setting,
-                        self.calibration, self.calibration.z_settings, self.camera_properties, self.save_settings]:
+                        self.calibration, self.calibration.z_settings, self.camera_settings, self.save_settings]:
             self.settings_tree.add(setting)
 
         self.status.sig_param_changed.connect(self.send_settings)
@@ -275,7 +265,7 @@ class State:
         self.calibration.z_settings.sig_param_changed.connect(self.send_settings)
         self.single_plane_settings.sig_param_changed.connect(self.send_settings)
         self.volume_setting.sig_param_changed.connect(self.send_settings)
-        self.camera_properties.sig_param_changed.connect(self.send_settings)
+        self.camera_settings.sig_param_changed.connect(self.send_settings)
         self.save_settings.sig_param_changed.connect(self.send_save_params)
 
         self.camera.start()
@@ -311,17 +301,15 @@ class State:
             params = convert_single_plane_params(
                 self.planar_setting, self.single_plane_settings, self.calibration
             )
-            self.camera.internal_trigger_mode_event.set()
         elif self.status.scanning_state == "Volume":
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
-            self.camera.external_trigger_mode_event.set()
 
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
-        camera_params = convert_camera_params(self.camera_properties)
-        self.camera.parameter_queue.put(camera_params)
+        self.camera.duration_queue.put(self.stytra_comm.stytra_data_queue.get(timeout=0.001))
+        self.camera.parameter_queue.put(convert_camera_params(self.camera_settings))
         self.stytra_comm.current_settings_queue.put(params)
         if params.experiment_state == ExperimentPrepareState.START:
             self.experiment_state = ExperimentPrepareState.NORMAL

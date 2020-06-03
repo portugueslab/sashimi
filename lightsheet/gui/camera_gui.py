@@ -46,7 +46,7 @@ class ViewingWidget(QWidget):
 
         self.display_settings = DisplaySettings()
 
-        self.wid_camera_properties = ParameterGui(self.state.camera_properties)
+        self.wid_camera_properties = ParameterGui(self.state.camera_settings)
         self.wid_display_settings = ParameterGui(self.display_settings)
 
         self.lbl_camera_info = QLabel()
@@ -84,7 +84,7 @@ class ViewingWidget(QWidget):
         self.set_roi_button.clicked.connect(self.set_roi)
         self.set_full_size_frame_button.clicked.connect(self.set_full_size_frame)
         self.display_settings.sig_param_changed.connect(self.update_replay_rate)
-        self.state.camera_properties.sig_param_changed.connect(self.update_camera_info)
+        self.state.camera_settings.sig_param_changed.connect(self.update_camera_info)
         # FIXME: Display frame rate correctly in volumetric scan
         self.state.volume_setting.sig_param_changed.connect(self.update_camera_info)
 
@@ -94,10 +94,10 @@ class ViewingWidget(QWidget):
     def set_roi(self):
         roi_size = self.roi.size()
         roi_pos = self.roi.pos()
-        self.state.camera_properties.subarray = [roi_size.x(), roi_size.y(), roi_pos.x(), roi_pos.y()]
+        self.state.camera_settings.subarray = [roi_size.x(), roi_size.y(), roi_pos.x(), roi_pos.y()]
 
     def set_full_size_frame(self):
-        self.state.camera_properties.subarray = [
+        self.state.camera_settings.subarray = [
             self.current_camera_settings.image_params.image_width,
             self.current_camera_settings.image_params.image_height,
             0,
