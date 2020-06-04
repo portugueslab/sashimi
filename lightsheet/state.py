@@ -297,12 +297,14 @@ class State:
         if self.status.scanning_state == "Paused":
             params = ScanParameters(state=ScanningState.PAUSED)
             camera_params.camera_mode = CameraMode.PAUSED
+
         elif self.status.scanning_state == "Calibration":
             params = convert_calibration_params(
                 self.planar_setting, self.calibration.z_settings
             )
             camera_params.trigger_mode = TriggerMode.FREE
             camera_params.camera_mode = CameraMode.PREVIEW
+
         elif self.status.scanning_state == "Planar":
             params = convert_single_plane_params(
                 self.planar_setting, self.single_plane_settings, self.calibration
@@ -310,6 +312,7 @@ class State:
             camera_params.trigger_mode = TriggerMode.FREE
             camera_params.camera_mode = CameraMode.PREVIEW
             camera_params.triggered_frame_rate = self.single_plane_settings.frequency
+
         elif self.status.scanning_state == "Volume":
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration

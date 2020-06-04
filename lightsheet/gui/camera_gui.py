@@ -85,7 +85,6 @@ class ViewingWidget(QWidget):
         self.set_full_size_frame_button.clicked.connect(self.set_full_size_frame)
         self.display_settings.sig_param_changed.connect(self.update_replay_rate)
         self.state.camera_settings.sig_param_changed.connect(self.update_camera_info)
-        # FIXME: Display frame rate correctly in volumetric scan
         self.state.volume_setting.sig_param_changed.connect(self.update_camera_info)
 
     def update_replay_rate(self):
@@ -134,5 +133,12 @@ class ViewingWidget(QWidget):
 
     def update_camera_info(self):
         self.current_camera_settings = self.state.get_camera_settings()
-        frame_rate = self.current_camera_settings.internal_frame_rate
-        self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))
+        if self.state.status.scanning_state == "Paused":
+            self.lbl_camera_info.hide()
+        else:
+            if self.state.status.scanning_state == "Calibration":
+                frame_rate = self.current_camera_settings.internal_frame_rate
+            else:
+                frame_rate = self.current_camera_settings.triggered_frame_rate
+            self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))
+            self.lbl_camera_info.show()
