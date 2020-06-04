@@ -19,7 +19,7 @@ from lightsheet.scanning import (
 from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
 import json
-from lightsheet.camera import CameraProcess, CamParameters
+from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from multiprocessing import Queue
@@ -33,6 +33,7 @@ class SaveSettings(ParametrizedQt):
         self.n_frames = Param(1000, (1, 10_000_000))
         self.chunk_size = Param(1000, (1, 10_000))
         self.save_dir = Param(r"F:/Vilim", gui=False)
+        self.experiment_duration = Param(0, (0, 100_000), gui=False)
 
 
 class ScanningSettings(ParametrizedQt):
@@ -58,7 +59,7 @@ class CalibrationZSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "scanning/z_manual"
-        self.piezo = Param(0.0, (0.0, 400.0), unit="um", gui="slider")
+        self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
         self.lateral = Param(0.0, (-2.0, 2.0), gui="slider")
         self.frontal = Param(0.0, (-2.0, 2.0), gui="slider")
 
@@ -67,8 +68,8 @@ class SinglePlaneSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "scanning/z_single_plane"
-        self.piezo = Param(0.0, (0.0, 400.0), unit="um", gui="slider")
-        self.frequency = Param(1.0, (0.1, 100), unit="Hz")
+        self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
+        self.frequency = Param(1.0, (0.1, 1000), unit="planes/s (Hz)")
 
 
 class ZRecordingSettings(ParametrizedQt):
@@ -76,7 +77,7 @@ class ZRecordingSettings(ParametrizedQt):
         super().__init__(self)
         self.name = "scanning/volumetric_recording"
         self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
-        self.frequency = Param(1.0, (0.1, 100), unit="Hz")
+        self.frequency = Param(1.0, (0.1, 100), unit="volumes/s (Hz)")
         self.n_planes = Param(10, (1, 100))
         self.i_freeze = Param(-1, (-1, 1000))
         self.n_skip_start = Param(0, (0, 20))
@@ -89,7 +90,7 @@ class CameraSettings(ParametrizedQt):
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
-        self.subarray = Param([2048, 2048, 0, 0])  # order of params here is [hsize, vsize, hpos, vpos]
+        self.subarray = Param([0, 0, 2048, 2048])  # order of params here is [hpos, vpos, hsize, vsize,]
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -159,7 +160,8 @@ class Calibration(ParametrizedQt):
 
         return True
 
-def convert_camera_params(camera_settings: CameraSettings):
+
+def convert_camera_params(camera_settings: CameraSettings, scan_settings):
     if camera_settings.binning == "1x1":
         binning = 1
     elif camera_settings.binning == "2x2":
@@ -176,10 +178,10 @@ def convert_camera_params(camera_settings: CameraSettings):
         subarray=camera_settings.subarray
     )
 
-
-
 def convert_single_plane_params(
-        planar: PlanarScanningSettings, single_plane_setting: SinglePlaneSettings, calibration: Calibration
+        planar: PlanarScanningSettings,
+        single_plane_setting: SinglePlaneSettings,
+        calibration: Calibration
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -273,7 +275,6 @@ class State:
         self.stytra_comm.start()
         self.saver.start()
 
-    # FIXME: Restoring the tree correctly updates camera settings but it is not reflected in GUI controllers
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
             self.settings_tree.deserialize(json.load(f))
@@ -291,38 +292,50 @@ class State:
         self.send_settings()
 
     def send_settings(self):
+        camera_params = convert_camera_params(self.camera_settings)
+
         if self.status.scanning_state == "Paused":
             params = ScanParameters(state=ScanningState.PAUSED)
+            camera_params.camera_mode = CameraMode.PAUSED
         elif self.status.scanning_state == "Calibration":
             params = convert_calibration_params(
                 self.planar_setting, self.calibration.z_settings
             )
+            camera_params.trigger_mode = TriggerMode.FREE
+            camera_params.camera_mode = CameraMode.PREVIEW
         elif self.status.scanning_state == "Planar":
             params = convert_single_plane_params(
                 self.planar_setting, self.single_plane_settings, self.calibration
             )
+            camera_params.trigger_mode = TriggerMode.FREE
+            camera_params.camera_mode = CameraMode.PREVIEW
+            camera_params.triggered_frame_rate = self.single_plane_settings.frequency
         elif self.status.scanning_state == "Volume":
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
+            camera_params.trigger_mode = TriggerMode.EXTERNAL_TRIGGER
+            camera_params.camera_mode = CameraMode.PREVIEW
+            camera_params.internal_frame_rate = self.volume_setting.frequency
 
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
-        self.camera.duration_queue.put(self.stytra_comm.stytra_data_queue.get(timeout=0.001))
-        self.camera.parameter_queue.put(convert_camera_params(self.camera_settings))
+        self.save_settings.experiment_duration = self.stytra_comm.stytra_data_queue.get(timeout=0.001)
+        self.camera.duration_queue.put(self.save_settings.experiment_duration)
+
+        self.camera.parameter_queue.put(camera_params)
         self.stytra_comm.current_settings_queue.put(params)
         if params.experiment_state == ExperimentPrepareState.START:
             self.experiment_state = ExperimentPrepareState.NORMAL
 
     def wrap_up(self):
-        self.scanner.stop_event.set()
-        self.camera.stop_event.set()
-        self.saver.stop_signal.set()
+        self.stop_event.set()
         self.laser.close()
         self.camera.close_camera()
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
+        self.stytra_comm.join(timeout=10)
 
     def get_image(self):
         try:

@@ -52,8 +52,8 @@ class VolumeScanningWidget(QWidget):
         timer.timeout.connect(self.updateBtnText)
 
     def updateBtnText(self):
-        self.btn_start.setText(STATE_TEXTS[self.state.experiment_state])
-        if self.state.experiment_state == ExperimentPrepareState.NORMAL:
+        self.btn_start.setText(STATE_TEXTS[self.state.camera_mode])
+        if self.state.camera_mode == ExperimentPrepareState.NORMAL:
             self.btn_start.setChecked(False)
         else:
             self.btn_start.setChecked(True)

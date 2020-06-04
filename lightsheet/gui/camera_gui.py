@@ -92,16 +92,16 @@ class ViewingWidget(QWidget):
         self.refresh_timer.setInterval(int(1000 / self.display_settings.replay_rate))
 
     def set_roi(self):
-        roi_size = self.roi.size()
         roi_pos = self.roi.pos()
-        self.state.camera_settings.subarray = [roi_size.x(), roi_size.y(), roi_pos.x(), roi_pos.y()]
+        roi_size = self.roi.size()
+        self.state.camera_settings.subarray = [roi_pos.x(), roi_pos.y(), roi_size.x(), roi_size.y()]
 
     def set_full_size_frame(self):
         self.state.camera_settings.subarray = [
-            self.current_camera_settings.image_params.image_width,
-            self.current_camera_settings.image_params.image_height,
             0,
-            0
+            0,
+            self.current_camera_settings.image_params.image_width,
+            self.current_camera_settings.image_params.image_height
         ]
 
     def refresh(self) -> None:
@@ -134,5 +134,5 @@ class ViewingWidget(QWidget):
 
     def update_camera_info(self):
         self.current_camera_settings = self.state.get_camera_settings()
-        frame_rate = self.current_camera_settings.image_params.internal_frame_rate
+        frame_rate = self.current_camera_settings.internal_frame_rate
         self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))

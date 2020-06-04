@@ -10,7 +10,7 @@ from queue import Empty
 from math import ceil
 
 
-class ExperimentState(Enum):
+class CameraMode(Enum):
     PREVIEW = 1
     EXPERIMENT_RUNNING = 2
     PAUSED = 3
@@ -24,17 +24,16 @@ class TriggerMode(Enum):
 @dataclass
 class CamParameters:
     exposure_time: float = 60
-    subarray = [2048, 2048, 0, 0]  # order of params here is [hsize, vsize, hpos, vpos]
     binning: int = 2
+    subarray: tuple = (0, 0, 2048, 2048)  # order of params here is [hpos, vpos, hsize, vsize,]
     image_height: int = 2048
     image_width: int = 2048
     frame_shape: tuple = (2048, 2048)
     internal_frame_rate: float = None
-    # TODO: Get actual frame rate from state via Queue()
     triggered_frame_rate: int = 60
     trigger_mode: TriggerMode = TriggerMode.FREE
-    experiment_state: ExperimentState = ExperimentState.PREVIEW
-    n_frames: int = 1000
+    camera_mode: CameraMode = CameraMode.PREVIEW
+    n_frames_duration: int = 0
 
 
 class CameraProcess(Process):
@@ -64,8 +63,8 @@ class CameraProcess(Process):
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
                 if self.new_parameters != self.parameters and (
-                        self.parameters.experiment_state != ExperimentState.EXPERIMENT_RUNNING or
-                        self.new_parameters.experiment_state == ExperimentState.PREVIEW
+                        self.parameters.camera_mode != CameraMode.EXPERIMENT_RUNNING or
+                        self.new_parameters.camera_mode == CameraMode.PREVIEW
                 ):
                     self.camera.stopAcquisition()
                     break
@@ -76,14 +75,14 @@ class CameraProcess(Process):
         '''
         It only runs when the experiment is in prepared state awaiting for experiment trigger signal
         '''
-        if self.parameters.experiment_state == ExperimentState.EXPERIMENT_RUNNING:
+        if self.parameters.camera_mode == CameraMode.EXPERIMENT_RUNNING:
             while not self.experiment_start_event.is_set():
                 sleep(0.00001)
 
     def calculate_duration(self):
         try:
             duration = self.duration_queue.get(timeout=0.0001)
-            self.parameters.n_frames = (
+            self.parameters.n_frames_duration = (
                     int(ceil(duration * self.parameters.triggered_frame_rate)) + 1
             )
         except Empty:
@@ -99,7 +98,7 @@ class CameraProcess(Process):
             self.update_reverse_parameter_queue()
             self.calculate_duration()
             self.apply_parameters()
-            if self.parameters.experiment_state == ExperimentState.PAUSED:
+            if self.parameters.camera_mode == CameraMode.PAUSED:
                 self.pause_loop()
             else:
                 self.camera.startAcquisition()
@@ -119,13 +118,15 @@ class CameraProcess(Process):
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
                 if self.new_parameters != self.parameters and (
-                        self.parameters.experiment_state != ExperimentState.EXPERIMENT_RUNNING or
-                        self.new_parameters.experiment_state == ExperimentState.PREVIEW
+                        self.parameters.camera_mode != CameraMode.EXPERIMENT_RUNNING or
+                        self.new_parameters.camera_mode == CameraMode.PREVIEW
                 ):
                     self.camera.stopAcquisition()
                     break
             except Empty:
                 pass
+
+            self.calculate_duration()
 
     def apply_parameters(self):
         subarray = self.parameters.subarray
@@ -134,10 +135,10 @@ class CameraProcess(Process):
         # this can be simplified by making the API nice
         self.camera.setPropertyValue('binning', self.parameters.binning)
         self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.exposure_time)
-        self.camera.setPropertyValue('subarray_vpos', subarray[2])
-        self.camera.setPropertyValue('subarray_hpos', subarray[3])
-        self.camera.setPropertyValue('subarray_vsize', subarray[0])
-        self.camera.setPropertyValue('subarray_hsize', subarray[1])
+        self.camera.setPropertyValue('subarray_vpos', subarray[0])
+        self.camera.setPropertyValue('subarray_hpos', subarray[1])
+        self.camera.setPropertyValue('subarray_vsize', subarray[2])
+        self.camera.setPropertyValue('subarray_hsize', subarray[3])
         self.camera.setPropertyValue('trigger_source', self.parameters.trigger_mode.value)
 
         # This is not sent to the camera but has to be updated with camera info directly (because of multiples of 4)

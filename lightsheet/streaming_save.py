@@ -28,9 +28,9 @@ class SavingStatus:
 
 
 class StackSaver(Process):
-    def __init__(self, stop_signal, max_queue_size=500):
+    def __init__(self, stop_event, max_queue_size=500):
         super().__init__()
-        self.stop_signal = stop_signal
+        self.stop_event = stop_event
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.saving_signal = Event()
         self.saving = False
@@ -45,7 +45,7 @@ class StackSaver(Process):
         self.dtype = np.uint16
 
     def run(self):
-        while not self.stop_signal.is_set():
+        while not self.stop_event.is_set():
             if self.saving_signal.is_set() and self.save_parameters is not None:
                 self.save_loop()
             else:
@@ -74,7 +74,7 @@ class StackSaver(Process):
         while (
                 i_received < n_total
                 and self.saving_signal.is_set()
-                and not self.stop_signal.is_set()
+                and not self.stop_event.is_set()
         ):
             self.receive_save_parameters()
             try:
