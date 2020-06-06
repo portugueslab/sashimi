@@ -90,7 +90,7 @@ class CameraSettings(ParametrizedQt):
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
-        self.subarray = Param([0, 0, 2048, 2048])  # order of params here is [hpos, vpos, hsize, vsize,]
+        self.subarray = Param((0, 0, 2048, 2048))  # order of params here is [hpos, vpos, hsize, vsize,]
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -172,11 +172,23 @@ def convert_camera_params(camera_settings: CameraSettings):
     else:
         binning = 2
 
+    print(camera_settings.subarray)
+
     return CamParameters(
         exposure_time=camera_settings.exposure,
         binning=binning,
         subarray=camera_settings.subarray
     )
+
+
+def convert_save_params(save_settings: SaveSettings, current_camera_settings):
+    return SavingParameters(
+        output_dir=Path(save_settings.save_dir),
+        n_t=int(save_settings.n_frames),
+        chunk_size=int(save_settings.chunk_size),
+        frame_shape=current_camera_settings.frame_shape
+    )
+
 
 def convert_single_plane_params(
         planar: PlanarScanningSettings,
@@ -224,6 +236,7 @@ class State:
     def __init__(self):
         self.stop_event = Event()
         self.experiment_start_event = Event()
+        self.reverse_camera_queue = Queue()
         self.experiment_state = ExperimentPrepareState.NORMAL
         self.scanner = Scanner(
             stop_event=self.stop_event,
@@ -235,6 +248,7 @@ class State:
         self.camera = CameraProcess(
             experiment_start_event=self.experiment_start_event,
             stop_event=self.stop_event,
+            reverse_parameter_queue=self.reverse_camera_queue
         )
 
         self.camera_settings = CameraSettings()
@@ -250,7 +264,6 @@ class State:
         )
 
         self.save_status: Optional[SavingStatus] = None
-        self.current_camera_settings = self.camera_settings
 
         self.saver = StackSaver(self.stop_event)
 
@@ -274,6 +287,8 @@ class State:
         self.scanner.start()
         self.stytra_comm.start()
         self.saver.start()
+
+        self.send_settings()
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -324,13 +339,19 @@ class State:
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
 
+        self.camera.parameter_queue.put(camera_params)
+
         try:
             self.save_settings.experiment_duration = self.stytra_comm.stytra_data_queue.get(timeout=0.001)
         except Empty:
             pass
         self.camera.duration_queue.put(self.save_settings.experiment_duration)
 
-        self.camera.parameter_queue.put(camera_params)
+        try:
+            self.current_camera_settings = self.reverse_camera_queue.get(timeout=0.005)
+            print("state/save: "+str(self.current_camera_settings))
+        except Empty:
+            pass
         self.stytra_comm.current_settings_queue.put(params)
         if params.experiment_state == ExperimentPrepareState.START:
             self.experiment_state = ExperimentPrepareState.NORMAL
@@ -357,27 +378,12 @@ class State:
         except Empty:
             return None
 
-    def get_camera_settings(self):
-        try:
-            self.current_camera_settings = self.camera.reverse_parameter_queue.get(timeout=0.001)
-            return self.current_camera_settings
-        except Empty:
-            return None
-
     def send_save_params(self):
-        self.saver.saving_parameter_queue.put(
-            SavingParameters(
-                output_dir=Path(self.save_settings.save_dir),
-                n_t=int(self.save_settings.n_frames),
-                chunk_size=int(self.save_settings.chunk_size),
-                frame_shape=self.current_camera_settings.frame_shape
-            )
-        )
+        save_params = convert_save_params(self.save_settings, self.current_camera_settings)
+        self.saver.saving_parameter_queue.put(save_params)
 
     def get_save_status(self) -> Optional[SavingStatus]:
         try:
-            self.save_status = self.saver.saved_status_queue.get(timeout=0.001)
-            return self.save_status
+            return self.saver.saved_status_queue.get(timeout=0.001)
         except Empty:
-            pass
-        return None
+            return None

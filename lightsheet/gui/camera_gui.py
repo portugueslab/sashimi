@@ -132,11 +132,11 @@ class ViewingWidget(QWidget):
         self.refresh_display = True
 
     def update_camera_info(self):
-        self.current_camera_settings = self.state.get_camera_settings()
+        self.current_camera_settings = self.state.current_camera_settings
         if self.state.status.scanning_state == "Paused":
             self.lbl_camera_info.hide()
         else:
-            if self.state.status.scanning_state == "Calibration":
+            if self.state.status.scanning_state == "Calibration" and self.current_camera_settings is not None:
                 frame_rate = self.current_camera_settings.internal_frame_rate
             else:
                 frame_rate = self.current_camera_settings.triggered_frame_rate
