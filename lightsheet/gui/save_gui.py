@@ -54,19 +54,16 @@ class SaveWidget(QWidget):
             self.save_location_button.setStyleSheet("")
 
     def auto_calculate_required_n_frames(self):
-        if self.state.save_settings.experiment_duration != 0 and (
-                self.state.status.scanning_state == "Planar" or
-                self.state.status.scanning_state == "Volume"
-        ):
+        if self.state.save_settings.experiment_duration != 0:
             self.current_camera_settings = self.state.get_camera_settings()
             self.state.save_settings.n_frames = self.current_camera_settings.n_frames_duration
+            print("hello world")
             self.auto_button_label.setText("")
         else:
             self.auto_button_label.setText(
                 "\n".join(
                     [
                         "Unable to calculate number of frames for the experiment.",
-                        "This feature will only work in Planar or Volume modes.",
                         "Check that Stytra is running"
                      ]
                 )

@@ -94,18 +94,22 @@ class ContainerWidget(QMainWindow):
             self.wid_calib.hide()
             self.wid_single_plane.hide()
             self.wid_volume.show()
+            self.wid_save_options.show()
         elif self.st.status.scanning_state == "Calibration":
             self.wid_calib.show()
             self.wid_single_plane.hide()
             self.wid_volume.hide()
+            self.wid_save_options.hide()
         elif self.st.status.scanning_state == "Paused":
             self.wid_calib.hide()
             self.wid_single_plane.hide()
             self.wid_volume.hide()
+            self.wid_save_options.hide()
         elif self.st.status.scanning_state == "Planar":
             self.wid_calib.hide()
             self.wid_single_plane.show()
             self.wid_volume.hide()
+            self.wid_save_options.show()
 
     def closeEvent(self, a0) -> None:
         self.st.wrap_up()

@@ -8,7 +8,6 @@ import numpy as np
 import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
-from threading import Thread
 
 
 @dataclass
@@ -101,7 +100,7 @@ class StackSaver(Process):
         return frame
 
     def fill_dataset(self, frame):
-        self.current_data[self.i_in_chunk, self.i_plane, :, :] = self.cast(frame) # why is there a zero
+        self.current_data[self.i_in_chunk, self.i_plane, :, :] = self.cast(frame)  # why is there a zero
 
         self.i_plane += 1
         if self.i_plane >= self.save_parameters.n_planes:

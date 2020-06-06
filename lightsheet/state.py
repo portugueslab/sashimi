@@ -30,8 +30,8 @@ class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "experiment_settings"
-        self.n_frames = Param(1000, (1, 10_000_000))
-        self.chunk_size = Param(1000, (1, 10_000))
+        self.n_frames = Param(10_000, (1, 10_000_000))
+        self.chunk_size = Param(2_000, (1, 10_000))
         self.save_dir = Param(r"F:/Vilim", gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
 
@@ -161,7 +161,7 @@ class Calibration(ParametrizedQt):
         return True
 
 
-def convert_camera_params(camera_settings: CameraSettings, scan_settings):
+def convert_camera_params(camera_settings: CameraSettings):
     if camera_settings.binning == "1x1":
         binning = 1
     elif camera_settings.binning == "2x2":
@@ -250,7 +250,7 @@ class State:
         )
 
         self.save_status: Optional[SavingStatus] = None
-        self.current_camera_settings = copy(self.camera_settings)
+        self.current_camera_settings = self.camera_settings
 
         self.saver = StackSaver(self.stop_event)
 
@@ -323,7 +323,11 @@ class State:
 
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
-        self.save_settings.experiment_duration = self.stytra_comm.stytra_data_queue.get(timeout=0.001)
+
+        try:
+            self.save_settings.experiment_duration = self.stytra_comm.stytra_data_queue.get(timeout=0.001)
+        except Empty:
+            pass
         self.camera.duration_queue.put(self.save_settings.experiment_duration)
 
         self.camera.parameter_queue.put(camera_params)
@@ -334,7 +338,6 @@ class State:
     def wrap_up(self):
         self.stop_event.set()
         self.laser.close()
-        self.camera.close_camera()
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
@@ -356,7 +359,7 @@ class State:
 
     def get_camera_settings(self):
         try:
-            self.current_camera_settings = self.camera.reverse_parameter_queue.get()
+            self.current_camera_settings = self.camera.reverse_parameter_queue.get(timeout=0.001)
             return self.current_camera_settings
         except Empty:
             return None
@@ -367,7 +370,7 @@ class State:
                 output_dir=Path(self.save_settings.save_dir),
                 n_t=int(self.save_settings.n_frames),
                 chunk_size=int(self.save_settings.chunk_size),
-                frame_shape=self.current_camera_settings.image_params.frame_shape
+                frame_shape=self.current_camera_settings.frame_shape
             )
         )
 

@@ -28,11 +28,11 @@ class CamParameters:
     subarray: tuple = (0, 0, 2048, 2048)  # order of params here is [hpos, vpos, hsize, vsize,]
     image_height: int = 2048
     image_width: int = 2048
-    frame_shape: tuple = (2048, 2048)
+    frame_shape: tuple = (1024, 1024)
     internal_frame_rate: float = None
     triggered_frame_rate: int = 60
     trigger_mode: TriggerMode = TriggerMode.FREE
-    camera_mode: CameraMode = CameraMode.PREVIEW
+    camera_mode: CameraMode = CameraMode.PAUSED
     n_frames_duration: int = 0
 
 
@@ -52,11 +52,11 @@ class CameraProcess(Process):
         self.frame_duration = None
 
     def initialize_camera(self):
+        self.dcam_api = DCamAPI()
+        self.camera = HamamatsuCameraMR(self.dcam_api.dcam, camera_id=self.camera_id)
+
         self.camera.setACQMode("run_till_abort")
         self.camera.setSubArrayMode()
-
-        self.dcam_api = DCamAPI()
-        self.camera = HamamatsuCameraMR(self.dcam_api, camera_id=self.camera_id)
 
     def pause_loop(self):
         while not self.stop_event.is_set():
@@ -91,6 +91,7 @@ class CameraProcess(Process):
     def run(self):
         self.initialize_camera()
         self.run_camera()
+        self.camera.shutdown()
 
     def run_camera(self):
         while not self.stop_event.is_set():
@@ -143,8 +144,8 @@ class CameraProcess(Process):
 
         # This is not sent to the camera but has to be updated with camera info directly (because of multiples of 4)
         self.parameters.frame_shape = (
-            self.camera.getPropertyValue('subarray_hsize') // self.parameters.binning,
-            self.camera.getPropertyValue('subarray_vsize') // self.parameters.binning
+            self.camera.getPropertyValue('subarray_hsize')[0] // self.parameters.binning,
+            self.camera.getPropertyValue('subarray_vsize')[0] // self.parameters.binning
         )
 
     def update_reverse_parameter_queue(self):
