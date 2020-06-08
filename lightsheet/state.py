@@ -22,15 +22,15 @@ import json
 from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
-from multiprocessing import Queue
-from copy import copy
+import time
+from math import ceil
 
 
 class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "experiment_settings"
-        self.n_frames = Param(10_000, (1, 10_000_000))
+        self.n_frames = Param(10_000, (1, 10_000_000), gui=False)
         self.chunk_size = Param(2_000, (1, 10_000))
         self.save_dir = Param(r"F:/Vilim", gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
@@ -181,12 +181,12 @@ def convert_camera_params(camera_settings: CameraSettings):
     )
 
 
-def convert_save_params(save_settings: SaveSettings, current_camera_settings):
+def convert_save_params(save_settings: SaveSettings, frame_shape):
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
         n_t=int(save_settings.n_frames),
         chunk_size=int(save_settings.chunk_size),
-        frame_shape=current_camera_settings.frame_shape
+        frame_shape=frame_shape
     )
 
 
@@ -236,8 +236,7 @@ class State:
     def __init__(self):
         self.stop_event = Event()
         self.experiment_start_event = Event()
-        self.reverse_camera_queue = Queue()
-        self.experiment_state = ExperimentPrepareState.NORMAL
+        self.experiment_state = ExperimentPrepareState.PREVIEW
         self.scanner = Scanner(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
@@ -247,8 +246,7 @@ class State:
         self.laser = CoboltLaser()
         self.camera = CameraProcess(
             experiment_start_event=self.experiment_start_event,
-            stop_event=self.stop_event,
-            reverse_parameter_queue=self.reverse_camera_queue
+            stop_event=self.stop_event
         )
 
         self.camera_settings = CameraSettings()
@@ -281,13 +279,14 @@ class State:
         self.single_plane_settings.sig_param_changed.connect(self.send_settings)
         self.volume_setting.sig_param_changed.connect(self.send_settings)
         self.camera_settings.sig_param_changed.connect(self.send_settings)
-        self.save_settings.sig_param_changed.connect(self.send_save_params)
+        self.save_settings.sig_param_changed.connect(self.send_settings)
 
         self.camera.start()
         self.scanner.start()
         self.stytra_comm.start()
         self.saver.start()
 
+        self.current_camera_status = CamParameters()
         self.send_settings()
 
     def restore_tree(self, restore_file):
@@ -299,12 +298,48 @@ class State:
             json.dump(self.settings_tree.serialize(), f)
 
     def toggle_experiment_state(self):
-        if self.experiment_state == ExperimentPrepareState.NORMAL:
-            self.experiment_state = ExperimentPrepareState.NO_CAMERA
-        elif self.experiment_state == ExperimentPrepareState.NO_CAMERA:
-            self.experiment_state = ExperimentPrepareState.START
-            self.saver.saving_signal.set()
+        if self.experiment_state == ExperimentPrepareState.PREVIEW:
+            self.experiment_state = ExperimentPrepareState.PREPARED
+            self.prepare_experiment()
+
+        elif self.experiment_state == ExperimentPrepareState.PREPARED:
+            self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
+            self.start_experiment()
+
+        elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+            self.experiment_state = ExperimentPrepareState.ABORT
+            self.abort_experiment()
+            self.experiment_state = ExperimentPrepareState.PREVIEW
+
+    # TODO: Move some things here
+    def prepare_experiment(self):
+        pass
+
+    def start_experiment(self):
+        self.experiment_start_event.set()
+        self.calculate_duration()
+        self.saver.saving_signal.set()
+
+    def abort_experiment(self):
+        self.saver.saving_signal.clear()
+        self.experiment_start_event.clear()
         self.send_settings()
+
+    def calculate_duration(self):
+        try:
+            duration = self.stytra_comm.stytra_data_queue.get(timeout=0.001)
+            self.save_settings.experiment_duration = duration
+            if self.status.scanning_state == "Volume":
+                triggered_frame_rate = self.volume_setting.frequency
+            elif self.status.scanning_state == "Planar":
+                triggered_frame_rate = self.single_plane_settings.frequency
+            else:
+                triggered_frame_rate = None
+            if triggered_frame_rate:
+                n_frames_duration = int(ceil(duration * triggered_frame_rate)) + 1
+                self.save_settings.n_frames = n_frames_duration
+        except Empty:
+            pass
 
     def send_settings(self):
         camera_params = convert_camera_params(self.camera_settings)
@@ -336,25 +371,30 @@ class State:
             camera_params.camera_mode = CameraMode.PREVIEW
             camera_params.internal_frame_rate = self.volume_setting.frequency
 
+        if self.experiment_state == ExperimentPrepareState.PREPARED:
+            camera_params.camera_mode = CameraMode.EXPERIMENT_RUNNING
+        if self.experiment_state == ExperimentPrepareState.ABORT:
+            camera_params.camera_mode = CameraMode.ABORT
+
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
-
         self.camera.parameter_queue.put(camera_params)
-
-        try:
-            self.save_settings.experiment_duration = self.stytra_comm.stytra_data_queue.get(timeout=0.001)
-        except Empty:
-            pass
-        self.camera.duration_queue.put(self.save_settings.experiment_duration)
-
-        try:
-            self.current_camera_settings = self.reverse_camera_queue.get(timeout=0.005)
-            print("state/save: "+str(self.current_camera_settings))
-        except Empty:
-            pass
         self.stytra_comm.current_settings_queue.put(params)
-        if params.experiment_state == ExperimentPrepareState.START:
-            self.experiment_state = ExperimentPrepareState.NORMAL
+
+        # TODO: Give time to camera process to get from queue, update hardware and send back. Could be optimised
+        time.sleep(0.1)
+        new_camera_status = self.get_camera_status()
+        if new_camera_status:
+            self.current_camera_status = new_camera_status
+        save_params = convert_save_params(self.save_settings, self.current_camera_status.frame_shape)
+        self.saver.saving_parameter_queue.put(save_params)
+
+    def get_camera_status(self):
+        try:
+            current_camera_status = self.camera.camera_status_queue.get(timeout=0.001)
+            return current_camera_status
+        except Empty:
+            return None
 
     def wrap_up(self):
         self.stop_event.set()
@@ -377,10 +417,6 @@ class State:
             return image
         except Empty:
             return None
-
-    def send_save_params(self):
-        save_params = convert_save_params(self.save_settings, self.current_camera_settings)
-        self.saver.saving_parameter_queue.put(save_params)
 
     def get_save_status(self) -> Optional[SavingStatus]:
         try:

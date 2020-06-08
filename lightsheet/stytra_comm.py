@@ -33,7 +33,6 @@ class StytraCom(Process):
         self.stytra_data_queue = Queue()
 
     def run(self):
-
         while not self.stop_event.is_set():
             while True:
                 try:

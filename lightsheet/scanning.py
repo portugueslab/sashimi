@@ -39,9 +39,10 @@ class ScanningState(Enum):
 
 
 class ExperimentPrepareState(Enum):
-    NORMAL = 1
-    NO_CAMERA = 2
-    START = 3
+    PREVIEW = 1
+    PREPARED = 2
+    EXPERIMENT_STARTED = 3
+    ABORT = 4
 
 
 @dataclass
@@ -92,7 +93,7 @@ class TriggeringParameters:
 @dataclass
 class ScanParameters:
     state: ScanningState = ScanningState.PAUSED
-    experiment_state: ExperimentPrepareState = ExperimentPrepareState.NORMAL
+    experiment_state: ExperimentPrepareState = ExperimentPrepareState.PREVIEW
     z: Union[ZScanning, ZManual, ZSynced] = ZManual()
     xy: PlanarScanning = PlanarScanning()
     triggering: TriggeringParameters = TriggeringParameters()
@@ -276,12 +277,6 @@ class VolumetricScanLoop(ScanLoop):
         n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
         return lcm(n_samples_trigger, super().n_samples_period())
 
-    def check_start(self):
-        super().check_start()
-        if self.parameters.experiment_state == ExperimentPrepareState.START:
-            self.experiment_start_event.set()
-            self.parameters.experiment_state = ExperimentPrepareState.NORMAL
-
     def update_settings(self):
         updated = super().update_settings()
         if not updated:
@@ -313,12 +308,12 @@ class VolumetricScanLoop(ScanLoop):
 
         if (
             self.camera_on
-            and self.parameters.experiment_state == ExperimentPrepareState.NO_CAMERA
+            and self.parameters.experiment_state == ExperimentPrepareState.PREPARED
         ):
             self.camera_on = False
         if (
             not self.camera_on
-            and self.parameters.experiment_state == ExperimentPrepareState.START
+            and self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
         ):
             self.camera_on = True
             self.i_sample = 0  # puts it at the beggining of the cycle

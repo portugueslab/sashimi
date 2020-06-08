@@ -1,20 +1,19 @@
-from multiprocessing import Process, Queue, Event
+from multiprocessing import Process, Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
 from lightsheet.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from time import sleep
 import numpy as np
 from copy import copy
 from queue import Empty
-from math import ceil
-import time
 
 
 class CameraMode(Enum):
     PREVIEW = 1
     EXPERIMENT_RUNNING = 2
     PAUSED = 3
+    ABORT = 4
 
 
 class TriggerMode(Enum):
@@ -34,26 +33,24 @@ class CamParameters:
     triggered_frame_rate: int = 60
     trigger_mode: TriggerMode = TriggerMode.FREE
     camera_mode: CameraMode = CameraMode.PAUSED
-    n_frames_duration: int = 1
 
 
 class CameraProcess(Process):
-    def __init__(self, experiment_start_event, stop_event, reverse_parameter_queue, camera_id=0, max_queue_size=500):
+    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=500):
         super().__init__()
         self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.parameter_queue = Queue()
-        self.duration_queue = Queue()
         self.camera_id = camera_id
         self.camera = None
         self.parameters = CamParameters()
         self.new_parameters = copy(self.parameters)
-        self.frame_duration = None
-        self.reverse_parameter_queue = reverse_parameter_queue
+        self.camera_status_queue = Queue()
 
+    # TODO: Move last two rows to API
     def initialize_camera(self):
-        self.reverse_parameter_queue.put(self.parameters)
+        self.camera_status_queue.put(self.parameters)
         self.dcam_api = DCamAPI()
         self.camera = HamamatsuCameraMR(self.dcam_api.dcam, camera_id=self.camera_id)
 
@@ -64,11 +61,7 @@ class CameraProcess(Process):
         while not self.stop_event.is_set():
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.new_parameters != self.parameters and (
-                        self.parameters.camera_mode != CameraMode.EXPERIMENT_RUNNING or
-                        self.new_parameters.camera_mode == CameraMode.PREVIEW
-                ):
-                    self.camera.stopAcquisition()
+                if self.new_parameters != self.parameters:
                     break
             except Empty:
                 pass
@@ -81,16 +74,6 @@ class CameraProcess(Process):
             while not self.experiment_start_event.is_set():
                 sleep(0.00001)
 
-    def calculate_duration(self):
-        try:
-            duration = self.duration_queue.get(timeout=0.0001)
-            self.parameters.n_frames_duration = (
-                    int(ceil(duration * self.parameters.triggered_frame_rate)) + 1
-            )
-            print("duration"+str(duration))
-        except Empty:
-            pass
-
     def run(self):
         self.initialize_camera()
         self.run_camera()
@@ -100,12 +83,10 @@ class CameraProcess(Process):
         while not self.stop_event.is_set():
             self.parameters = self.new_parameters
             self.apply_parameters()
-            self.reverse_parameter_queue.put(self.parameters)
-            print("Camera: "+str(self.parameters))
+            self.camera_status_queue.put(self.parameters)
             if self.parameters.camera_mode == CameraMode.PAUSED:
                 self.pause_loop()
             else:
-                self.calculate_duration()
                 self.camera.startAcquisition()
                 self.camera_loop()
 
@@ -122,17 +103,15 @@ class CameraProcess(Process):
                     i_acquired += 1
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.new_parameters != self.parameters and (
-                        self.parameters.camera_mode != CameraMode.EXPERIMENT_RUNNING or
-                        self.new_parameters.camera_mode == CameraMode.PREVIEW
-                ):
+                if self.parameters.camera_mode == CameraMode.ABORT or \
+                        (self.new_parameters != self.parameters and
+                         self.parameters.camera_mode != CameraMode.EXPERIMENT_RUNNING):
                     self.camera.stopAcquisition()
                     break
             except Empty:
                 pass
 
-            self.calculate_duration()
-
+    # TODO: Move this to API
     def apply_parameters(self):
         subarray = self.parameters.subarray
         # quantizing the ROI dims in multiples of 4

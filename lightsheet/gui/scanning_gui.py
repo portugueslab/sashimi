@@ -18,9 +18,10 @@ class PlanarScanningWidget(QWidget):
 
 
 STATE_TEXTS = {
-    ExperimentPrepareState.NO_CAMERA: "Start recording",
-    ExperimentPrepareState.NORMAL: "Prepare recording",
-    ExperimentPrepareState.START: "Recording started",
+    ExperimentPrepareState.PREPARED: "Start recording",
+    ExperimentPrepareState.PREVIEW: "Prepare recording",
+    ExperimentPrepareState.EXPERIMENT_STARTED: "Recording started. Press to abort",
+    ExperimentPrepareState.ABORT: "Experiment aborted"
 }
 
 
@@ -53,7 +54,10 @@ class VolumeScanningWidget(QWidget):
 
     def updateBtnText(self):
         self.btn_start.setText(STATE_TEXTS[self.state.experiment_state])
-        if self.state.experiment_state == ExperimentPrepareState.NORMAL:
+        if self.state.experiment_state == ExperimentPrepareState.PREVIEW or \
+                self.state.experiment_state == ExperimentPrepareState.ABORTED:
             self.btn_start.setChecked(False)
-        else:
+        if self.state.experiment_state == ExperimentPrepareState.PREPARED or \
+                self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
             self.btn_start.setChecked(True)
+
