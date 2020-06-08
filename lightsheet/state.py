@@ -369,7 +369,7 @@ class State:
             )
             camera_params.trigger_mode = TriggerMode.EXTERNAL_TRIGGER
             camera_params.camera_mode = CameraMode.PREVIEW
-            camera_params.internal_frame_rate = self.volume_setting.frequency
+            camera_params.triggered_frame_rate = self.volume_setting.frequency
 
         if self.experiment_state == ExperimentPrepareState.PREPARED:
             camera_params.camera_mode = CameraMode.EXPERIMENT_RUNNING
