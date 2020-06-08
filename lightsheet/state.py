@@ -361,7 +361,6 @@ class State:
             )
             camera_params.trigger_mode = TriggerMode.FREE
             camera_params.camera_mode = CameraMode.PREVIEW
-            camera_params.triggered_frame_rate = self.single_plane_settings.frequency
 
         elif self.status.scanning_state == "Volume":
             params = convert_volume_params(
@@ -369,7 +368,6 @@ class State:
             )
             camera_params.trigger_mode = TriggerMode.EXTERNAL_TRIGGER
             camera_params.camera_mode = CameraMode.PREVIEW
-            camera_params.triggered_frame_rate = self.volume_setting.frequency
 
         if self.experiment_state == ExperimentPrepareState.PREPARED:
             camera_params.camera_mode = CameraMode.EXPERIMENT_RUNNING
@@ -381,7 +379,7 @@ class State:
         self.camera.parameter_queue.put(camera_params)
         self.stytra_comm.current_settings_queue.put(params)
 
-        # TODO: Give time to camera process to get from queue, update hardware and send back. Could be optimised
+        # TODO: Gives time to camera process to get from queue, update hardware and send back. Could be optimised
         time.sleep(0.1)
         new_camera_status = self.get_camera_status()
         if new_camera_status:
@@ -421,5 +419,11 @@ class State:
     def get_save_status(self) -> Optional[SavingStatus]:
         try:
             return self.saver.saved_status_queue.get(timeout=0.001)
+        except Empty:
+            return None
+
+    def get_triggered_frame_rate(self):
+        try:
+            return self.camera.triggered_frame_rate_queue.get(timeout=0.001)
         except Empty:
             return None

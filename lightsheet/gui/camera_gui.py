@@ -33,6 +33,8 @@ class ViewingWidget(QWidget):
         self.state = state
         self.timer = timer
         self.refresh_timer = QTimer()
+        self.camera_info_timer = QTimer()
+        self.camera_info_timer.setInterval(500)
         self.setLayout(QVBoxLayout())
         self.current_camera_settings: CameraSettings
 
@@ -84,8 +86,8 @@ class ViewingWidget(QWidget):
         self.set_roi_button.clicked.connect(self.set_roi)
         self.set_full_size_frame_button.clicked.connect(self.set_full_size_frame)
         self.display_settings.sig_param_changed.connect(self.update_replay_rate)
-        self.state.camera_settings.sig_param_changed.connect(self.update_camera_info)
-        self.state.volume_setting.sig_param_changed.connect(self.update_camera_info)
+        self.camera_info_timer.timeout.connect(self.update_camera_info())
+
 
     def update_replay_rate(self):
         self.refresh_timer.setInterval(int(1000 / self.display_settings.replay_rate))
@@ -132,12 +134,14 @@ class ViewingWidget(QWidget):
         self.refresh_display = True
 
     def update_camera_info(self):
-        if self.state.status.scanning_state == "Paused":
-            self.lbl_camera_info.hide()
-        else:
-            if self.state.status.scanning_state == "Calibration":
-                frame_rate = self.state.current_camera_status.internal_frame_rate
+        triggered_frame_rate = self.state.get_triggered_frame_rate()
+        if triggered_frame_rate is not None:
+            if self.state.status.scanning_state == "Paused":
+                self.lbl_camera_info.hide()
             else:
-                frame_rate = self.state.current_camera_status.triggered_frame_rate
-            self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))
-            self.lbl_camera_info.show()
+                if self.state.status.scanning_state == "Calibration":
+                    frame_rate = self.state.current_camera_status.internal_frame_rate
+                else:
+                    frame_rate = triggered_frame_rate
+                self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))
+                self.lbl_camera_info.show()
