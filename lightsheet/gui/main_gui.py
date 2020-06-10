@@ -32,7 +32,7 @@ class DockedWidget(QDockWidget):
             self.setWindowTitle(title)
 
 
-class ContainerWidget(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self, st: State):
         super().__init__()
         self.st = st
