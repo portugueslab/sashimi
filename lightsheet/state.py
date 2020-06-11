@@ -34,6 +34,7 @@ class SaveSettings(ParametrizedQt):
         self.chunk_size = Param(2_000, (1, 10_000))
         self.save_dir = Param(r"F:/Vilim", gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
+        self.notification_email = Param("None")
 
 
 class ScanningSettings(ParametrizedQt):
@@ -186,7 +187,8 @@ def convert_save_params(save_settings: SaveSettings, frame_shape):
         output_dir=Path(save_settings.save_dir),
         n_t=int(save_settings.n_frames),
         chunk_size=int(save_settings.chunk_size),
-        frame_shape=frame_shape
+        frame_shape=frame_shape,
+        notification_email=str(save_settings.notification_email)
     )
 
 

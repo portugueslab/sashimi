@@ -8,6 +8,7 @@ import numpy as np
 import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
+import yagmail
 
 
 @dataclass
@@ -17,6 +18,7 @@ class SavingParameters:
     n_planes: int = 1
     chunk_size: int = 1000
     frame_shape: tuple = (1024, 1024)
+    notification_email: str = "None"
 
 
 @dataclass
@@ -89,9 +91,36 @@ class StackSaver(Process):
 
         if self.i_chunk > 0:
             self.finalize_dataset()
+            if self.save_parameters.notification_email != "None":
+                self.send_email_end()
 
         self.saving_signal.clear()
         self.save_parameters = None
+
+    def send_email_end(self):
+        sender_email = "fishgitbot@gmail.com"
+        receiver_email = self.save_parameters.notification_email
+        subject = "Your lightsheet experiment is complete"
+        # TODO: Add the password in the lightsheet computer
+        sender_password = ""
+
+        yag = yagmail.SMTP(user=sender_email, password=sender_password)
+
+        body = [
+            "Hey!",
+            "\n",
+            "Your lightsheet experiment has completed and was a success! Come pick up your little fish",
+            "\n"
+            "Always yours,",
+            "fishgitbot"
+        ]
+
+        yag.send(
+            to=receiver_email,
+            subject=subject,
+            contents=body,
+            attachments=r"icons/main_icon.png"
+        )
 
     def cast(self, frame):
         """
@@ -100,7 +129,7 @@ class StackSaver(Process):
         return frame
 
     def fill_dataset(self, frame):
-        self.current_data[self.i_in_chunk, self.i_plane, :, :] = self.cast(frame)  # why is there a zero
+        self.current_data[self.i_in_chunk, self.i_plane, :, :] = self.cast(frame)
 
         self.i_plane += 1
         if self.i_plane >= self.save_parameters.n_planes:
