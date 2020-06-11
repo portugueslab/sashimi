@@ -1,4 +1,4 @@
-## Fish finding and beam adjustment
+## First things
 
 1.  Turn on the IR light ( 1/3 power), laser (key clockwise), piezo
     (under the anti-vibration table), CMOS camera (on top)
@@ -16,13 +16,15 @@
 5.  If it was not well-centred in embedding, using the camera on the
     behaviour computer, align the dish under the objective and move the
     paper window
+    
+## Calibration mode
 
-6.  Open lightsheet control software. For that, open lightsheet_take_two 
+1.  Open lightsheet control software. For that, open lightsheet_take_two 
     with PyCharm and run ```__init__.py```. The GUI will pop-up after some
     seconds. There are four modes available: Pause, calibration, planar and
     volumetric.
 
-7.  Go to calibration tab to determine the piezo/galvo relation and the 
+2.  Go to calibration tab to determine the piezo/galvo relation and the 
     extent of scanning for both lateral and frontal beams. Turn on the
     laser at a low current (min 23 mA) with a small lateral range
     of the lateral beam (block the frontal) and move the stage in X and Z
@@ -31,11 +33,11 @@
     (i.e. hit something a bit more caudal like the swimming bladder
     which also shows autofluorescence). You can turn off the laser now.
 
-8. with the room lights on, manually focus the objective with objective
+3. with the room lights on, manually focus the objective with objective
     manipulator and find the eyes/silhouette of the fish by moving the stage
     with its X and Y manipulators. Now turn off room lights.
 
-9. Turn on the laser again. Play with the piezo and galvo(s)
+4. Turn on the laser again. Play with the piezo and galvo(s)
     positions until you see the most focused signal. Set lateral and frontal
     beam ranges to that that is inside the FOV but does not burn the eyes.
     If you want to do volumetric imaging continue here, else jump to planar
