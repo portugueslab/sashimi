@@ -1,9 +1,6 @@
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
     QWidget,
-    QRadioButton,
-    QHBoxLayout,
-    QVBoxLayout,
     QMainWindow,
     QDockWidget,
     QTabWidget
@@ -12,12 +9,9 @@ from lightsheet.gui.calibration_gui import CalibrationWidget
 from lightsheet.gui.scanning_gui import PlanarScanningWidget, VolumeScanningWidget, SinglePlaneScanningWidget
 from lightsheet.gui.laser_gui import LaserControlWidget
 from lightsheet.gui.save_settings_gui import SavingSettingsWidget
-from lightsheet.gui.camera_gui import ViewingWidget
+from lightsheet.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
 from lightsheet.gui.save_gui import SaveWidget
 from lightsheet.state import State
-from lightparam import Param
-from lightparam.gui import ParameterGui
-import qdarkstyle
 
 
 class DockedWidget(QDockWidget):
@@ -37,6 +31,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.st = st
         self.timer = QTimer()
+        self.resize(1800, 900)
 
         self.wid_settings_tree = SavingSettingsWidget(st)
         self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
@@ -46,6 +41,7 @@ class MainWindow(QMainWindow):
         self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
+        self.wid_camera_settings = CameraSettingsContainerWidget(st)
 
         self.setCentralWidget(self.wid_display)
 
@@ -62,6 +58,11 @@ class MainWindow(QMainWindow):
         self.addDockWidget(
             Qt.RightDockWidgetArea,
             DockedWidget(widget=self.wid_laser, title="Laser control")
+        )
+
+        self.addDockWidget(
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_camera_settings, title="Camera settings")
         )
 
         self.addDockWidget(
@@ -86,8 +87,8 @@ class MainWindow(QMainWindow):
         self.wid_status.wid_volume.wid_volume.refresh_widgets()
         self.wid_status.wid_calibration.refresh_widgets()
         self.wid_status.wid_single_plane.wid_singleplane.refresh_widgets()
-        self.wid_display.wid_camera_properties.refresh_widgets()
-        self.wid_display.wid_display_settings.refresh_widgets()
+        self.wid_camera_settings.wid_display_settings.refresh_widgets()
+        self.wid_camera_settings.wid_camera_properties.refresh_widgets()
         self.wid_save_options.wid_save_options.refresh_widgets()
 
 
@@ -119,3 +120,4 @@ class StatusWidget(QTabWidget):
 class PausedWidget(QWidget):
     def __init__(self):
         super().__init__()
+
