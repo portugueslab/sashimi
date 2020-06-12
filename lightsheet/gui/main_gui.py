@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
-        self.wid_camera_settings = CameraSettingsContainerWidget(st)
+        self.wid_camera = CameraSettingsContainerWidget(st, self.wid_display.roi)
 
         self.setCentralWidget(self.wid_display)
 
@@ -62,16 +62,16 @@ class MainWindow(QMainWindow):
 
         self.addDockWidget(
             Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_camera_settings, title="Camera settings")
+            DockedWidget(widget=self.wid_camera, title="Camera settings")
         )
 
         self.addDockWidget(
             Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_save_options, title="Saving options")
+            DockedWidget(widget=self.wid_save_options, title="Saving")
         )
         self.addDockWidget(
             Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_settings_tree, title="Settings options")
+            DockedWidget(widget=self.wid_settings_tree, title="Metadata")
         )
 
         self.timer.start()
@@ -87,8 +87,8 @@ class MainWindow(QMainWindow):
         self.wid_status.wid_volume.wid_volume.refresh_widgets()
         self.wid_status.wid_calibration.refresh_widgets()
         self.wid_status.wid_single_plane.wid_singleplane.refresh_widgets()
-        self.wid_camera_settings.wid_display_settings.refresh_widgets()
-        self.wid_camera_settings.wid_camera_properties.refresh_widgets()
+        self.wid_display.wid_display_settings.refresh_widgets()
+        self.wid_camera.wid_camera_settings.refresh_widgets()
         self.wid_save_options.wid_save_options.refresh_widgets()
 
 

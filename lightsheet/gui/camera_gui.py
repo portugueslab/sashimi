@@ -97,22 +97,22 @@ class ViewingWidget(QWidget):
 
 
 class CameraSettingsContainerWidget(QWidget):
-    def __init__(self, state):
+    def __init__(self, state, roi):
         super().__init__()
+        self.roi = roi
         self.state = state
         self.camera_info_timer = QTimer()
         self.camera_info_timer.setInterval(500)
         self.setLayout(QVBoxLayout())
-        self.current_camera_settings: CameraSettings
 
-        self.wid_camera_properties = ParameterGui(self.state.camera_settings)
+        self.wid_camera_settings = ParameterGui(self.state.camera_settings)
 
         self.lbl_camera_info = QLabel()
 
         self.set_roi_button = QPushButton("set ROI")
         self.set_full_size_frame_button = QPushButton("set full size frame")
 
-        self.layout().addWidget(self.wid_camera_properties)
+        self.layout().addWidget(self.wid_camera_settings)
         self.layout().addWidget(self.lbl_camera_info)
         self.layout().addWidget(self.set_roi_button)
         self.layout().addWidget(self.set_full_size_frame_button)
@@ -133,8 +133,8 @@ class CameraSettingsContainerWidget(QWidget):
         self.state.camera_settings.subarray = [
             0,
             0,
-            self.current_camera_settings.image_params.image_width,
-            self.current_camera_settings.image_params.image_height
+            self.state.current_camera_status.image_width,
+            self.state.current_camera_status.image_height
         ]
 
     def update_camera_info(self):

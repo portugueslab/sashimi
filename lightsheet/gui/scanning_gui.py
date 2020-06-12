@@ -2,8 +2,9 @@ from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QPushButton,
-    QLabel
+    QLabel,
 )
+from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
 from lightsheet.gui.waveform import WaveformWidget
 from lightsheet.scanning import ExperimentPrepareState
@@ -46,7 +47,10 @@ class VolumeScanningWidget(QWidget):
     def __init__(self, state, timer):
         super().__init__()
         self.state = state
+        self.timer = timer
         self.setLayout(QVBoxLayout())
+        self.timer_scope_info = QTimer()
+        self.timer_scope_info.setInterval(500)
         self.wid_volume = ParameterGui(state.volume_setting)
         self.btn_start = QPushButton()
         self.btn_start.setCheckable(True)
@@ -64,29 +68,30 @@ class VolumeScanningWidget(QWidget):
         self.wid_wave = WaveformWidget(state.scanner.waveform_queue, timer)
         self.layout().addWidget(self.wid_wave)
 
-        self.updateBtnText()
-        timer.timeout.connect(self.updateBtnText)
+        self.timer_scope_info.start()
 
-        self.update_alignment()
-        self.scope_alignment.sig_param_changed.connect(self.update_alignment)
+        self.updateBtnText()
+        self.timer.timeout.connect(self.updateBtnText)
+
+        self.timer_scope_info.timeout.connect(self.update_alignment)
 
     def updateBtnText(self):
         self.btn_start.setText(STATE_TEXTS[self.state.experiment_state])
-        if self.state.experiment_state == ExperimentPrepareState.PREVIEW or \
-                self.state.experiment_state == ExperimentPrepareState.ABORTED:
-            self.btn_start.setChecked(False)
-        if self.state.experiment_state == ExperimentPrepareState.PREPARED or \
-                self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
-            self.btn_start.setChecked(True)
+        #if self.state.experiment_state == ExperimentPrepareState.PREVIEW or \
+        #        self.state.experiment_state == ExperimentPrepareState.ABORTED:
+        #    self.btn_start.setChecked(False)
+        #if self.state.experiment_state == ExperimentPrepareState.PREPARED or \
+        #        self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+        #    self.btn_start.setChecked(True)
 
     def update_alignment(self):
         scan_width = self.state.volume_setting.scan_range[1] - self.state.volume_setting.scan_range[0]
         plane_distance = scan_width/(self.state.volume_setting.n_planes - 1) - self.scope_alignment.waist_width
         if plane_distance > 0:
             self.lbl_interplane_distance.setText(
-                "With the current configuration, distance between planes is {:0.2f}".format(plane_distance)
+                "With the current configuration, distance between planes is {:0.2f} um".format(plane_distance)
             )
         if plane_distance <= 0:
             self.lbl_interplane_distance.setText(
-                "The current configuration covers the whole volume. Plane overlap is {:0.2f}".format(-plane_distance)
+                "The current configuration covers the whole volume. Plane overlap is {:0.2f} um".format(-plane_distance)
             )
