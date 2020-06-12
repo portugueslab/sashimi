@@ -49,9 +49,14 @@ class CameraProcess(Process):
         self.camera_status_queue = Queue()
         self.triggered_frame_rate_queue = Queue()
 
+    def cast_parameters(self):
+        params = self.parameters
+        params.subarray = list(params.subarray)
+        return params
+
     # TODO: Move last two rows to API
     def initialize_camera(self):
-        self.camera_status_queue.put(self.parameters)
+        self.camera_status_queue.put(self.cast_parameters())
         self.dcam_api = DCamAPI()
         self.camera = HamamatsuCameraMR(self.dcam_api.dcam, camera_id=self.camera_id)
 
@@ -84,7 +89,7 @@ class CameraProcess(Process):
         while not self.stop_event.is_set():
             self.parameters = self.new_parameters
             self.apply_parameters()
-            self.camera_status_queue.put(self.parameters)
+            self.camera_status_queue.put(self.cast_parameters())
             if self.parameters.camera_mode == CameraMode.PAUSED:
                 self.pause_loop()
             else:
@@ -99,20 +104,21 @@ class CameraProcess(Process):
             # FIXME: Clean the camera buffer before start of experiment! Or only get the last frame/drop frames?
             if first_frame:
                 self.check_start_signal()
-            start_time = time.time()
+            start_time = time.perf_counter()
             frames = self.camera.getFrames()
             if frames:
                 # FIXME: triggered frame rate approximation assumes we are getting only 1 frame in most iterations
+                # FIXME: Also it does not give what one expects
                 for frame in frames:
-                    elapsed = time.time() - start_time
+                    elapsed = time.perf_counter() - start_time
                     self.image_queue.put(np.reshape(frame.getData(), self.parameters.frame_shape))
                     i_acquired += 1
                     cumulative_time += elapsed
                     if cumulative_time >= 1:
-                        triggered_frame_rate = i_acquired/elapsed
+                        triggered_frame_rate = i_acquired/cumulative_time
+                        self.triggered_frame_rate_queue.put(triggered_frame_rate)
                         cumulative_time = 0
                         i_acquired = 0
-                        self.triggered_frame_rate_queue.put(triggered_frame_rate)
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
                 if self.parameters.camera_mode == CameraMode.ABORT or \

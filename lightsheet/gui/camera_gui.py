@@ -1,7 +1,6 @@
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
     QWidget,
-    QDockWidget,
     QVBoxLayout,
     QPushButton,
     QLabel,
@@ -12,7 +11,6 @@ from lightparam.gui import ParameterGui
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
 from pyqtgraph.graphicsItems.ROI import ROI
-from lightsheet.state import CameraSettings
 
 
 class DisplaySettings(ParametrizedQt):
@@ -127,7 +125,7 @@ class CameraSettingsContainerWidget(QWidget):
     def set_roi(self):
         roi_pos = self.roi.pos()
         roi_size = self.roi.size()
-        self.state.camera_settings.subarray = [roi_pos.x(), roi_pos.y(), roi_size.x(), roi_size.y()]
+        self.state.camera_settings.subarray = tuple([roi_pos.x(), roi_pos.y(), roi_size.x(), roi_size.y()])
 
     def set_full_size_frame(self):
         self.state.camera_settings.subarray = [
@@ -143,9 +141,33 @@ class CameraSettingsContainerWidget(QWidget):
             if self.state.status.scanning_state == "Paused":
                 self.lbl_camera_info.hide()
             else:
+                expected_frame_rate = None
                 if self.state.status.scanning_state == "Calibration":
                     frame_rate = self.state.current_camera_status.internal_frame_rate
-                else:
-                    frame_rate = triggered_frame_rate
-                self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))
+                    self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))
+                if self.state.status.scanning_state == "Volume":
+                    planes = self.state.volume_setting.n_planes - \
+                             self.state.volume_setting.n_skip_start - self.state.volume_setting.n_skip_end
+                    expected_frame_rate = self.state.volume_setting.frequency * planes
+                if self.state.status.scanning_state == "Planar":
+                    expected_frame_rate = self.state.single_plane_settings.frequency
+                if expected_frame_rate:
+                    self.lbl_camera_info.setText(
+                        "\n".join(
+                            [
+                                "Triggered frame rate: {}".format(round(triggered_frame_rate, 2))
+                            ]
+                            + (
+                                ["Camera is lagging behind. Decrease exposure, planes or frequency"]
+                                if expected_frame_rate > triggered_frame_rate
+                                else [
+                                    "Camera seems to follow well current speed"
+                                ]
+                            )
+                        )
+                    )
+
+                    if expected_frame_rate > triggered_frame_rate:
+                        self.lbl_camera_info.setStyleSheet("color: red")
+
                 self.lbl_camera_info.show()

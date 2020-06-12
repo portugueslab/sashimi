@@ -74,7 +74,11 @@ class MainWindow(QMainWindow):
             DockedWidget(widget=self.wid_settings_tree, title="Metadata")
         )
 
+        self.st.camera_settings.sig_param_changed.connect(self.adjust_viewer)
         self.timer.start()
+
+    def adjust_viewer(self):
+        self.wid_display.is_first_image = True
 
     def closeEvent(self, a0) -> None:
         self.st.wrap_up()
