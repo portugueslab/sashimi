@@ -86,7 +86,7 @@ class ViewingWidget(QWidget):
         self.set_roi_button.clicked.connect(self.set_roi)
         self.set_full_size_frame_button.clicked.connect(self.set_full_size_frame)
         self.display_settings.sig_param_changed.connect(self.update_replay_rate)
-        self.camera_info_timer.timeout.connect(self.update_camera_info())
+        self.camera_info_timer.timeout.connect(self.update_camera_info)
 
 
     def update_replay_rate(self):

@@ -41,34 +41,36 @@ class MainWindow(QMainWindow):
         self.wid_settings_tree = SavingSettingsWidget(st)
         self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
 
-        self.wid_status = StatusWidget(st)
+        self.wid_status = StatusWidget(st, self.timer)
         self.wid_display = ViewingWidget(st, self.timer)
         self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
 
+        self.setCentralWidget(self.wid_display)
+
         self.addDockWidget(
-            Qt.TopDockWidgetArea,
+            Qt.LeftDockWidgetArea,
             DockedWidget(widget=self.wid_status, title="Mode")
         )
 
-        # self.layout().addWidget(self.wid_status)
-
         self.addDockWidget(
             Qt.LeftDockWidgetArea,
-            DockedWidget(widget=self.wid_laser, title="Laser control")
-        )
-        self.addDockWidget(
-            Qt.BottomDockWidgetArea,
             DockedWidget(widget=self.wid_scan, title="Scanning settings")
         )
+
         self.addDockWidget(
-            Qt.LeftDockWidgetArea,
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_laser, title="Laser control")
+        )
+
+        self.addDockWidget(
+            Qt.RightDockWidgetArea,
             DockedWidget(widget=self.wid_save_options, title="Saving options")
         )
         self.addDockWidget(
-            Qt.LeftDockWidgetArea,
-            DockedWidget(widget=self.wid_settings_tree, title="Parameter tree")
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_settings_tree, title="Settings options")
         )
 
         self.timer.start()
@@ -90,10 +92,11 @@ class MainWindow(QMainWindow):
 
 
 class StatusWidget(QTabWidget):
-    def __init__(self, st: State):
+    def __init__(self, st: State, timer):
         super().__init__()
 
         self.state = st
+        self.timer = timer
         self.scan_settings = self.state.status
         self.option_dict = {0: "Paused", 1: "Calibration", 2: "Planar", 3: "Volume"}
 
@@ -107,7 +110,7 @@ class StatusWidget(QTabWidget):
         self.addTab(self.wid_single_plane, self.option_dict[2])
         self.addTab(self.wid_volume, self.option_dict[3])
 
-        self.currentChanged.connect(self.update_state)
+        self.currentChanged.connect(self.update_status)
 
     def update_status(self):
         self.state.status.scanning_state = self.option_dict[self.currentIndex()]

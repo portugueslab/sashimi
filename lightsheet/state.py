@@ -173,8 +173,6 @@ def convert_camera_params(camera_settings: CameraSettings):
     else:
         binning = 2
 
-    print(camera_settings.subarray)
-
     return CamParameters(
         exposure_time=camera_settings.exposure,
         binning=binning,
