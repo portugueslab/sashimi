@@ -12,7 +12,7 @@ from datetime import datetime
 DEFAULT_SETTIGNS_PATH = "C:/Users/portugueslab/lightsheet_settings"
 
 
-class SavingSettingsWidget(QWidget):
+class SavingWidget(QWidget):
     sig_params_loaded = pyqtSignal()
 
     def __init__(self, st: State):

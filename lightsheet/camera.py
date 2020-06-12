@@ -1,153 +1,75 @@
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Event
 from enum import Enum
+
 from arrayqueues.shared_arrays import ArrayQueue
-from lightsheet.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
-from dataclasses import dataclass
-from time import sleep
-import numpy as np
-from copy import copy
-from queue import Empty
-import time
+from lightsheet.hardware.hamamatsu_camera import HamamatsuCameraMR
+from dataclasses import dataclass, fields
 
 
-class CameraMode(Enum):
-    PREVIEW = 1
-    EXPERIMENT_RUNNING = 2
-    PAUSED = 3
-    ABORT = 4
+class CameraProcessState(Enum):
+    FREE = 0
+    TRIGGERED = 1
 
-
-class TriggerMode(Enum):
-    FREE = 1
-    EXTERNAL_TRIGGER = 2
+class CameraParams:
+    exposure: float = 0.06
+    subarray_hsize: int = 2048
+    subarray_vsize: int = 2048
+    subarray_hpos: int = 0
+    subarray_vpos: int = 0
+    # TODO: Restrict binning to possible values: 1x1 (1), 2x2 (2) or 4x4 (4)
+    binning: dict = {'1x1': 1, '2x2': 2, '4x4': 4}
 
 
 @dataclass
-class CamParameters:
-    exposure_time: float = 60
-    binning: int = 2
-    subarray: tuple = (0, 0, 2048, 2048)  # order of params here is [hpos, vpos, hsize, vsize,]
-    image_height: int = 2048
-    image_width: int = 2048
-    frame_shape: tuple = (1024, 1024)
-    internal_frame_rate: float = 60
-    trigger_mode: TriggerMode = TriggerMode.FREE
-    camera_mode: CameraMode = CameraMode.PAUSED
+class ScanParameters:
+    run_mode: CameraProcessState = CameraProcessState.FREE
+    image_params: CameraParams = CameraParams()
+
 
 
 class CameraProcess(Process):
-    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=500):
+    def __init__(self, stop_event: Event, max_mbytes_queue=500, camera_id=0):
         super().__init__()
-        self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event
-        self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
-        self.parameter_queue = Queue()
+        self.image_queue = ArrayQueue(max_mbytes=max_mbytes_queue)
         self.camera_id = camera_id
         self.camera = None
-        self.parameters = CamParameters()
-        self.new_parameters = copy(self.parameters)
-        self.camera_status_queue = Queue()
-        self.triggered_frame_rate_queue = Queue()
+        self.info = None
+        self.parameters = ScanParameters
 
-    def cast_parameters(self):
-        params = self.parameters
-        params.subarray = list(params.subarray)
-        return params
+    def set_params(self):
+        # FIXME: Access subclass
+        for param in fields(self.parameters.image_params):
+            self.camera.setPropertyValue(param.name, param.value)
 
-    # TODO: Move last two rows to API
+    # TODO: Get param info
+    def get_param_value(self):
+        # FIXME: Access subclass
+        for param in self.parameters.image_params:
+            newparams = self.camera.getPropertyValue(param.name)[0]
+
     def initialize_camera(self):
-        self.camera_status_queue.put(self.cast_parameters())
-        self.dcam_api = DCamAPI()
-        self.camera = HamamatsuCameraMR(self.dcam_api.dcam, camera_id=self.camera_id)
+        self.camera = HamamatsuCameraMR(camera_id=self.camera_id)
+        self.info = self.camera.getModelInfo(self.camera_id)
+        # TODO: figure out what is this
+        self.camera.setPropertyValue("defect_correct_mode", 1)
 
-        self.camera.setACQMode("run_till_abort")
-        self.camera.setSubArrayMode()
-
-    def pause_loop(self):
-        while not self.stop_event.is_set():
-            try:
-                self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.new_parameters != self.parameters:
-                    break
-            except Empty:
-                pass
-
-    def check_start_signal(self):
-        '''
-        It only runs when the experiment is in prepared state awaiting for experiment trigger signal
-        '''
-        if self.parameters.camera_mode == CameraMode.EXPERIMENT_RUNNING:
-            while not self.experiment_start_event.is_set():
-                sleep(0.00001)
-
+    # TODO: Figure out how to trigger each camera frame
     def run(self):
         self.initialize_camera()
-        self.run_camera()
-        self.camera.shutdown()
+        self.camera.setACQMode("run_till_abort")
+        self.camera.startAcquisition()
+        if self.parameters.run_mode == CameraProcessState.FREE:
+            while not self.stop_event.is_set():
+                frames = self.camera.getFrames()
+                self.image_queue.put(frames)
+            self.camera.stopAcquisition()
+        if self.parameters.run_mode == CameraProcessState.TRIGGERED:
+            # FIXME: Set trigger
+            while not self.stop_event.is_set():
+                frames = self.camera.getFrames()
+                self.image_queue.put(frames)
 
-    def run_camera(self):
-        while not self.stop_event.is_set():
-            self.parameters = self.new_parameters
-            self.apply_parameters()
-            self.camera_status_queue.put(self.cast_parameters())
-            if self.parameters.camera_mode == CameraMode.PAUSED:
-                self.pause_loop()
-            else:
-                self.camera.startAcquisition()
-                self.camera_loop()
-
-    def camera_loop(self):
-        i_acquired = 0
-        cumulative_time = 0
-        first_frame = True
-        while not self.stop_event.is_set():
-            # FIXME: Clean the camera buffer before start of experiment! Or only get the last frame/drop frames?
-            if first_frame:
-                self.check_start_signal()
-            start_time = time.perf_counter()
-            frames = self.camera.getFrames()
-            if frames:
-                for frame in frames:
-                    elapsed = time.perf_counter() - start_time
-                    self.image_queue.put(np.reshape(frame.getData(), self.parameters.frame_shape))
-                    i_acquired += 1
-                    cumulative_time += elapsed
-                    if cumulative_time >= 1:
-                        triggered_frame_rate = i_acquired/cumulative_time
-                        self.triggered_frame_rate_queue.put(triggered_frame_rate)
-                        cumulative_time = 0
-                        i_acquired = 0
-            try:
-                self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.parameters.camera_mode == CameraMode.ABORT or \
-                        (self.new_parameters != self.parameters and
-                         self.parameters.camera_mode != CameraMode.EXPERIMENT_RUNNING):
-                    self.camera.stopAcquisition()
-                    break
-            except Empty:
-                pass
-
-    # TODO: Move this to API
-    def apply_parameters(self):
-        subarray = self.parameters.subarray
-        # quantizing the ROI dims in multiples of 4
-        subarray = [(i // 4) * 4 for i in subarray]
-        # this can be simplified by making the API nice
-        self.camera.setPropertyValue('binning', self.parameters.binning)
-        self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.exposure_time)
-        self.camera.setPropertyValue('subarray_vpos', subarray[0])
-        self.camera.setPropertyValue('subarray_hpos', subarray[1])
-        self.camera.setPropertyValue('subarray_vsize', subarray[2])
-        self.camera.setPropertyValue('subarray_hsize', subarray[3])
-        self.camera.setPropertyValue('trigger_source', self.parameters.trigger_mode.value)
-
-        # This is not sent to the camera but has to be updated with camera info directly (because of multiples of 4)
-        self.parameters.frame_shape = (
-            self.camera.getPropertyValue('subarray_hsize')[0] // self.parameters.binning,
-            self.camera.getPropertyValue('subarray_vsize')[0] // self.parameters.binning
-        )
-
-        self.parameters.internal_frame_rate = self.camera.getPropertyValue("internal_frame_rate")[0]
 
     def close_camera(self):
         self.camera.shutdown()

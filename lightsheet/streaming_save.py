@@ -7,18 +7,13 @@ import flammkuchen as fl
 import numpy as np
 import shutil
 import json
-from arrayqueues.shared_arrays import ArrayQueue
-import yagmail
 
 
 @dataclass
 class SavingParameters:
-    output_dir: Path = r"F:/Vilim"
+    output_dir: Path
     n_t: int = 10000
-    n_planes: int = 1
-    chunk_size: int = 2000
-    frame_shape: tuple = (1024, 1024)
-    notification_email: str = "None"
+    chunk_size: int = 100
 
 
 @dataclass
@@ -29,24 +24,22 @@ class SavingStatus:
 
 
 class StackSaver(Process):
-    def __init__(self, stop_event, max_queue_size=500):
+    def __init__(self, stop_signal, data_queue):
         super().__init__()
-        self.stop_event = stop_event
-        self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
+        self.stop_signal = stop_signal
+        self.data_queue = data_queue
         self.saving_signal = Event()
         self.saving = False
         self.saving_parameter_queue = Queue()
-        self.save_parameters: Optional[SavingParameters] = SavingParameters()
+        self.save_parameters: Optional[SavingParameters] = None
         self.i_in_chunk = 0
         self.i_chunk = 0
-        self.i_plane = 0
         self.current_data = None
         self.saved_status_queue = Queue()
-        self.frame_shape = None
-        self.dtype = np.uint16
+        self.dtype = np.float32
 
     def run(self):
-        while not self.stop_event.is_set():
+        while not self.stop_signal.is_set():
             if self.saving_signal.is_set() and self.save_parameters is not None:
                 self.save_loop()
             else:
@@ -54,7 +47,6 @@ class StackSaver(Process):
 
     def save_loop(self):
         # remove files if some are found at the save location
-        Path(self.save_parameters.output_dir).mkdir(parents=True, exist_ok=True)
         if (
                 Path(self.save_parameters.output_dir) / "original" / "stack_metadata.json"
         ).is_file():
@@ -66,16 +58,15 @@ class StackSaver(Process):
         i_received = 0
         self.i_in_chunk = 0
         self.i_chunk = 0
-        self.i_plane = 0
         self.current_data = np.empty(
-            (self.save_parameters.n_t, self.save_parameters.n_planes, *self.save_parameters.frame_shape),
-            dtype=self.dtype
+            (self.save_parameters.n_t, 1, *self.save_parameters.chunk_size),
+            dtype=self.dtype,
         )
         n_total = self.save_parameters.n_t
         while (
                 i_received < n_total
                 and self.saving_signal.is_set()
-                and not self.stop_event.is_set()
+                and not self.stop_signal.is_set()
         ):
             self.receive_save_parameters()
             try:
@@ -83,7 +74,7 @@ class StackSaver(Process):
             except Empty:
                 pass
             try:
-                frame = self.save_queue.get(timeout=0.01)
+                frame = self.data_queue.get(timeout=0.01)
                 self.fill_dataset(frame)
                 i_received += 1
             except Empty:
@@ -91,36 +82,9 @@ class StackSaver(Process):
 
         if self.i_chunk > 0:
             self.finalize_dataset()
-            if self.save_parameters.notification_email != "None":
-                self.send_email_end()
 
         self.saving_signal.clear()
         self.save_parameters = None
-
-    def send_email_end(self):
-        sender_email = "fishgitbot@gmail.com"
-        receiver_email = self.save_parameters.notification_email
-        subject = "Your lightsheet experiment is complete"
-        # TODO: Add the password in the lightsheet computer
-        sender_password = ""
-
-        yag = yagmail.SMTP(user=sender_email, password=sender_password)
-
-        body = [
-            "Hey!",
-            "\n",
-            "Your lightsheet experiment has completed and was a success! Come pick up your little fish",
-            "\n"
-            "Always yours,",
-            "fishgitbot"
-        ]
-
-        yag.send(
-            to=receiver_email,
-            subject=subject,
-            contents=body,
-            attachments=r"icons/main_icon.png"
-        )
 
     def cast(self, frame):
         """
@@ -129,13 +93,8 @@ class StackSaver(Process):
         return frame
 
     def fill_dataset(self, frame):
-        self.current_data[self.i_in_chunk, self.i_plane, :, :] = self.cast(frame)
-
-        self.i_plane += 1
-        if self.i_plane >= self.save_parameters.n_planes:
-            self.i_plane = 0
-            self.i_in_chunk += 1
-
+        self.current_data[self.i_in_chunk, 0, :, :] = self.cast(frame)
+        self.i_in_chunk += 1
         self.saved_status_queue.put(
             SavingStatus(
                 target_params=self.save_parameters,

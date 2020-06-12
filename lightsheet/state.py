@@ -1,4 +1,5 @@
 import numpy as np
+from arrayqueues.shared_arrays import ArrayQueue
 from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
@@ -19,22 +20,8 @@ from lightsheet.scanning import (
 from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
 import json
-from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
+from lightsheet.camera import CameraProcess
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
-from pathlib import Path
-import time
-from math import ceil
-
-
-class SaveSettings(ParametrizedQt):
-    def __init__(self):
-        super().__init__()
-        self.name = "experiment_settings"
-        self.n_frames = Param(10_000, (1, 10_000_000), gui=False, loadable=False)
-        self.chunk_size = Param(2_000, (1, 10_000))
-        self.save_dir = Param(r"F:/Vilim", gui=False)
-        self.experiment_duration = Param(0, (0, 100_000), gui=False, loadable=False)
-        self.notification_email = Param("None")
 
 
 class ScanningSettings(ParametrizedQt):
@@ -60,7 +47,7 @@ class CalibrationZSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "scanning/z_manual"
-        self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
+        self.piezo = Param(0.0, (0.0, 400.0), unit="um", gui="slider")
         self.lateral = Param(0.0, (-2.0, 2.0), gui="slider")
         self.frontal = Param(0.0, (-2.0, 2.0), gui="slider")
 
@@ -69,8 +56,8 @@ class SinglePlaneSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "scanning/z_single_plane"
-        self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
-        self.frequency = Param(1.0, (0.1, 1000), unit="planes/s (Hz)")
+        self.piezo = Param(0.0, (0.0, 400.0), unit="um", gui="slider")
+        self.frequency = Param(1.0, (0.1, 100), unit="Hz")
 
 
 class ZRecordingSettings(ParametrizedQt):
@@ -78,20 +65,11 @@ class ZRecordingSettings(ParametrizedQt):
         super().__init__(self)
         self.name = "scanning/volumetric_recording"
         self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
-        self.frequency = Param(1.0, (0.1, 100), unit="volumes/s (Hz)")
+        self.frequency = Param(1.0, (0.1, 100), unit="Hz")
         self.n_planes = Param(10, (1, 100))
         self.i_freeze = Param(-1, (-1, 1000))
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
-
-
-class CameraSettings(ParametrizedQt):
-    def __init__(self):
-        super().__init__()
-        self.name = "camera/parameters"
-        self.exposure = Param(60, (2, 1000), unit="ms")
-        self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
-        self.subarray = Param([0, 0, 2048, 2048], gui=False, loadable=False)  # order of params here is [hpos, vpos, hsize, vsize,]
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -162,38 +140,8 @@ class Calibration(ParametrizedQt):
         return True
 
 
-def convert_camera_params(camera_settings: CameraSettings):
-    if camera_settings.binning == "1x1":
-        binning = 1
-    elif camera_settings.binning == "2x2":
-        binning = 2
-    elif camera_settings.binning == "4x4":
-        binning = 4
-    # set binning 2x2 by default
-    else:
-        binning = 2
-
-    return CamParameters(
-        exposure_time=camera_settings.exposure,
-        binning=binning,
-        subarray=tuple(camera_settings.subarray)
-    )
-
-
-def convert_save_params(save_settings: SaveSettings, frame_shape):
-    return SavingParameters(
-        output_dir=Path(save_settings.save_dir),
-        n_t=int(save_settings.n_frames),
-        chunk_size=int(save_settings.chunk_size),
-        frame_shape=frame_shape,
-        notification_email=str(save_settings.notification_email)
-    )
-
-
 def convert_single_plane_params(
-        planar: PlanarScanningSettings,
-        single_plane_setting: SinglePlaneSettings,
-        calibration: Calibration
+        planar: PlanarScanningSettings, single_plane_setting: SinglePlaneSettings, calibration: Calibration
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -236,21 +184,12 @@ class State:
     def __init__(self):
         self.stop_event = Event()
         self.experiment_start_event = Event()
-        self.experiment_state = ExperimentPrepareState.PREVIEW
+        self.experiment_state = ExperimentPrepareState.NORMAL
         self.scanner = Scanner(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
         )
         self.status = ScanningSettings()
-
-        self.laser = CoboltLaser()
-        self.camera = CameraProcess(
-            experiment_start_event=self.experiment_start_event,
-            stop_event=self.stop_event
-        )
-
-        self.camera_settings = CameraSettings()
-        self.save_settings = SaveSettings()
 
         self.settings_tree = ParameterTree()
 
@@ -263,14 +202,15 @@ class State:
 
         self.save_status: Optional[SavingStatus] = None
 
-        self.saver = StackSaver(self.stop_event)
+        self.save_queue = ArrayQueue(max_mbytes=800)
+        self.saver = StackSaver(self.scanner.stop_event, self.save_queue)
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
         self.calibration = Calibration()
 
         for setting in [self.planar_setting, self.laser_settings, self.single_plane_settings, self.volume_setting,
-                        self.calibration, self.calibration.z_settings, self.camera_settings, self.save_settings]:
+                        self.calibration, self.calibration.z_settings]:
             self.settings_tree.add(setting)
 
         self.status.sig_param_changed.connect(self.send_settings)
@@ -278,16 +218,12 @@ class State:
         self.calibration.z_settings.sig_param_changed.connect(self.send_settings)
         self.single_plane_settings.sig_param_changed.connect(self.send_settings)
         self.volume_setting.sig_param_changed.connect(self.send_settings)
-        self.camera_settings.sig_param_changed.connect(self.send_settings)
-        self.save_settings.sig_param_changed.connect(self.send_settings)
 
-        self.camera.start()
+        self.laser = CoboltLaser()
         self.scanner.start()
         self.stytra_comm.start()
-        self.saver.start()
-
-        self.current_camera_status = CamParameters()
-        self.send_settings()
+        self.camera = CameraProcess(self.stop_event, self.status)
+        self.camera.run()
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -298,134 +234,50 @@ class State:
             json.dump(self.settings_tree.serialize(), f)
 
     def toggle_experiment_state(self):
-        if self.experiment_state == ExperimentPrepareState.PREVIEW:
-            self.experiment_state = ExperimentPrepareState.PREPARED
-            self.prepare_experiment()
-
-        elif self.experiment_state == ExperimentPrepareState.PREPARED:
-            self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
-            self.start_experiment()
-
-        elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
-            self.experiment_state = ExperimentPrepareState.ABORT
-            self.abort_experiment()
-            self.experiment_state = ExperimentPrepareState.PREVIEW
-
-    # TODO: Move some things here
-    def prepare_experiment(self):
-        pass
-
-    def start_experiment(self):
-        self.experiment_start_event.set()
-        self.calculate_duration()
-        self.saver.saving_signal.set()
-
-    def abort_experiment(self):
-        self.saver.saving_signal.clear()
-        self.experiment_start_event.clear()
+        if self.experiment_state == ExperimentPrepareState.NORMAL:
+            self.experiment_state = ExperimentPrepareState.NO_CAMERA
+        elif self.experiment_state == ExperimentPrepareState.NO_CAMERA:
+            self.experiment_state = ExperimentPrepareState.START
         self.send_settings()
 
-    def calculate_duration(self):
-        try:
-            duration = self.stytra_comm.stytra_data_queue.get(timeout=0.01)
-            print(duration)
-            self.save_settings.experiment_duration = duration
-            if self.status.scanning_state == "Volume":
-                triggered_frame_rate = self.volume_setting.frequency
-            elif self.status.scanning_state == "Planar":
-                triggered_frame_rate = self.single_plane_settings.frequency
-            else:
-                triggered_frame_rate = None
-            if triggered_frame_rate:
-                print(triggered_frame_rate)
-                n_frames_duration = int(ceil(duration * triggered_frame_rate)) + 1
-                self.save_settings.n_frames = n_frames_duration
-        except Empty:
-            pass
-
     def send_settings(self):
-        camera_params = convert_camera_params(self.camera_settings)
-
         if self.status.scanning_state == "Paused":
             params = ScanParameters(state=ScanningState.PAUSED)
-            camera_params.camera_mode = CameraMode.PAUSED
-
         elif self.status.scanning_state == "Calibration":
             params = convert_calibration_params(
                 self.planar_setting, self.calibration.z_settings
             )
-            camera_params.trigger_mode = TriggerMode.FREE
-            camera_params.camera_mode = CameraMode.PREVIEW
-
         elif self.status.scanning_state == "Planar":
             params = convert_single_plane_params(
                 self.planar_setting, self.single_plane_settings, self.calibration
             )
-            camera_params.trigger_mode = TriggerMode.FREE
-            camera_params.camera_mode = CameraMode.PREVIEW
-
         elif self.status.scanning_state == "Volume":
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
-            camera_params.trigger_mode = TriggerMode.EXTERNAL_TRIGGER
-            camera_params.camera_mode = CameraMode.PREVIEW
-
-        if self.experiment_state == ExperimentPrepareState.PREPARED:
-            camera_params.camera_mode = CameraMode.EXPERIMENT_RUNNING
-        if self.experiment_state == ExperimentPrepareState.ABORT:
-            camera_params.camera_mode = CameraMode.ABORT
 
         params.experiment_state = self.experiment_state
         self.scanner.parameter_queue.put(params)
-        self.camera.parameter_queue.put(camera_params)
         self.stytra_comm.current_settings_queue.put(params)
-
-        # TODO: Gives time to camera process to get from queue, update hardware and send back. Could be optimised
-        time.sleep(0.1)
-        new_camera_status = self.get_camera_status()
-        if new_camera_status:
-            self.current_camera_status = new_camera_status
-        save_params = convert_save_params(self.save_settings, self.current_camera_status.frame_shape)
-        self.saver.saving_parameter_queue.put(save_params)
-
-    def get_camera_status(self):
-        try:
-            current_camera_status = self.camera.camera_status_queue.get(timeout=0.001)
-            return current_camera_status
-        except Empty:
-            return None
+        if params.experiment_state == ExperimentPrepareState.START:
+            self.experiment_state = ExperimentPrepareState.NORMAL
 
     def wrap_up(self):
-        self.stop_event.set()
-        self.laser.close()
+        self.scanner.stop_event.set()
         self.scanner.join(timeout=10)
-        self.saver.join(timeout=10)
-        self.camera.join(timeout=10)
-        self.stytra_comm.join(timeout=10)
+        self.laser.close()
+        self.camera.close_camera()
 
     def get_image(self):
         try:
-            image = self.camera.image_queue.get(timeout=0.001)
+            image = -self.camera.image_queue.get(timeout=0.001)
             if self.saver.saving_signal.is_set():
                 if (
                         self.save_status is not None
                         and self.save_status.i_t + 1 == self.save_status.target_params.n_t
                 ):
                     self.wrap_up()
-                self.saver.save_queue.put(image)
+                self.save_queue.put(image)
             return image
-        except Empty:
-            return None
-
-    def get_save_status(self) -> Optional[SavingStatus]:
-        try:
-            return self.saver.saved_status_queue.get(timeout=0.001)
-        except Empty:
-            return None
-
-    def get_triggered_frame_rate(self):
-        try:
-            return self.camera.triggered_frame_rate_queue.get(timeout=0.001)
         except Empty:
             return None
