@@ -107,8 +107,6 @@ class CameraProcess(Process):
             start_time = time.perf_counter()
             frames = self.camera.getFrames()
             if frames:
-                # FIXME: triggered frame rate approximation assumes we are getting only 1 frame in most iterations
-                # FIXME: Also it does not give what one expects
                 for frame in frames:
                     elapsed = time.perf_counter() - start_time
                     self.image_queue.put(np.reshape(frame.getData(), self.parameters.frame_shape))

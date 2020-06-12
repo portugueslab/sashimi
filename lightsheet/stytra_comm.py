@@ -39,13 +39,13 @@ class StytraCom(Process):
                     self.current_settings = self.current_settings_queue.get(
                         timeout=0.00001
                     )
+                    saved_data = dict(lightsheet=clean_json(asdict(self.current_settings)))
                 except Empty:
                     break
             if self.start_stytra.is_set():
                 zmq_context = zmq.Context()
                 with zmq_context.socket(zmq.REQ) as zmq_socket:
                     zmq_socket.connect(self.zmq_tcp_address)
-                    saved_data = dict(lightsheet=clean_json(asdict(self.current_settings)))
                     zmq_socket.send_json(saved_data)
                     poller = zmq.Poller()
                     poller.register(zmq_socket, zmq.POLLIN)

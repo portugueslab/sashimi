@@ -141,6 +141,7 @@ class CameraSettingsContainerWidget(QWidget):
             if self.state.status.scanning_state == "Paused":
                 self.lbl_camera_info.hide()
             else:
+                self.lbl_camera_info.setStyleSheet("color: white")
                 expected_frame_rate = None
                 if self.state.status.scanning_state == "Calibration":
                     frame_rate = self.state.current_camera_status.internal_frame_rate

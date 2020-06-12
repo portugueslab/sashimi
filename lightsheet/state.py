@@ -327,7 +327,8 @@ class State:
 
     def calculate_duration(self):
         try:
-            duration = self.stytra_comm.stytra_data_queue.get(timeout=0.001)
+            duration = self.stytra_comm.stytra_data_queue.get(timeout=0.01)
+            print(duration)
             self.save_settings.experiment_duration = duration
             if self.status.scanning_state == "Volume":
                 triggered_frame_rate = self.volume_setting.frequency
@@ -336,6 +337,7 @@ class State:
             else:
                 triggered_frame_rate = None
             if triggered_frame_rate:
+                print(triggered_frame_rate)
                 n_frames_duration = int(ceil(duration * triggered_frame_rate)) + 1
                 self.save_settings.n_frames = n_frames_duration
         except Empty:

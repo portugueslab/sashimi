@@ -14,9 +14,9 @@ import yagmail
 @dataclass
 class SavingParameters:
     output_dir: Path = r"F:/Vilim"
-    n_t: int = 1000
+    n_t: int = 10000
     n_planes: int = 1
-    chunk_size: int = 1000
+    chunk_size: int = 2000
     frame_shape: tuple = (1024, 1024)
     notification_email: str = "None"
 

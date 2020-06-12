@@ -86,7 +86,9 @@ class VolumeScanningWidget(QWidget):
 
     def update_alignment(self):
         scan_width = self.state.volume_setting.scan_range[1] - self.state.volume_setting.scan_range[0]
-        plane_distance = scan_width/(self.state.volume_setting.n_planes - 1) - self.scope_alignment.waist_width
+        num_planes = self.state.volume_setting.n_planes - \
+                 self.state.volume_setting.n_skip_start - self.state.volume_setting.n_skip_end
+        plane_distance = scan_width / num_planes - self.scope_alignment.waist_width
         if plane_distance > 0:
             self.lbl_interplane_distance.setText(
                 "With the current configuration, distance between planes is {:0.2f} um".format(plane_distance)
