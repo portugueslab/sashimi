@@ -32,7 +32,7 @@ class StytraCom(Process):
         self.start_stytra = experiment_start_event
         self.stop_event = stop_event
         self.zmq_tcp_address = stytra_address
-        self.stytra_data_queue = Queue()
+        self.duration_queue = Queue()
 
     def run(self):
         while not self.stop_event.is_set():
@@ -54,7 +54,7 @@ class StytraCom(Process):
                     duration = None
                     if poller.poll(1000):
                         duration = zmq_socket.recv_json()
-                    self.stytra_data_queue.put(duration)
+                    self.duration_queue.put(duration)
                     self.start_stytra.clear()
                     zmq_socket.close()
                     zmq_context.destroy()

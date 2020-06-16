@@ -16,10 +16,10 @@ class SavingParameters:
     output_dir: Path = r"F:/Vilim"
     n_t: int = 10000
     n_planes: int = 1
-    chunk_size: int = 2000
+    chunk_size: int = 1000
     frame_shape: tuple = (1024, 1024)
     notification_email: str = "None"
-
+    framerate: float = 1
 
 @dataclass
 class SavingStatus:
@@ -29,7 +29,7 @@ class SavingStatus:
 
 
 class StackSaver(Process):
-    def __init__(self, stop_event, max_queue_size=500):
+    def __init__(self, stop_event, duration_queue, max_queue_size=500):
         super().__init__()
         self.stop_event = stop_event
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
@@ -44,6 +44,7 @@ class StackSaver(Process):
         self.saved_status_queue = Queue()
         self.frame_shape = None
         self.dtype = np.uint16
+        self.duration_queue = duration_queue
 
     def run(self):
         while not self.stop_event.is_set():
@@ -98,7 +99,7 @@ class StackSaver(Process):
         self.save_parameters = None
 
     def send_email_end(self):
-        sender_email = "fishgitbot@gmail.com"
+        sender_email = "fishgitbot@gmail.com" # TODO this should go to thecolonel and be fixed
         receiver_email = self.save_parameters.notification_email
         subject = "Your lightsheet experiment is complete"
         # TODO: Add the password in the lightsheet computer
@@ -187,5 +188,10 @@ class StackSaver(Process):
     def receive_save_parameters(self):
         try:
             self.save_parameters = self.saving_parameter_queue.get(timeout=0.001)
+        except Empty:
+            pass
+        try:
+            new_duration = self.duration_queue.get(timeout=0.001)
+            self.save_parameters.n_t = int(np.ceil(self.save_parameters.framerate*new_duration))
         except Empty:
             pass

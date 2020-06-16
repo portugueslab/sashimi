@@ -22,9 +22,8 @@ import json
 from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
-import time
-from math import ceil
 from enum import Enum
+
 
 class GlobalState(Enum):
     PAUSED = 0
@@ -32,6 +31,7 @@ class GlobalState(Enum):
     PLANAR_PREVIEW = 2
     VOLUME_PREVIEW = 3
     EXPERIMENT_RUNNING = 4
+
 
 class SaveSettings(ParametrizedQt):
     def __init__(self):
@@ -198,13 +198,15 @@ def convert_camera_params(camera_settings: CameraSettings):
     )
 
 
-def convert_save_params(save_settings: SaveSettings, frame_shape):
+def convert_save_params(save_settings: SaveSettings, frame_shape, scanning_settings:ZRecordingSettings):
+    framerate = scanning_settings.frequency * (scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end))
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
         n_t=int(save_settings.n_frames),
         chunk_size=int(save_settings.chunk_size),
         frame_shape=frame_shape,
         notification_email=str(save_settings.notification_email),
+        framerate=framerate
     )
 
 
@@ -283,7 +285,7 @@ class State:
 
         self.save_status: Optional[SavingStatus] = None
 
-        self.saver = StackSaver(self.stop_event)
+        self.saver = StackSaver(self.stop_event, duration_queue=self.stytra_comm.duration_queue)
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
@@ -371,15 +373,18 @@ class State:
         self.scanner.parameter_queue.put(params)
         self.stytra_comm.current_settings_queue.put(self.all_settings)
 
+        save_params = convert_save_params(
+                self.save_settings, self.current_camera_status.frame_shape, self.volume_setting)
+        self.saver.saving_parameter_queue.put(save_params)
+
         # # TODO: Gives time to camera process to get from queue, update hardware and send back. Could be optimised
         # time.sleep(0.1)
         # new_camera_status = self.get_camera_status()
         # if new_camera_status:
         #     self.current_camera_status = new_camera_status
-        # save_params = convert_save_params(
-        #     self.save_settings, self.current_camera_status.frame_shape
+        #
         # )
-        # self.saver.saving_parameter_queue.put(save_params)
+        #
 
     def get_camera_status(self):
         try:
@@ -405,7 +410,6 @@ class State:
 
     def prepare_experiment(self):
         # TODO disable the GUI
-        self.calculate_duration()
         self.send_scan_settings()
         self.saver.saving_signal.set()
 
@@ -413,19 +417,6 @@ class State:
         self.saver.saving_signal.clear()
         self.experiment_start_event.clear()
         self.send_scan_settings()
-
-    def calculate_duration(self):
-        if self.status.scanning_state == "Volume":
-            planes = self.volume_setting.n_planes - (
-                self.volume_setting.n_skip_start - self.volume_setting.n_skip_end
-            )
-            triggered_frame_rate = self.volume_setting.frequency * planes
-        elif self.status.scanning_state == "Planar":
-            triggered_frame_rate = self.single_plane_settings.frequency
-        n_frames_duration = (
-            int(ceil(self.save_settings.experiment_duration * triggered_frame_rate)) + 1
-        )
-        self.save_settings.n_frames = n_frames_duration
 
     def get_image(self):
         try:
@@ -436,7 +427,8 @@ class State:
                     and self.save_status.i_t + 1 == self.save_status.target_params.n_t
                 ):
                     self.wrap_up()
-                self.saver.save_queue.put(image)
+                if self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+                    self.saver.save_queue.put(image)
             return image
         except Empty:
             return None

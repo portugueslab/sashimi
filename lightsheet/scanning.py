@@ -273,6 +273,12 @@ class VolumetricScanLoop(ScanLoop):
             and self.parameters.state == ScanningState.VOLUMETRIC
         )
 
+    def check_start(self):
+        super().check_start()
+        if self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+            self.experiment_start_event.set()
+            self.parameters.experiment_state = ExperimentPrepareState.PREVIEW
+
     def n_samples_period(self):
         n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
         return lcm(n_samples_trigger, super().n_samples_period())
