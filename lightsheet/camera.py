@@ -27,7 +27,7 @@ class TriggerMode(Enum):
 class CamParameters:
     exposure_time: float = 60
     binning: int = 2
-    subarray: tuple = (0, 0, 2048, 2048)  # order of params here is [hpos, vpos, hsize, vsize,]
+    subarray: tuple = (0, 0, 1024, 1024)  # order of params here is [hpos, vpos, hsize, vsize,]
     image_height: int = 2048
     image_width: int = 2048
     frame_shape: tuple = (1024, 1024)
@@ -132,7 +132,7 @@ class CameraProcess(Process):
     def apply_parameters(self):
         subarray = self.parameters.subarray
         # quantizing the ROI dims in multiples of 4
-        subarray = [(i * self.parameters.binning // 4) * 4 for i in subarray]
+        subarray = [min((i * self.parameters.binning // 4) * 4, 2048) for i in subarray]
         # this can be simplified by making the API nice
         self.camera.setPropertyValue('binning', self.parameters.binning)
         self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.exposure_time)
