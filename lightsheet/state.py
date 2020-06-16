@@ -379,15 +379,6 @@ class State:
                 self.save_settings, self.current_camera_status.frame_shape, self.volume_setting)
         self.saver.saving_parameter_queue.put(save_params)
 
-        # # TODO: Gives time to camera process to get from queue, update hardware and send back. Could be optimised
-        # time.sleep(0.1)
-        # new_camera_status = self.get_camera_status()
-        # if new_camera_status:
-        #     self.current_camera_status = new_camera_status
-        #
-        # )
-        #
-
     def get_camera_status(self):
         try:
             current_camera_status = self.camera.camera_status_queue.get(timeout=0.001)

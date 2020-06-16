@@ -96,11 +96,11 @@ class StackSaver(Process):
         self.save_parameters = None
 
     def send_email_end(self):
-        sender_email = "fishgitbot@gmail.com" # TODO this should go to thecolonel and be fixed
+        sender_email = "fishgitbot@gmail.com" # TODO this should go to thecolonel
+        # TODO: Send email every x minutes with image like in 2P
         receiver_email = self.save_parameters.notification_email
         subject = "Your lightsheet experiment is complete"
-        # TODO: Add the password in the lightsheet computer
-        sender_password = ""
+        sender_password = "think_clear2020"
 
         yag = yagmail.SMTP(user=sender_email, password=sender_password)
 

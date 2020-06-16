@@ -46,7 +46,7 @@ class ViewingWidget(QWidget):
         self.stack_progress = QProgressBar()
         self.chunk_progress = QProgressBar()
         self.chunk_progress.setFormat("Chunk %v of %m")
-        self.stack_progress.setFormat("Frame in chunk %v of %m")
+        self.stack_progress.setFormat("Volume %v of %m")
 
         self.layout().addWidget(self.image_viewer)
         self.layout().addWidget(self.wid_display_settings)
