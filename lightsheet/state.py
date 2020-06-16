@@ -336,10 +336,8 @@ class State:
 
     def send_camera_settings(self):
         camera_params = convert_camera_params(self.camera_settings)
-        camera_params.trigger_mode = TriggerMode.FREE if GlobalState.PREVIEW else TriggerMode.EXTERNAL_TRIGGER
-        if self.global_state == GlobalState.EXPERIMENT_RUNNING:
-            camera_params.camera_mode = CameraMode.EXPERIMENT_RUNNING
-        elif self.global_state == GlobalState.PAUSED:
+        camera_params.trigger_mode = TriggerMode.FREE if self.global_state == GlobalState.PREVIEW else TriggerMode.EXTERNAL_TRIGGER
+        if self.global_state == GlobalState.PAUSED:
             camera_params.camera_mode = CameraMode.PAUSED
         else:
             camera_params.camera_mode = CameraMode.PREVIEW
@@ -392,23 +390,23 @@ class State:
 
     def toggle_experiment_state(self):
         if self.experiment_state == ExperimentPrepareState.PREVIEW:
-            self.experiment_state = ExperimentPrepareState.PREPARED
+            self.experiment_state = ExperimentPrepareState.NO_TRIGGER
             self.prepare_experiment()
 
-        elif self.experiment_state == ExperimentPrepareState.PREPARED:
+        elif self.experiment_state == ExperimentPrepareState.NO_TRIGGER:
             self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
-            self.start_experiment()
+            self.send_scan_settings()
 
         elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
             self.experiment_state = ExperimentPrepareState.ABORT
             self.abort_experiment()
             self.experiment_state = ExperimentPrepareState.PREVIEW
+            self.send_scan_settings()
 
     def prepare_experiment(self):
+        # TODO disable the GUI
         self.calculate_duration()
-
-    def start_experiment(self):
-        self.experiment_start_event.set()
+        self.send_scan_settings()
         self.saver.saving_signal.set()
 
     def abort_experiment(self):

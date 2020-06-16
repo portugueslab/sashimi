@@ -14,7 +14,7 @@ def clean_json(d):
     elif isinstance(d, Enum):
         return d.name
     elif is_dataclass(d):
-        return asdict(d)
+        return clean_json(asdict(d))
     else:
         return d
 

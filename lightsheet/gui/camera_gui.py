@@ -16,11 +16,12 @@ from time import time_ns
 
 pg.setConfigOptions(imageAxisOrder="row-major")
 
+
 class DisplaySettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "display_settings"
-        self.display_framerate = Param(60, (1, 100))
+        self.display_framerate = Param(16, (1, 100))
 
 
 class ViewingWidget(QWidget):
@@ -91,8 +92,6 @@ class ViewingWidget(QWidget):
             self.stack_progress.setValue(sstatus.i_t)
 
 
-
-
 class CameraSettingsContainerWidget(QWidget):
     def __init__(self, state, roi):
         super().__init__()
@@ -142,7 +141,7 @@ class CameraSettingsContainerWidget(QWidget):
             else:
                 self.lbl_camera_info.setStyleSheet("color: white")
                 expected_frame_rate = None
-                if self.state.status.scanning_state == "Calibration":
+                if self.state.status.scanning_state == "Calibration": # TODO refactor with global state
                     frame_rate = self.state.current_camera_status.internal_frame_rate
                     self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))
                 if self.state.status.scanning_state == "Volume":

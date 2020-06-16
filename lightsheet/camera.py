@@ -73,14 +73,6 @@ class CameraProcess(Process):
             except Empty:
                 pass
 
-    def check_start_signal(self):
-        '''
-        It only runs when the experiment is in prepared state awaiting for experiment trigger signal
-        '''
-        if self.parameters.camera_mode == CameraMode.EXPERIMENT_RUNNING:
-            while not self.experiment_start_event.is_set():
-                sleep(0.00001)
-
     def run(self):
         self.initialize_camera()
         self.run_camera()
@@ -100,12 +92,8 @@ class CameraProcess(Process):
     def camera_loop(self):
         i_acquired = 0
         cumulative_time = 0
-        first_frame = True
         while not self.stop_event.is_set():
-            # FIXME: Clean the camera buffer before start of experiment! Or only get the last frame/drop frames?
-            if first_frame:
-                self.check_start_signal()
-            start_time = time.perf_counter()
+            start_time = time.perf_counter()  # TODO switch to time ns, and have a little update_framerate function
             frames = self.camera.getFrames()
             if frames:
                 for frame in frames:
@@ -121,8 +109,7 @@ class CameraProcess(Process):
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
                 if self.parameters.camera_mode == CameraMode.ABORT or \
-                        (self.new_parameters != self.parameters and
-                         self.parameters.camera_mode != CameraMode.EXPERIMENT_RUNNING):
+                        (self.new_parameters != self.parameters):
                     self.camera.stopAcquisition()
                     break
             except Empty:

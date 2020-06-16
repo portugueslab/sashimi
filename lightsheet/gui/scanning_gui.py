@@ -27,7 +27,7 @@ class PlanarScanningWidget(QWidget):
 
 
 STATE_TEXTS = {
-    ExperimentPrepareState.PREPARED: "Start recording",
+    ExperimentPrepareState.NO_TRIGGER: "Start recording",
     ExperimentPrepareState.PREVIEW: "Prepare recording",
     ExperimentPrepareState.EXPERIMENT_STARTED: "Recording started. Press to abort",
     ExperimentPrepareState.ABORT: "Experiment aborted"
@@ -77,12 +77,12 @@ class VolumeScanningWidget(QWidget):
 
     def updateBtnText(self):
         self.btn_start.setText(STATE_TEXTS[self.state.experiment_state])
-        #if self.state.experiment_state == ExperimentPrepareState.PREVIEW or \
-        #        self.state.experiment_state == ExperimentPrepareState.ABORTED:
-        #    self.btn_start.setChecked(False)
-        #if self.state.experiment_state == ExperimentPrepareState.PREPARED or \
-        #        self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
-        #    self.btn_start.setChecked(True)
+        if self.state.experiment_state == ExperimentPrepareState.PREVIEW or \
+               self.state.experiment_state == ExperimentPrepareState.ABORT:
+           self.btn_start.setChecked(False)
+        if self.state.experiment_state == ExperimentPrepareState.NO_TRIGGER or \
+               self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+           self.btn_start.setChecked(True)
 
     def update_alignment(self):
         scan_width = self.state.volume_setting.scan_range[1] - self.state.volume_setting.scan_range[0]

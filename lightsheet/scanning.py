@@ -40,7 +40,7 @@ class ScanningState(Enum):
 
 class ExperimentPrepareState(Enum):
     PREVIEW = 1
-    PREPARED = 2
+    NO_TRIGGER = 2
     EXPERIMENT_STARTED = 3
     ABORT = 4
 
@@ -308,7 +308,7 @@ class VolumetricScanLoop(ScanLoop):
 
         if (
             self.camera_on
-            and self.parameters.experiment_state == ExperimentPrepareState.PREPARED
+            and self.parameters.experiment_state == ExperimentPrepareState.NO_TRIGGER
         ):
             self.camera_on = False
         if (
@@ -316,7 +316,7 @@ class VolumetricScanLoop(ScanLoop):
             and self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
         ):
             self.camera_on = True
-            self.i_sample = 0  # puts it at the beggining of the cycle
+            self.i_sample = 0  # puts it at the beginning of the cycle
 
         return True
 
