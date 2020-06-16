@@ -344,12 +344,7 @@ class State:
         else:
             camera_params.camera_mode = CameraMode.PREVIEW
 
-        print(camera_params)
         self.camera.parameter_queue.put(camera_params)
-
-        print(camera_params)
-        self.camera.parameter_queue.put(camera_params)
-
         self.all_settings["camera"] = camera_params
 
     def send_scan_settings(self):
