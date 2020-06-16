@@ -344,10 +344,8 @@ class State:
         else:
             camera_params.camera_mode = CameraMode.PREVIEW
 
-    def abort_experiment(self):
-        self.saver.saving_signal.clear()
-        self.experiment_start_event.clear()
-        self.send_settings()
+        print(camera_params)
+        self.camera.parameter_queue.put(camera_params)
 
         print(camera_params)
         self.camera.parameter_queue.put(camera_params)
