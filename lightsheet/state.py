@@ -199,10 +199,12 @@ def convert_camera_params(camera_settings: CameraSettings):
 
 
 def convert_save_params(save_settings: SaveSettings, frame_shape, scanning_settings:ZRecordingSettings):
-    framerate = scanning_settings.frequency * (scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end))
+    n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
+    framerate = scanning_settings.frequency * (n_planes)
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
         n_t=int(save_settings.n_frames),
+        n_planes=n_planes,
         chunk_size=int(save_settings.chunk_size),
         frame_shape=frame_shape,
         notification_email=str(save_settings.notification_email),

@@ -68,10 +68,7 @@ class StackSaver(Process):
         self.i_in_chunk = 0
         self.i_chunk = 0
         self.i_plane = 0
-        self.current_data = np.empty(
-            (self.save_parameters.n_t, self.save_parameters.n_planes, *self.save_parameters.frame_shape),
-            dtype=self.dtype
-        )
+        self.current_data = None
         n_total = self.save_parameters.n_t
         while (
                 i_received < n_total
@@ -130,6 +127,12 @@ class StackSaver(Process):
         return frame
 
     def fill_dataset(self, frame):
+        if self.current_data is None:
+            self.current_data = np.empty(
+                (self.save_parameters.chunk_size, self.save_parameters.n_planes, *frame.shape),
+                dtype=self.dtype
+            )
+
         self.current_data[self.i_in_chunk, self.i_plane, :, :] = self.cast(frame)
 
         self.i_plane += 1

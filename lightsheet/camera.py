@@ -37,7 +37,7 @@ class CamParameters:
 
 
 class CameraProcess(Process):
-    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=500):
+    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=1200):
         super().__init__()
         self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event

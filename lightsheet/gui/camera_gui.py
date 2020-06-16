@@ -88,7 +88,7 @@ class ViewingWidget(QWidget):
             num_chunks = int(sstatus.target_params.n_t / sstatus.target_params.chunk_size)
             self.chunk_progress.setMaximum(num_chunks)
             self.chunk_progress.setValue(sstatus.i_chunk)
-            self.stack_progress.setMaximum(int(sstatus.target_params.n_t / num_chunks))
+            self.stack_progress.setMaximum(sstatus.target_params.chunk_size)
             self.stack_progress.setValue(sstatus.i_t)
 
 
