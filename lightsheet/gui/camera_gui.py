@@ -12,12 +12,15 @@ from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
 from pyqtgraph.graphicsItems.ROI import ROI
 
+from time import time_ns
+
+pg.setConfigOptions(imageAxisOrder="row-major")
 
 class DisplaySettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "display_settings"
-        self.replay_rate = Param(5, (1, 10))
+        self.display_framerate = Param(60, (1, 100))
 
 
 class ViewingWidget(QWidget):
@@ -56,21 +59,18 @@ class ViewingWidget(QWidget):
         self.refresh_display = True
 
         # ms for display clock. Currently 5 fps replay
-        self.refresh_timer.start(int(1000 / self.display_settings.replay_rate))
+        self.last_time_updated = 0
 
         self.timer.timeout.connect(self.refresh)
-        self.refresh_timer.timeout.connect(self.display_new_image)
-        self.display_settings.sig_param_changed.connect(self.update_replay_rate)
-
-    def update_replay_rate(self):
-        self.refresh_timer.setInterval(int(1000 / self.display_settings.replay_rate))
 
     def refresh(self) -> None:
         current_image = self.state.get_image()
         if current_image is None:
             return
 
-        if self.refresh_display:
+        current_time = time_ns()
+        delta_t = (current_time - self.last_time_updated)/1e9
+        if delta_t > 1/self.display_settings.display_framerate:
             self.image_viewer.setImage(
                 current_image,
                 autoLevels=self.is_first_image,
@@ -78,7 +78,7 @@ class ViewingWidget(QWidget):
                 autoHistogramRange=self.is_first_image,
             )
             self.is_first_image = False
-            self.refresh_display = False
+            self.last_time_updated = time_ns()
 
         sstatus = self.state.get_save_status()
         if sstatus is not None:
@@ -90,8 +90,7 @@ class ViewingWidget(QWidget):
             self.stack_progress.setMaximum(int(sstatus.target_params.n_t / num_chunks))
             self.stack_progress.setValue(sstatus.i_t)
 
-    def display_new_image(self):
-        self.refresh_display = True
+
 
 
 class CameraSettingsContainerWidget(QWidget):

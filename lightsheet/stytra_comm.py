@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue, Event
 from queue import Empty
 import zmq
-from dataclasses import asdict
+from dataclasses import asdict, is_dataclass
 from enum import Enum
 
 
@@ -13,6 +13,8 @@ def clean_json(d):
         return cleaned
     elif isinstance(d, Enum):
         return d.name
+    elif is_dataclass(d):
+        return asdict(d)
     else:
         return d
 
@@ -39,7 +41,7 @@ class StytraCom(Process):
                     self.current_settings = self.current_settings_queue.get(
                         timeout=0.00001
                     )
-                    saved_data = dict(lightsheet=clean_json(asdict(self.current_settings)))
+                    saved_data = dict(lightsheet=clean_json(self.current_settings))
                 except Empty:
                     break
             if self.start_stytra.is_set():

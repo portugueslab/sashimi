@@ -12,7 +12,8 @@ import time
 
 class CameraMode(Enum):
     PREVIEW = 1
-    EXPERIMENT_RUNNING = 2
+    TRIGGERED = 2
+    EXPERIMENT_RUNNING = 3
     PAUSED = 3
     ABORT = 4
 
@@ -131,20 +132,20 @@ class CameraProcess(Process):
     def apply_parameters(self):
         subarray = self.parameters.subarray
         # quantizing the ROI dims in multiples of 4
-        subarray = [(i // 4) * 4 for i in subarray]
+        subarray = [(i * self.parameters.binning // 4) * 4 for i in subarray]
         # this can be simplified by making the API nice
         self.camera.setPropertyValue('binning', self.parameters.binning)
         self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.exposure_time)
-        self.camera.setPropertyValue('subarray_vpos', subarray[0])
-        self.camera.setPropertyValue('subarray_hpos', subarray[1])
-        self.camera.setPropertyValue('subarray_vsize', subarray[2])
-        self.camera.setPropertyValue('subarray_hsize', subarray[3])
+        self.camera.setPropertyValue('subarray_vpos', subarray[1])
+        self.camera.setPropertyValue('subarray_hpos', subarray[0])
+        self.camera.setPropertyValue('subarray_vsize', subarray[3])
+        self.camera.setPropertyValue('subarray_hsize', subarray[2])
         self.camera.setPropertyValue('trigger_source', self.parameters.trigger_mode.value)
 
         # This is not sent to the camera but has to be updated with camera info directly (because of multiples of 4)
         self.parameters.frame_shape = (
-            self.camera.getPropertyValue('subarray_hsize')[0] // self.parameters.binning,
-            self.camera.getPropertyValue('subarray_vsize')[0] // self.parameters.binning
+            self.camera.getPropertyValue('subarray_vsize')[0] // self.parameters.binning,
+            self.camera.getPropertyValue('subarray_hsize')[0] // self.parameters.binning
         )
 
         self.parameters.internal_frame_rate = self.camera.getPropertyValue("internal_frame_rate")[0]
