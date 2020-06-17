@@ -37,7 +37,7 @@ class ViewingWidget(QWidget):
         self.wid_display_settings = ParameterGui(self.display_settings)
 
         self.image_viewer = pg.ImageView()
-        self.roi = ROI(pos=[100, 100], size=500)
+        self.roi = ROI(pos=[100, 100], size=500, removable=True)
         self.roi.addScaleHandle([1, 1], [0, 0])
         self.image_viewer.view.addItem(self.roi)
 
@@ -99,6 +99,7 @@ class CameraSettingsContainerWidget(QWidget):
         super().__init__()
         self.roi = roi
         self.state = state
+        self.full_size = True
         self.camera_info_timer = QTimer()
         self.camera_info_timer.setInterval(500)
         self.setLayout(QVBoxLayout())
@@ -106,6 +107,7 @@ class CameraSettingsContainerWidget(QWidget):
         self.wid_camera_settings = ParameterGui(self.state.camera_settings)
 
         self.lbl_camera_info = QLabel()
+        self.lbl_roi = QLabel()
 
         self.set_roi_button = QPushButton("set ROI")
         self.set_full_size_frame_button = QPushButton("set full size frame")
@@ -114,8 +116,10 @@ class CameraSettingsContainerWidget(QWidget):
         self.layout().addWidget(self.lbl_camera_info)
         self.layout().addWidget(self.set_roi_button)
         self.layout().addWidget(self.set_full_size_frame_button)
+        self.layout().addWidget(self.lbl_roi)
 
         self.update_camera_info()
+        self.update_roi_info()
         self.camera_info_timer.start()
 
         self.set_roi_button.clicked.connect(self.set_roi)
@@ -126,6 +130,7 @@ class CameraSettingsContainerWidget(QWidget):
         roi_pos = self.roi.pos()
         roi_size = self.roi.size()
         self.state.camera_settings.subarray = tuple([roi_pos.x(), roi_pos.y(), roi_size.x(), roi_size.y()])
+        self.update_roi_info()
 
     def set_full_size_frame(self):
         self.state.camera_settings.subarray = [
@@ -134,6 +139,14 @@ class CameraSettingsContainerWidget(QWidget):
             self.state.current_camera_status.image_width,
             self.state.current_camera_status.image_height
         ]
+        self.update_roi_info()
+
+    def update_roi_info(self):
+        self.lbl_roi.setText(
+            "Current frame dimensions are: {}, {}".format(
+                self.state.current_camera_status.image_width, self.state.current_camera_status.image_height
+            )
+        )
 
     def update_camera_info(self):
         triggered_frame_rate = self.state.get_triggered_frame_rate()
