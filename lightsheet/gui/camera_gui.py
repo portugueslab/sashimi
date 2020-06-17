@@ -44,18 +44,14 @@ class ViewingWidget(QWidget):
         self.image_viewer.ui.roiBtn.hide()
         self.image_viewer.ui.menuBtn.hide()
 
-        self.stack_progress = QProgressBar()
-        self.chunk_progress = QProgressBar()
-        self.chunk_progress.setFormat("Chunk %v of %m")
-        self.stack_progress.setFormat("Volume %v of %m")
+        self.experiment_progress = QProgressBar()
+        self.experiment_progress.setFormat("frame %v of %m")
 
         self.layout().addWidget(self.image_viewer)
         self.layout().addWidget(self.wid_display_settings)
-        self.layout().addWidget(self.chunk_progress)
-        self.layout().addWidget(self.stack_progress)
+        self.layout().addWidget(self.experiment_progress)
 
-        self.chunk_progress.hide()
-        self.stack_progress.hide()
+        self.experiment_progress.hide()
 
         self.is_first_image = True
         self.refresh_display = True
@@ -84,14 +80,9 @@ class ViewingWidget(QWidget):
 
         sstatus = self.state.get_save_status()
         if sstatus is not None:
-            self.chunk_progress.show()
-            self.stack_progress.show()
-            n_volumes = sstatus.target_params.n_t//sstatus.target_params.n_planes
-            num_chunks = int(ceil(n_volumes / sstatus.target_params.chunk_size))
-            self.chunk_progress.setMaximum(num_chunks)
-            self.chunk_progress.setValue(sstatus.i_chunk)
-            self.stack_progress.setMaximum(sstatus.target_params.chunk_size)
-            self.stack_progress.setValue(sstatus.i_t)
+            self.experiment_progress.show()
+            self.experiment_progress.setMaximum(sstatus.target_params.n_t)
+            self.experiment_progress.setValue(sstatus.i_frame)
 
 
 class CameraSettingsContainerWidget(QWidget):
