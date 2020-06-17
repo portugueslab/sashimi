@@ -89,8 +89,10 @@ class StackSaver(Process):
             except Empty:
                 pass
 
-        if self.i_chunk > 0:
+        if self.i_received > 0:
+            self.save_chunk()
             self.finalize_dataset()
+            self.current_data = None
             if self.save_parameters.notification_email != "None":
                 self.send_email_end()
 
@@ -165,14 +167,12 @@ class StackSaver(Process):
             json.dump(
                 {
                     "shape_full": (
-                        self.save_parameters.n_t,
-                        self.i_chunk,
-                        *self.current_data.shape[2:],
+                        self.save_parameters.n_t//self.current_data.shape[1],
+                        *self.current_data.shape[3:],
                     ),
                     "shape_block": (
                         self.save_parameters.chunk_size,
-                        1,
-                        *self.current_data.shape[2:],
+                        *self.current_data.shape[1:],
                     ),
                     "crop_start": [0, 0, 0, 0],
                     "crop_end": [0, 0, 0, 0],
@@ -185,7 +185,7 @@ class StackSaver(Process):
         fl.save(
             Path(self.save_parameters.output_dir)
             / "original/{:04d}.h5".format(self.i_chunk),
-            {"stack_4D": self.current_data},
+            {"stack_4D": self.current_data[:self.i_in_chunk, :, :, :]},
             compression="blosc",
         )
         self.i_in_chunk = 0
