@@ -77,6 +77,7 @@ class VolumeScanningWidget(QWidget):
         self.timer.timeout.connect(self.updateBtnText)
 
         self.timer_scope_info.timeout.connect(self.update_alignment)
+        self.chk_pause.clicked.connect(self.change_pause_status)
 
     def updateBtnText(self):
         self.btn_start.setText(STATE_TEXTS[self.state.experiment_state])
@@ -100,3 +101,6 @@ class VolumeScanningWidget(QWidget):
             self.lbl_interplane_distance.setText(
                 "The current configuration covers the whole volume. Plane overlap is {:0.2f} um".format(-plane_distance)
             )
+
+    def change_pause_status(self):
+        self.state.pause_after = self.chk_pause.isChecked()
