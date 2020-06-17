@@ -410,8 +410,6 @@ class State:
         self.send_scan_settings()
 
     def end_experiment(self):
-        self.experiment_start_event.clear()
-        self.saver.saving_signal.clear()
         if self.pause_after:
             self.global_state = GlobalState.PAUSED
             self.laser.set_current(0)
