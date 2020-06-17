@@ -198,7 +198,7 @@ def convert_camera_params(camera_settings: CameraSettings):
     )
 
 
-def convert_save_params(save_settings: SaveSettings, frame_shape, scanning_settings:ZRecordingSettings):
+def convert_save_params(save_settings: SaveSettings, scanning_settings:ZRecordingSettings):
     n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
     framerate = scanning_settings.frequency * (n_planes)
     return SavingParameters(
@@ -206,7 +206,6 @@ def convert_save_params(save_settings: SaveSettings, frame_shape, scanning_setti
         n_t=int(save_settings.n_frames),
         n_planes=n_planes,
         chunk_size=int(save_settings.chunk_size),
-        frame_shape=frame_shape,
         notification_email=str(save_settings.notification_email),
         framerate=framerate
     )
@@ -376,7 +375,7 @@ class State:
         self.stytra_comm.current_settings_queue.put(self.all_settings)
 
         save_params = convert_save_params(
-                self.save_settings, self.current_camera_status.frame_shape, self.volume_setting)
+                self.save_settings, self.volume_setting)
         self.saver.saving_parameter_queue.put(save_params)
 
     def get_camera_status(self):
