@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QPushButton,
     QLabel,
+    QCheckBox
 )
 from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
@@ -55,6 +56,8 @@ class VolumeScanningWidget(QWidget):
         self.btn_start = QPushButton()
         self.btn_start.setCheckable(True)
         self.btn_start.clicked.connect(self.state.toggle_experiment_state)
+        self.chk_waveform = QCheckBox("Show waveform")
+        self.chk_waveform.clicked.connect(self.show_hide_waveform)
 
         self.scope_alignment = ScopeAlignmentInfo()
 
@@ -65,6 +68,7 @@ class VolumeScanningWidget(QWidget):
         self.layout().addWidget(self.btn_start)
         self.layout().addWidget(self.wid_alignment)
         self.layout().addWidget(self.lbl_interplane_distance)
+        self.layout().addWidget(self.chk_waveform)
         self.wid_wave = WaveformWidget(state.scanner.waveform_queue, timer)
         self.layout().addWidget(self.wid_wave)
 
@@ -97,3 +101,9 @@ class VolumeScanningWidget(QWidget):
             self.lbl_interplane_distance.setText(
                 "The current configuration covers the whole volume. Plane overlap is {:0.2f} um".format(-plane_distance)
             )
+
+    def show_hide_waveform(self):
+        if self.chk_waveform.isChecked():
+            self.wid_wave.show()
+        else:
+            self.wid_wave.hide()
