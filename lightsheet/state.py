@@ -274,6 +274,7 @@ class State:
         self.settings_tree = ParameterTree()
 
         self.global_state = GlobalState.PAUSED
+        self.pause_after = False
 
         self.planar_setting = PlanarScanningSettings()
         self.laser_settings = LaserSettings()
@@ -408,6 +409,13 @@ class State:
         self.experiment_start_event.clear()
         self.send_scan_settings()
 
+    def end_experiment(self):
+        self.experiment_start_event.clear()
+        self.saver.saving_signal.clear()
+        if self.pause_after:
+            self.global_state = GlobalState.PAUSED
+            self.laser.set_current(0)
+
     def get_image(self):
         try:
             image = self.camera.image_queue.get(timeout=0.001)
@@ -416,7 +424,7 @@ class State:
                     self.save_status is not None
                     and self.save_status.i_t + 1 == self.save_status.target_params.n_t
                 ):
-                    self.wrap_up()
+                    self.end_experiment()
                 if self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
                     self.saver.save_queue.put(image)
             return image
