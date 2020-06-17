@@ -13,6 +13,7 @@ from lightparam import Param
 from pyqtgraph.graphicsItems.ROI import ROI
 
 from time import time_ns
+from math import ceil
 
 pg.setConfigOptions(imageAxisOrder="row-major")
 
@@ -85,7 +86,8 @@ class ViewingWidget(QWidget):
         if sstatus is not None:
             self.chunk_progress.show()
             self.stack_progress.show()
-            num_chunks = int(sstatus.target_params.n_t / sstatus.target_params.chunk_size)
+            n_volumes = sstatus.target_params.n_t//sstatus.target_params.n_planes
+            num_chunks = int(ceil(n_volumes / sstatus.target_params.chunk_size))
             self.chunk_progress.setMaximum(num_chunks)
             self.chunk_progress.setValue(sstatus.i_chunk)
             self.stack_progress.setMaximum(sstatus.target_params.chunk_size)

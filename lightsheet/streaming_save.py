@@ -17,7 +17,6 @@ class SavingParameters:
     n_t: int = 10000
     n_planes: int = 1
     chunk_size: int = 1000
-    frame_shape: tuple = (1024, 1024)
     notification_email: str = "None"
     framerate: float = 1
 
@@ -25,7 +24,9 @@ class SavingParameters:
 class SavingStatus:
     target_params: SavingParameters
     i_t: int = 0
+    i_frame: int = 0
     i_chunk: int = 0
+    i_received: int = 0
 
 
 class StackSaver(Process):
@@ -40,6 +41,7 @@ class StackSaver(Process):
         self.i_in_chunk = 0
         self.i_chunk = 0
         self.i_plane = 0
+        self.i_received = 0
         self.current_data = None
         self.saved_status_queue = Queue()
         self.frame_shape = None
@@ -64,14 +66,14 @@ class StackSaver(Process):
         (Path(self.save_parameters.output_dir) / "original").mkdir(
             parents=True, exist_ok=True
         )
-        i_received = 0
+        self.i_received = 0
         self.i_in_chunk = 0
         self.i_chunk = 0
         self.i_plane = 0
         self.current_data = None
         n_total = self.save_parameters.n_t
         while (
-                i_received < n_total
+                self.i_received < n_total
                 and self.saving_signal.is_set()
                 and not self.stop_event.is_set()
         ):
@@ -83,7 +85,7 @@ class StackSaver(Process):
             try:
                 frame = self.save_queue.get(timeout=0.01)
                 self.fill_dataset(frame)
-                i_received += 1
+                self.i_received += 1
             except Empty:
                 pass
 
@@ -140,13 +142,14 @@ class StackSaver(Process):
             self.i_plane = 0
             self.i_in_chunk += 1
 
-        self.saved_status_queue.put(
-            SavingStatus(
-                target_params=self.save_parameters,
-                i_t=self.i_in_chunk,
-                i_chunk=self.i_chunk,
+            self.saved_status_queue.put(
+                SavingStatus(
+                    target_params=self.save_parameters,
+                    i_t=self.i_in_chunk,
+                    i_chunk=self.i_chunk,
+                    i_frame=self.i_received
+                )
             )
-        )
         if self.i_in_chunk == self.save_parameters.chunk_size:
             self.save_chunk()
 
