@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
-from lightsheet.gui.waveform import WaveformWidget
+from lightsheet.gui.waveform_gui import WaveformWidget
 from lightsheet.scanning import ExperimentPrepareState
 from lightparam.param_qt import ParametrizedQt, Param
 
