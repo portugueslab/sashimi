@@ -9,9 +9,7 @@
     manipulator. If you don't know which one it is, ask someone before
     making a guess.
 
-4.  In the behaviour computer open Ximea cam-tool and press play to
-    start the behaviour camera (remember to close this later on before
-    starting Stytra)
+4.  In the behaviour computer launch your StytraConfig protocol in PyCharm (ctrl + shift + F10)
 
 5.  If it was not well-centred in embedding, using the camera on the
     behaviour computer, align the dish under the objective and move the
@@ -33,7 +31,7 @@
     (i.e. hit something a bit more caudal like the swimming bladder
     which also shows autofluorescence). You can turn off the laser now.
 
-3. with the room lights on, manually focus the objective with objective
+3.  With the room lights on, manually focus the objective with objective
     manipulator and find the eyes/silhouette of the fish by moving the stage
     with its X and Y manipulators. Now turn off room lights.
 
@@ -43,15 +41,18 @@
     If you want to do volumetric imaging continue here, else jump to planar
     mode section.
     
-## Volumetric mode
-    
-1. Now, add points to calibration by finding piezo and galvo(s)
+5. Now, add points to calibration by finding piezo and galvo(s)
     positions where you see the most focused signal. Add a point 
     by pressing "+". Repeat this a total of 3 times over the
     span of your desired recorded volume. If you added a point by mistake,
     press "-" to delete the last point added to calibration.
+    
+## Volumetric mode
 
-2. Once you are happy with the calibration points, move on to either volumetric
+** __note: If the piezo impulse-response seems funny or unexpected switch back to calibration tab, then again to volumetric
+tab. This is a little bug -- which will be solved soon__ 
+
+1. Once you are happy with the calibration points, move on to either volumetric
     or planar acquisition mode. Restrict the ROI in the display
     to only contain the area of interest by drawing a rectangle and
     clicking "set ROI". If you are unhappy with your ROI you can always go
@@ -61,16 +62,18 @@
     a plane by setting it to that number. If you are unhappy with your calibration
     you can always go back to the calibration tab, delete the calibration points
     and start over. By now you may also want to switch to lower exposure (4-10 ms)
-    maintaining the binning at 2x2.
+    maintaining the binning at 2x2. You can also decrease the file size by binning 4x4
+    at the cost of losing spatial resolution, but maybe gaining in SNR (however this is 
+    unadvised unless you have a good reason for doing this).
 
-3. Set the number of planes you want to divide your volume into. Pay attention to
+2. Set the number of planes you want to divide your volume into. Pay attention to
     inter-plane distance and triggered frame rate -- this last one should be close to
     what you expect! Otherwise camera might be lagging behind (maybe exposure is too
     high?). Finally, fine-tune the piezo range by checking the last and first planes.
     The displayed values are in micrometers, so you can calculate the axial extent of the recorded volume.
     You might want to discard the last few ventral planes to account for the piezo 
     impulse-response, which you can see in the impulse-reponse graph widget. Keep only
-    those in the linear range (e.g. discard most 3 ventral planes for 33 planes acquisition).
+    those in the linear range (e.g. discard most 3 ventral planes for 33 planes 200 um acquisition).
     
 ## Planar mode
 
@@ -90,20 +93,18 @@
 
 ## Behaviour computer
 
-1.  Select the correct protocol
-
-2.  Ensure the stimulus display window is properly set and dimensions
+1.  Ensure the stimulus display window is properly set and dimensions
     are properly calibrated
 
-3.  If tail tracking is required, turn on IR light (1/3-1/2 power) and
+2.  If tail tracking is required, turn on IR light (~1/2 power) and
     set the correct tail location
 
-4.  Set/update the correct metadata and experiment parameters. Ensure Stytra is connected to experiment database.
-    Set the saving location or use the one by default (desktop).
+3.  Set/update the correct metadata and experiment parameters. Ensure Stytra is connected to experiment database (red is
+    not connected! Click to connect if it is red). Set the saving location or use the one by default (desktop).
 
-5.  VERY IMPORTANT!! Check that both machines (behaviour and acquisition) are connected to the network.
+4.  VERY IMPORTANT!! Check that both machines (behaviour and acquisition) are connected to the network.
 
-6.  Check the box "Wait for scope".
+5.  Check the box "Wait for scope".
 
 ## Starting the experiment
 
