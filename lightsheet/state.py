@@ -40,7 +40,7 @@ class SaveSettings(ParametrizedQt):
         self.n_frames = Param(10_000, (1, 10_000_000), gui=False, loadable=False)
         self.chunk_size = Param(320, (1, 10_000))
         self.save_dir = Param(r"F:/Vilim", gui=False)
-        self.experiment_duration = Param(0, (0, 100_000), gui=False, loadable=False)
+        self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("None")
 
 
@@ -104,9 +104,7 @@ class CameraSettings(ParametrizedQt):
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
-        self.subarray = Param(
-            [0, 0, 2048, 2048], gui=False, loadable=False
-        )  # order of params here is [hpos, vpos, hsize, vsize,]
+        self.subarray = Param([0, 0, 2048, 2048], gui=False)  # order of params here is [hpos, vpos, hsize, vsize,]
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
