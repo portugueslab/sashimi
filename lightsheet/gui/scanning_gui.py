@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
     QCheckBox
 )
 from PyQt5.QtCore import QTimer
-from lightparam.gui import ParameterGui
+from lightparam.gui import ParameterGui, CollapsibleWidget
 from lightsheet.gui.waveform_gui import WaveformWidget
 from lightsheet.scanning import ExperimentPrepareState
 from lightparam.param_qt import ParametrizedQt, Param
@@ -56,21 +56,25 @@ class VolumeScanningWidget(QWidget):
         self.btn_start = QPushButton()
         self.btn_start.setCheckable(True)
         self.btn_start.clicked.connect(self.state.toggle_experiment_state)
-        self.chk_waveform = QCheckBox("Show waveform")
-        self.chk_waveform.clicked.connect(self.show_hide_waveform)
 
         self.scope_alignment = ScopeAlignmentInfo()
 
         self.wid_alignment = ParameterGui(self.scope_alignment)
         self.lbl_interplane_distance = QLabel()
 
+        self.wid_wave = WaveformWidget(
+            self.state.scanner.waveform_queue,
+            self.state.scanner.trigger_queue,
+            self.timer,
+            self.state
+        )
+        self.wid_collapsible_wave = CollapsibleWidget(child=self.wid_wave, name="collapsible waveform")
+
         self.layout().addWidget(self.wid_volume)
         self.layout().addWidget(self.btn_start)
         self.layout().addWidget(self.wid_alignment)
         self.layout().addWidget(self.lbl_interplane_distance)
-        self.layout().addWidget(self.chk_waveform)
-        self.wid_wave = WaveformWidget(state.scanner.waveform_queue, timer)
-        self.layout().addWidget(self.wid_wave)
+        self.layout().addWidget(self.wid_collapsible_wave)
 
         self.timer_scope_info.start()
 
@@ -101,9 +105,3 @@ class VolumeScanningWidget(QWidget):
             self.lbl_interplane_distance.setText(
                 "The current configuration covers the whole volume. Plane overlap is {:0.2f} um".format(-plane_distance)
             )
-
-    def show_hide_waveform(self):
-        if self.chk_waveform.isChecked():
-            self.wid_wave.show()
-        else:
-            self.wid_wave.hide()
