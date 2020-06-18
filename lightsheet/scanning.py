@@ -126,7 +126,6 @@ class ScanLoop:
         n_samples,
         sample_rate,
         waveform_queue: ArrayQueue,
-        trigger_queue: ArrayQueue,
         experiment_start_signal: Event,
     ):
 
@@ -150,7 +149,6 @@ class ScanLoop:
 
         self.parameter_queue = parameter_queue
         self.waveform_queue = waveform_queue
-        self.camera_pulses_queue = trigger_queue
         self.experiment_start_event = experiment_start_signal
 
         self.parameters = initial_parameters
@@ -338,7 +336,6 @@ class VolumetricScanLoop(ScanLoop):
             i_insert,
         )
         self.waveform_queue.put(self.recorded_signal.buffer)
-        self.camera_pulses_queue.put(self.camera_pulses.buffer)
 
     def fill_arrays(self):
         super().fill_arrays()
@@ -380,7 +377,6 @@ class Scanner(Process):
         self.parameter_queue = Queue()
 
         self.waveform_queue = ArrayQueue(max_mbytes=100)
-        self.trigger_queue = ArrayQueue(max_mbytes=100)
         self.n_samples = n_samples_waveform
         self.sample_rate = sample_rate
 
@@ -459,7 +455,6 @@ class Scanner(Process):
                     self.n_samples,
                     self.sample_rate,
                     self.waveform_queue,
-                    self.trigger_queue,
                     self.experiment_start_event,
                 )
                 try:

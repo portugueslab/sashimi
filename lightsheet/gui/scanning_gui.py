@@ -63,10 +63,9 @@ class VolumeScanningWidget(QWidget):
         self.lbl_interplane_distance = QLabel()
 
         self.wid_wave = WaveformWidget(
-            self.state.scanner.waveform_queue,
-            self.state.scanner.trigger_queue,
-            self.timer,
-            self.state
+            waveform_queue=self.state.scanner.waveform_queue,
+            timer=self.timer,
+            state=self.state
         )
         self.wid_collapsible_wave = CollapsibleWidget(child=self.wid_wave, name="collapsible waveform")
 
