@@ -46,12 +46,15 @@ class ViewingWidget(QWidget):
 
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
+        self.lbl_experiment_progress = QLabel()
 
         self.layout().addWidget(self.image_viewer)
         self.layout().addWidget(self.wid_display_settings)
         self.layout().addWidget(self.experiment_progress)
+        self.layout().addWidget(self.lbl_experiment_progress)
 
         self.experiment_progress.hide()
+        self.lbl_experiment_progress.hide()
 
         self.is_first_image = True
         self.refresh_display = True
@@ -81,8 +84,10 @@ class ViewingWidget(QWidget):
         sstatus = self.state.get_save_status()
         if sstatus is not None:
             self.experiment_progress.show()
+            self.lbl_experiment_progress.show()
             self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
             self.experiment_progress.setValue(sstatus.i_volume)
+            self.lbl_experiment_progress.setText("Saved chunks: {}".format(sstatus.i_chunck))
 
 
 class CameraSettingsContainerWidget(QWidget):
