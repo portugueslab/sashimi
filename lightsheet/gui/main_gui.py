@@ -106,7 +106,7 @@ class StatusWidget(QTabWidget):
         self.option_dict = {0: "Paused", 1: "Calibration", 2: "Planar", 3: "Volume"}
 
         self.wid_paused = PausedWidget()
-        self.wid_calibration = CalibrationWidget(st.calibration, self.timer)
+        self.wid_calibration = CalibrationWidget(st, st.calibration, self.timer)
         self.wid_single_plane = SinglePlaneScanningWidget(st)
         self.wid_volume = VolumeScanningWidget(st, self.timer)
 

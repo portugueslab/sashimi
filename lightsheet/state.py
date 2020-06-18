@@ -253,6 +253,7 @@ def convert_volume_params(
 
 class State:
     def __init__(self):
+        self.calibration_ref = None
         self.stop_event = Event()
         self.experiment_start_event = Event()
         self.experiment_state = ExperimentPrepareState.PREVIEW
@@ -411,6 +412,8 @@ class State:
     def get_image(self):
         try:
             image = self.camera.image_queue.get(timeout=0.001)
+            if self.calibration_ref:
+                image = image - self.calibration_ref
             if self.saver.saving_signal.is_set():
                 if (
                     self.save_status is not None
