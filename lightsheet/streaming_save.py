@@ -168,7 +168,7 @@ class StackSaver(Process):
                 {
                     "shape_full": (
                         self.save_parameters.n_t//self.current_data.shape[1],
-                        *self.current_data.shape[3:],
+                        *self.current_data.shape[1:],
                     ),
                     "shape_block": (
                         self.save_parameters.chunk_size,
