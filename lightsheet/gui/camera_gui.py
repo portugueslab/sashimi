@@ -45,7 +45,7 @@ class ViewingWidget(QWidget):
         self.image_viewer.ui.menuBtn.hide()
 
         self.experiment_progress = QProgressBar()
-        self.experiment_progress.setFormat("frame %v of %m")
+        self.experiment_progress.setFormat("Volume %v of %m")
 
         self.layout().addWidget(self.image_viewer)
         self.layout().addWidget(self.wid_display_settings)
@@ -81,8 +81,8 @@ class ViewingWidget(QWidget):
         sstatus = self.state.get_save_status()
         if sstatus is not None:
             self.experiment_progress.show()
-            self.experiment_progress.setMaximum(sstatus.target_params.n_t)
-            self.experiment_progress.setValue(sstatus.i_frame)
+            self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
+            self.experiment_progress.setValue(sstatus.i_volume)
 
 
 class CameraSettingsContainerWidget(QWidget):
