@@ -31,18 +31,19 @@ class WaveformWidget(QWidget):
             self.state.volume_setting.n_planes - self.state.volume_setting.n_skip_end
         ) / (self.state.volume_setting.frequency * self.state.volume_setting.n_planes)
 
-        pulse_duration = self.sample_rate / 1000 * self.state.camera_settings.exposure
         for region in range(len(self.pulse_regions)):
             self.plot_widget.removeItem(self.pulse_regions[region])
         self.pulse_regions = [None] * len(pulse_times)
         for pulse in pulse_times:
-            self.pulse_regions[pulse_times] = pg.LinearRegionItem(values=(pulse, pulse + pulse_duration))
+            self.pulse_regions[pulse_times] = pg.LinearRegionItem(
+                values=(pulse, pulse + self.state.camera_settings.exposure)
+            )
             self.plot_widget.addItem(self.pulse_regions[pulse_times])
-            self.plot_widget.removeItem()
 
     def update(self):
         try:
             current_waveform = self.waveform_queue.get(timeout=0.001)
-            self.plot_curve.setData(np.arange(len(current_waveform)), current_waveform)
+            n_samples = self.sample_rate / self.state.volume_setting.frequency
+            self.plot_curve.setData(np.arange(len(current_waveform)) / n_samples, current_waveform)
         except Empty:
             pass
