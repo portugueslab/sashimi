@@ -63,7 +63,7 @@ class CalibrationWidget(QWidget):
             )
         )
 
-    def perform_noise_substraction(self, n_images=10, dtype=np.uint16):
+    def perform_noise_subtraction(self, n_images=10, dtype=np.uint16):
         '''
         Substracts the average noise of n_images to all the acquired ones both for display and saving
         '''
