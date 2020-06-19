@@ -36,14 +36,13 @@ class WaveformWidget(QWidget):
         self.pulse_regions = [None] * len(pulse_times)
         for pulse in pulse_times:
             self.pulse_regions[pulse_times] = pg.LinearRegionItem(
-                values=(pulse, pulse + self.state.camera_settings.exposure)
+                values=(pulse, pulse + self.state.camera_settings.exposure / 1000)
             )
             self.plot_widget.addItem(self.pulse_regions[pulse_times])
 
     def update(self):
         try:
             current_waveform = self.waveform_queue.get(timeout=0.001)
-            n_samples = self.sample_rate / self.state.volume_setting.frequency
-            self.plot_curve.setData(np.arange(len(current_waveform)) / n_samples, current_waveform)
+            self.plot_curve.setData(np.arange(len(current_waveform)) / self.sample_rate, current_waveform)
         except Empty:
             pass
