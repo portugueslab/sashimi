@@ -63,7 +63,7 @@ class CalibrationWidget(QWidget):
             )
         )
 
-    def perform_noise_substraction(self, n_images=10):
+    def perform_noise_substraction(self, n_images=10, dtype=np.uint16):
         '''
         Substracts the average noise of n_images to all the acquired ones both for display and saving
         '''
@@ -77,18 +77,13 @@ class CalibrationWidget(QWidget):
                 current_image = self.state.get_image()
                 if current_image:
                     if n_image == 0:
-                        calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=np.uint16)
+                        calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
                     calibration_set[n_image, ...] = current_image
                     n_image += 1
                     calibration_image = None
-            self.state.calibration_ref = np.average(calibration_set)
+            self.state.calibration_ref = np.average(calibration_set, axis=0)
+            self.state.calibration_ref = self.state.calibration_ref.astype(dtype=dtype)
             self.show_dialog_box(finished=True)
-            ctypes.windll.user32.MessageBoxW(
-                0,
-                "Noise subtraction completed"
-                "Noise subtraction mode",
-                0
-            )
             self.state.laser.set_current(current_laser)
         else:
             self.state.calibration_ref = None
