@@ -1,4 +1,4 @@
-from lightsheet.hardware.laser import CoboltLaser, LaserSettings
+from lightsheet.hardware.laser import CoboltLaser
 from PyQt5.QtWidgets import (
     QHBoxLayout,
     QPushButton,
@@ -9,7 +9,7 @@ from lightparam.gui import ParameterGui
 
 
 class LaserControlWidget(QWidget):
-    def __init__(self, laser: CoboltLaser, laser_settings: LaserSettings, timer):
+    def __init__(self, laser: CoboltLaser, laser_settings, timer):
         super().__init__()
 
         self.laser = laser

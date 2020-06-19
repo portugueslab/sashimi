@@ -3,7 +3,7 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from lightsheet.hardware.laser import CoboltLaser, LaserSettings
+from lightsheet.hardware.laser import CoboltLaser
 from lightsheet.scanning import (
     Scanner,
     PlanarScanning,
@@ -105,6 +105,13 @@ class CameraSettings(ParametrizedQt):
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
         self.subarray = Param([0, 0, 2048, 2048], gui=False)  # order of params here is [hpos, vpos, hsize, vsize,]
+
+
+class LaserSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "general/laser"
+        self.laser_power = Param(0, (0, 40), unit="mA")
 
 
 def convert_planar_params(planar: PlanarScanningSettings):

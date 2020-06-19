@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
-    QApplication,
+    QMessageBox,
     QWidget,
     QMainWindow,
     QDockWidget,
@@ -63,29 +63,44 @@ class CalibrationWidget(QWidget):
             )
         )
 
-    def perform_noise_substraction(self):
+    def perform_noise_substraction(self, n_images=10):
+        '''
+        Substracts the average noise of n_images to all the acquired ones both for display and saving
+        '''
         if self.state.calibration_ref is None:
+            current_laser = self.state.laser_settings.laser_power
             self.state.laser.set_current(0)
-            ctypes.windll.user32.MessageBoxW(
-                0,
-                "Turn off the lights. If you change camera settings (e.g. exposure) you will have to perform noise "
-                "subtraction again",
-                "Noise subtraction mode",
-                0
-            )
-            calibration_set = []
+            self.show_dialog_box(finished=False)
             calibration_image = None
-            while not calibration_image or len(calibration_set) < 10:
+            n_image = 0
+            while not calibration_image or n_image < n_images:
                 current_image = self.state.get_image()
                 if current_image:
-                    calibration_set.append(current_image)
+                    if n_image == 0:
+                        calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=np.uint16)
+                    calibration_set[n_image, ...] = current_image
+                    n_image += 1
                     calibration_image = None
             self.state.calibration_ref = np.average(calibration_set)
+            self.show_dialog_box(finished=True)
             ctypes.windll.user32.MessageBoxW(
                 0,
                 "Noise subtraction completed"
                 "Noise subtraction mode",
                 0
             )
+            self.state.laser.set_current(current_laser)
         else:
             self.state.calibration_ref = None
+
+    def show_dialog_box(self, finished):
+        dialog_box = QMessageBox()
+        dialog_box.setIcon(QMessageBox.Information)
+        dialog_box.setWindowTitle("Noise subtraction mode")
+        dialog_box.setText(
+            "Turn off the lights. If you change camera settings (e.g. exposure) you will have to perform noise "
+            "subtraction again"
+        )
+        if finished:
+            dialog_box.setText("Noise subtraction completed")
+        dialog_box.setStandardButtons(QMessageBox.ok)
