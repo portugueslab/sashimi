@@ -11,6 +11,7 @@ from lightparam.gui import ParameterGui
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
 from pyqtgraph.graphicsItems.ROI import ROI
+from lightsheet.state import convert_camera_params
 
 from time import time_ns
 from math import ceil
@@ -119,10 +120,6 @@ class CameraSettingsContainerWidget(QWidget):
         self.layout().addWidget(self.lbl_roi)
 
         self.update_camera_info()
-        self.update_roi_info(
-            self.state.current_camera_status.image_width,
-            self.state.current_camera_status.image_height
-        )
         self.camera_info_timer.start()
 
         self.set_roi_button.clicked.connect(self.set_roi)
@@ -142,9 +139,10 @@ class CameraSettingsContainerWidget(QWidget):
             self.state.current_camera_status.image_width,
             self.state.current_camera_status.image_height
         ]
+        camera_params = convert_camera_params(self.state.camera_settings)
         self.update_roi_info(
-            width=self.state.current_camera_status.image_width,
-            height=self.state.current_camera_status.image_height
+            width=self.state.current_camera_status.image_width / camera_params.binning,
+            height=self.state.current_camera_status.image_height / camera_params.binning
         )
 
     def update_roi_info(self, width, height):
