@@ -75,6 +75,7 @@ class MainWindow(QMainWindow):
         )
 
         self.st.camera_settings.sig_param_changed.connect(self.adjust_viewer)
+        self.st.status.sig_param_changed.connect(self.adjust_viewer)
         self.timer.start()
 
     def adjust_viewer(self):
