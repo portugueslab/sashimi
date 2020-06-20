@@ -6,7 +6,8 @@ from PyQt5.QtWidgets import (
     QCheckBox
 )
 from PyQt5.QtCore import QTimer
-from lightparam.gui import ParameterGui, CollapsibleWidget
+from lightparam.gui import ParameterGui
+from lightparam.gui.collapsible_widget import CollapsibleWidget
 from lightsheet.gui.waveform_gui import WaveformWidget
 from lightsheet.scanning import ExperimentPrepareState
 from lightparam.param_qt import ParametrizedQt, Param
@@ -67,7 +68,8 @@ class VolumeScanningWidget(QWidget):
             timer=self.timer,
             state=self.state
         )
-        self.wid_collapsible_wave = CollapsibleWidget(child=self.wid_wave, name="collapsible waveform")
+        self.wid_collapsible_wave = CollapsibleWidget(child=self.wid_wave, name="Piezo impulse-response waveform")
+        self.wid_collapsible_wave.toggle_collapse()
 
         self.layout().addWidget(self.wid_volume)
         self.layout().addWidget(self.btn_start)

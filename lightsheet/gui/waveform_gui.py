@@ -21,9 +21,8 @@ class WaveformWidget(QWidget):
         self.layout().addWidget(self.plot_widget)
 
         self.timer.timeout.connect(self.update)
-        self.state.volume_setting.n_planes.changed.connect(self.update_pulses)
-        self.state.volume_setting.frequency.changed.connect(self.update_pulses)
-        self.state.camera_settings.exposure.changed.connect(self.update_pulses)
+        self.state.volume_setting.sig_param_changed.connect(self.update_pulses)
+        self.state.camera_settings.sig_param_changed.connect(self.update_pulses)
 
     def update_pulses(self):
         pulse_times = np.arange(
@@ -34,11 +33,17 @@ class WaveformWidget(QWidget):
         for region in range(len(self.pulse_regions)):
             self.plot_widget.removeItem(self.pulse_regions[region])
         self.pulse_regions = [None] * len(pulse_times)
-        for pulse in pulse_times:
-            self.pulse_regions[pulse_times] = pg.LinearRegionItem(
-                values=(pulse, pulse + self.state.camera_settings.exposure / 1000)
+        for i_pulse, pulse in enumerate(pulse_times):
+            self.pulse_regions[i_pulse] = pg.LinearRegionItem(
+                values=(pulse, pulse + self.state.camera_settings.exposure / 1000),
+                movable=False,
+                brush=pg.mkBrush(
+                    166, 196, 240, 100
+                )
             )
-            self.plot_widget.addItem(self.pulse_regions[pulse_times])
+            for line in self.pulse_regions[i_pulse].lines:
+                line.hide()
+            self.plot_widget.addItem(self.pulse_regions[i_pulse])
 
     def update(self):
         try:
