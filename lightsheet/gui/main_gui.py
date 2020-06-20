@@ -97,8 +97,10 @@ class MainWindow(QMainWindow):
         self.wid_save_options.wid_save_options.refresh_widgets()
 
     def check_end_experiment(self):
-        if self.st.pause_after:
-            if self.st.saver.saver_stopped_signal.is_set():
+        if self.st.saver.saver_stopped_signal.is_set():
+            self.st.end_experiment()
+            self.st.saver.saver_stopped_signal.clear()
+            if self.st.pause_after:
                 self.wid_status.setCurrentIndex(0)
                 self.st.laser.set_current(0)
                 self.refresh_param_values()
