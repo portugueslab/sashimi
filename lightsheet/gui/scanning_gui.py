@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QPushButton,
     QLabel,
+    QCheckBox
 )
 from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
@@ -55,6 +56,7 @@ class VolumeScanningWidget(QWidget):
         self.btn_start = QPushButton()
         self.btn_start.setCheckable(True)
         self.btn_start.clicked.connect(self.state.toggle_experiment_state)
+        self.chk_pause = QCheckBox("Pause after experiment")
 
         self.scope_alignment = ScopeAlignmentInfo()
 
@@ -63,6 +65,7 @@ class VolumeScanningWidget(QWidget):
 
         self.layout().addWidget(self.wid_volume)
         self.layout().addWidget(self.btn_start)
+        self.layout().addWidget(self.chk_pause)
         self.layout().addWidget(self.wid_alignment)
         self.layout().addWidget(self.lbl_interplane_distance)
         self.wid_wave = WaveformWidget(state.scanner.waveform_queue, timer)
@@ -74,6 +77,7 @@ class VolumeScanningWidget(QWidget):
         self.timer.timeout.connect(self.updateBtnText)
 
         self.timer_scope_info.timeout.connect(self.update_alignment)
+        self.chk_pause.clicked.connect(self.change_pause_status)
 
     def updateBtnText(self):
         self.btn_start.setText(STATE_TEXTS[self.state.experiment_state])
@@ -97,3 +101,6 @@ class VolumeScanningWidget(QWidget):
             self.lbl_interplane_distance.setText(
                 "The current configuration covers the whole volume. Plane overlap is {:0.2f} um".format(-plane_distance)
             )
+
+    def change_pause_status(self):
+        self.state.pause_after = self.chk_pause.isChecked()

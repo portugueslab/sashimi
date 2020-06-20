@@ -36,6 +36,7 @@ class StackSaver(Process):
         self.stop_event = stop_event
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.saving_signal = Event()
+        self.saver_stopped_signal = Event()
         self.saving = False
         self.saving_parameter_queue = Queue()
         self.save_parameters: Optional[SavingParameters] = SavingParameters()
@@ -102,6 +103,7 @@ class StackSaver(Process):
 
         self.saving_signal.clear()
         self.save_parameters = None
+        self.saver_stopped_signal.set()
 
     def send_email_end(self):
         sender_email = "fishgitbot@gmail.com" # TODO this should go to thecolonel

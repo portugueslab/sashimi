@@ -77,6 +77,7 @@ class MainWindow(QMainWindow):
         self.st.camera_settings.sig_param_changed.connect(self.adjust_viewer)
         self.st.status.sig_param_changed.connect(self.adjust_viewer)
         self.timer.start()
+        self.timer.timeout.connect(self.check_end_experiment)
 
     def adjust_viewer(self):
         self.wid_display.is_first_image = True
@@ -95,6 +96,15 @@ class MainWindow(QMainWindow):
         self.wid_display.wid_display_settings.refresh_widgets()
         self.wid_camera.wid_camera_settings.refresh_widgets()
         self.wid_save_options.wid_save_options.refresh_widgets()
+
+    def check_end_experiment(self):
+        if self.st.saver.saver_stopped_signal.is_set():
+            self.st.end_experiment()
+            self.st.saver.saver_stopped_signal.clear()
+            if self.st.pause_after:
+                self.wid_status.setCurrentIndex(0)
+                self.st.laser.set_current(0)
+                self.refresh_param_values()
 
 
 class StatusWidget(QTabWidget):
