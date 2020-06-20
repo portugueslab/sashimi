@@ -16,6 +16,7 @@ class SavingParameters:
     output_dir: Path = r"F:/Vilim"
     n_t: int = 10000
     n_planes: int = 1
+    n_volumes: int = 10000
     chunk_size: int = 1000
     notification_email: str = "None"
     framerate: float = 1
@@ -23,14 +24,14 @@ class SavingParameters:
 @dataclass
 class SavingStatus:
     target_params: SavingParameters
-    i_t: int = 0
-    i_frame: int = 0
+    i_in_chunk: int = 0
+    i_volume: int = 0
     i_chunk: int = 0
-    i_received: int = 0
+    i_frame: int = 0
 
 
 class StackSaver(Process):
-    def __init__(self, stop_event, duration_queue, max_queue_size=500):
+    def __init__(self, stop_event, duration_queue, max_queue_size=2000):
         super().__init__()
         self.stop_event = stop_event
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
@@ -41,7 +42,8 @@ class StackSaver(Process):
         self.i_in_chunk = 0
         self.i_chunk = 0
         self.i_plane = 0
-        self.i_received = 0
+        self.i_frame = 0
+        self.i_volume = 0
         self.current_data = None
         self.saved_status_queue = Queue()
         self.frame_shape = None
@@ -66,14 +68,15 @@ class StackSaver(Process):
         (Path(self.save_parameters.output_dir) / "original").mkdir(
             parents=True, exist_ok=True
         )
-        self.i_received = 0
+        self.i_frame = 0
         self.i_in_chunk = 0
         self.i_chunk = 0
         self.i_plane = 0
+        self.i_volume = 0
         self.current_data = None
         n_total = self.save_parameters.n_t
         while (
-                self.i_received < n_total
+                self.i_frame < n_total
                 and self.saving_signal.is_set()
                 and not self.stop_event.is_set()
         ):
@@ -85,12 +88,13 @@ class StackSaver(Process):
             try:
                 frame = self.save_queue.get(timeout=0.01)
                 self.fill_dataset(frame)
-                self.i_received += 1
+                self.i_frame += 1
             except Empty:
                 pass
 
-        if self.i_received > 0:
+        if self.i_frame > 0:
             self.save_chunk()
+            self.update_saved_status_queue()
             self.finalize_dataset()
             self.current_data = None
             if self.save_parameters.notification_email != "None":
@@ -143,17 +147,22 @@ class StackSaver(Process):
         if self.i_plane >= self.save_parameters.n_planes:
             self.i_plane = 0
             self.i_in_chunk += 1
+            self.i_volume += 1
+            self.update_saved_status_queue()
 
-            self.saved_status_queue.put(
-                SavingStatus(
-                    target_params=self.save_parameters,
-                    i_t=self.i_in_chunk,
-                    i_chunk=self.i_chunk,
-                    i_frame=self.i_received
-                )
-            )
         if self.i_in_chunk == self.save_parameters.chunk_size:
             self.save_chunk()
+
+    def update_saved_status_queue(self):
+        self.saved_status_queue.put(
+            SavingStatus(
+                target_params=self.save_parameters,
+                i_in_chunk=self.i_in_chunk,
+                i_chunk=self.i_chunk,
+                i_volume=self.i_volume,
+                i_frame=self.i_frame
+            )
+        )
 
     def finalize_dataset(self):
         with open(
@@ -199,5 +208,6 @@ class StackSaver(Process):
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
             self.save_parameters.n_t = int(np.ceil(self.save_parameters.framerate*new_duration))
+            self.save_parameters.n_volumes = int(np.ceil(self.save_parameters.n_t / self.save_parameters.n_planes))
         except Empty:
             pass

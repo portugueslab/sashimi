@@ -414,7 +414,7 @@ class State:
             if self.saver.saving_signal.is_set():
                 if (
                     self.save_status is not None
-                    and self.save_status.i_t + 1 == self.save_status.target_params.n_t
+                    and self.save_status.i_in_chunk + 1 == self.save_status.target_params.n_t
                 ):
                     self.wrap_up()
                 if self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
