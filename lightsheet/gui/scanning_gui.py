@@ -7,7 +7,8 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
-from lightsheet.gui.waveform import WaveformWidget
+from lightparam.gui.collapsible_widget import CollapsibleWidget
+from lightsheet.gui.waveform_gui import WaveformWidget
 from lightsheet.scanning import ExperimentPrepareState
 from lightparam.param_qt import ParametrizedQt, Param
 
@@ -63,13 +64,20 @@ class VolumeScanningWidget(QWidget):
         self.wid_alignment = ParameterGui(self.scope_alignment)
         self.lbl_interplane_distance = QLabel()
 
+        self.wid_wave = WaveformWidget(
+            waveform_queue=self.state.scanner.waveform_queue,
+            timer=self.timer,
+            state=self.state
+        )
+        self.wid_collapsible_wave = CollapsibleWidget(child=self.wid_wave, name="Piezo impulse-response waveform")
+        self.wid_collapsible_wave.toggle_collapse()
+
         self.layout().addWidget(self.wid_volume)
         self.layout().addWidget(self.btn_start)
         self.layout().addWidget(self.chk_pause)
         self.layout().addWidget(self.wid_alignment)
         self.layout().addWidget(self.lbl_interplane_distance)
-        self.wid_wave = WaveformWidget(state.scanner.waveform_queue, timer)
-        self.layout().addWidget(self.wid_wave)
+        self.layout().addWidget(self.wid_collapsible_wave)
 
         self.timer_scope_info.start()
 

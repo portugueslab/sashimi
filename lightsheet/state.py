@@ -252,13 +252,15 @@ def convert_volume_params(
 
 
 class State:
-    def __init__(self):
+    def __init__(self, sample_rate):
+        self.sample_rate = sample_rate
         self.stop_event = Event()
         self.experiment_start_event = Event()
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.scanner = Scanner(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
+            sample_rate=self.sample_rate
         )
         self.status = ScanningSettings()
 

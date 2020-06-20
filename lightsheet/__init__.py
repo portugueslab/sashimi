@@ -9,7 +9,7 @@ if __name__ == "__main__":
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     app.setApplicationName("Lightsheet control")
     app.setWindowIcon(QIcon(r"icons/main_icon.png"))
-    st = State()
+    st = State(sample_rate=40000)
     main_window = MainWindow(st)
     main_window.show()
     app.exec()
