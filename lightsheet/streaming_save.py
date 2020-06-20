@@ -31,7 +31,7 @@ class SavingStatus:
 
 
 class StackSaver(Process):
-    def __init__(self, stop_event, duration_queue, max_queue_size=500):
+    def __init__(self, stop_event, duration_queue, max_queue_size=2000):
         super().__init__()
         self.stop_event = stop_event
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
@@ -72,6 +72,7 @@ class StackSaver(Process):
         self.i_in_chunk = 0
         self.i_chunk = 0
         self.i_plane = 0
+        self.i_volume = 0
         self.current_data = None
         n_total = self.save_parameters.n_t
         while (
@@ -93,6 +94,7 @@ class StackSaver(Process):
 
         if self.i_frame > 0:
             self.save_chunk()
+            self.update_saved_status_queue()
             self.finalize_dataset()
             self.current_data = None
             if self.save_parameters.notification_email != "None":
@@ -146,18 +148,21 @@ class StackSaver(Process):
             self.i_plane = 0
             self.i_in_chunk += 1
             self.i_volume += 1
+            self.update_saved_status_queue()
 
-            self.saved_status_queue.put(
-                SavingStatus(
-                    target_params=self.save_parameters,
-                    i_in_chunk=self.i_in_chunk,
-                    i_chunk=self.i_chunk,
-                    i_volume=self.i_volume,
-                    i_frame=self.i_frame
-                )
-            )
         if self.i_in_chunk == self.save_parameters.chunk_size:
             self.save_chunk()
+
+    def update_saved_status_queue(self):
+        self.saved_status_queue.put(
+            SavingStatus(
+                target_params=self.save_parameters,
+                i_in_chunk=self.i_in_chunk,
+                i_chunk=self.i_chunk,
+                i_volume=self.i_volume,
+                i_frame=self.i_frame
+            )
+        )
 
     def finalize_dataset(self):
         with open(

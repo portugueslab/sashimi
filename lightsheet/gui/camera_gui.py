@@ -87,7 +87,7 @@ class ViewingWidget(QWidget):
             self.lbl_experiment_progress.show()
             self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
             self.experiment_progress.setValue(sstatus.i_volume)
-            self.lbl_experiment_progress.setText("Saved chunks: {}".format(sstatus.i_chunck))
+            self.lbl_experiment_progress.setText("Saved chunks: {}".format(sstatus.i_chunk))
 
 
 class CameraSettingsContainerWidget(QWidget):
