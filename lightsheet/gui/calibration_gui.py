@@ -63,30 +63,17 @@ class CalibrationWidget(QWidget):
             )
         )
 
-    def perform_noise_subtraction(self, n_images=10, dtype=np.uint16):
+    def set_noise_subtraction_mode(self):
         '''
         Substracts the average noise of n_images to all the acquired ones both for display and saving
         '''
-        if self.state.calibration_ref is None:
-            current_laser = self.state.laser_settings.laser_power
-            self.state.laser.set_current(0)
+        if self.state.calibration_ref:
             self.show_dialog_box(finished=False)
-            calibration_image = None
-            n_image = 0
-            while not calibration_image or n_image < n_images:
-                current_image = self.state.get_image()
-                if current_image:
-                    if n_image == 0:
-                        calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
-                    calibration_set[n_image, ...] = current_image
-                    n_image += 1
-                    calibration_image = None
-            self.state.calibration_ref = np.average(calibration_set, axis=0)
-            self.state.calibration_ref = self.state.calibration_ref.astype(dtype=dtype)
+            self.state.obtain_signal_average()
+            while True:
+                if self.state.calibration_ref is not None:
+                    break
             self.show_dialog_box(finished=True)
-            self.state.laser.set_current(current_laser)
-        else:
-            self.state.calibration_ref = None
 
     def show_dialog_box(self, finished):
         dialog_box = QMessageBox()

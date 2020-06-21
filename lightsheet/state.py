@@ -417,6 +417,26 @@ class State:
         self.experiment_start_event.clear()
         self.send_scan_settings()
 
+    def obtain_signal_average(self, n_images=50, dtype=np.uint16):
+        if self.calibration_ref is None:
+            current_laser = self.laser_settings.laser_power
+            self.laser.set_current(0)
+            calibration_image = None
+            n_image = 0
+            while not calibration_image or n_image < n_images:
+                current_image = self.get_image()
+                if current_image:
+                    if n_image == 0:
+                        calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
+                    calibration_set[n_image, ...] = current_image
+                    n_image += 1
+                    calibration_image = None
+            self.calibration_ref = np.average(calibration_set, axis=0)
+            self.calibration_ref = self.calibration_ref.astype(dtype=dtype)
+            self.laser.set_current(current_laser)
+        else:
+            self.calibration_ref = None
+
     def get_image(self):
         try:
             image = self.camera.image_queue.get(timeout=0.001)
