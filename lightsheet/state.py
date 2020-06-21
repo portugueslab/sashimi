@@ -23,6 +23,7 @@ from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerM
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
+from lightsheet.utilities import cast_unsigned_subtraction
 
 
 class GlobalState(Enum):
@@ -420,7 +421,7 @@ class State:
         try:
             image = self.camera.image_queue.get(timeout=0.001)
             if self.calibration_ref:
-                image = image - self.calibration_ref
+                image = cast_unsigned_subtraction(image, self.calibration_ref)
             if self.saver.saving_signal.is_set():
                 if (
                     self.save_status is not None
