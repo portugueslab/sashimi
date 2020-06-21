@@ -74,6 +74,11 @@ tab. This is a little bug -- which will be solved soon__
     You might want to discard the last few ventral planes to account for the piezo 
     impulse-response, which you can see in the impulse-reponse graph widget. Keep only
     those in the linear range (e.g. discard most 3 ventral planes for 33 planes 200 um acquisition).
+    The waveform plot show the impulse response together with the triggering and duration of frames as
+    a shaded area. Scale in x is seconds.
+    
+3. Hide waveform plot, check the box "pause after experiment" if you want to stop everything once the experiment is
+    done (i.e. laser off, galvos stopped, etc.).
     
 ## Planar mode
 
@@ -86,7 +91,8 @@ tab. This is a little bug -- which will be solved soon__
     
 2. Select the saving folder in one of the HDD data drives. Chunk size is the number
     of frames in each .H5 file (data is saved directly as a split dataset). Check that there is
-    enough space in the drive to save the whole experiment.
+    enough space in the drive to save the whole experiment. Add your email if you want to be notified at the end 
+    of the experiment.
     
 3. Remember to put the selected plane back to -1 so that acquisition runs over
     all the planes!
