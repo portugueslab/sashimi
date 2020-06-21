@@ -15,6 +15,15 @@ from lightparam.gui import ParameterGui
 from lightsheet.state import Calibration
 import ctypes
 import numpy as np
+from lightparam.param_qt import ParametrizedQt
+from lightparam import Param
+
+
+class NoiseSubtractionSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "Average of n frames"
+        self.n_frames_average_noise = Param(50, (5, 500))
 
 
 class CalibrationWidget(QWidget):
@@ -31,6 +40,8 @@ class CalibrationWidget(QWidget):
         self.btn_rm_points.clicked.connect(self.calibration_state.remove_calibration_point)
         self.lbl_calibration = QLabel("")
         self.chk_noise_subtraction = QCheckBox()
+        self.param_n_noise_subtraction = NoiseSubtractionSettings()
+        self.wid_n_noise_subtraction = ParameterGui(self.param_n_noise_subtraction)
         self.layout().addWidget(self.chk_noise_subtraction)
         self.layout().addWidget(self.btn_add_points)
         self.layout().addWidget(self.btn_rm_points)
@@ -69,7 +80,7 @@ class CalibrationWidget(QWidget):
         '''
         if self.state.calibration_ref:
             self.show_dialog_box(finished=False)
-            self.state.obtain_signal_average()
+            self.state.obtain_signal_average(n_images=self.wid_n_noise_subtraction.n_frames_average_noise)
             while True:
                 if self.state.calibration_ref is not None:
                     break
