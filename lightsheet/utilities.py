@@ -17,12 +17,3 @@ def unsafe_subtraction(target: np.ndarray, reference: np.ndarray):
     result = target - reference
     result[result < 0] = 0
     return result
-
-
-if __name__ == '__main__':
-    t = np.random.randint(low=0, high=500, size=15, dtype=np.uint16)
-    r = np.random.randint(low=0, high=500, size=t.shape, dtype=np.uint16)
-    output = cast_unsigned_subtraction(t, r)
-    np.set_printoptions(linewidth=300)
-    for array in (t, r, output):
-        print(array, array.dtype, type(array))
