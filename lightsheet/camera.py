@@ -49,6 +49,8 @@ class CameraProcess(Process):
         self.new_parameters = copy(self.parameters)
         self.camera_status_queue = Queue()
         self.triggered_frame_rate_queue = Queue()
+        self.i_acquired = 0
+        self.cumulative_time = 0
 
     def cast_parameters(self):
         params = self.parameters
@@ -90,8 +92,8 @@ class CameraProcess(Process):
                 self.camera_loop()
 
     def camera_loop(self):
-        i_acquired = 0
-        cumulative_time = 0
+        self.i_acquired = 0
+        self.cumulative_time = 0
         while not self.stop_event.is_set():
             start_time = time.time_ns()  # TODO switch to time ns, and have a little update_framerate function
             frames = self.camera.getFrames()
@@ -99,13 +101,11 @@ class CameraProcess(Process):
                 for frame in frames:
                     elapsed = time.time_ns() - start_time
                     self.image_queue.put(np.reshape(frame.getData(), self.parameters.frame_shape))
-                    i_acquired += 1
-                    cumulative_time += elapsed
-                    if cumulative_time >= 1:
-                        triggered_frame_rate = i_acquired/cumulative_time
-                        self.triggered_frame_rate_queue.put(triggered_frame_rate)
-                        cumulative_time = 0
-                        i_acquired = 0
+                    self.i_acquired += 1
+                    self.cumulative_time += elapsed
+                    if self.cumulative_time >= 3:
+                        self.update_framerate()
+
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
                 if self.parameters.camera_mode == CameraMode.ABORT or \
@@ -114,6 +114,12 @@ class CameraProcess(Process):
                     break
             except Empty:
                 pass
+
+    def update_framerate(self):
+        triggered_frame_rate = self.i_acquired / self.cumulative_time
+        self.triggered_frame_rate_queue.put(triggered_frame_rate)
+        self.cumulative_time = 0
+        self.i_acquired = 0
 
     # TODO: Move this to API
     def apply_parameters(self):
