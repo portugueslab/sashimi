@@ -93,11 +93,11 @@ class CameraProcess(Process):
         i_acquired = 0
         cumulative_time = 0
         while not self.stop_event.is_set():
-            start_time = time.perf_counter()  # TODO switch to time ns, and have a little update_framerate function
+            start_time = time.time_ns()  # TODO switch to time ns, and have a little update_framerate function
             frames = self.camera.getFrames()
             if frames:
                 for frame in frames:
-                    elapsed = time.perf_counter() - start_time
+                    elapsed = time.time_ns() - start_time
                     self.image_queue.put(np.reshape(frame.getData(), self.parameters.frame_shape))
                     i_acquired += 1
                     cumulative_time += elapsed
