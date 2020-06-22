@@ -95,7 +95,7 @@ class CameraProcess(Process):
         self.i_acquired = 0
         self.cumulative_time = 0
         while not self.stop_event.is_set():
-            start_time = time.time_ns()  # TODO switch to time ns, and have a little update_framerate function
+            start_time = time.time_ns()
             frames = self.camera.getFrames()
             if frames:
                 for frame in frames:
