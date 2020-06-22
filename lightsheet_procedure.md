@@ -90,9 +90,13 @@ tab. This is a little bug -- which will be solved soon__
     You can load them next time at any point by pressing "load settings".
     
 2. Select the saving folder in one of the HDD data drives. Chunk size is the number
-    of frames in each .H5 file (data is saved directly as a split dataset). Check that there is
+    of volumes in each .h5 file (data is saved directly as a split dataset). Check that there is
     enough space in the drive to save the whole experiment. Add your email if you want to be notified at the end 
-    of the experiment.
+    of the experiment. Calculating the optimal size of the chunks is currently tricky and we are working on
+    improving that. If you set a chunk size too big the saver will have trouble keeping up with the acquisition.
+    As a reference, set it to 10 if you are doing whole brain imaging (2x2 binning, full-size frame @2 volumes/s)
+    or to 50 if you are doing volumetric imaging of a particular structure (e.g. cerebellum 10 planes, small ROI,
+    5-6 volumes/s).
     
 3. Remember to put the selected plane back to -1 so that acquisition runs over
     all the planes!
