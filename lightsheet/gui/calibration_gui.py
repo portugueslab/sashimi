@@ -31,6 +31,7 @@ class CalibrationWidget(QWidget):
         super().__init__()
         self.state = state
         self.calibration_state = calibration_state
+        self.timer = timer
         self.setLayout(QVBoxLayout())
         self.wid_settings = ParameterGui(self.calibration_state.z_settings)
         self.layout().addWidget(self.wid_settings)
@@ -48,7 +49,7 @@ class CalibrationWidget(QWidget):
         self.layout().addWidget(self.lbl_calibration)
 
         self.chk_noise_subtraction.clicked.connect(self.perform_noise_substraction)
-        timer.timeout.connect(self.update_label)
+        self.timer.timeout.connect(self.update_label)
 
     def refresh_widgets(self):
         self.wid_settings.refresh_widgets()
@@ -81,9 +82,11 @@ class CalibrationWidget(QWidget):
         if self.state.calibration_ref:
             self.show_dialog_box(finished=False)
             self.state.obtain_signal_average(n_images=self.wid_n_noise_subtraction.n_frames_average_noise)
-            while True:
-                if self.state.calibration_ref is not None:
-                    break
+            self.timer.timeout.connect(self.check_noise_subtraction_finished)
+
+    def check_noise_subtraction_finished(self):
+        if self.state.calibration_ref is not None:
+            self.timer.timeout.disconnect(self.check_noise_subtraction_finished)
             self.show_dialog_box(finished=True)
 
     def show_dialog_box(self, finished):
