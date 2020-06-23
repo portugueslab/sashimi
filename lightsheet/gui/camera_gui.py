@@ -153,7 +153,7 @@ class CameraSettingsContainerWidget(QWidget):
             else:
                 self.lbl_camera_info.setStyleSheet("color: white")
                 expected_frame_rate = None
-                if self.state.status.scanning_state == "Calibration": # TODO refactor with global state
+                if self.state.status.scanning_state == "Calibration":  # TODO refactor with global state
                     frame_rate = self.state.current_camera_status.internal_frame_rate
                     self.lbl_camera_info.setText("Internal frame rate: " + str(round(frame_rate, 2)))
                 if self.state.status.scanning_state == "Volume":
@@ -166,19 +166,19 @@ class CameraSettingsContainerWidget(QWidget):
                     self.lbl_camera_info.setText(
                         "\n".join(
                             [
-                                "Triggered frame rate: {}".format(round(triggered_frame_rate, 2))
+                                "Camera frame rate: {}".format(round(triggered_frame_rate, 2))
                             ]
                             + (
-                                ["Camera is lagging behind. Decrease exposure, planes or frequency"]
-                                if expected_frame_rate > triggered_frame_rate
+                                ["Camera is lagging behind. Decrease exposure, number of planes or frequency"]
+                                if expected_frame_rate > triggered_frame_rate * 0.9
                                 else [
-                                    "Camera seems to follow well current speed"
+                                    "Seems to follow well current speed"
                                 ]
                             )
                         )
                     )
 
-                    if expected_frame_rate > triggered_frame_rate:
+                    if expected_frame_rate > triggered_frame_rate * 0.9:
                         self.lbl_camera_info.setStyleSheet("color: red")
 
                 self.lbl_camera_info.show()
