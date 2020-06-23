@@ -92,13 +92,12 @@ class ViewingWidget(QWidget):
 
 
 class CameraSettingsContainerWidget(QWidget):
-    def __init__(self, state, roi):
+    def __init__(self, state, roi, timer):
         super().__init__()
         self.roi = roi
         self.state = state
         self.full_size = True
-        self.camera_info_timer = QTimer()
-        self.camera_info_timer.setInterval(500)
+        self.camera_info_timer = timer
         self.setLayout(QVBoxLayout())
 
         self.wid_camera_settings = ParameterGui(self.state.camera_settings)
