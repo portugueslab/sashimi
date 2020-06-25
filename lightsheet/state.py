@@ -418,19 +418,20 @@ class State:
         self.send_scan_settings()
 
     def obtain_signal_average(self, n_images=50, dtype=np.uint16):
+        '''
+        Obtains average noise of n_images to subtract to acquired, both for display and saving
+        '''
         if self.calibration_ref is None:
             current_laser = self.laser_settings.laser_power
             self.laser.set_current(0)
-            calibration_image = None
             n_image = 0
-            while not calibration_image or n_image < n_images:
+            while n_image < n_images:
                 current_image = self.get_image()
-                if current_image:
+                if current_image is not None:
                     if n_image == 0:
                         calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
-                    calibration_set[n_image, ...] = current_image
+                    calibration_set[n_image, :, :] = current_image
                     n_image += 1
-                    calibration_image = None
             self.calibration_ref = np.average(calibration_set, axis=0)
             self.calibration_ref = self.calibration_ref.astype(dtype=dtype)
             self.laser.set_current(current_laser)
@@ -440,7 +441,7 @@ class State:
     def get_image(self):
         try:
             image = self.camera.image_queue.get(timeout=0.001)
-            if self.calibration_ref:
+            if self.calibration_ref is not None:
                 image = neg_dif(image, self.calibration_ref)
             if self.saver.saving_signal.is_set():
                 if (
