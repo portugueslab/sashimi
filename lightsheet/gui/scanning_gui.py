@@ -63,6 +63,7 @@ class VolumeScanningWidget(QWidget):
 
         self.wid_alignment = ParameterGui(self.scope_alignment)
         self.lbl_interplane_distance = QLabel()
+        self.lbl_interplane_distance.setStyleSheet("color: yellow")
 
         self.wid_wave = WaveformWidget(
             waveform_queue=self.state.scanner.waveform_queue,

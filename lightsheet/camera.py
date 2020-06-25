@@ -69,7 +69,7 @@ class FramerateRecorder:
 
 
 class CameraProcess(Process):
-    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=10):
+    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20):
         super().__init__()
         self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event
@@ -128,8 +128,7 @@ class CameraProcess(Process):
             if frames:
                 for frame in frames:
                     self.image_queue.put(np.reshape(frame.getData(), self.parameters.frame_shape))
-                    if self.parameters.camera_mode != CameraMode.PREVIEW:
-                        self.update_framerate()
+                    self.update_framerate()
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
                 if self.parameters.camera_mode == CameraMode.ABORT or \
