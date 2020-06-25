@@ -3,7 +3,7 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from lightsheet.hardware.laser import CoboltLaser, LaserSettings
+from lightsheet.hardware.laser import CoboltLaser
 from lightsheet.scanning import (
     Scanner,
     PlanarScanning,
@@ -23,6 +23,7 @@ from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerM
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
+from lightsheet.utilities import neg_dif
 
 
 class GlobalState(Enum):
@@ -105,6 +106,13 @@ class CameraSettings(ParametrizedQt):
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
         self.subarray = Param([0, 0, 2048, 2048], gui=False)  # order of params here is [hpos, vpos, hsize, vsize,]
+
+
+class LaserSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "general/laser"
+        self.laser_power = Param(0, (0, 40), unit="mA")
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -254,6 +262,7 @@ def convert_volume_params(
 class State:
     def __init__(self, sample_rate):
         self.sample_rate = sample_rate
+        self.calibration_ref = None
         self.stop_event = Event()
         self.experiment_start_event = Event()
         self.experiment_state = ExperimentPrepareState.PREVIEW
@@ -416,9 +425,32 @@ class State:
         self.saver.save_queue.clear()
         self.send_scan_settings()
 
+    def obtain_signal_average(self, n_images=50, dtype=np.uint16):
+        '''
+        Obtains average noise of n_images to subtract to acquired, both for display and saving
+        '''
+        if self.calibration_ref is None:
+            current_laser = self.laser_settings.laser_power
+            self.laser.set_current(0)
+            n_image = 0
+            while n_image < n_images:
+                current_image = self.get_image()
+                if current_image is not None:
+                    if n_image == 0:
+                        calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
+                    calibration_set[n_image, :, :] = current_image
+                    n_image += 1
+            self.calibration_ref = np.average(calibration_set, axis=0)
+            self.calibration_ref = self.calibration_ref.astype(dtype=dtype)
+            self.laser.set_current(current_laser)
+        else:
+            self.calibration_ref = None
+
     def get_image(self):
         try:
             image = self.camera.image_queue.get(timeout=0.001)
+            if self.calibration_ref is not None:
+                image = neg_dif(image, self.calibration_ref)
             if self.saver.saving_signal.is_set():
                 if self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
                     self.saver.save_queue.put(image)

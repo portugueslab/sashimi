@@ -76,6 +76,11 @@ class MainWindow(QMainWindow):
 
         self.st.camera_settings.sig_param_changed.connect(self.adjust_viewer)
         self.st.status.sig_param_changed.connect(self.adjust_viewer)
+        self.wid_camera.set_full_size_frame_button.clicked.connect(self.adjust_viewer)
+        self.wid_status.wid_calibration.dialog_button.clicked.connect(self.adjust_viewer)
+
+        self.st.camera_settings.sig_param_changed.connect(self.wid_status.wid_calibration.uncheck_noise)
+
         self.timer.start()
         self.timer.timeout.connect(self.check_end_experiment)
 
@@ -117,7 +122,7 @@ class StatusWidget(QTabWidget):
         self.option_dict = {0: "Paused", 1: "Calibration", 2: "Planar", 3: "Volume"}
 
         self.wid_paused = PausedWidget()
-        self.wid_calibration = CalibrationWidget(st.calibration, self.timer)
+        self.wid_calibration = CalibrationWidget(st, st.calibration, self.timer)
         self.wid_single_plane = SinglePlaneScanningWidget(st)
         self.wid_volume = VolumeScanningWidget(st, self.timer)
 

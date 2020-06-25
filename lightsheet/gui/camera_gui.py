@@ -127,6 +127,7 @@ class CameraSettingsContainerWidget(QWidget):
         roi_size = self.roi.size()
         self.state.camera_settings.subarray = tuple([roi_pos.x(), roi_pos.y(), roi_size.x(), roi_size.y()])
         self.update_roi_info(width=roi_size.x(), height=roi_size.y())
+        self.roi.hide()
 
     def set_full_size_frame(self):
         self.state.camera_settings.subarray = [
