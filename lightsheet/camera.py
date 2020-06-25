@@ -8,14 +8,15 @@ import numpy as np
 from copy import copy
 from queue import Empty
 import time
+from datetime import datetime
 
 
 class CameraMode(Enum):
     PREVIEW = 1
     TRIGGERED = 2
     EXPERIMENT_RUNNING = 3
-    PAUSED = 3
-    ABORT = 4
+    PAUSED = 4
+    ABORT = 5
 
 
 class TriggerMode(Enum):
@@ -36,8 +37,39 @@ class CamParameters:
     camera_mode: CameraMode = CameraMode.PAUSED
 
 
+class FramerateRecorder:
+    def __init__(self, n_fps_frames=10):
+        # Set framerate calculation parameters
+        self.n_fps_frames = n_fps_frames
+        self.i_fps = 0
+        self.previous_time_fps = None
+        self.current_framerate = None
+
+        # Store current time timestamp:
+        self.current_time = datetime.now()
+        self.starting_time = datetime.now()
+
+    def update_framerate(self):
+        """Calculate the framerate every n_fps_frames frames."""
+        # If number of frames for updating is reached:
+        if self.i_fps == self.n_fps_frames - 1:
+            self.current_time = datetime.now()
+            if self.previous_time_fps is not None:
+                try:
+                    self.current_framerate = (
+                            self.n_fps_frames
+                            / (self.current_time - self.previous_time_fps).total_seconds()
+                    )
+                except ZeroDivisionError:
+                    self.current_framerate = 0
+
+            self.previous_time_fps = self.current_time
+        # Reset i after every n frames
+        self.i_fps = (self.i_fps + 1) % self.n_fps_frames
+
+
 class CameraProcess(Process):
-    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=1200):
+    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20):
         super().__init__()
         self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event
@@ -49,6 +81,7 @@ class CameraProcess(Process):
         self.new_parameters = copy(self.parameters)
         self.camera_status_queue = Queue()
         self.triggered_frame_rate_queue = Queue()
+        self.framerate_rec = FramerateRecorder(n_fps_frames=n_fps_frames)
 
     def cast_parameters(self):
         params = self.parameters
@@ -90,22 +123,12 @@ class CameraProcess(Process):
                 self.camera_loop()
 
     def camera_loop(self):
-        i_acquired = 0
-        cumulative_time = 0
         while not self.stop_event.is_set():
-            start_time = time.perf_counter()  # TODO switch to time ns, and have a little update_framerate function
             frames = self.camera.getFrames()
             if frames:
                 for frame in frames:
-                    elapsed = time.perf_counter() - start_time
                     self.image_queue.put(np.reshape(frame.getData(), self.parameters.frame_shape))
-                    i_acquired += 1
-                    cumulative_time += elapsed
-                    if cumulative_time >= 1:
-                        triggered_frame_rate = i_acquired/cumulative_time
-                        self.triggered_frame_rate_queue.put(triggered_frame_rate)
-                        cumulative_time = 0
-                        i_acquired = 0
+                    self.update_framerate()
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
                 if self.parameters.camera_mode == CameraMode.ABORT or \
@@ -114,6 +137,11 @@ class CameraProcess(Process):
                     break
             except Empty:
                 pass
+
+    def update_framerate(self):
+        self.framerate_rec.update_framerate()
+        if self.framerate_rec.i_fps == 0:
+            self.triggered_frame_rate_queue.put(self.framerate_rec.current_framerate)
 
     # TODO: Move this to API
     def apply_parameters(self):

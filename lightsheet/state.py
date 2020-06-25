@@ -355,6 +355,7 @@ class State:
         else:
             camera_params.camera_mode = CameraMode.PREVIEW
 
+        self.camera.image_queue.clear()
         self.camera.parameter_queue.put(camera_params)
         self.all_settings["camera"] = camera_params
 
