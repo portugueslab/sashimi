@@ -162,6 +162,8 @@ class CameraSettingsContainerWidget(QWidget):
                     expected_frame_rate = self.state.volume_setting.frequency * planes
                 if self.state.global_state == GlobalState.PLANAR_PREVIEW:
                     expected_frame_rate = self.state.single_plane_settings.frequency
+                if self.state.volume_setting.i_freeze > 0:
+                    expected_frame_rate = 1
                 if expected_frame_rate:
                     self.lbl_camera_info.setText(
                         "\n".join(

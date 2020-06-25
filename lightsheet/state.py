@@ -94,7 +94,7 @@ class ZRecordingSettings(ParametrizedQt):
         self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
         self.frequency = Param(1.0, (0.1, 100), unit="volumes/s (Hz)")
         self.n_planes = Param(10, (1, 100))
-        self.i_freeze = Param(-1, (-1, 1000))
+        self.i_freeze = Param(0, (0, 1000))
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
 
