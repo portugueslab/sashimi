@@ -141,6 +141,7 @@ class CameraSettingsContainerWidget(QWidget):
             width=self.state.current_camera_status.image_width / camera_params.binning,
             height=self.state.current_camera_status.image_height / camera_params.binning
         )
+        self.roi.show()
 
     def update_roi_info(self, width, height):
         self.lbl_roi.setText(
