@@ -479,6 +479,12 @@ class State:
         except Empty:
             return None
 
+    def get_chunk_gb(self):
+        try:
+            return self.disk_writer.chunk_gb_queue.get(timeout=0.001)
+        except Empty:
+            return None
+
     def wrap_up(self):
         self.stop_event.set()
         self.laser.close()

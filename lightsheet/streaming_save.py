@@ -10,6 +10,8 @@ import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
 import time
+import os
+from math import ceil
 
 
 @dataclass
@@ -230,6 +232,8 @@ class DiskWriter(Process):
         self.writer_queue = writer_queue
         self.chunk = None
         self.saved_status = None
+        self.bytes_chunk = 0
+        self.chunk_gb_queue = Queue()
 
     def run(self):
         while not self.stop_event.is_set():
@@ -256,5 +260,13 @@ class DiskWriter(Process):
                 compression="blosc",
             )
             self.chunk = None
+        if self.saved_status.i_chunk == 0:
+            self.bytes_chunk = os.stat(
+                Path(self.saved_status.target_params.output_dir)
+                / "original/{:04d}.h5".format(self.saved_status.i_chunk)
+            ).st_size
+            n_chunks = ceil(self.saved_status.target_params.n_volumes / self.saved_status.target_params.chunk_size)
+            experiment_gb = self.bytes_chunk * n_chunks / 1073741824
+            self.chunk_gb_queue.put(experiment_gb)
         if self.saved_status.i_frame == self.saved_status.taget_params.n_total:
             self.saver_stopped_signal.set()

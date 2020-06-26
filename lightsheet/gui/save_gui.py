@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
 )
 from lightparam.gui import ParameterGui
 from pathlib import Path
+import
 
 
 class SaveWidget(QWidget):
@@ -20,13 +21,17 @@ class SaveWidget(QWidget):
 
         self.wid_save_options = ParameterGui(state.save_settings)
         self.save_location_button = QPushButton()
+        self.lbl_experiment_gb = QLabel()
+        self.lbl_experiment_gb.setStyleSheet("color: green")
 
         self.layout().addWidget(self.wid_save_options)
         self.layout().addWidget(self.save_location_button)
+        self.layout().addWidget(self.lbl_experiment_gb)
 
         self.set_locationbutton()
 
         self.save_location_button.clicked.connect(self.set_save_location)
+        self.timer.timeout.connect(self.show_experiment_gb)
 
     def set_save_location(self):
         save_dir = QFileDialog.getExistingDirectory()
@@ -44,3 +49,8 @@ class SaveWidget(QWidget):
         else:
             self.save_location_button.setText("Save in " + pathtext)
             self.save_location_button.setStyleSheet("")
+
+    def show_experiment_gb(self):
+        estimated_gb_experiment = self.state.get_chunk_gb()
+        if estimated_gb_experiment is not None:
+            self.lbl_experiment_gb.setText("Estimated experiment size on disk: {:.2f} GB".format(estimated_gb_experiment))
