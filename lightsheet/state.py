@@ -300,8 +300,9 @@ class State:
         self.disk_writer = DiskWriter(
             self.stop_event,
             self.saver.saving_signal,
-            self.saver.writer_queue, 
-            self.saver.path_queue
+            self.saver.writer_queue,
+            self.saver.saved_status_queue_2,
+            self.saver.saver_stopped_signal
         )
 
         self.single_plane_settings = SinglePlaneSettings()

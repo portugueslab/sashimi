@@ -9,6 +9,7 @@ import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
+import time
 
 
 @dataclass
@@ -48,7 +49,7 @@ class StackSaver(Process):
         self.i_volume = 0
         self.current_data = None
         self.saved_status_queue = Queue()
-        self.path_queue = Queue()
+        self.saved_status_queue_2 = Queue()
         self.frame_shape = None
         self.dtype = np.uint16
         self.duration_queue = duration_queue
@@ -103,9 +104,10 @@ class StackSaver(Process):
             if self.save_parameters.notification_email != "None":
                 self.send_email_end()
 
+        while not self.saver_stopped_signal.is_set():
+            time.sleep(0.001)
         self.saving_signal.clear()
         self.save_parameters = None
-        self.saver_stopped_signal.set()
 
     def send_email_end(self):
         sender_email = "fishgitbot@gmail.com"  # TODO this should go to thecolonel
@@ -208,18 +210,26 @@ class StackSaver(Process):
 
     def send_to_writer(self):
         self.writer_queue.put(self.current_data[:self.i_in_chunk, :, :, :])
+        self.saved_status_queue_2.put(
+            SavingStatus(
+                target_params=self.save_parameters,
+                i_chunk=self.i_chunk,
+                i_frame=self.i_frame
+            )
+        )
+        self.i_chunk += 1
 
 
 class DiskWriter(Process):
-    def __init__(self, stop_event, saving_signal, path_queue, writer_queue):
+    def __init__(self, stop_event, saving_signal, saved_status_queue, writer_queue, saver_stopped_signal):
         super().__init__()
         self.stop_event = stop_event
         self.saving_signal = saving_signal
-        self.output_dir = None
-        self.path_queue = path_queue
+        self.saver_stopped_signal = saver_stopped_signal
+        self.saved_status = saved_status_queue
         self.writer_queue = writer_queue
         self.chunk = None
-        self.i_chunk = 0
+        self.saved_status = None
 
     def run(self):
         while not self.stop_event.is_set():
@@ -232,18 +242,19 @@ class DiskWriter(Process):
         except Empty:
             pass
         try:
-            new_path = self.path_queue.get(timeout=0.001)
-            self.output_dir = new_path
+            new_status = self.saved_status.get(timeout=0.001)
+            self.saved_status = new_status
         except Empty:
             pass
 
     def save_chunk(self):
         if self.chunk is not None:
             fl.save(
-                Path(self.output_dir)
-                / "original/{:04d}.h5".format(self.i_chunk),
+                Path(self.saved_status.target_params.output_dir)
+                / "original/{:04d}.h5".format(self.saved_status.i_chunk),
                 {"stack_4D": self.chunk},
                 compression="blosc",
             )
             self.chunk = None
-            self.i_chunk += 1
+        if self.saved_status.i_frame == self.saved_status.taget_params.n_total:
+            self.saver_stopped_signal.set()
