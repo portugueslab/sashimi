@@ -9,7 +9,6 @@ from PyQt5.QtWidgets import (
 )
 from lightparam.gui import ParameterGui
 from pathlib import Path
-import
 
 
 class SaveWidget(QWidget):

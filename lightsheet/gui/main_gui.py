@@ -78,7 +78,6 @@ class MainWindow(QMainWindow):
         self.st.status.sig_param_changed.connect(self.adjust_viewer)
         self.wid_camera.set_full_size_frame_button.clicked.connect(self.adjust_viewer)
         self.wid_status.wid_calibration.dialog_button.clicked.connect(self.adjust_viewer)
-        self.wid_status.wid_volume.
 
         self.st.camera_settings.sig_param_changed.connect(self.wid_status.wid_calibration.uncheck_noise)
 
