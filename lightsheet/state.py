@@ -20,7 +20,7 @@ from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
 import json
 from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
-from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
+from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus, DiskWriter
 from pathlib import Path
 from enum import Enum
 from lightsheet.utilities import neg_dif
@@ -297,6 +297,12 @@ class State:
         self.save_status: Optional[SavingStatus] = None
 
         self.saver = StackSaver(self.stop_event, duration_queue=self.stytra_comm.duration_queue)
+        self.disk_writer = DiskWriter(
+            self.stop_event,
+            self.saver.saving_signal,
+            self.saver.writer_queue, 
+            self.saver.path_queue
+        )
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
@@ -328,6 +334,7 @@ class State:
         self.scanner.start()
         self.stytra_comm.start()
         self.saver.start()
+        self.disk_writer.start()
 
         self.all_settings = dict(camera=dict(), scanning=dict())
 
@@ -476,6 +483,7 @@ class State:
         self.laser.close()
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)
+        self.disk_writer.join(timeout=10)
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
 
