@@ -21,6 +21,7 @@ class SavingParameters:
     notification_email: str = "None"
     framerate: float = 1
 
+
 @dataclass
 class SavingStatus:
     target_params: SavingParameters
@@ -35,9 +36,9 @@ class StackSaver(Process):
         super().__init__()
         self.stop_event = stop_event
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
+        self.writer_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.saving_signal = Event()
         self.saver_stopped_signal = Event()
-        self.saving = False
         self.saving_parameter_queue = Queue()
         self.save_parameters: Optional[SavingParameters] = SavingParameters()
         self.i_in_chunk = 0
@@ -47,6 +48,7 @@ class StackSaver(Process):
         self.i_volume = 0
         self.current_data = None
         self.saved_status_queue = Queue()
+        self.path_queue = Queue()
         self.frame_shape = None
         self.dtype = np.uint16
         self.duration_queue = duration_queue
@@ -94,7 +96,7 @@ class StackSaver(Process):
                 pass
 
         if self.i_frame > 0:
-            self.save_chunk()
+            self.send_to_writer()
             self.update_saved_status_queue()
             self.finalize_dataset()
             self.current_data = None
@@ -106,7 +108,7 @@ class StackSaver(Process):
         self.saver_stopped_signal.set()
 
     def send_email_end(self):
-        sender_email = "fishgitbot@gmail.com" # TODO this should go to thecolonel
+        sender_email = "fishgitbot@gmail.com"  # TODO this should go to thecolonel
         # TODO: Send email every x minutes with image like in 2P
         receiver_email = self.save_parameters.notification_email
         subject = "Your lightsheet experiment is complete"
@@ -153,7 +155,7 @@ class StackSaver(Process):
             self.update_saved_status_queue()
 
         if self.i_in_chunk == self.save_parameters.chunk_size:
-            self.save_chunk()
+            self.send_to_writer()
 
     def update_saved_status_queue(self):
         self.saved_status_queue.put(
@@ -168,17 +170,17 @@ class StackSaver(Process):
 
     def finalize_dataset(self):
         with open(
-            (
-                Path(self.save_parameters.output_dir)
-                / "original"
-                / "stack_metadata.json"
-            ),
-            "w",
+                (
+                        Path(self.save_parameters.output_dir)
+                        / "original"
+                        / "stack_metadata.json"
+                ),
+                "w",
         ) as f:
             json.dump(
                 {
                     "shape_full": (
-                        self.save_parameters.n_t//self.current_data.shape[1],
+                        self.save_parameters.n_t // self.current_data.shape[1],
                         *self.current_data.shape[1:],
                     ),
                     "shape_block": (
@@ -192,16 +194,6 @@ class StackSaver(Process):
                 f,
             )
 
-    def save_chunk(self):
-        fl.save(
-            Path(self.save_parameters.output_dir)
-            / "original/{:04d}.h5".format(self.i_chunk),
-            {"stack_4D": self.current_data[:self.i_in_chunk, :, :, :]},
-            compression="blosc",
-        )
-        self.i_in_chunk = 0
-        self.i_chunk += 1
-
     def receive_save_parameters(self):
         try:
             self.save_parameters = self.saving_parameter_queue.get(timeout=0.001)
@@ -209,7 +201,49 @@ class StackSaver(Process):
             pass
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
-            self.save_parameters.n_t = int(np.ceil(self.save_parameters.framerate*new_duration))
+            self.save_parameters.n_t = int(np.ceil(self.save_parameters.framerate * new_duration))
             self.save_parameters.n_volumes = int(np.ceil(self.save_parameters.n_t / self.save_parameters.n_planes))
         except Empty:
             pass
+
+    def send_to_writer(self):
+        self.writer_queue.put(self.current_data[:self.i_in_chunk, :, :, :])
+
+
+class DiskWriter(Process):
+    def __init__(self, stop_event, saving_signal, path_queue, writer_queue):
+        super().__init__()
+        self.stop_event = stop_event
+        self.saving_signal = saving_signal
+        self.output_dir = None
+        self.path_queue = path_queue
+        self.writer_queue = writer_queue
+        self.chunk = None
+        self.i_chunk = 0
+
+    def run(self):
+        while not self.stop_event.is_set():
+            if self.saving_signal.is_set():
+                self.receive_chunk()
+
+    def receive_chunk(self):
+        try:
+            self.chunk = self.writer_queue.get(timeout=0.001)
+        except Empty:
+            pass
+        try:
+            new_path = self.path_queue.get(timeout=0.001)
+            self.output_dir = new_path
+        except Empty:
+            pass
+
+    def save_chunk(self):
+        if self.chunk is not None:
+            fl.save(
+                Path(self.output_dir)
+                / "original/{:04d}.h5".format(self.i_chunk),
+                {"stack_4D": self.chunk},
+                compression="blosc",
+            )
+            self.chunk = None
+            self.i_chunk += 1
