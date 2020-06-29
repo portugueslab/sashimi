@@ -80,6 +80,10 @@ tab. This is a little bug -- which will be solved soon__
 3. Hide waveform plot, check the box "pause after experiment" if you want to stop everything once the experiment is
     done (i.e. laser off, galvos stopped, etc.).
     
+4. You can go back to calibration mode to enable noise subtraction once your camera settings are the definitive ones,
+    i.e. the actual exposure and roi size. It will disable if you change any of these options and you will have
+    to activate it again.
+    
 ## Planar mode
 
 
