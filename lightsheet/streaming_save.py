@@ -94,7 +94,8 @@ class StackSaver(Process):
                 pass
 
         if self.i_frame > 0:
-            self.save_chunk()
+            if self.i_in_chunk != 0:
+                self.save_chunk()
             self.update_saved_status_queue()
             self.finalize_dataset()
             self.current_data = None
