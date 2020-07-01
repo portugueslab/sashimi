@@ -21,7 +21,6 @@ class SavingParameters:
     notification_email: str = "None"
     framerate: float = 1
     voxel_size: tuple = (1, 1, 1)
-    inter_plane_spacing: float = 1.0
 
 @dataclass
 class SavingStatus:
@@ -191,7 +190,6 @@ class StackSaver(Process):
                     "crop_end": [0, 0, 0, 0],
                     "padding": [0, 0, 0, 0],
                     "voxel_size": self.save_parameters.voxel_size,
-                    "inter_plane_spacing": self.save_parameters.inter_plane_spacing
                 },
                 f,
             )

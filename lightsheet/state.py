@@ -231,7 +231,7 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
     else:
         binning = 2
 
-    dummy_waist_width = scope_alignment.waist_width * binning
+    inter_plane = int(scan_length / (n_planes - 1) * 1000) / (1000 * binning)
 
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
@@ -242,12 +242,11 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
         framerate=framerate,
         voxel_size=tuple(
             int(dimension * binning * 1000) / 1000 for dimension in (
-                dummy_waist_width,
+                inter_plane,
                 scope_alignment.pixel_size_x,
                 scope_alignment.pixel_size_y
             )
-        ),
-        inter_plane_spacing=int(scan_length / (n_planes - 1) * 1000) / 1000
+        )
     )
 
 
