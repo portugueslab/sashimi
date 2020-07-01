@@ -34,6 +34,15 @@ class GlobalState(Enum):
     EXPERIMENT_RUNNING = 4
 
 
+class ScopeAlignmentInfo(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "scope_alignment_info"
+        self.waist_width = Param(6.5, (0.1, 100), unit="um")
+        self.pixel_size_x = Param(0.3, (0.1, 10), unit="um (at binning 1x1)")
+        self.pixel_size_y = Param(0.3, (0.1, 10), unit="um (at binning 1x1)")
+
+
 class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
@@ -206,16 +215,38 @@ def convert_camera_params(camera_settings: CameraSettings):
     )
 
 
-def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings):
+def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings,
+                        camera_settings: CameraSettings, scope_alignment: ScopeAlignmentInfo):
     n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
-    framerate = scanning_settings.frequency * (n_planes)
+    framerate = scanning_settings.frequency * n_planes
+
+    if camera_settings.binning == "1x1":
+        binning = 1
+    elif camera_settings.binning == "2x2":
+        binning = 2
+    elif camera_settings.binning == "4x4":
+        binning = 4
+    # set binning 2x2 by default
+    else:
+        binning = 2
+
+    scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0] / binning
+
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
         n_t=int(save_settings.n_frames),
         n_planes=n_planes,
         chunk_size=int(save_settings.chunk_size),
         notification_email=str(save_settings.notification_email),
-        framerate=framerate
+        framerate=framerate,
+        voxel_size=tuple(
+            int(dimension * binning * 1000) / 1000 for dimension in (
+                scan_length / (n_planes - 1),
+                scope_alignment.pixel_size_x,
+                scope_alignment.pixel_size_y
+            )
+        ),
+        inter_plane_spacing=scan_length / (n_planes - 1) * binning
     )
 
 
@@ -274,6 +305,7 @@ class State:
             sample_rate=self.sample_rate
         )
         self.status = ScanningSettings()
+        self.scope_alignment_info = ScopeAlignmentInfo()
 
         self.laser = CoboltLaser()
         self.camera = CameraProcess(
@@ -313,6 +345,7 @@ class State:
             self.calibration.z_settings,
             self.camera_settings,
             self.save_settings,
+            self.scope_alignment_info
         ]:
             self.settings_tree.add(setting)
 
@@ -388,7 +421,7 @@ class State:
         self.stytra_comm.current_settings_queue.put(self.all_settings)
 
         save_params = convert_save_params(
-            self.save_settings, self.volume_setting)
+            self.save_settings, self.volume_setting, self.camera_settings, self.scope_alignment_info)
         self.saver.saving_parameter_queue.put(save_params)
 
     def get_camera_status(self):
