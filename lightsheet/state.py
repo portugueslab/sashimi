@@ -219,6 +219,7 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
                         camera_settings: CameraSettings, scope_alignment: ScopeAlignmentInfo):
     n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
     framerate = scanning_settings.frequency * n_planes
+    scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
 
     if camera_settings.binning == "1x1":
         binning = 1
@@ -230,7 +231,7 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
     else:
         binning = 2
 
-    scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0] / binning
+    dummy_waist_width = scope_alignment.waist_width * binning
 
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
@@ -241,12 +242,12 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
         framerate=framerate,
         voxel_size=tuple(
             int(dimension * binning * 1000) / 1000 for dimension in (
-                scan_length / (n_planes - 1),
+                dummy_waist_width,
                 scope_alignment.pixel_size_x,
                 scope_alignment.pixel_size_y
             )
         ),
-        inter_plane_spacing=scan_length / (n_planes - 1) * binning
+        inter_plane_spacing=int(scan_length / (n_planes - 1) * 1000) / 1000
     )
 
 

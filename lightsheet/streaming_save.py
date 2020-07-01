@@ -130,7 +130,6 @@ class StackSaver(Process):
             to=receiver_email,
             subject=subject,
             contents=body,
-            attachments=r"icons/main_icon.png"
         )
 
     def cast(self, frame):
