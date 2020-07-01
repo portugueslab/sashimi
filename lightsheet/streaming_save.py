@@ -220,15 +220,16 @@ class StackSaver(Process):
             )
         )
         self.i_chunk += 1
+        self.i_in_chunk = 0
 
 
 class DiskWriter(Process):
-    def __init__(self, stop_event, saving_signal, saved_status_queue, writer_queue, saver_stopped_signal):
+    def __init__(self, stop_event, saving_signal, writer_queue, saved_status_queue, saver_stopped_signal):
         super().__init__()
         self.stop_event = stop_event
         self.saving_signal = saving_signal
         self.saver_stopped_signal = saver_stopped_signal
-        self.saved_status = saved_status_queue
+        self.saved_status_queue = saved_status_queue
         self.writer_queue = writer_queue
         self.chunk = None
         self.saved_status = None
@@ -239,6 +240,7 @@ class DiskWriter(Process):
         while not self.stop_event.is_set():
             if self.saving_signal.is_set():
                 self.receive_chunk()
+                self.save_chunk()
 
     def receive_chunk(self):
         try:
@@ -246,7 +248,7 @@ class DiskWriter(Process):
         except Empty:
             pass
         try:
-            new_status = self.saved_status.get(timeout=0.001)
+            new_status = self.saved_status_queue.get(timeout=0.001)
             self.saved_status = new_status
         except Empty:
             pass
@@ -260,13 +262,15 @@ class DiskWriter(Process):
                 compression="blosc",
             )
             self.chunk = None
-        if self.saved_status.i_chunk == 0:
-            self.bytes_chunk = os.stat(
-                Path(self.saved_status.target_params.output_dir)
-                / "original/{:04d}.h5".format(self.saved_status.i_chunk)
-            ).st_size
-            n_chunks = ceil(self.saved_status.target_params.n_volumes / self.saved_status.target_params.chunk_size)
-            experiment_gb = self.bytes_chunk * n_chunks / 1073741824
-            self.chunk_gb_queue.put(experiment_gb)
-        if self.saved_status.i_frame == self.saved_status.taget_params.n_total:
-            self.saver_stopped_signal.set()
+            self.writer_queue.clear()
+        if self.saved_status is not None:
+            if self.saved_status.i_chunk == 0:
+                self.bytes_chunk = os.stat(
+                    Path(self.saved_status.target_params.output_dir)
+                    / "original/{:04d}.h5".format(self.saved_status.i_chunk)
+                ).st_size
+                n_chunks = ceil(self.saved_status.target_params.n_volumes / self.saved_status.target_params.chunk_size)
+                experiment_gb = self.bytes_chunk * n_chunks / 1073741824
+                self.chunk_gb_queue.put(experiment_gb)
+            if self.saved_status.i_frame == self.saved_status.target_params.n_t:
+                self.saver_stopped_signal.set()
