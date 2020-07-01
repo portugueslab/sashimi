@@ -53,12 +53,14 @@ class ScanningSettings(ParametrizedQt):
             "Paused", ["Paused", "Calibration", "Planar", "Volume"],
         )
 
+
 scanning_to_global_state = dict(
     Paused=GlobalState.PAUSED,
     Calibration=GlobalState.PREVIEW,
     Planar=GlobalState.PLANAR_PREVIEW,
     Volume=GlobalState.VOLUME_PREVIEW
 )
+
 
 class PlanarScanningSettings(ParametrizedQt):
     def __init__(self):
@@ -131,7 +133,7 @@ def convert_planar_params(planar: PlanarScanningSettings):
 
 
 def convert_calibration_params(
-    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
+        planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
         state=ScanningState.PLANAR,
@@ -204,7 +206,7 @@ def convert_camera_params(camera_settings: CameraSettings):
     )
 
 
-def convert_save_params(save_settings: SaveSettings, scanning_settings:ZRecordingSettings):
+def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings):
     n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
     framerate = scanning_settings.frequency * (n_planes)
     return SavingParameters(
@@ -218,9 +220,9 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings:ZRecordin
 
 
 def convert_single_plane_params(
-    planar: PlanarScanningSettings,
-    single_plane_setting: SinglePlaneSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        single_plane_setting: SinglePlaneSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -235,9 +237,9 @@ def convert_single_plane_params(
 
 
 def convert_volume_params(
-    planar: PlanarScanningSettings,
-    z_setting: ZRecordingSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        z_setting: ZRecordingSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
@@ -386,7 +388,7 @@ class State:
         self.stytra_comm.current_settings_queue.put(self.all_settings)
 
         save_params = convert_save_params(
-                self.save_settings, self.volume_setting)
+            self.save_settings, self.volume_setting)
         self.saver.saving_parameter_queue.put(save_params)
 
     def get_camera_status(self):
@@ -478,4 +480,3 @@ class State:
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
-
