@@ -10,13 +10,6 @@ from lightparam.gui import ParameterGui
 from lightparam.gui.collapsible_widget import CollapsibleWidget
 from lightsheet.gui.waveform_gui import WaveformWidget
 from lightsheet.scanning import ExperimentPrepareState
-from lightparam.param_qt import ParametrizedQt, Param
-
-class ScopeAlignmentInfo(ParametrizedQt):
-    def __init__(self):
-        super().__init__()
-        self.name= "scope_alignment_info"
-        self.waist_width = Param(6.5, (0.1, 100), unit="um")
 
 
 class PlanarScanningWidget(QWidget):
@@ -59,9 +52,7 @@ class VolumeScanningWidget(QWidget):
         self.btn_start.clicked.connect(self.state.toggle_experiment_state)
         self.chk_pause = QCheckBox("Pause after experiment")
 
-        self.scope_alignment = ScopeAlignmentInfo()
-
-        self.wid_alignment = ParameterGui(self.scope_alignment)
+        self.wid_alignment = ParameterGui(self.state.scope_alignment_info)
         self.lbl_interplane_distance = QLabel()
         self.lbl_interplane_distance.setStyleSheet("color: yellow")
 
@@ -91,17 +82,17 @@ class VolumeScanningWidget(QWidget):
     def updateBtnText(self):
         self.btn_start.setText(STATE_TEXTS[self.state.experiment_state])
         if self.state.experiment_state == ExperimentPrepareState.PREVIEW or \
-               self.state.experiment_state == ExperimentPrepareState.ABORT:
-           self.btn_start.setChecked(False)
+                self.state.experiment_state == ExperimentPrepareState.ABORT:
+            self.btn_start.setChecked(False)
         if self.state.experiment_state == ExperimentPrepareState.NO_TRIGGER or \
-               self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
-           self.btn_start.setChecked(True)
+                self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+            self.btn_start.setChecked(True)
 
     def update_alignment(self):
         scan_width = self.state.volume_setting.scan_range[1] - self.state.volume_setting.scan_range[0]
         num_planes = self.state.volume_setting.n_planes - \
-                 self.state.volume_setting.n_skip_start - self.state.volume_setting.n_skip_end
-        plane_distance = scan_width / num_planes - self.scope_alignment.waist_width
+                     self.state.volume_setting.n_skip_start - self.state.volume_setting.n_skip_end
+        plane_distance = scan_width / num_planes - self.state.scope_alignment_info.waist_width
         if plane_distance > 0:
             self.lbl_interplane_distance.setText(
                 "With the current configuration, distance between planes is {:0.2f} um".format(plane_distance)

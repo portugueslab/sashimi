@@ -34,6 +34,15 @@ class GlobalState(Enum):
     EXPERIMENT_RUNNING = 4
 
 
+class ScopeAlignmentInfo(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "scope_alignment_info"
+        self.waist_width = Param(6.5, (0.1, 100), unit="um")
+        self.pixel_size_x = Param(0.3, (0.1, 10), unit="um (at binning 1x1)")
+        self.pixel_size_y = Param(0.3, (0.1, 10), unit="um (at binning 1x1)")
+
+
 class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
@@ -53,12 +62,14 @@ class ScanningSettings(ParametrizedQt):
             "Paused", ["Paused", "Calibration", "Planar", "Volume"],
         )
 
+
 scanning_to_global_state = dict(
     Paused=GlobalState.PAUSED,
     Calibration=GlobalState.PREVIEW,
     Planar=GlobalState.PLANAR_PREVIEW,
     Volume=GlobalState.VOLUME_PREVIEW
 )
+
 
 class PlanarScanningSettings(ParametrizedQt):
     def __init__(self):
@@ -131,7 +142,7 @@ def convert_planar_params(planar: PlanarScanningSettings):
 
 
 def convert_calibration_params(
-    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
+        planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
         state=ScanningState.PLANAR,
@@ -204,23 +215,45 @@ def convert_camera_params(camera_settings: CameraSettings):
     )
 
 
-def convert_save_params(save_settings: SaveSettings, scanning_settings:ZRecordingSettings):
+def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings,
+                        camera_settings: CameraSettings, scope_alignment: ScopeAlignmentInfo):
     n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
-    framerate = scanning_settings.frequency * (n_planes)
+    framerate = scanning_settings.frequency * n_planes
+    scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
+
+    if camera_settings.binning == "1x1":
+        binning = 1
+    elif camera_settings.binning == "2x2":
+        binning = 2
+    elif camera_settings.binning == "4x4":
+        binning = 4
+    # set binning 2x2 by default
+    else:
+        binning = 2
+
+    inter_plane = int(scan_length / (n_planes - 1) * 1000) / (1000 * binning)
+
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
         n_t=int(save_settings.n_frames),
         n_planes=n_planes,
         chunk_size=int(save_settings.chunk_size),
         notification_email=str(save_settings.notification_email),
-        framerate=framerate
+        framerate=framerate,
+        voxel_size=tuple(
+            int(dimension * binning * 1000) / 1000 for dimension in (
+                inter_plane,
+                scope_alignment.pixel_size_x,
+                scope_alignment.pixel_size_y
+            )
+        )
     )
 
 
 def convert_single_plane_params(
-    planar: PlanarScanningSettings,
-    single_plane_setting: SinglePlaneSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        single_plane_setting: SinglePlaneSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -235,9 +268,9 @@ def convert_single_plane_params(
 
 
 def convert_volume_params(
-    planar: PlanarScanningSettings,
-    z_setting: ZRecordingSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        z_setting: ZRecordingSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
@@ -272,6 +305,7 @@ class State:
             sample_rate=self.sample_rate
         )
         self.status = ScanningSettings()
+        self.scope_alignment_info = ScopeAlignmentInfo()
 
         self.laser = CoboltLaser()
         self.camera = CameraProcess(
@@ -311,6 +345,7 @@ class State:
             self.calibration.z_settings,
             self.camera_settings,
             self.save_settings,
+            self.scope_alignment_info
         ]:
             self.settings_tree.add(setting)
 
@@ -386,7 +421,7 @@ class State:
         self.stytra_comm.current_settings_queue.put(self.all_settings)
 
         save_params = convert_save_params(
-                self.save_settings, self.volume_setting)
+            self.save_settings, self.volume_setting, self.camera_settings, self.scope_alignment_info)
         self.saver.saving_parameter_queue.put(save_params)
 
     def get_camera_status(self):
@@ -478,4 +513,3 @@ class State:
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
-

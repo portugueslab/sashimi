@@ -20,6 +20,7 @@ class SavingParameters:
     chunk_size: int = 1000
     notification_email: str = "None"
     framerate: float = 1
+    voxel_size: tuple = (1, 1, 1)
 
 @dataclass
 class SavingStatus:
@@ -94,7 +95,8 @@ class StackSaver(Process):
                 pass
 
         if self.i_frame > 0:
-            self.save_chunk()
+            if self.i_in_chunk != 0:
+                self.save_chunk()
             self.update_saved_status_queue()
             self.finalize_dataset()
             self.current_data = None
@@ -127,7 +129,6 @@ class StackSaver(Process):
             to=receiver_email,
             subject=subject,
             contents=body,
-            attachments=r"icons/main_icon.png"
         )
 
     def cast(self, frame):
@@ -188,6 +189,7 @@ class StackSaver(Process):
                     "crop_start": [0, 0, 0, 0],
                     "crop_end": [0, 0, 0, 0],
                     "padding": [0, 0, 0, 0],
+                    "voxel_size": self.save_parameters.voxel_size,
                 },
                 f,
             )
