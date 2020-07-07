@@ -243,8 +243,8 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
         voxel_size=tuple(
             int(dimension * binning * 1000) / 1000 for dimension in (
                 inter_plane,
-                scope_alignment.pixel_size_x,
-                scope_alignment.pixel_size_y
+                scope_alignment.pixel_size_y,
+                scope_alignment.pixel_size_x
             )
         )
     )
