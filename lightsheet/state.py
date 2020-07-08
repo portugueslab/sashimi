@@ -48,7 +48,6 @@ class SaveSettings(ParametrizedQt):
         super().__init__()
         self.name = "experiment_settings"
         self.n_frames = Param(10_000, (1, 10_000_000), gui=False, loadable=False)
-        self.chunk_size = Param(50, (1, 10_000))
         self.save_dir = Param(r"F:/Vilim", gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("None")
@@ -237,7 +236,6 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
         output_dir=Path(save_settings.save_dir),
         n_t=int(save_settings.n_frames),
         n_planes=n_planes,
-        chunk_size=int(save_settings.chunk_size),
         notification_email=str(save_settings.notification_email),
         framerate=framerate,
         voxel_size=tuple(
