@@ -101,7 +101,7 @@ class StackSaver(Process):
             self.update_saved_status_queue()
             self.finalize_dataset()
             self.current_data = None
-            if self.save_parameters.notification_email != "None":
+            if self.save_parameters.notification_email != "None" and self.saving_signal.is_set():
                 self.send_email_end()
 
         self.saving_signal.clear()
@@ -120,9 +120,8 @@ class StackSaver(Process):
         body = [
             "Hey!",
             "\n",
-            "Your lightsheet experiment has completed and was a success! Come pick up your little fish",
+            "Your lightsheet experiment has finished and was a success! Come pick up your little fish",
             "\n"
-            "Always yours,",
             "fishgitbot"
         ]
 
