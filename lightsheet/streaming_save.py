@@ -17,7 +17,8 @@ class SavingParameters:
     n_t: int = 10000
     n_planes: int = 1
     n_volumes: int = 10000
-    chunk_size: int = 1000
+    chunk_size: int = 20
+    optimal_chunk_MB_RAM: int = 450  # Experimental value, might be different for different machines.
     notification_email: str = "None"
     framerate: float = 1
     voxel_size: tuple = (1, 1, 1)
@@ -139,6 +140,7 @@ class StackSaver(Process):
 
     def fill_dataset(self, frame):
         if self.current_data is None:
+            self.calculate_optimal_size(frame)
             self.current_data = np.empty(
                 (self.save_parameters.chunk_size, self.save_parameters.n_planes, *frame.shape),
                 dtype=self.dtype
@@ -203,6 +205,15 @@ class StackSaver(Process):
         )
         self.i_in_chunk = 0
         self.i_chunk += 1
+
+    def calculate_optimal_size(self, frame):
+        if self.dtype == np.uint16:
+            array_bytes = 2 * frame.shape[0] * frame.shape[1]
+        else:
+            raise TypeError("Saving data type not supported. Only uint16 is supported")
+
+        volume_megabytes = array_bytes * self.save_parameters.n_planes / 1048576
+        self.save_parameters.chunk_size = int(self.save_parameters.optimal_chunk_MB_RAM / volume_megabytes)
 
     def receive_save_parameters(self):
         try:
