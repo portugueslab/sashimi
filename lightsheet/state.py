@@ -103,7 +103,7 @@ class ZRecordingSettings(ParametrizedQt):
         self.name = "scanning/volumetric_recording"
         self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
         self.frequency = Param(1.0, (0.1, 100), unit="volumes/s (Hz)")
-        self.n_planes = Param(10, (1, 100))
+        self.n_planes = Param(10, (2, 100))
         self.i_freeze = Param(0, (0, 1000))
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
@@ -229,7 +229,6 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
     # set binning 2x2 by default
     else:
         binning = 2
-
     inter_plane = int(scan_length / (n_planes - 1) * 1000) / (1000 * binning)
 
     return SavingParameters(
