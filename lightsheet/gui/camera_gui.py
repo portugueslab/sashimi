@@ -14,6 +14,7 @@ from pyqtgraph.graphicsItems.ROI import ROI
 from lightsheet.state import convert_camera_params, GlobalState
 
 from time import time_ns
+import napari
 
 pg.setConfigOptions(imageAxisOrder="row-major")
 
@@ -36,19 +37,19 @@ class ViewingWidget(QWidget):
         self.display_settings = DisplaySettings()
         self.wid_display_settings = ParameterGui(self.display_settings)
 
-        self.image_viewer = pg.ImageView()
-        self.roi = ROI(pos=[100, 100], size=500, removable=True)
-        self.roi.addScaleHandle([1, 1], [0, 0])
-        self.image_viewer.view.addItem(self.roi)
+        self.viewer = napari.Viewer()
+        # self.roi = ROI(pos=[100, 100], size=500, removable=True)
+        # self.roi.addScaleHandle([1, 1], [0, 0])
+        # self.image_viewer.view.addItem(self.roi)
 
-        self.image_viewer.ui.roiBtn.hide()
-        self.image_viewer.ui.menuBtn.hide()
+        # self.image_viewer.ui.roiBtn.hide()
+        # self.image_viewer.ui.menuBtn.hide()
 
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
         self.lbl_experiment_progress = QLabel()
 
-        self.layout().addWidget(self.image_viewer)
+        self.layout().addWidget(self.viewer.window.qt_viewer)
         self.layout().addWidget(self.wid_display_settings)
         self.layout().addWidget(self.experiment_progress)
         self.layout().addWidget(self.lbl_experiment_progress)
@@ -70,13 +71,11 @@ class ViewingWidget(QWidget):
             return
 
         current_time = time_ns()
-        delta_t = (current_time - self.last_time_updated)/1e9
-        if delta_t > 1/self.display_settings.display_framerate:
-            self.image_viewer.setImage(
+        delta_t = (current_time - self.last_time_updated) / 1e9
+        # TODO: Adjust for first image like in pyqtgraph
+        if delta_t > 1 / self.display_settings.display_framerate:
+            self.viewer.add_image(
                 current_image,
-                autoLevels=self.is_first_image,
-                autoRange=self.is_first_image,
-                autoHistogramRange=self.is_first_image,
             )
             self.is_first_image = False
             self.last_time_updated = time_ns()
