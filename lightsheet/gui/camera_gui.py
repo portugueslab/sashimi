@@ -2,6 +2,7 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QPushButton,
     QLabel,
     QProgressBar
@@ -10,11 +11,11 @@ import pyqtgraph as pg
 from lightparam.gui import ParameterGui
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
-from pyqtgraph.graphicsItems.ROI import ROI
 from lightsheet.state import convert_camera_params, GlobalState
 
 from time import time_ns
 import napari
+import  numpy as np
 
 pg.setConfigOptions(imageAxisOrder="row-major")
 
@@ -32,27 +33,30 @@ class ViewingWidget(QWidget):
         self.state = state
         self.timer = timer
         self.refresh_timer = QTimer()
-        self.setLayout(QVBoxLayout())
+        self.main_layout = QVBoxLayout()
 
         self.display_settings = DisplaySettings()
         self.wid_display_settings = ParameterGui(self.display_settings)
 
-        self.viewer = napari.Viewer()
-        # self.roi = ROI(pos=[100, 100], size=500, removable=True)
-        # self.roi.addScaleHandle([1, 1], [0, 0])
-        # self.image_viewer.view.addItem(self.roi)
-
-        # self.image_viewer.ui.roiBtn.hide()
-        # self.image_viewer.ui.menuBtn.hide()
+        self.viewer = napari.Viewer(show=False)
+        self.frame_layer = self.viewer.add_image(np.zeros([1000, 1000]))
+        self.roi = self.viewer.add_shapes([np.array([[0, 0], [500, 500]])], opacity=0.1)
 
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
         self.lbl_experiment_progress = QLabel()
 
-        self.layout().addWidget(self.viewer.window.qt_viewer)
-        self.layout().addWidget(self.wid_display_settings)
-        self.layout().addWidget(self.experiment_progress)
-        self.layout().addWidget(self.lbl_experiment_progress)
+        self.btn_autoadjust = QPushButton("Autoadjust LUT")
+
+        self.bottom_layout = QHBoxLayout()
+        self.bottom_layout.addWidget(self.wid_display_settings)
+        self.bottom_layout.addWidget(self.btn_autoadjust)
+        self.bottom_layout.addStretch()
+
+        self.main_layout.addWidget(self.viewer.window.qt_viewer)
+        self.main_layout.addLayout(self.bottom_layout)
+        self.main_layout.addWidget(self.experiment_progress)
+        self.main_layout.addWidget(self.lbl_experiment_progress)
 
         self.experiment_progress.hide()
         self.lbl_experiment_progress.hide()
@@ -60,24 +64,27 @@ class ViewingWidget(QWidget):
         self.is_first_image = True
         self.refresh_display = True
 
-        # ms for display clock. Currently 5 fps replay
         self.last_time_updated = 0
 
+        self.setLayout(self.main_layout)
+
         self.timer.timeout.connect(self.refresh)
+        self.btn_autoadjust.clicked.connect(self.autoadjust_lut)
 
     def refresh(self) -> None:
         current_image = self.state.get_image()
         if current_image is None:
             return
+        if self.is_first_image:
+            self.viewer.layers.remove_selected()
+            self.frame_layer = self.viewer.add_image(current_image)
+            self.is_first_image = False
 
         current_time = time_ns()
         delta_t = (current_time - self.last_time_updated) / 1e9
-        # TODO: Adjust for first image like in pyqtgraph
+        # TODO: Auto-adjust for fist image after binning change (right now one has to click autoadjust_lut)
         if delta_t > 1 / self.display_settings.display_framerate:
-            self.viewer.add_image(
-                current_image,
-            )
-            self.is_first_image = False
+            self.frame_layer.data = current_image
             self.last_time_updated = time_ns()
 
         sstatus = self.state.get_save_status()
@@ -87,6 +94,9 @@ class ViewingWidget(QWidget):
             self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
             self.experiment_progress.setValue(sstatus.i_volume)
             self.lbl_experiment_progress.setText("Saved chunks: {}".format(sstatus.i_chunk))
+
+    def autoadjust_lut(self):
+        self.is_first_image = True
 
 
 class CameraSettingsContainerWidget(QWidget):
