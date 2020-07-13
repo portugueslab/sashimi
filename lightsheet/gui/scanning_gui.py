@@ -23,9 +23,8 @@ class PlanarScanningWidget(QWidget):
 
 STATE_TEXTS = {
     ExperimentPrepareState.NO_TRIGGER: "Start recording",
-    ExperimentPrepareState.PREVIEW: "Prepare recording",
+    ExperimentPrepareState.PREVIEW: "Start recording",
     ExperimentPrepareState.EXPERIMENT_STARTED: "Recording started. Press to abort",
-    ExperimentPrepareState.ABORT: "Experiment aborted"
 }
 
 
@@ -49,7 +48,7 @@ class VolumeScanningWidget(QWidget):
         self.wid_volume = ParameterGui(state.volume_setting)
         self.btn_start = QPushButton()
         self.btn_start.setCheckable(True)
-        self.btn_start.clicked.connect(self.state.toggle_experiment_state)
+        self.btn_start.clicked.connect(self.change_experiment_state)
         self.chk_pause = QCheckBox("Pause after experiment")
 
         self.wid_alignment = ParameterGui(self.state.scope_alignment_info)
@@ -79,10 +78,11 @@ class VolumeScanningWidget(QWidget):
         self.timer_scope_info.timeout.connect(self.update_alignment)
         self.chk_pause.clicked.connect(self.change_pause_status)
 
+        self.chk_pause.click()
+
     def updateBtnText(self):
         self.btn_start.setText(STATE_TEXTS[self.state.experiment_state])
-        if self.state.experiment_state == ExperimentPrepareState.PREVIEW or \
-                self.state.experiment_state == ExperimentPrepareState.ABORT:
+        if self.state.experiment_state == ExperimentPrepareState.PREVIEW:
             self.btn_start.setChecked(False)
         if self.state.experiment_state == ExperimentPrepareState.NO_TRIGGER or \
                 self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
@@ -104,3 +104,10 @@ class VolumeScanningWidget(QWidget):
 
     def change_pause_status(self):
         self.state.pause_after = self.chk_pause.isChecked()
+
+    def change_experiment_state(self):
+        if self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+            # Here what happens if experiment is aborted
+            self.state.saver.saving_signal.clear()
+        else:
+            self.state.toggle_experiment_state()

@@ -431,30 +431,27 @@ class State:
     def toggle_experiment_state(self):
         if self.experiment_state == ExperimentPrepareState.PREVIEW:
             self.experiment_state = ExperimentPrepareState.NO_TRIGGER
-            self.prepare_experiment()
+            self.start_experiment()
 
         elif self.experiment_state == ExperimentPrepareState.NO_TRIGGER:
             self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
             self.send_scan_settings()
 
         elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
-            self.experiment_state = ExperimentPrepareState.ABORT
-            self.abort_experiment()
             self.experiment_state = ExperimentPrepareState.PREVIEW
-            self.send_scan_settings()
+            self.end_experiment()
 
-    def prepare_experiment(self):
-        # TODO disable the GUI
+    def start_experiment(self):
+        # TODO disable the GUI except the abort button
         self.send_scan_settings()
         self.saver.saving_signal.set()
-
-    def abort_experiment(self):
-        self.end_experiment()
+        self.saver.save_queue.empty()
+        self.camera.image_queue.empty()
+        self.toggle_experiment_state()
 
     def end_experiment(self):
         self.saver.saving_signal.clear()
         self.experiment_start_event.clear()
-        self.saver.saver_stopped_signal.clear()
         self.saver.save_queue.clear()
         self.send_scan_settings()
 
