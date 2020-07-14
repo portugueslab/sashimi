@@ -106,12 +106,13 @@ class MainWindow(QMainWindow):
 
     def check_end_experiment(self):
         if self.st.saver.saver_stopped_signal.is_set():
-            self.st.end_experiment()
-            self.st.saver.saver_stopped_signal.clear()
+            self.st.toggle_experiment_state()
             if self.st.pause_after:
                 self.wid_status.setCurrentIndex(0)
                 self.st.laser.set_current(0)
-                self.refresh_param_values()
+            self.refresh_param_values()
+            self.wid_display.experiment_progress.hide()
+            self.st.saver.saver_stopped_signal.clear()
 
 
 class StatusWidget(QTabWidget):
