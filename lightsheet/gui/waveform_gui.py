@@ -34,13 +34,22 @@ class WaveformWidget(QWidget):
             self.plot_widget.removeItem(self.pulse_regions[region])
         self.pulse_regions = [None] * len(pulse_times)
         for i_pulse, pulse in enumerate(pulse_times):
-            self.pulse_regions[i_pulse] = pg.LinearRegionItem(
-                values=(pulse, pulse + self.state.camera_settings.exposure / 1000),
-                movable=False,
-                brush=pg.mkBrush(
-                    166, 196, 240, 100
+            if self.state.volume_setting.i_freeze - 1 == i_pulse:
+                self.pulse_regions[i_pulse] = pg.LinearRegionItem(
+                    values=(pulse, pulse + self.state.camera_settings.exposure / 1000),
+                    movable=False,
+                    brush=pg.mkBrush(
+                        100, 100, 240, 100
+                    )
                 )
-            )
+            else:
+                self.pulse_regions[i_pulse] = pg.LinearRegionItem(
+                    values=(pulse, pulse + self.state.camera_settings.exposure / 1000),
+                    movable=False,
+                    brush=pg.mkBrush(
+                        166, 196, 240, 100
+                    )
+                )
             for line in self.pulse_regions[i_pulse].lines:
                 line.hide()
             self.plot_widget.addItem(self.pulse_regions[i_pulse])
