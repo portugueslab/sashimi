@@ -15,7 +15,7 @@ from lightsheet.state import convert_camera_params, GlobalState
 
 from time import time_ns
 import napari
-import  numpy as np
+import numpy as np
 
 pg.setConfigOptions(imageAxisOrder="row-major")
 
@@ -24,7 +24,7 @@ class DisplaySettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "display_settings"
-        self.display_framerate = Param(16, (1, 100))
+        self.display_framerate = Param(30, (1, 100))
 
 
 class ViewingWidget(QWidget):
@@ -50,6 +50,7 @@ class ViewingWidget(QWidget):
         )
         self.viewer.press_key("s")  # this allows moving the whole roi and scaling but no individual handles
         # TODO: Block rotating roi
+        self.btn_display_roi = QPushButton("Show/Hide ROI")
 
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
@@ -57,6 +58,7 @@ class ViewingWidget(QWidget):
 
         self.bottom_layout = QHBoxLayout()
         self.bottom_layout.addWidget(self.wid_display_settings)
+        self.bottom_layout.addWidget(self.btn_display_roi)
         self.bottom_layout.addStretch()
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
@@ -74,6 +76,7 @@ class ViewingWidget(QWidget):
         self.setLayout(self.main_layout)
 
         self.timer.timeout.connect(self.refresh)
+        self.btn_display_roi.clicked.connect(self.toggle_roi_display)
 
     def refresh(self) -> None:
         current_image = self.state.get_image()
@@ -94,8 +97,11 @@ class ViewingWidget(QWidget):
             self.experiment_progress.setValue(sstatus.i_volume)
             self.lbl_experiment_progress.setText("Saved chunks: {}".format(sstatus.i_chunk))
 
-    def show_roi(self):
-        pass
+    def toggle_roi_display(self):
+        if self.roi.visible:
+            self.roi.visible = False
+        else:
+            self.roi.visible = True
 
 
 class CameraSettingsContainerWidget(QWidget):
