@@ -51,6 +51,7 @@ class SaveSettings(ParametrizedQt):
         self.save_dir = Param(r"F:/Vilim", gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("None")
+        self.overwrite_save_folder = Param(0, (0, 1), gui=False, loadable=False)
 
 
 class ScanningSettings(ParametrizedQt):
