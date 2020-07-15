@@ -48,8 +48,7 @@ class ViewingWidget(QWidget):
             opacity=0.3,
             face_color="yellow"
         )
-        self.viewer.press_key("s")  # this allows moving the whole roi and scaling but no individual handles
-        # TODO: Block rotating roi
+        self.toggle_roi_display()
         self.btn_display_roi = QPushButton("Show/Hide ROI")
 
         self.experiment_progress = QProgressBar()
@@ -99,9 +98,11 @@ class ViewingWidget(QWidget):
 
     def toggle_roi_display(self):
         if self.roi.visible:
+            # TODO: Block rotating roi
             self.roi.visible = False
         else:
             self.roi.visible = True
+            self.viewer.press_key("s")  # this allows moving the whole roi and scaling but no individual handles
 
 
 class CameraSettingsContainerWidget(QWidget):
