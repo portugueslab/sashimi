@@ -39,18 +39,24 @@ class ViewingWidget(QWidget):
         self.wid_display_settings = ParameterGui(self.display_settings)
 
         self.viewer = napari.Viewer(show=False)
-        self.frame_layer = self.viewer.add_image(np.zeros([1000, 1000]))
-        self.roi = self.viewer.add_shapes([np.array([[0, 0], [500, 500]])], opacity=0.1)
+        self.frame_layer = self.viewer.add_image(np.zeros([1024, 1024]), blending='translucent', name="frame_layer")
+        self.frame_layer.events.data.connect(lambda e: self.frame_layer.reset_contrast_limits())
+
+        self.roi = self.viewer.add_shapes(
+            [np.array([[0, 0], [500, 0], [500, 500], [0, 500]])],
+            blending='translucent',
+            opacity=0.3,
+            face_color="yellow"
+        )
+        self.viewer.press_key("s")  # this allows moving the whole roi and scaling but no individual handles
+        # TODO: Block rotating roi
 
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
         self.lbl_experiment_progress = QLabel()
 
-        self.btn_autoadjust = QPushButton("Autoadjust LUT")
-
         self.bottom_layout = QHBoxLayout()
         self.bottom_layout.addWidget(self.wid_display_settings)
-        self.bottom_layout.addWidget(self.btn_autoadjust)
         self.bottom_layout.addStretch()
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
@@ -61,7 +67,6 @@ class ViewingWidget(QWidget):
         self.experiment_progress.hide()
         self.lbl_experiment_progress.hide()
 
-        self.is_first_image = True
         self.refresh_display = True
 
         self.last_time_updated = 0
@@ -69,20 +74,14 @@ class ViewingWidget(QWidget):
         self.setLayout(self.main_layout)
 
         self.timer.timeout.connect(self.refresh)
-        self.btn_autoadjust.clicked.connect(self.autoadjust_lut)
 
     def refresh(self) -> None:
         current_image = self.state.get_image()
         if current_image is None:
             return
-        if self.is_first_image:
-            self.viewer.layers.remove_selected()
-            self.frame_layer = self.viewer.add_image(current_image)
-            self.is_first_image = False
 
         current_time = time_ns()
         delta_t = (current_time - self.last_time_updated) / 1e9
-        # TODO: Auto-adjust for fist image after binning change (right now one has to click autoadjust_lut)
         if delta_t > 1 / self.display_settings.display_framerate:
             self.frame_layer.data = current_image
             self.last_time_updated = time_ns()
@@ -95,8 +94,8 @@ class ViewingWidget(QWidget):
             self.experiment_progress.setValue(sstatus.i_volume)
             self.lbl_experiment_progress.setText("Saved chunks: {}".format(sstatus.i_chunk))
 
-    def autoadjust_lut(self):
-        self.is_first_image = True
+    def show_roi(self):
+        pass
 
 
 class CameraSettingsContainerWidget(QWidget):
@@ -123,6 +122,7 @@ class CameraSettingsContainerWidget(QWidget):
         self.layout().addWidget(self.lbl_roi)
 
         self.update_camera_info()
+        self.set_full_size_frame_button
         self.camera_info_timer.start()
 
         self.set_roi_button.clicked.connect(self.set_roi)
@@ -130,11 +130,16 @@ class CameraSettingsContainerWidget(QWidget):
         self.camera_info_timer.timeout.connect(self.update_camera_info)
 
     def set_roi(self):
-        roi_pos = self.roi.pos()
-        roi_size = self.roi.size()
-        self.state.camera_settings.subarray = tuple([roi_pos.x(), roi_pos.y(), roi_size.x(), roi_size.y()])
-        self.update_roi_info(width=roi_size.x(), height=roi_size.y())
-        self.roi.hide()
+        roi_pos = (
+            int(self.roi.data[0][0][1]),
+            int(self.roi.data[0][0][0])
+        )
+        roi_size = (
+            int(self.roiroi.data[0][3][1] - self.roi.data[0][0][1]),
+            int(self.roi.data[0][1][0] - self.roi.data[0][0][0]),
+        )
+        self.state.camera_settings.subarray = tuple([roi_pos[0], roi_pos[1], roi_size[0], roi_size[1]])
+        self.update_roi_info(width=roi_size[0], height=roi_size[1])
 
     def set_full_size_frame(self):
         self.state.camera_settings.subarray = [
@@ -148,7 +153,6 @@ class CameraSettingsContainerWidget(QWidget):
             width=self.state.current_camera_status.image_width / camera_params.binning,
             height=self.state.current_camera_status.image_height / camera_params.binning
         )
-        self.roi.show()
 
     def update_roi_info(self, width, height):
         self.lbl_roi.setText(

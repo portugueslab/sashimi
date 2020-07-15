@@ -74,18 +74,10 @@ class MainWindow(QMainWindow):
             DockedWidget(widget=self.wid_settings_tree, title="Metadata")
         )
 
-        self.st.camera_settings.sig_param_changed.connect(self.adjust_viewer)
-        self.wid_camera.set_full_size_frame_button.clicked.connect(self.adjust_viewer)
-        self.wid_camera.set_roi_button.clicked.connect(self.adjust_viewer)
-        self.wid_status.wid_calibration.dialog_button.clicked.connect(self.adjust_viewer)
-
         self.st.camera_settings.sig_param_changed.connect(self.wid_status.wid_calibration.uncheck_noise)
 
         self.timer.start()
         self.timer.timeout.connect(self.check_end_experiment)
-
-    def adjust_viewer(self):
-        self.wid_display.is_first_image = True
 
     def closeEvent(self, a0) -> None:
         self.st.wrap_up()
