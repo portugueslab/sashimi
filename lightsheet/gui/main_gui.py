@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
             self.st.toggle_experiment_state()
             if self.st.pause_after:
                 self.wid_status.setCurrentIndex(0)
-                self.st.laser.set_current(0)
+                self.wid_laser.toggle()
             self.refresh_param_values()
             self.wid_display.experiment_progress.hide()
             self.st.saver.saver_stopped_signal.clear()
