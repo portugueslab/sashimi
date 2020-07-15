@@ -91,7 +91,7 @@ class MainWindow(QMainWindow):
         self.st.wrap_up()
         a0.accept()
 
-    def refresh_param_values(self):
+    def refresh_param_values(self, omit_wid_camera=False):
         # TODO should be possible with lightparam, when it's implemented there remove here
         self.wid_laser.wid_settings.refresh_widgets()
         self.wid_scan.wid_planar.refresh_widgets()
@@ -99,7 +99,8 @@ class MainWindow(QMainWindow):
         self.wid_status.wid_calibration.refresh_widgets()
         self.wid_status.wid_single_plane.wid_singleplane.refresh_widgets()
         self.wid_display.wid_display_settings.refresh_widgets()
-        self.wid_camera.wid_camera_settings.refresh_widgets()
+        if not omit_wid_camera:
+            self.wid_camera.wid_camera_settings.refresh_widgets()
         self.wid_save_options.wid_save_options.refresh_widgets()
         self.wid_camera.set_roi()
         self.wid_save_options.set_locationbutton()
@@ -110,7 +111,7 @@ class MainWindow(QMainWindow):
             if self.st.pause_after:
                 self.wid_status.setCurrentIndex(0)
                 self.wid_laser.toggle()
-            self.refresh_param_values()
+            self.refresh_param_values(omit_wid_camera=True)
             self.wid_display.experiment_progress.hide()
             self.st.saver.saver_stopped_signal.clear()
 
