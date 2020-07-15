@@ -28,6 +28,7 @@ class SavingSettingsWidget(QWidget):
         f = open(r"../../lightsheet_procedure.md")
         self.html_markdown = markdown.markdown(f.read())
         self.instructions = QTextEdit(self.html_markdown)
+        self.instructions.setReadOnly(True)
         self.popup_window = QDialog()
         self.layout().addWidget(self.btn_load)
         self.layout().addWidget(self.btn_save)
