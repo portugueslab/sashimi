@@ -127,6 +127,7 @@ class ScanLoop:
         sample_rate,
         waveform_queue: ArrayQueue,
         experiment_start_signal: Event,
+        wait_signal : Event
     ):
 
         self.sample_rate = sample_rate
@@ -163,7 +164,7 @@ class ScanLoop:
         self.shifted_time = self.time.copy()
         self.i_sample = 0
         self.n_samples_written = 0
-        self.wait_signal = Event()
+        self.wait_signal = wait_signal
         self.wait_signal.set()
 
     def n_samples_period(self):
@@ -379,6 +380,7 @@ class Scanner(Process):
 
         self.stop_event = stop_event
         self.experiment_start_event = experiment_start_event
+        self.wait_signal = Event()
 
         self.parameter_queue = Queue()
 
@@ -462,6 +464,7 @@ class Scanner(Process):
                     self.sample_rate,
                     self.waveform_queue,
                     self.experiment_start_event,
+                    self.wait_signal
                 )
                 try:
                     scanloop.loop()
