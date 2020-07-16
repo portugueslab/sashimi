@@ -162,6 +162,7 @@ class ScanLoop:
         self.time = np.arange(self.n_samples) / self.sample_rate
         self.shifted_time = self.time.copy()
         self.i_sample = 0
+        self.n_samples_written = 0
 
     def n_samples_period(self):
         ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
@@ -199,6 +200,7 @@ class ScanLoop:
     def write(self):
         self.z_writer.write_many_sample(self.write_arrays[:4])
         self.xy_writer.write_many_sample(self.write_arrays[4:])
+        self.n_samples_written += 1
 
     def read(self):
         self.z_reader.read_many_sample(
@@ -323,6 +325,7 @@ class VolumetricScanLoop(ScanLoop):
         ):
             self.camera_on = True
             self.i_sample = 0  # puts it at the beginning of the cycle
+            self.n_samples_written = 0
 
         return True
 
