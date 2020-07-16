@@ -11,5 +11,5 @@ setup(
     author_email="vilim@neuro.mpg.de",
     packages=find_packages(),
     install_requires=requirements,
-    entry_points={"console_scripts" : ["fancyls = lightsheet.main:main"]},
+    entry_points={"console_scripts" : ["slim = lightsheet.main:main"]},
 )

@@ -1,16 +1,41 @@
-# Portugues lab lighthsheet control software
+# SLiM
 
-Reworked with knowledge acquired in the past 3 years.
+<a href="url"><img 
+src="https://github.com/portugueslab/lightsheet_take_two/blob/master/lightsheet/icons/main_icon.png" 
+align="left" 
+height="200" 
+width="300"></a>
 
-The lightsheet software has four modes: pause, calibration, planar and volumetric.
-In the calibration mode two things need to be determined:
 
-1) the ranges and frequencies for lateral scanning
-2) the piezo-galvo relation
+SLiM is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
+It was developed by members of the (PortuguesLab)[http://www.portugueslab.com/]
+ at the Technical University of Munich and Max Planck Institute of Neurobiology
+ 
+# Installation
 
-In the planar or volumetric adquisition mode the estimated piezo-galvo relation is applied. In the later,
-the piezo range has to be determined. NB. -1 in I freeze frees the camera to run over all planes. Any other number
-freezer the camera over that particular plane. "N skip start" and "N skip end" skip ventral and dorsal planes,
-respectively.
+Install the latest (Anaconda)[https://www.anaconda.com/]] distribution of Python 3.
 
-Guidelines for use can be found in lightsheet_procedure.md
+(Create a new environment)[https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/
+manage-environments.html#creating-an-environment-with-commands]
+
+Activate the environment (replace `my_env` for the name of your environment):
+
+```conda activate my_env```
+
+Clone this repository
+
+Navigate to the folder where you cloned the repository (`/lightsheet_take_two`) and run
+
+```pip install .```
+
+Now you are ready to go!
+
+# Starting the software from command line
+
+Open a new command line prompt and activate your environment
+
+Run:
+
+```slim```
+
+Sit back, relax and enjoy your experience!
