@@ -3,6 +3,9 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout
 from queue import Empty
 import numpy as np
 
+color_plane = (166, 196, 240, 100)
+color_current_plane = (100, 100, 240, 100)
+
 
 class WaveformWidget(QWidget):
     def __init__(self, waveform_queue, timer, state):
@@ -39,7 +42,7 @@ class WaveformWidget(QWidget):
                     values=(pulse, pulse + self.state.camera_settings.exposure / 1000),
                     movable=False,
                     brush=pg.mkBrush(
-                        100, 100, 240, 100
+                        *color_current_plane
                     )
                 )
             else:
@@ -47,7 +50,7 @@ class WaveformWidget(QWidget):
                     values=(pulse, pulse + self.state.camera_settings.exposure / 1000),
                     movable=False,
                     brush=pg.mkBrush(
-                        166, 196, 240, 100
+                        *color_plane
                     )
                 )
             for line in self.pulse_regions[i_pulse].lines:
