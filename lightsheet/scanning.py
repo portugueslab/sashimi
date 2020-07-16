@@ -163,6 +163,8 @@ class ScanLoop:
         self.shifted_time = self.time.copy()
         self.i_sample = 0
         self.n_samples_written = 0
+        self.wait_signal = Event()
+        self.wait_signal.set()
 
     def n_samples_period(self):
         ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
@@ -199,8 +201,8 @@ class ScanLoop:
 
     def write(self):
         self.z_writer.write_many_sample(self.write_arrays[:4])
-        self.xy_writer.write_many_sample(self.write_arrays[4:])
         self.n_samples_written += 1
+        self.xy_writer.write_many_sample(self.write_arrays[4:])
 
     def read(self):
         self.z_reader.read_many_sample(
@@ -287,6 +289,7 @@ class VolumetricScanLoop(ScanLoop):
 
     def update_settings(self):
         updated = super().update_settings()
+        self.wait_signal.set()
         if not updated:
             return False
 
@@ -355,8 +358,8 @@ class VolumetricScanLoop(ScanLoop):
             if (-2 < calc_sync(min_wave, self.parameters.z.frontal_sync) < 2 and
                 -2 < calc_sync(max_wave, self.parameters.z.frontal_sync) < 2):
                 self.write_arrays[2, :] = calc_sync(wave_part, self.parameters.z.frontal_sync)
-
         if self.camera_on:
+            self.wait_signal.clear()
             self.write_arrays[3, :] = self.camera_pulses.read(
                 i_sample, self.n_samples
             )
