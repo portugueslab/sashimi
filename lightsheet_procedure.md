@@ -93,26 +93,9 @@ tab. This is a little bug -- which will be solved soon__
     for a similar experiment or for the next subject. Press "save settings".
     You can load them next time at any point by pressing "load settings".
     
-2. Select the saving folder in one of the HDD data drives. Chunk size is the number
-    of volumes in each .h5 file (data is saved directly as a split dataset). Check that there is
-    enough space in the drive to save the whole experiment. Add your email if you want to be notified at the end 
-    of the experiment. Calculating the optimal size of the chunks is currently tricky and we are working on
-    improving that. If you set a chunk size too big the saver will have trouble keeping up with the acquisition.
-    As a reference, set it to 10 if you are doing whole brain imaging (2x2 binning, full-size frame @2 volumes/s)
-    or to 100 if you are doing volumetric imaging of a particular structure (e.g. cerebellum 10 planes, small ROI,
-    5-6 volumes/s). You can also estimate the size of each chunk with the formula below and check that your chunks
-    are around 300-600 MB.
-    
-    _nx, ny, nz_: Dimensions of the frame and number of planes (take skipping into account)
-    
-    _small sigma_: chunk_size
-    
-    _output_: estimated size in megabytes
-    
-    <p align="center">
-  <img src="https://render.githubusercontent.com/render/math?math=\hat{\Sigma} = \sigma \dfrac{2 n_{x} n_{y} n_{z}}{10^{6}}">
-    </p> 
-    
+2. Select the saving folder in the SSD data drive (data should be immediately moved to an
+    HDD drive after the experiment). Check that there is enough space in the drive to save the whole
+    recording. Add your email if you want to be notified at the end of the experiment.
     
 3. Remember to put the selected plane back to -1 so that acquisition runs over
     all the planes!
@@ -136,9 +119,7 @@ tab. This is a little bug -- which will be solved soon__
 
 1.  In Stytra press start protocol.
 
-3.  In the lightsheet control GUI press prepare experiment (after ensuring everything is ok!)
-
-5.  Press "start experiment" in the lightsheet control GUI.
+2.  In the lightsheet control GUI press "start experiment".
 
 ## After the experiment
 
