@@ -6,13 +6,11 @@ align="left"
 height="150" 
 width="225"></a>
 
-
-SLiM is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
+<br/>SLiM is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
 It was developed by members of the [PortuguesLab](http://www.portugueslab.com/)
  at the Technical University of Munich and Max Planck Institute of Neurobiology
  
- 
- 
+<br/><br/>
  
 # Installation
 
