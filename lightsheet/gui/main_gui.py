@@ -101,8 +101,8 @@ class MainWindow(QMainWindow):
         self.wid_display.wid_display_settings.refresh_widgets()
         if not omit_wid_camera:
             self.wid_camera.wid_camera_settings.refresh_widgets()
+            self.wid_camera.set_roi()
         self.wid_save_options.wid_save_options.refresh_widgets()
-        self.wid_camera.set_roi()
         self.wid_save_options.set_locationbutton()
 
     def check_end_experiment(self):
@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
             self.st.toggle_experiment_state()
             if self.st.pause_after:
                 self.wid_status.setCurrentIndex(0)
-                self.wid_laser.toggle()
+                self.wid_laser.btn_off.click()
             self.refresh_param_values(omit_wid_camera=True)
             self.wid_display.experiment_progress.hide()
             self.st.saver.saver_stopped_signal.clear()
