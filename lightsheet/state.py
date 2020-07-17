@@ -24,6 +24,7 @@ from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
 from lightsheet.utilities import neg_dif
+import time
 
 
 class GlobalState(Enum):
@@ -447,6 +448,7 @@ class State:
         self.saver.saving_signal.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
+        time.sleep(0.5)
         self.toggle_experiment_state()
 
     def end_experiment(self):
