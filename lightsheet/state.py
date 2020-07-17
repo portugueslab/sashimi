@@ -294,6 +294,7 @@ class State:
     def __init__(self, sample_rate):
         self.sample_rate = sample_rate
         self.calibration_ref = None
+        self.waveform = None
         self.stop_event = Event()
         self.experiment_start_event = Event()
         self.experiment_state = ExperimentPrepareState.PREVIEW
@@ -410,9 +411,15 @@ class State:
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
+            if self.waveform is not None:
+                pulses = self.calculate_pulse_times() * self.sample_rate
+                try:
+                    pulse_log = self.waveform[pulses.astype(int)]
+                    self.all_settings["piezo_log"] = {"trigger": pulse_log.tolist()}
+                except IndexError:
+                    pass
 
         params.experiment_state = self.experiment_state
-
         self.all_settings["scanning"] = params
 
         self.scanner.parameter_queue.put(params)
@@ -500,6 +507,19 @@ class State:
             return self.camera.triggered_frame_rate_queue.get(timeout=0.001)
         except Empty:
             return None
+
+    def get_waveform(self):
+        try:
+            self.waveform = self.scanner.waveform_queue.get(timeout=0.001)
+            return self.waveform
+        except Empty:
+            return None
+
+    def calculate_pulse_times(self):
+        return np.arange(
+            self.volume_setting.n_skip_start,
+            self.volume_setting.n_planes - self.volume_setting.n_skip_end
+        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
 
     def wrap_up(self):
         self.stop_event.set()

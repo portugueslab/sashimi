@@ -57,7 +57,6 @@ class VolumeScanningWidget(QWidget):
         self.lbl_interplane_distance.setStyleSheet("color: yellow")
 
         self.wid_wave = WaveformWidget(
-            waveform_queue=self.state.scanner.waveform_queue,
             timer=self.timer,
             state=self.state
         )
