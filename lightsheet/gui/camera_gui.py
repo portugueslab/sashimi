@@ -45,7 +45,7 @@ class ViewingWidget(QWidget):
         self.roi = self.viewer.add_shapes(
             [np.array([[0, 0], [500, 0], [500, 500], [0, 500]])],
             blending='translucent',
-            opacity=0.3,
+            opacity=0.1,
             face_color="yellow"
         )
         self.toggle_roi_display()
@@ -142,7 +142,7 @@ class CameraSettingsContainerWidget(QWidget):
             int(self.roi.data[0][0][0])
         )
         roi_size = (
-            int(self.roiroi.data[0][3][1] - self.roi.data[0][0][1]),
+            int(self.roi.data[0][3][1] - self.roi.data[0][0][1]),
             int(self.roi.data[0][1][0] - self.roi.data[0][0][0]),
         )
         self.state.camera_settings.subarray = tuple([roi_pos[0], roi_pos[1], roi_size[0], roi_size[1]])
