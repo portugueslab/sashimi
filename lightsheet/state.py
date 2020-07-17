@@ -17,6 +17,7 @@ from lightsheet.scanning import (
     ExperimentPrepareState,
 )
 from lightsheet.stytra_comm import StytraCom
+from lightsheet.boost import FrameDispatcher
 from multiprocessing import Event
 import json
 from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
@@ -330,6 +331,13 @@ class State:
 
         self.saver = StackSaver(self.stop_event, duration_queue=self.stytra_comm.duration_queue)
 
+        self.dispatcher = FrameDispatcher(
+            self.stop_event,
+            self.saver.saving_signal,
+            self.camera.image_queue,
+            self.saver.save_queue,
+        )
+
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
         self.calibration = Calibration()
@@ -361,6 +369,7 @@ class State:
         self.scanner.start()
         self.stytra_comm.start()
         self.saver.start()
+        self.dispatcher.start()
 
         self.all_settings = dict(camera=dict(), scanning=dict())
 
@@ -445,11 +454,9 @@ class State:
     def start_experiment(self):
         # TODO disable the GUI except the abort button
         self.send_scan_settings()
-        self.saver.saving_signal.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
-        while self.scanner.wait_signal.is_set():
-            time.sleep(0.0001)
+        self.saver.saving_signal.set()
         self.toggle_experiment_state()
 
     def end_experiment(self):
@@ -478,16 +485,11 @@ class State:
             self.laser.set_current(current_laser)
         else:
             self.calibration_ref = None
+        self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
     def get_image(self):
         try:
-            image = self.camera.image_queue.get(timeout=0.001)
-            if self.calibration_ref is not None:
-                image = neg_dif(image, self.calibration_ref)
-            if self.saver.saving_signal.is_set():
-                if self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
-                    self.saver.save_queue.put(image)
-            return image
+            return self.dispatcher.viewer_queue.get()
         except Empty:
             return None
 
@@ -510,3 +512,4 @@ class State:
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
+        self.dispatcher.join(timeout=10)
