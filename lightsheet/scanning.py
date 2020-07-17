@@ -28,7 +28,6 @@ try:
 except ImportError:
     dry_run = True
 
-
 PIEZO_SCALE = 1 / 40
 
 
@@ -116,18 +115,18 @@ def lcm(a, b):
 
 class ScanLoop:
     def __init__(
-        self,
-        read_task,
-        write_task_z,
-        write_task_xy,
-        stop_event,
-        initial_parameters: ScanParameters,
-        parameter_queue: Queue,
-        n_samples,
-        sample_rate,
-        waveform_queue: ArrayQueue,
-        experiment_start_signal: Event,
-        wait_signal : Event
+            self,
+            read_task,
+            write_task_z,
+            write_task_xy,
+            stop_event,
+            initial_parameters: ScanParameters,
+            parameter_queue: Queue,
+            n_samples,
+            sample_rate,
+            waveform_queue: ArrayQueue,
+            experiment_start_signal: Event,
+            wait_signal: Event
     ):
 
         self.sample_rate = sample_rate
@@ -163,7 +162,7 @@ class ScanLoop:
         self.time = np.arange(self.n_samples) / self.sample_rate
         self.shifted_time = self.time.copy()
         self.i_sample = 0
-        self.n_samples_written = 0
+        self.n_samples_read = 0
         self.wait_signal = wait_signal
         self.wait_signal.set()
 
@@ -202,13 +201,13 @@ class ScanLoop:
 
     def write(self):
         self.z_writer.write_many_sample(self.write_arrays[:4])
-        self.n_samples_written += 1
         self.xy_writer.write_many_sample(self.write_arrays[4:])
 
     def read(self):
         self.z_reader.read_many_sample(
             self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
         )
+        self.n_samples_read += self.write_arrays[1]
         self.read_array[:] = self.read_array / PIEZO_SCALE
 
     def loop(self):
@@ -231,13 +230,13 @@ def calc_sync(z, sync_coef):
 class PlanarScanLoop(ScanLoop):
     def loop_condition(self):
         return (
-            super().loop_condition() and self.parameters.state == ScanningState.PLANAR
+                super().loop_condition() and self.parameters.state == ScanningState.PLANAR
         )
 
     def n_samples_period(self):
         if (
-            self.parameters.triggering.frequency is None
-            or self.parameters.triggering.frequency == 0
+                self.parameters.triggering.frequency is None
+                or self.parameters.triggering.frequency == 0
         ):
             return super().n_samples_period()
         else:
@@ -274,8 +273,8 @@ class VolumetricScanLoop(ScanLoop):
 
     def loop_condition(self):
         return (
-            super().loop_condition()
-            and self.parameters.state == ScanningState.VOLUMETRIC
+                super().loop_condition()
+                and self.parameters.state == ScanningState.VOLUMETRIC
         )
 
     def check_start(self):
@@ -290,7 +289,6 @@ class VolumetricScanLoop(ScanLoop):
 
     def update_settings(self):
         updated = super().update_settings()
-        self.wait_signal.set()
         if not updated:
             return False
 
@@ -319,26 +317,32 @@ class VolumetricScanLoop(ScanLoop):
         )
 
         if (
-            self.camera_on
-            and self.parameters.experiment_state == ExperimentPrepareState.NO_TRIGGER
+                self.camera_on
+                and self.parameters.experiment_state == ExperimentPrepareState.NO_TRIGGER
         ):
             self.camera_on = False
         if (
-            not self.camera_on
-            and self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
+                not self.camera_on
+                and self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
+                and self.n_samples_read > self.n_samples_period()
         ):
             self.camera_on = True
             self.i_sample = 0  # puts it at the beginning of the cycle
-            self.n_samples_written = 0
+            self.n_samples_read = 0
 
         return True
+
+    def write(self):
+        super().read()
+        if self.camera_on:
+            self.wait_signal.clear()
 
     def read(self):
         super().read()
         i_insert = (self.i_sample - self.n_samples) % len(self.recorded_signal.buffer)
         self.recorded_signal.write(
             self.read_array[
-                : min(len(self.recorded_signal.buffer), len(self.read_array))
+            : min(len(self.recorded_signal.buffer), len(self.read_array))
             ],
             i_insert,
         )
@@ -347,20 +351,19 @@ class VolumetricScanLoop(ScanLoop):
     def fill_arrays(self):
         super().fill_arrays()
         self.write_arrays[0, :] = (
-            self.z_waveform.values(self.shifted_time) * PIEZO_SCALE
+                self.z_waveform.values(self.shifted_time) * PIEZO_SCALE
         )
         i_sample = self.i_sample % len(self.recorded_signal.buffer)
         if self.recorded_signal.is_complete():
             wave_part = self.recorded_signal.read(i_sample, self.n_samples)
             max_wave, min_wave = (np.max(wave_part), np.min(wave_part))
             if (-2 < calc_sync(min_wave, self.parameters.z.lateral_sync) < 2 and
-                -2 < calc_sync(max_wave, self.parameters.z.lateral_sync) < 2):
+                    -2 < calc_sync(max_wave, self.parameters.z.lateral_sync) < 2):
                 self.write_arrays[1, :] = calc_sync(wave_part, self.parameters.z.lateral_sync)
             if (-2 < calc_sync(min_wave, self.parameters.z.frontal_sync) < 2 and
-                -2 < calc_sync(max_wave, self.parameters.z.frontal_sync) < 2):
+                    -2 < calc_sync(max_wave, self.parameters.z.frontal_sync) < 2):
                 self.write_arrays[2, :] = calc_sync(wave_part, self.parameters.z.frontal_sync)
         if self.camera_on:
-            self.wait_signal.clear()
             self.write_arrays[3, :] = self.camera_pulses.read(
                 i_sample, self.n_samples
             )
@@ -370,11 +373,11 @@ class VolumetricScanLoop(ScanLoop):
 
 class Scanner(Process):
     def __init__(
-        self,
-        stop_event: Event,
-        experiment_start_event,
-        n_samples_waveform=10000,
-        sample_rate=40000,
+            self,
+            stop_event: Event,
+            experiment_start_event,
+            n_samples_waveform=10000,
+            sample_rate=40000,
     ):
         super().__init__()
 
