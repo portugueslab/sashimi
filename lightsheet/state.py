@@ -51,7 +51,7 @@ class SaveSettings(ParametrizedQt):
         self.n_frames = Param(10_000, (1, 10_000_000), gui=False, loadable=False)
         self.save_dir = Param(r"F:/Vilim", gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
-        self.notification_email = Param("None")
+        self.notification_email = Param("")
 
 
 class ScanningSettings(ParametrizedQt):
