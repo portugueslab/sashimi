@@ -17,7 +17,7 @@ from lightsheet.scanning import (
     ExperimentPrepareState,
 )
 from lightsheet.stytra_comm import StytraCom
-from lightsheet.boost import FrameDispatcher
+from lightsheet.boost import VolumeDispatcher
 from multiprocessing import Event
 import json
 from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
@@ -324,18 +324,22 @@ class State:
         self.laser_settings = LaserSettings()
         self.stytra_comm = StytraCom(
             stop_event=self.stop_event,
-            experiment_start_event=self.experiment_start_event,
+            experiment_start_event=self.experiment_start_event
         )
 
         self.save_status: Optional[SavingStatus] = None
 
-        self.saver = StackSaver(self.stop_event, duration_queue=self.stytra_comm.duration_queue)
+        self.saver = StackSaver(
+            stop_event=self.stop_event,
+            duration_queue=self.stytra_comm.duration_queue
+        )
 
-        self.dispatcher = FrameDispatcher(
-            self.stop_event,
-            self.saver.saving_signal,
-            self.camera.image_queue,
-            self.saver.save_queue,
+        self.dispatcher = VolumeDispatcher(
+            stop_event=self.stop_event,
+            saving_signal=self.saver.saving_signal,
+            wait_signal=self.scanner.wait_signal,
+            camera_queue=self.camera.image_queue,
+            saver_queue=self.saver.save_queue,
         )
 
         self.single_plane_settings = SinglePlaneSettings()
@@ -364,6 +368,10 @@ class State:
 
         self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
         self.save_settings.sig_param_changed.connect(self.send_scan_settings)
+
+        self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
+        self.single_plane_settings.sig_param_changed.connect(self.send_dispatcher_settings)
+        self.status.sig_param_changed.connect(self.send_dispatcher_settings)
 
         self.camera.start()
         self.scanner.start()
@@ -409,16 +417,19 @@ class State:
             params = convert_calibration_params(
                 self.planar_setting, self.calibration.z_settings
             )
+            n_planes = 1
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
                 self.planar_setting, self.single_plane_settings, self.calibration
             )
+            n_planes = 1
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
+            n_planes = self.volume_setting.n_planes - self.volume_setting.n_skip_start - self.volume_setting.n_skip_end
 
         params.experiment_state = self.experiment_state
 
@@ -430,6 +441,10 @@ class State:
         save_params = convert_save_params(
             self.save_settings, self.volume_setting, self.camera_settings, self.scope_alignment_info)
         self.saver.saving_parameter_queue.put(save_params)
+        self.dispatcher.n_planes_queue.put(n_planes)
+
+    def send_dispatcher_settings(self):
+        pass
 
     def get_camera_status(self):
         try:
