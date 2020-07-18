@@ -502,7 +502,7 @@ class State:
             self.calibration_ref = None
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
-    def get_image(self):
+    def get_volume(self):
         try:
             return self.dispatcher.viewer_queue.get()
         except Empty:

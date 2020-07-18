@@ -12,6 +12,7 @@ from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
 from pyqtgraph.graphicsItems.ROI import ROI
 from lightsheet.state import convert_camera_params, GlobalState
+from lightsheet.rolling_buffer import RollingBuffer
 
 from time import time_ns
 
@@ -65,15 +66,15 @@ class ViewingWidget(QWidget):
         self.timer.timeout.connect(self.refresh)
 
     def refresh(self) -> None:
-        current_image = self.state.get_image()
-        if current_image is None:
+        current_volume = self.state.get_volume()
+        if current_volume is None:
             return
 
         current_time = time_ns()
         delta_t = (current_time - self.last_time_updated)/1e9
         if delta_t > 1/self.display_settings.display_framerate:
             self.image_viewer.setImage(
-                current_image,
+                current_volume,
                 autoLevels=self.is_first_image,
                 autoRange=self.is_first_image,
                 autoHistogramRange=self.is_first_image,

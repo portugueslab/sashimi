@@ -64,11 +64,11 @@ class VolumeDispatcher(Process):
             self.experiment_started = False
 
     def check_experiment_start(self):
-        self.saver_queue.clear()
         self.current_frame = 0
         while self.wait_signal.is_set():
-            self.camera_queue.clear()
             time.sleep(0.001)
+        self.camera_queue.clear()
+        self.saver_queue.clear()
         self.experiment_started = True
         self.wait_signal.set()
 
