@@ -14,27 +14,31 @@ It was developed by members of the [PortuguesLab](http://www.portugueslab.com/)
  
 # Installation
 
-Install the latest [Anaconda](https://www.anaconda.com/) distribution of Python 3.
+[Install the latest Anaconda](https://www.anaconda.com/) distribution of Python 3.
 
-[Create a new environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands)
+Clone this repository and navigate to the main folder (`/lightsheet_take_two`)
 
-Activate the environment (replace `my_env` for the name of your environment):
+### Recommended: Create a new environment
+
+For instructions visit [this site](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands). Then activate the environment (replace `my_env` for the name of your environment):
 
     conda activate my_env
+    
+### Install with pip
 
-Clone this repository
-
-Navigate to the folder where you cloned the repository (`/lightsheet_take_two`) and run
+For a non-editable installation run:
 
     pip install .
+
+Otherwise, for editable installation run:
+
+    pip install -e .
 
 Now you are ready to go!
 
 # Starting the software from command line
 
-Open a new command line prompt and activate your environment
-
-Run:
+Open a new command line prompt and activate your environment like above. Then run:
 
     slim
 
