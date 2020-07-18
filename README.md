@@ -38,7 +38,7 @@ Now you are ready to go!
 
 # Starting the software from command line
 
-Open a new command line prompt and activate your environment like above. Then run:
+Open a new anaconda prompt and activate your environment like above. Then run:
 
     slim
 
