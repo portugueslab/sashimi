@@ -101,7 +101,7 @@ class StackSaver(Process):
             self.update_saved_status_queue()
             self.finalize_dataset()
             self.current_data = None
-            if self.save_parameters.notification_email != "None" and self.saving_signal.is_set():
+            if self.saving_signal.is_set():
                 self.send_email_end()
 
         self.saving_signal.clear()
@@ -117,6 +117,7 @@ class StackSaver(Process):
 
         yag = yagmail.SMTP(user=sender_email, password=sender_password)
 
+
         body = [
             "Hey!",
             "\n",
@@ -124,12 +125,14 @@ class StackSaver(Process):
             "\n"
             "fishgitbot"
         ]
-
-        yag.send(
-            to=receiver_email,
-            subject=subject,
-            contents=body,
-        )
+        try:
+            yag.send(
+                to=receiver_email,
+                subject=subject,
+                contents=body,
+            )
+        except (yagmail.error.YagAddressError, yagmail.error.YagConnectionClosed, yagmail.error.YagInvalidEmailAddress):
+            pass
 
     def cast(self, frame):
         """

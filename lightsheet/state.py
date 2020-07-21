@@ -24,6 +24,7 @@ from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
 from lightsheet.utilities import neg_dif
+import time
 
 
 class GlobalState(Enum):
@@ -50,8 +51,9 @@ class SaveSettings(ParametrizedQt):
         self.n_frames = Param(10_000, (1, 10_000_000), gui=False, loadable=False)
         self.save_dir = Param(r"F:/Vilim", gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
-        self.notification_email = Param("None")
+        self.notification_email = Param("")
         self.overwrite_save_folder = Param(0, (0, 1), gui=False, loadable=False)
+
 
 
 class ScanningSettings(ParametrizedQt):
@@ -455,6 +457,7 @@ class State:
         self.saver.saving_signal.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
+        time.sleep(0.5)
         self.toggle_experiment_state()
 
     def end_experiment(self):
