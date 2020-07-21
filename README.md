@@ -46,4 +46,4 @@ Open a new anaconda prompt and activate your environment like above. Then run:
 
     slim
     
-Press *User guide* to pop-up instructions that will drive you through the whole experiment preparation, acquisition and termination.
+Press __User guide__ to pop-up instructions that will drive you through the whole experiment preparation, acquisition and termination.
