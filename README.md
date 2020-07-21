@@ -45,5 +45,5 @@ Now you are ready to go!
 Open a new anaconda prompt and activate your environment like above. Then run:
 
     slim
-
-Sit back, relax and enjoy your experience!
+    
+Press *User guide* to pop-up instructions that will drive you through the whole experiment preparation, acquisition and termination.
