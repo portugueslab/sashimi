@@ -6,9 +6,9 @@ align="left"
 height="190" 
 width="270"></a>
 
-<br/>SLiM is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
+<br/>Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
 It was developed by members of the [PortuguesLab](http://www.portugueslab.com/)
- at the Technical University of Munich and Max Planck Institute of Neurobiology. SLiM relies on the fast, multidimensional
+ at the Technical University of Munich and Max Planck Institute of Neurobiology. Sashimi relies on the fast, multidimensional
  [Napari viewer](https://github.com/napari/napari) and is powered by [numba](https://github.com/numba/numba) for increased efficiency.
  
 Hardware is controlled through [pyvisa](https://github.com/pyvisa/pyvisa) for serial communication and 
@@ -20,7 +20,7 @@ Hardware is controlled through [pyvisa](https://github.com/pyvisa/pyvisa) for se
 
 [Install the latest Anaconda](https://www.anaconda.com/) distribution of Python 3.
 
-Clone this repository and navigate to the main folder (`/lightsheet_take_two`)
+Clone this repository and navigate to the main folder (`/sashimi`)
 
 ### Recommended: Create a new environment
 
@@ -44,6 +44,6 @@ Now you are ready to go!
 
 Open a new anaconda prompt and activate your environment like above. Then run:
 
-    slim
+    sashimi
     
 Press __User guide__ to pop-up instructions that will drive you through the whole experiment preparation, acquisition and termination.
