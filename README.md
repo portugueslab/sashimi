@@ -1,4 +1,4 @@
-# SLiM
+# Sashimi
 
 <a href="url"><img 
 src="https://github.com/portugueslab/lightsheet_take_two/blob/master/lightsheet/icons/main_icon.png" 
