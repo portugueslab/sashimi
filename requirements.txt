@@ -1,6 +1,6 @@
 arrayqueues==1.2.0b0
 flammkuchen==0.9.2
-lightparam==0.3.9
+lightparam>=0.3.10
 numba==0.45.1
 numpy==1.16.5
 pyqt5==5.15
