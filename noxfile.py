@@ -14,6 +14,7 @@ def tests(session):
     session.install("pytest")
     session.install("pytest-cov")
     session.install("-r", "requirements.txt")
+    session.install(".")
     session.run("pytest", "--cov=lightsheet")
 
 
