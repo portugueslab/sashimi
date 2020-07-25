@@ -1,51 +1,67 @@
 import configparser
 from pathlib import Path
-from pkg_resources import resource_filename
 import click
+import toml
+from lightparam import set_nested, get_nested
 
-CONFIG_FILENAME = "hardware_config.conf"
-CONFIG_PATH = Path(resource_filename("lightsheet", CONFIG_FILENAME))
+CONFIG_FILENAME = "hardware_config.toml"
+CONFIG_DIR_PATH = Path.home() / ".sashimi"
+CONFIG_DIR_PATH.mkdir(exist_ok=True)
+
+CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 
 # 2 level dictionary for sections and values:
+# TODO this will obvously have to change to fit scanning declarations
 TEMPLATE_CONF_DICT = {
-    "piezo": {
-        "dev": 0,
-        "chan": 1,
-    },
-    "galvo_lat": {
-            "dev": 1,
-            "chan": 0,
+    "piezo":
+        {
+            "position_read":
+                {
+                    "pos_chan": "Dev1/ai0:0",
+                    "min_val": 0,
+                    "max_val": 10
+            },
+            "position_write":
+                {
+                    "pos_chan": "Dev1/a00:0",
+                    "min_val": -5,
+                    "max_val": 10
+            }
+        },
+    "galvo_lateral":
+        {"write_position":
+                {
+                    "pos_chan": "Dev12/a0:1",
+                    "min_val": -5,
+                    "max_val": 10
+            }
         }
 }
 
 
-def write_default_config(path=CONFIG_PATH, template=TEMPLATE_CONF_DICT):
+def write_default_config(file_path=CONFIG_PATH, template=TEMPLATE_CONF_DICT):
     """Write configuration file at first repo usage. In this way,
     we don't need to keep a confusing template config file in the repo.
 
     Parameters
     ----------
-    path : Path object
+    file_path : Path object
         Path of the config file (optional).
     template : dict
         Template of the config file to be written (optional).
 
     """
 
-    conf = configparser.ConfigParser()
-    for k, val in template.items():
-        conf[k] = val
-
-    with open(path, "w") as f:
-        conf.write(f)
+    with open(file_path, "w") as f:
+        toml.dump(template, f)
 
 
-def read_config(path=CONFIG_PATH):
+def read_config(file_path=CONFIG_PATH):
     """Read Sashimi config.
 
     Parameters
     ----------
-    path : Path object
+    file_path : Path object
         Path of the config file (optional).
 
     Returns
@@ -55,41 +71,38 @@ def read_config(path=CONFIG_PATH):
     """
 
     # If no config file exists yet, write the default one:
-    if not path.exists():
+    if not file_path.exists():
         write_default_config()
 
-    conf = configparser.ConfigParser()
-    conf.read(path)
-
-    return conf
+    return toml.load(file_path)
 
 
-def write_config_value(section_name, key, val, path=CONFIG_PATH):
+def write_config_value(dict_path, val, file_path=CONFIG_PATH):
     """Write a new value in the config file. To make things simple, ignore
     sections and look directly for matching parameters names.
 
     Parameters
     ----------
-    sect_name : str
-        Name of the section to configure.
-    key : str
-        Name of the parameter to configure.
+    dict_path : str or list of strings
+        Full path of the section to configure
+        (e.g., ["piezo", "position_read", "min_val"])
     val :
         New value.
-    path : Path object
+    file_path : Path object
         Path of the config file (optional).
 
     """
-    # If no config file exists yet, write the default one:
-    if not path.exists():
-        write_default_config()
+    # Ensure path to entry is always a string:
+    if type(dict_path) == str:
+        dict_path = [dict_path]
 
-    conf = configparser.ConfigParser()
-    conf.read(path)
-    conf[section_name][key] = str(val)
+    # Read and set:
+    conf = read_config(file_path=file_path)
+    set_nested(conf, dict_path, val)
 
-    with open(CONFIG_PATH, "w") as f:
-        conf.write(f)
+    # Write:
+    with open(file_path, "w") as f:
+        toml.dump(conf, f)
 
 @click.command()
 @click.argument("command")
@@ -97,24 +110,27 @@ def write_config_value(section_name, key, val, path=CONFIG_PATH):
               help="Path (section/name) of parameter to be changed")
 @click.option("-v", "--val",
               help="Value of parameter to be changed")
-def cli_modify_config(command, name=None, val=None):
-    # Ensure that we choose valid paths for default directory. The path does
-    # not have to exist yet, but the parent must be valid:
+@click.option("-p", "--file_path", default=CONFIG_PATH,
+              help="Path to the config file (optional)")
+def cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
+    file_path = Path(file_path)
     if command == "edit":
-        section_name, key = name.split("/")
-        write_config_value(section_name, key, val)
+        conf = read_config(file_path=file_path)
+
+        # Cast the type of the previous variable
+        # (to avoid overwriting values with strings)
+        dict_path = name.split(".")
+        old_val = get_nested(conf, dict_path)
+        val = type(old_val)(val)  # Convert to keep the same type
+
+        write_config_value(dict_path, val, file_path)
+
     elif command == "show":
-        click.echo(_print_config())
+        click.echo(_print_config(file_path=file_path))
 
 
-def _print_config():
-    """Print configuration.
+def _print_config(file_path=CONFIG_PATH):
+    """Return configuration string for printing.
     """
-    config = read_config()
-    string = ""
-    for sect_name, sect_content in config.items():
-        string += f"[{sect_name}]\n"
-        for k, val in sect_content.items():
-            string += f"\t{k}: {val}\n"
-
-    return string
+    config = read_config(file_path=file_path)
+    return toml.dumps(config)
