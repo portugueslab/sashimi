@@ -16,17 +16,22 @@ from typing import Union, Tuple
 from lightsheet.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
 
 try:
-    import nidaqmx
+    from nidaqmx.task import Task
     from nidaqmx.stream_readers import (
         AnalogMultiChannelReader,
         AnalogSingleChannelReader,
     )
     from nidaqmx.stream_writers import AnalogMultiChannelWriter
     from nidaqmx.constants import Edge, AcquisitionType, LineGrouping
+    from nidaqmx.errors import DaqError
 
-    dry_run = False
 except ImportError:
-    dry_run = True
+    from theknights.stream_readers import AnalogMultiChannelReader
+    from theknights.stream_readers import AnalogSingleChannelReader
+    from theknights.stream_writers import AnalogMultiChannelWriter
+    from theknights.constants import Edge, AcquisitionType, LineGrouping
+    from theknights.task import Task
+    from theknights.errors import DaqError
 
 
 PIEZO_SCALE = 1 / 40
@@ -438,7 +443,7 @@ class Scanner(Process):
                 self.retrieve_parameters()
                 continue
 
-            with nidaqmx.Task() as read_task, nidaqmx.Task() as write_task_z, nidaqmx.Task() as write_task_xy:
+            with Task() as read_task, Task() as write_task_z, Task() as write_task_xy:
                 self.setup_tasks(read_task, write_task_z, write_task_xy)
                 if self.parameters.state == ScanningState.PLANAR:
                     loop = PlanarScanLoop
@@ -459,7 +464,7 @@ class Scanner(Process):
                 )
                 try:
                     scanloop.loop()
-                except nidaqmx.errors.DaqError as e:
+                except DaqError as e:
                     warn("NI error " + e.__repr__())
                 self.parameters = deepcopy(
                     scanloop.parameters

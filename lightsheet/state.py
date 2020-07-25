@@ -3,7 +3,7 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from lightsheet.hardware.laser import CoboltLaser
+from lightsheet.hardware.laser import CoboltLaser, FakeCoboltLaser
 from lightsheet.scanning import (
     Scanner,
     PlanarScanning,
@@ -19,7 +19,7 @@ from lightsheet.scanning import (
 from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
 import json
-from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
+from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode, FakeCameraProcess
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
@@ -293,26 +293,38 @@ def convert_volume_params(
 
 
 class State:
-    def __init__(self, sample_rate):
+    def __init__(self, sample_rate, dry_run=False):
         self.sample_rate = sample_rate
         self.calibration_ref = None
         self.waveform = None
         self.stop_event = Event()
         self.experiment_start_event = Event()
         self.experiment_state = ExperimentPrepareState.PREVIEW
-        self.scanner = Scanner(
-            stop_event=self.stop_event,
-            experiment_start_event=self.experiment_start_event,
-            sample_rate=self.sample_rate
-        )
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
 
-        self.laser = CoboltLaser()
-        self.camera = CameraProcess(
-            experiment_start_event=self.experiment_start_event,
-            stop_event=self.stop_event,
-        )
+        if dry_run:
+            self.laser = FakeCoboltLaser()
+            self.camera = FakeCameraProcess(
+                experiment_start_event=self.experiment_start_event,
+                stop_event=self.stop_event
+            )
+            self.scanner = Scanner(
+                stop_event=self.stop_event,
+                experiment_start_event=self.experiment_start_event,
+                sample_rate=self.sample_rate
+            )
+        else:
+            self.scanner = Scanner(
+                stop_event=self.stop_event,
+                experiment_start_event=self.experiment_start_event,
+                sample_rate=self.sample_rate
+            )
+            self.laser = CoboltLaser()
+            self.camera = CameraProcess(
+                experiment_start_event=self.experiment_start_event,
+                stop_event=self.stop_event,
+            )
 
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()

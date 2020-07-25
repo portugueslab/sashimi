@@ -167,3 +167,83 @@ class CameraProcess(Process):
 
     def close_camera(self):
         self.camera.shutdown()
+
+
+class FakeCameraProcess(Process):
+    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20):
+        super().__init__()
+        self.experiment_start_event = experiment_start_event
+        self.stop_event = stop_event
+        self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
+        self.parameter_queue = Queue()
+        self.camera_id = camera_id
+        self.camera = None
+        self.parameters = CamParameters()
+        self.new_parameters = copy(self.parameters)
+        self.camera_status_queue = Queue()
+        self.triggered_frame_rate_queue = Queue()
+        self.framerate_rec = FramerateRecorder(n_fps_frames=n_fps_frames)
+
+    def cast_parameters(self):
+        params = self.parameters
+        params.subarray = list(params.subarray)
+        return params
+
+    def initialize_camera(self):
+        self.camera_status_queue.put(self.cast_parameters())
+
+    def pause_loop(self):
+        while not self.stop_event.is_set():
+            try:
+                self.new_parameters = self.parameter_queue.get(timeout=0.001)
+                if self.new_parameters != self.parameters:
+                    break
+            except Empty:
+                pass
+
+    def run(self):
+        self.initialize_camera()
+        self.run_camera()
+
+    def run_camera(self):
+        while not self.stop_event.is_set():
+            self.parameters = self.new_parameters
+            self.apply_parameters()
+            self.camera_status_queue.put(self.cast_parameters())
+            if self.parameters.camera_mode == CameraMode.PAUSED:
+                self.pause_loop()
+            else:
+                self.camera_loop()
+
+    def camera_loop(self):
+        while not self.stop_event.is_set():
+            time.sleep(0.001)
+            is_there_frame = np.random.random_sample(1)
+            if is_there_frame < (1 / self.parameters.exposure_time):
+                frame = np.random.randint(0, 65534, size=self.parameters.frame_shape, dtype=np.uint16)
+                self.image_queue.put(frame)
+                self.update_framerate()
+            try:
+                self.new_parameters = self.parameter_queue.get(timeout=0.001)
+                if self.parameters.camera_mode == CameraMode.ABORT or \
+                        (self.new_parameters != self.parameters):
+                    break
+            except Empty:
+                pass
+
+    def update_framerate(self):
+        self.framerate_rec.update_framerate()
+        if self.framerate_rec.i_fps == 0:
+            self.triggered_frame_rate_queue.put(self.framerate_rec.current_framerate)
+
+    def apply_parameters(self):
+        subarray = self.parameters.subarray
+        # quantizing the ROI dims in multiples of 4
+        subarray = [min((i * self.parameters.binning // 4) * 4, 2048) for i in subarray]
+        # this can be simplified by making the API nice
+
+        # This is not sent to the camera but has to be updated with camera info directly (because of multiples of 4)
+        self.parameters.frame_shape = (subarray[2], subarray[3])
+
+    def close_camera(self):
+        pass
