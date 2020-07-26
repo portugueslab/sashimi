@@ -11,8 +11,10 @@ from lightsheet.state import State
 from pathlib import Path
 from datetime import datetime
 import markdown
+from lightsheet.config import read_config
 
-DEFAULT_SETTINGS_PATH = "C:/Users/portugueslab/lightsheet_settings"
+conf = read_config()
+PRESETS_PATH = conf["default_paths"]["presets"]
 
 
 class SavingSettingsWidget(QWidget):
@@ -41,12 +43,12 @@ class SavingSettingsWidget(QWidget):
         self.btn_instructions.clicked.connect(self.popup_window.show)
 
     def load(self):
-        file, _ = QFileDialog.getOpenFileName(None, "Open settings file", DEFAULT_SETTINGS_PATH, "*.json")
+        file, _ = QFileDialog.getOpenFileName(None, "Open settings file", PRESETS_PATH, "*.json")
         if Path(file).is_file():
             self.state.restore_tree(file)
             self.sig_params_loaded.emit()
 
     def save(self):
-        pth = Path(DEFAULT_SETTINGS_PATH)
+        pth = Path(PRESETS_PATH)
         filename = datetime.now().strftime("%y%m%d %H%M%S.json")
-        self.state.save_tree(pth/filename)
+        self.state.save_tree(pth / filename)

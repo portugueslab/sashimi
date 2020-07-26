@@ -7,6 +7,8 @@ from lightparam import set_nested, get_nested
 CONFIG_FILENAME = "hardware_config.toml"
 CONFIG_DIR_PATH = Path.home() / ".sashimi"
 CONFIG_DIR_PATH.mkdir(exist_ok=True)
+PRESETS_DIR_PATH = Path.home() / "presets"
+PRESETS_DIR_PATH.mkdir(exist_ok=True)
 
 CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 
@@ -14,6 +16,11 @@ CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 # TODO this will obvously have to change to fit scanning declarations
 TEMPLATE_CONF_DICT = {
     "sample_rate": 40000,
+    "default_paths":
+        {
+            "data": str(Path.home()),
+            "presets": str(PRESETS_DIR_PATH)
+        },
     "piezo":
         {
             "position_read":
@@ -27,7 +34,12 @@ TEMPLATE_CONF_DICT = {
                     "pos_chan": "Dev1/a00:0",
                     "min_val": -5,
                     "max_val": 10
-                }
+                },
+            "synchronization":
+                {
+                    "pos_chan": "/Dev1/ao/StartTrigger",
+                    "scale": 1/40
+                },
         },
     "galvo_lateral":
         {
@@ -42,7 +54,8 @@ TEMPLATE_CONF_DICT = {
         {
             "user": "foo",
             "password": "foo"
-        }
+        },
+    "array_ram_MB": 450
 }
 
 
