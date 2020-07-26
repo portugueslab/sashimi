@@ -9,6 +9,7 @@ import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
+from lightsheet.config import read_config
 
 
 @dataclass
@@ -109,11 +110,12 @@ class StackSaver(Process):
         self.saver_stopped_signal.set()
 
     def send_email_end(self):
-        sender_email = "fishgitbot@gmail.com" # TODO this should go to thecolonel
+        conf = read_config()
+        sender_email = conf["email"]["user"] # TODO this should go to thecolonel
         # TODO: Send email every x minutes with image like in 2P
         receiver_email = self.save_parameters.notification_email
         subject = "Your lightsheet experiment is complete"
-        sender_password = "think_clear2020"
+        sender_password = conf["email"]["passsword"]
 
         yag = yagmail.SMTP(user=sender_email, password=sender_password)
 
