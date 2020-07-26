@@ -12,3 +12,4 @@ yagmail==0.11.224
 markdown==3.2.2
 click
 traitlets
+theknights
