@@ -13,6 +13,7 @@ CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 # 2 level dictionary for sections and values:
 # TODO this will obvously have to change to fit scanning declarations
 TEMPLATE_CONF_DICT = {
+    "sample_rate": 40000,
     "piezo":
         {
             "position_read":
@@ -20,21 +21,27 @@ TEMPLATE_CONF_DICT = {
                     "pos_chan": "Dev1/ai0:0",
                     "min_val": 0,
                     "max_val": 10
-            },
+                },
             "position_write":
                 {
                     "pos_chan": "Dev1/a00:0",
                     "min_val": -5,
                     "max_val": 10
-            }
+                }
         },
     "galvo_lateral":
-        {"write_position":
+        {
+            "write_position":
                 {
                     "pos_chan": "Dev12/a0:1",
                     "min_val": -5,
                     "max_val": 10
-            }
+                }
+        },
+    "email":
+        {
+            "user": "foo",
+            "password": "foo"
         }
 }
 
@@ -103,6 +110,7 @@ def write_config_value(dict_path, val, file_path=CONFIG_PATH):
     # Write:
     with open(file_path, "w") as f:
         toml.dump(conf, f)
+
 
 @click.command()
 @click.argument("command")
