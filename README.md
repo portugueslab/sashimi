@@ -58,12 +58,21 @@ You can ask sashimi for help:
    
     sashimi --help
     
-Running `sashimi --debug` lets you run the software without any hardware connected to the machine. Or also, 
-to learn about how to configure parameters of the software (such as I/O boards or email account):
+Running `sashimi --debug` lets you start the software without any hardware connected to the machine. Sashimi includes the
+`sashimi-config` module that lets you interact with the hardware and software settings from command line. You can display the
+ current configuration of the system by running:
+ 
+    sashimi-config show
+ 
+More information on its usage can be found by asking `sashimi-config` for help:
 
     sashimi-config --help
    
-You can add and modify parameters just from the command line. For example, to set the I/O card for the piezo to `Dev1`, just run:
+You can add and modify parameters just from the command line. For example, to set the piezo waveform readout channel to `Dev1/ao0:0` just run:
 
-    sashimi-config show
-    sashimi-config edit -n piezo/dev -v 1
+    sashimi-config edit -n piezo.position_write.pos_chan -v Dev1/ao0:0
+    
+Or to modify the minimum and maximum voltage (in Volts) of the channel:
+    
+    sashimi-config edit -n piezo.position_write.min_val -v 0
+    sashimi-config edit -n piezo.position_write.max_val -v 10
