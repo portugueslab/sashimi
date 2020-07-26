@@ -44,7 +44,7 @@ class CoboltLaser:
         self.cobolt.close()
 
 
-class FakeCoboltLaser:
+class MockCoboltLaser:
     def __init__(self, port="COM4"):
         self.port = port
 

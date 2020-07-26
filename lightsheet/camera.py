@@ -169,7 +169,7 @@ class CameraProcess(Process):
         self.camera.shutdown()
 
 
-class FakeCameraProcess(Process):
+class MockCameraProcess(Process):
     def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20):
         super().__init__()
         self.experiment_start_event = experiment_start_event

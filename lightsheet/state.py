@@ -3,7 +3,7 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from lightsheet.hardware.laser import CoboltLaser, FakeCoboltLaser
+from lightsheet.hardware.laser import CoboltLaser, MockCoboltLaser
 from lightsheet.scanning import (
     Scanner,
     PlanarScanning,
@@ -19,7 +19,7 @@ from lightsheet.scanning import (
 from lightsheet.stytra_comm import StytraCom
 from multiprocessing import Event
 import json
-from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode, FakeCameraProcess
+from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode, MockCameraProcess
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
@@ -304,8 +304,8 @@ class State:
         self.scope_alignment_info = ScopeAlignmentInfo()
 
         if dry_run:
-            self.laser = FakeCoboltLaser()
-            self.camera = FakeCameraProcess(
+            self.laser = MockCoboltLaser()
+            self.camera = MockCameraProcess(
                 experiment_start_event=self.experiment_start_event,
                 stop_event=self.stop_event
             )
