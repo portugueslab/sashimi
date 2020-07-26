@@ -115,7 +115,7 @@ class StackSaver(Process):
         # TODO: Send email every x minutes with image like in 2P
         receiver_email = self.save_parameters.notification_email
         subject = "Your lightsheet experiment is complete"
-        sender_password = conf["email"]["passsword"]
+        sender_password = conf["email"]["password"]
 
         yag = yagmail.SMTP(user=sender_email, password=sender_password)
 
