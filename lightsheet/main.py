@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import QApplication
 import qdarkstyle
-from lightsheet.state import State
 from lightsheet.gui.main_gui import MainWindow
 from PyQt5.QtGui import QIcon
 import click
 from lightsheet.config import _cli_modify_config
+from lightsheet.state import State
 
 
 @click.command()
