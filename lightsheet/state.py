@@ -295,7 +295,7 @@ def convert_volume_params(
 
 
 class State:
-    def __init__(self, sample_rate, dry_run=False):
+    def __init__(self, sample_rate):
         self.sample_rate = sample_rate
         self.calibration_ref = None
         self.waveform = None
@@ -304,30 +304,25 @@ class State:
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
-
-        if dry_run:
+        if conf["debug"]:
+            print("hello world")
             self.laser = MockCoboltLaser()
             self.camera = MockCameraProcess(
                 experiment_start_event=self.experiment_start_event,
                 stop_event=self.stop_event
             )
-            self.scanner = Scanner(
-                stop_event=self.stop_event,
-                experiment_start_event=self.experiment_start_event,
-                sample_rate=self.sample_rate
-            )
         else:
-            self.scanner = Scanner(
-                stop_event=self.stop_event,
-                experiment_start_event=self.experiment_start_event,
-                sample_rate=self.sample_rate
-            )
             self.laser = CoboltLaser()
             self.camera = CameraProcess(
                 experiment_start_event=self.experiment_start_event,
                 stop_event=self.stop_event,
             )
 
+        self.scanner = Scanner(
+            stop_event=self.stop_event,
+            experiment_start_event=self.experiment_start_event,
+            sample_rate=self.sample_rate
+        )
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
 

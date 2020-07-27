@@ -18,24 +18,19 @@ from lightsheet.config import read_config
 
 conf = read_config()
 
-try:
+if not conf["debug"]:
     from nidaqmx.task import Task
-    from nidaqmx.stream_readers import (
-        AnalogMultiChannelReader,
-        AnalogSingleChannelReader,
-    )
+    from nidaqmx.stream_readers import AnalogSingleChannelReader
     from nidaqmx.stream_writers import AnalogMultiChannelWriter
-    from nidaqmx.constants import Edge, AcquisitionType, LineGrouping
+    from nidaqmx.constants import Edge, AcquisitionType
     from nidaqmx.errors import DaqError
 
-except ImportError:
-    from theknights.stream_readers import AnalogMultiChannelReader
+else:
     from theknights.stream_readers import AnalogSingleChannelReader
     from theknights.stream_writers import AnalogMultiChannelWriter
-    from theknights.constants import Edge, AcquisitionType, LineGrouping
+    from theknights.constants import Edge, AcquisitionType
     from theknights.task import Task
     from theknights.errors import DaqError
-
 
 PIEZO_SCALE = conf["piezo"]["synchronization"]["scale"]
 
@@ -117,7 +112,7 @@ def get_last_parameters(parameter_queue, timeout=0.0001):
     return params
 
 
-#TODO: Move this to utils
+# TODO: Move this to utils
 def lcm(a, b):
     """Return lowest common multiple."""
     return a * b // gcd(a, b)
@@ -125,17 +120,17 @@ def lcm(a, b):
 
 class ScanLoop:
     def __init__(
-        self,
-        read_task,
-        write_task_z,
-        write_task_xy,
-        stop_event,
-        initial_parameters: ScanParameters,
-        parameter_queue: Queue,
-        n_samples,
-        sample_rate,
-        waveform_queue: ArrayQueue,
-        experiment_start_signal: Event,
+            self,
+            read_task,
+            write_task_z,
+            write_task_xy,
+            stop_event,
+            initial_parameters: ScanParameters,
+            parameter_queue: Queue,
+            n_samples,
+            sample_rate,
+            waveform_queue: ArrayQueue,
+            experiment_start_signal: Event,
     ):
 
         self.sample_rate = sample_rate
@@ -235,13 +230,13 @@ def calc_sync(z, sync_coef):
 class PlanarScanLoop(ScanLoop):
     def loop_condition(self):
         return (
-            super().loop_condition() and self.parameters.state == ScanningState.PLANAR
+                super().loop_condition() and self.parameters.state == ScanningState.PLANAR
         )
 
     def n_samples_period(self):
         if (
-            self.parameters.triggering.frequency is None
-            or self.parameters.triggering.frequency == 0
+                self.parameters.triggering.frequency is None
+                or self.parameters.triggering.frequency == 0
         ):
             return super().n_samples_period()
         else:
@@ -278,8 +273,8 @@ class VolumetricScanLoop(ScanLoop):
 
     def loop_condition(self):
         return (
-            super().loop_condition()
-            and self.parameters.state == ScanningState.VOLUMETRIC
+                super().loop_condition()
+                and self.parameters.state == ScanningState.VOLUMETRIC
         )
 
     def check_start(self):
@@ -322,13 +317,13 @@ class VolumetricScanLoop(ScanLoop):
         )
 
         if (
-            self.camera_on
-            and self.parameters.experiment_state == ExperimentPrepareState.NO_TRIGGER
+                self.camera_on
+                and self.parameters.experiment_state == ExperimentPrepareState.NO_TRIGGER
         ):
             self.camera_on = False
         if (
-            not self.camera_on
-            and self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
+                not self.camera_on
+                and self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
         ):
             self.camera_on = True
             self.i_sample = 0  # puts it at the beginning of the cycle
@@ -340,7 +335,7 @@ class VolumetricScanLoop(ScanLoop):
         i_insert = (self.i_sample - self.n_samples) % len(self.recorded_signal.buffer)
         self.recorded_signal.write(
             self.read_array[
-                : min(len(self.recorded_signal.buffer), len(self.read_array))
+            : min(len(self.recorded_signal.buffer), len(self.read_array))
             ],
             i_insert,
         )
@@ -349,17 +344,17 @@ class VolumetricScanLoop(ScanLoop):
     def fill_arrays(self):
         super().fill_arrays()
         self.write_arrays[0, :] = (
-            self.z_waveform.values(self.shifted_time) * PIEZO_SCALE
+                self.z_waveform.values(self.shifted_time) * PIEZO_SCALE
         )
         i_sample = self.i_sample % len(self.recorded_signal.buffer)
         if self.recorded_signal.is_complete():
             wave_part = self.recorded_signal.read(i_sample, self.n_samples)
             max_wave, min_wave = (np.max(wave_part), np.min(wave_part))
             if (-2 < calc_sync(min_wave, self.parameters.z.lateral_sync) < 2 and
-                -2 < calc_sync(max_wave, self.parameters.z.lateral_sync) < 2):
+                    -2 < calc_sync(max_wave, self.parameters.z.lateral_sync) < 2):
                 self.write_arrays[1, :] = calc_sync(wave_part, self.parameters.z.lateral_sync)
             if (-2 < calc_sync(min_wave, self.parameters.z.frontal_sync) < 2 and
-                -2 < calc_sync(max_wave, self.parameters.z.frontal_sync) < 2):
+                    -2 < calc_sync(max_wave, self.parameters.z.frontal_sync) < 2):
                 self.write_arrays[2, :] = calc_sync(wave_part, self.parameters.z.frontal_sync)
 
         if self.camera_on:
@@ -372,11 +367,11 @@ class VolumetricScanLoop(ScanLoop):
 
 class Scanner(Process):
     def __init__(
-        self,
-        stop_event: Event,
-        experiment_start_event,
-        n_samples_waveform=10000,
-        sample_rate=40000,
+            self,
+            stop_event: Event,
+            experiment_start_event,
+            n_samples_waveform=10000,
+            sample_rate=40000,
     ):
         super().__init__()
 
