@@ -25,6 +25,9 @@ from pathlib import Path
 from enum import Enum
 from lightsheet.utilities import neg_dif
 import time
+from lightsheet.config import read_config
+
+conf = read_config()
 
 
 class GlobalState(Enum):
@@ -49,11 +52,10 @@ class SaveSettings(ParametrizedQt):
         super().__init__()
         self.name = "experiment_settings"
         self.n_frames = Param(10_000, (1, 10_000_000), gui=False, loadable=False)
-        self.save_dir = Param(r"F:/Vilim", gui=False)
+        self.save_dir = Param(conf["default_paths"]["data"], gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("")
         self.overwrite_save_folder = Param(0, (0, 1), gui=False, loadable=False)
-
 
 
 class ScanningSettings(ParametrizedQt):

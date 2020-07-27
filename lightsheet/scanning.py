@@ -14,6 +14,9 @@ import numpy as np
 from typing import Union, Tuple
 
 from lightsheet.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
+from lightsheet.config import read_config
+
+conf = read_config()
 
 try:
     from nidaqmx.task import Task
@@ -34,7 +37,7 @@ except ImportError:
     from theknights.errors import DaqError
 
 
-PIEZO_SCALE = 1 / 40
+PIEZO_SCALE = conf["piezo"]["synchronization"]["scale"]
 
 
 class ScanningState(Enum):
@@ -114,6 +117,7 @@ def get_last_parameters(parameter_queue, timeout=0.0001):
     return params
 
 
+#TODO: Move this to utils
 def lcm(a, b):
     """Return lowest common multiple."""
     return a * b // gcd(a, b)
@@ -391,16 +395,24 @@ class Scanner(Process):
         # Configure the channels
 
         # read channel is only the piezo position on board 1
-        read_task.ai_channels.add_ai_voltage_chan("Dev1/ai0:0", min_val=0, max_val=10)
+        read_task.ai_channels.add_ai_voltage_chan(
+            conf["piezo"]["position_read"]["pos_chan"],
+            min_val=conf["piezo"]["position_read"]["min_val"],
+            max_val=conf["piezo"]["position_read"]["max_val"]
+        )
 
         # write channels are on board 1: piezo and z galvos
         write_task_z.ao_channels.add_ao_voltage_chan(
-            "Dev1/ao0:3", min_val=-5, max_val=10
+            conf["piezo"]["position_write"]["pos_chan"],
+            min_val=conf["piezo"]["position_write"]["min_val"],
+            max_val=conf["piezo"]["position_write"]["max_val"]
         )
 
         # on board 2: lateral galvos
         write_task_xy.ao_channels.add_ao_voltage_chan(
-            "Dev2/ao0:1", min_val=-5, max_val=10
+            conf["galvo_lateral"]["write_position"]["pos_chan"],
+            min_val=conf["galvo_lateral"]["write_position"]["min_val"],
+            max_val=conf["galvo_lateral"]["write_position"]["max_val"]
         )
 
         # Set the timing of both to the onboard clock so that they are synchronised
@@ -429,7 +441,7 @@ class Scanner(Process):
 
         # This is necessary to synchronise reading and writing
         read_task.triggers.start_trigger.cfg_dig_edge_start_trig(
-            "/Dev1/ao/StartTrigger", Edge.RISING
+            conf["piezo"]["synchronization"]["pos_chan"], Edge.RISING
         )
 
     def retrieve_parameters(self):
