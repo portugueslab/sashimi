@@ -218,10 +218,8 @@ def convert_camera_params(camera_settings: CameraSettings):
         subarray=tuple(camera_settings.subarray),
     )
 
-
-def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings,
-                        camera_settings: CameraSettings, scope_alignment: ScopeAlignmentInfo):
-    n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
+def get_voxel_size(scanning_settings: ZRecordingSettings, camera_settings: CameraSettings,
+                   scope_alignment: ScopeAlignmentInfo):
     scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
 
     if camera_settings.binning == "1x1":
@@ -230,23 +228,27 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
         binning = 2
     elif camera_settings.binning == "4x4":
         binning = 4
-    # set binning 2x2 by default
+        # set binning 2x2 by default
     else:
         binning = 2
-    inter_plane = int(scan_length / (n_planes - 1) * 1000) / (1000 * binning)
+
+    inter_plane = scan_length / scanning_settings.n_planes
+
+    return (inter_plane,
+                scope_alignment.pixel_size_y*binning,
+                scope_alignment.pixel_size_x*binning)
+
+
+def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings,
+                        camera_settings: CameraSettings, scope_alignment: ScopeAlignmentInfo):
+    n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
 
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
         n_planes=n_planes,
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
-        voxel_size=tuple(
-            int(dimension * binning * 1000) / 1000 for dimension in (
-                inter_plane,
-                scope_alignment.pixel_size_y,
-                scope_alignment.pixel_size_x
-            )
-        )
+        voxel_size=get_voxel_size(scanning_settings, camera_settings, scope_alignment)
     )
 
 

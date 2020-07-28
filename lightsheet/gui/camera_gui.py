@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
 from lightparam.gui import ParameterGui
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
-from lightsheet.state import convert_camera_params, GlobalState, State
+from lightsheet.state import convert_camera_params, GlobalState, State, get_voxel_size
 
 from time import time_ns
 import napari
@@ -56,6 +56,7 @@ class ViewingWidget(QWidget):
         self.bottom_layout.addWidget(self.wid_display_settings)
         self.bottom_layout.addWidget(self.btn_display_roi)
         self.bottom_layout.addWidget(self.btn_reset_contrast)
+        self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
         self.bottom_layout.addStretch()
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
@@ -85,6 +86,8 @@ class ViewingWidget(QWidget):
         delta_t = (current_time - self.last_time_updated) / 1e9
         if delta_t > 1 / self.display_settings.display_framerate:
             self.frame_layer.data = current_image
+            voxel_size = get_voxel_size(self.state.volume_setting, self.state.camera_settings, self.state.scope_alignment_info)
+            self.frame_layer.scale = [voxel_size[0]/voxel_size[1], 1.0, 1.0]
             self.last_time_updated = time_ns()
 
         sstatus = self.state.get_save_status()
