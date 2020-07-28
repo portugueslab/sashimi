@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 setup(
-    name="lightsheet",
+    name="sashimi",
     version="0.2.0",
     author="Vilim Stih @portugueslab",
     author_email="vilim@neuro.mpg.de",

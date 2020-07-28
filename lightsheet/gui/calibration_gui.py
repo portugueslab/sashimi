@@ -63,11 +63,6 @@ class CalibrationWidget(QWidget):
         self.chk_noise_subtraction.clicked.connect(self.set_noise_subtraction_mode)
         self.timer.timeout.connect(self.update_label)
 
-    def uncheck_noise(self):
-        if self.chk_noise_subtraction.isChecked():
-            self.chk_noise_subtraction.click()
-            self.show_dialog_box(deactivated=True)
-
     def refresh_widgets(self):
         self.wid_settings.refresh_widgets()
         self.update_label()
@@ -93,13 +88,14 @@ class CalibrationWidget(QWidget):
         )
 
     def set_noise_subtraction_mode(self):
+        # check by the status of the check box
         if self.state.calibration_ref is None:
             self.show_dialog_box(finished=False)
         else:
-            self.state.calibration_ref = None
-            self.dialog_button.click()
+            self.state.reset_noise_subtraction()
 
     def show_dialog_box(self, finished=True, deactivated=False):
+        # TODO split into two functions
         self.dialog_box.setIcon(QMessageBox.Information)
         self.dialog_box.setWindowTitle("Noise subtraction mode")
         self.dialog_box.setText(
@@ -107,7 +103,7 @@ class CalibrationWidget(QWidget):
         )
         if deactivated:
             self.dialog_box.setText("Noise subtraction has been deactivated")
-        elif not finished :
+        elif not finished:
             self.dialog_button.clicked.connect(self.perform_noise_subtraction)
         else:
             self.dialog_button.clicked.disconnect(self.perform_noise_subtraction)
@@ -115,5 +111,5 @@ class CalibrationWidget(QWidget):
         self.dialog_box.show()
 
     def perform_noise_subtraction(self):
-        self.state.obtain_signal_average(n_images=self.param_n_noise_subtraction.average_n_frames)
+        self.state.obtain_noise_average(n_images=self.param_n_noise_subtraction.average_n_frames)
         self.show_dialog_box(finished=True)

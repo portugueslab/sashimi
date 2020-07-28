@@ -2,83 +2,96 @@ from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QPushButton,
     QLabel,
     QProgressBar
 )
-import pyqtgraph as pg
 from lightparam.gui import ParameterGui
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
-from pyqtgraph.graphicsItems.ROI import ROI
-from lightsheet.state import convert_camera_params, GlobalState
+from lightsheet.state import convert_camera_params, GlobalState, State, get_voxel_size
 
 from time import time_ns
-
-pg.setConfigOptions(imageAxisOrder="row-major")
+import napari
+import numpy as np
 
 
 class DisplaySettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "display_settings"
-        self.display_framerate = Param(16, (1, 100))
+        self.display_framerate = Param(30, (1, 100))
 
 
 class ViewingWidget(QWidget):
-    def __init__(self, state, timer):
+    def __init__(self, state: State, timer):
         super().__init__()
         self.state = state
         self.timer = timer
         self.refresh_timer = QTimer()
-        self.setLayout(QVBoxLayout())
+        self.main_layout = QVBoxLayout()
 
         self.display_settings = DisplaySettings()
         self.wid_display_settings = ParameterGui(self.display_settings)
 
-        self.image_viewer = pg.ImageView()
-        self.roi = ROI(pos=[100, 100], size=500, removable=True)
-        self.roi.addScaleHandle([1, 1], [0, 0])
-        self.image_viewer.view.addItem(self.roi)
+        self.viewer = napari.Viewer(show=False)
+        self.frame_layer = self.viewer.add_image(np.zeros([1, 1024, 1024]), blending='translucent', name="frame_layer")
 
-        self.image_viewer.ui.roiBtn.hide()
-        self.image_viewer.ui.menuBtn.hide()
+        self.roi = self.viewer.add_shapes(
+            [np.array([[0, 0], [500, 0], [500, 500], [0, 500]])],
+            blending='translucent',
+            opacity=0.1,
+            face_color="yellow"
+        )
+        self.toggle_roi_display()
+        self.btn_display_roi = QPushButton("Show/Hide ROI")
+        self.btn_reset_contrast = QPushButton("Reset contrast limits")
 
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
         self.lbl_experiment_progress = QLabel()
 
-        self.layout().addWidget(self.image_viewer)
-        self.layout().addWidget(self.wid_display_settings)
-        self.layout().addWidget(self.experiment_progress)
-        self.layout().addWidget(self.lbl_experiment_progress)
+        self.bottom_layout = QHBoxLayout()
+        self.bottom_layout.addWidget(self.wid_display_settings)
+        self.bottom_layout.addWidget(self.btn_display_roi)
+        self.bottom_layout.addWidget(self.btn_reset_contrast)
+        self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
+        self.bottom_layout.addStretch()
+
+        self.main_layout.addWidget(self.viewer.window.qt_viewer)
+        self.main_layout.addLayout(self.bottom_layout)
+        self.main_layout.addWidget(self.experiment_progress)
+        self.main_layout.addWidget(self.lbl_experiment_progress)
 
         self.experiment_progress.hide()
         self.lbl_experiment_progress.hide()
 
-        self.is_first_image = True
         self.refresh_display = True
 
-        # ms for display clock. Currently 5 fps replay
         self.last_time_updated = 0
 
+        self.setLayout(self.main_layout)
+
         self.timer.timeout.connect(self.refresh)
+        self.btn_display_roi.clicked.connect(self.toggle_roi_display)
+        self.btn_reset_contrast.clicked.connect(self.update_contrast_limits)
 
     def refresh(self) -> None:
-        current_image = self.state.get_image()
+        current_image = self.state.get_volume()
+
         if current_image is None:
             return
 
         current_time = time_ns()
-        delta_t = (current_time - self.last_time_updated)/1e9
-        if delta_t > 1/self.display_settings.display_framerate:
-            self.image_viewer.setImage(
-                current_image,
-                autoLevels=self.is_first_image,
-                autoRange=self.is_first_image,
-                autoHistogramRange=self.is_first_image,
-            )
-            self.is_first_image = False
+        delta_t = (current_time - self.last_time_updated) / 1e9
+        if delta_t > 1 / self.display_settings.display_framerate:
+            # If not volumetric or out of range, reset indexes
+            if current_image.shape[0] == 1:
+                self.frame_layer.dims.reset()
+            self.frame_layer.data = current_image
+            voxel_size = get_voxel_size(self.state.volume_setting, self.state.camera_settings, self.state.scope_alignment_info)
+            self.frame_layer.scale = [voxel_size[0]/voxel_size[1], 1.0, 1.0]
             self.last_time_updated = time_ns()
 
         sstatus = self.state.get_save_status()
@@ -88,6 +101,17 @@ class ViewingWidget(QWidget):
             self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
             self.experiment_progress.setValue(sstatus.i_volume)
             self.lbl_experiment_progress.setText("Saved chunks: {}".format(sstatus.i_chunk))
+
+    def update_contrast_limits(self):
+        self.frame_layer.reset_contrast_limits()
+
+    def toggle_roi_display(self):
+        if self.roi.visible:
+            # TODO: Block rotating roi
+            self.roi.visible = False
+        else:
+            self.roi.visible = True
+            self.viewer.press_key("s")  # this allows moving the whole roi and scaling but no individual handles
 
 
 class CameraSettingsContainerWidget(QWidget):
@@ -114,6 +138,7 @@ class CameraSettingsContainerWidget(QWidget):
         self.layout().addWidget(self.lbl_roi)
 
         self.update_camera_info()
+        self.set_full_size_frame()
         self.camera_info_timer.start()
 
         self.set_roi_button.clicked.connect(self.set_roi)
@@ -121,11 +146,16 @@ class CameraSettingsContainerWidget(QWidget):
         self.camera_info_timer.timeout.connect(self.update_camera_info)
 
     def set_roi(self):
-        roi_pos = self.roi.pos()
-        roi_size = self.roi.size()
-        self.state.camera_settings.subarray = tuple([roi_pos.x(), roi_pos.y(), roi_size.x(), roi_size.y()])
-        self.update_roi_info(width=roi_size.x(), height=roi_size.y())
-        self.roi.hide()
+        roi_pos = (
+            int(self.roi.data[0][0][1]),
+            int(self.roi.data[0][0][0])
+        )
+        roi_size = (
+            int(self.roi.data[0][3][1] - self.roi.data[0][0][1]),
+            int(self.roi.data[0][1][0] - self.roi.data[0][0][0]),
+        )
+        self.state.camera_settings.subarray = tuple([roi_pos[0], roi_pos[1], roi_size[0], roi_size[1]])
+        self.update_roi_info(width=roi_size[0], height=roi_size[1])
 
     def set_full_size_frame(self):
         self.state.camera_settings.subarray = [
@@ -139,7 +169,6 @@ class CameraSettingsContainerWidget(QWidget):
             width=self.state.current_camera_status.image_width / camera_params.binning,
             height=self.state.current_camera_status.image_height / camera_params.binning
         )
-        self.roi.show()
 
     def update_roi_info(self, width, height):
         self.lbl_roi.setText(

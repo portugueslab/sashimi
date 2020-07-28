@@ -17,13 +17,12 @@ conf = read_config()
 @dataclass
 class SavingParameters:
     output_dir: Path = conf["default_paths"]["data"]
-    n_t: int = 10000
     n_planes: int = 1
     n_volumes: int = 10000
     chunk_size: int = 20
     optimal_chunk_MB_RAM: int = conf["array_ram_MB"]  # Experimental value, might be different for different machines.
     notification_email: str = "None"
-    framerate: float = 1
+    volumerate: float = 1
     voxel_size: tuple = (1, 1, 1)
 
 
@@ -33,8 +32,6 @@ class SavingStatus:
     i_in_chunk: int = 0
     i_volume: int = 0
     i_chunk: int = 0
-    i_frame: int = 0
-
 
 class StackSaver(Process):
     def __init__(self, stop_event, duration_queue, max_queue_size=2000):
@@ -49,7 +46,6 @@ class StackSaver(Process):
         self.i_in_chunk = 0
         self.i_chunk = 0
         self.i_plane = 0
-        self.i_frame = 0
         self.i_volume = 0
         self.current_data = None
         self.saved_status_queue = Queue()
@@ -75,31 +71,25 @@ class StackSaver(Process):
         (Path(self.save_parameters.output_dir) / "original").mkdir(
             parents=True, exist_ok=True
         )
-        self.i_frame = 0
         self.i_in_chunk = 0
         self.i_chunk = 0
-        self.i_plane = 0
         self.i_volume = 0
         self.current_data = None
-        n_total = self.save_parameters.n_t
+
         while (
-                self.i_frame < n_total
+                self.i_volume < self.save_parameters.n_volumes
                 and self.saving_signal.is_set()
                 and not self.stop_event.is_set()
         ):
             self.receive_save_parameters()
-            try:
-                n_total = self.save_parameters.n_t
-            except Empty:
-                pass
+
             try:
                 frame = self.save_queue.get(timeout=0.01)
                 self.fill_dataset(frame)
-                self.i_frame += 1
             except Empty:
                 pass
 
-        if self.i_frame > 0:
+        if self.i_volume > 0:
             if self.i_in_chunk != 0:
                 self.save_chunk()
             self.update_saved_status_queue()
@@ -137,28 +127,19 @@ class StackSaver(Process):
         except (yagmail.error.YagAddressError, yagmail.error.YagConnectionClosed, yagmail.error.YagInvalidEmailAddress):
             pass
 
-    def cast(self, frame):
-        """
-        Conversion into a format appropriate for saving
-        """
-        return frame
-
-    def fill_dataset(self, frame):
+    def fill_dataset(self, volume):
         if self.current_data is None:
-            self.calculate_optimal_size(frame)
+            self.calculate_optimal_size(volume)
             self.current_data = np.empty(
-                (self.save_parameters.chunk_size, self.save_parameters.n_planes, *frame.shape),
+                (self.save_parameters.chunk_size, *volume.shape),
                 dtype=self.dtype
             )
 
-        self.current_data[self.i_in_chunk, self.i_plane, :, :] = self.cast(frame)
+        self.current_data[self.i_in_chunk, :, :, :] = volume
 
-        self.i_plane += 1
-        if self.i_plane >= self.save_parameters.n_planes:
-            self.i_plane = 0
-            self.i_in_chunk += 1
-            self.i_volume += 1
-            self.update_saved_status_queue()
+        self.i_volume += 1
+        self.i_in_chunk += 1
+        self.update_saved_status_queue()
 
         if self.i_in_chunk == self.save_parameters.chunk_size:
             self.save_chunk()
@@ -170,7 +151,6 @@ class StackSaver(Process):
                 i_in_chunk=self.i_in_chunk,
                 i_chunk=self.i_chunk,
                 i_volume=self.i_volume,
-                i_frame=self.i_frame
             )
         )
 
@@ -186,7 +166,7 @@ class StackSaver(Process):
             json.dump(
                 {
                     "shape_full": (
-                        self.save_parameters.n_t // self.current_data.shape[1],
+                        self.save_parameters.n_volumes,
                         *self.current_data.shape[1:],
                     ),
                     "shape_block": (
@@ -218,7 +198,7 @@ class StackSaver(Process):
             raise TypeError("Saving data type not supported. Only uint16 is supported")
 
         volume_megabytes = array_bytes * self.save_parameters.n_planes / 1048576
-        self.save_parameters.chunk_size = int(self.save_parameters.optimal_chunk_MB_RAM / volume_megabytes)
+        self.save_parameters.chunk_size = 10 # int(self.save_parameters.optimal_chunk_MB_RAM / volume_megabytes)
 
     def receive_save_parameters(self):
         try:
@@ -227,7 +207,6 @@ class StackSaver(Process):
             pass
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
-            self.save_parameters.n_t = int(np.ceil(self.save_parameters.framerate * new_duration))
-            self.save_parameters.n_volumes = int(np.ceil(self.save_parameters.n_t / self.save_parameters.n_planes))
+            self.save_parameters.n_volumes = int(np.ceil(self.save_parameters.volumerate * new_duration))
         except Empty:
             pass

@@ -17,6 +17,7 @@ from lightsheet.scanning import (
     ExperimentPrepareState,
 )
 from lightsheet.stytra_comm import StytraCom
+from lightsheet.dispatcher import VolumeDispatcher
 from multiprocessing import Event
 import json
 from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
@@ -51,7 +52,6 @@ class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "experiment_settings"
-        self.n_frames = Param(10_000, (1, 10_000_000), gui=False, loadable=False)
         self.save_dir = Param(conf["default_paths"]["data"], gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("")
@@ -218,11 +218,8 @@ def convert_camera_params(camera_settings: CameraSettings):
         subarray=tuple(camera_settings.subarray),
     )
 
-
-def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings,
-                        camera_settings: CameraSettings, scope_alignment: ScopeAlignmentInfo):
-    n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
-    framerate = scanning_settings.frequency * n_planes
+def get_voxel_size(scanning_settings: ZRecordingSettings, camera_settings: CameraSettings,
+                   scope_alignment: ScopeAlignmentInfo):
     scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
 
     if camera_settings.binning == "1x1":
@@ -231,24 +228,27 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
         binning = 2
     elif camera_settings.binning == "4x4":
         binning = 4
-    # set binning 2x2 by default
+        # set binning 2x2 by default
     else:
         binning = 2
-    inter_plane = int(scan_length / (n_planes - 1) * 1000) / (1000 * binning)
+
+    inter_plane = scan_length / scanning_settings.n_planes
+
+    return (inter_plane,
+                scope_alignment.pixel_size_y*binning,
+                scope_alignment.pixel_size_x*binning)
+
+
+def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings,
+                        camera_settings: CameraSettings, scope_alignment: ScopeAlignmentInfo):
+    n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
 
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
-        n_t=int(save_settings.n_frames),
         n_planes=n_planes,
         notification_email=str(save_settings.notification_email),
-        framerate=framerate,
-        voxel_size=tuple(
-            int(dimension * binning * 1000) / 1000 for dimension in (
-                inter_plane,
-                scope_alignment.pixel_size_y,
-                scope_alignment.pixel_size_x
-            )
-        )
+        volumerate=scanning_settings.frequency,
+        voxel_size=get_voxel_size(scanning_settings, camera_settings, scope_alignment)
     )
 
 
@@ -328,12 +328,23 @@ class State:
         self.laser_settings = LaserSettings()
         self.stytra_comm = StytraCom(
             stop_event=self.stop_event,
-            experiment_start_event=self.experiment_start_event,
+            experiment_start_event=self.experiment_start_event
         )
 
         self.save_status: Optional[SavingStatus] = None
 
-        self.saver = StackSaver(self.stop_event, duration_queue=self.stytra_comm.duration_queue)
+        self.saver = StackSaver(
+            stop_event=self.stop_event,
+            duration_queue=self.stytra_comm.duration_queue
+        )
+
+        self.dispatcher = VolumeDispatcher(
+            stop_event=self.stop_event,
+            saving_signal=self.saver.saving_signal,
+            wait_signal=self.scanner.wait_signal,
+            camera_queue=self.camera.image_queue,
+            saver_queue=self.saver.save_queue,
+        )
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
@@ -362,10 +373,15 @@ class State:
         self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
         self.save_settings.sig_param_changed.connect(self.send_scan_settings)
 
+        self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
+        self.single_plane_settings.sig_param_changed.connect(self.send_dispatcher_settings)
+        self.status.sig_param_changed.connect(self.send_dispatcher_settings)
+
         self.camera.start()
         self.scanner.start()
         self.stytra_comm.start()
         self.saver.start()
+        self.dispatcher.start()
 
         self.all_settings = dict(camera=dict(), scanning=dict())
 
@@ -398,6 +414,7 @@ class State:
         self.all_settings["camera"] = camera_params
 
     def send_scan_settings(self):
+        n_planes = 1
         if self.global_state == GlobalState.PAUSED:
             params = ScanParameters(state=ScanningState.PAUSED)
 
@@ -415,6 +432,7 @@ class State:
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
+            n_planes = self.volume_setting.n_planes - self.volume_setting.n_skip_start - self.volume_setting.n_skip_end
             if self.waveform is not None:
                 pulses = self.calculate_pulse_times() * self.sample_rate
                 try:
@@ -432,6 +450,10 @@ class State:
         save_params = convert_save_params(
             self.save_settings, self.volume_setting, self.camera_settings, self.scope_alignment_info)
         self.saver.saving_parameter_queue.put(save_params)
+        self.dispatcher.n_planes_queue.put(n_planes)
+
+    def send_dispatcher_settings(self):
+        pass
 
     def get_camera_status(self):
         try:
@@ -456,9 +478,9 @@ class State:
     def start_experiment(self):
         # TODO disable the GUI except the abort button
         self.send_scan_settings()
-        self.saver.saving_signal.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
+        self.saver.saving_signal.set()
         time.sleep(0.5)
         self.toggle_experiment_state()
 
@@ -468,36 +490,36 @@ class State:
         self.saver.save_queue.clear()
         self.send_scan_settings()
 
-    def obtain_signal_average(self, n_images=50, dtype=np.uint16):
+    def obtain_noise_average(self, n_images=50, dtype=np.uint16):
         '''
         Obtains average noise of n_images to subtract to acquired, both for display and saving
         '''
-        if self.calibration_ref is None:
-            current_laser = self.laser_settings.laser_power
-            self.laser.set_current(0)
-            n_image = 0
-            while n_image < n_images:
-                current_image = self.get_image()
-                if current_image is not None:
-                    if n_image == 0:
-                        calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
-                    calibration_set[n_image, :, :] = current_image
-                    n_image += 1
-            self.calibration_ref = np.average(calibration_set, axis=0)
-            self.calibration_ref = self.calibration_ref.astype(dtype=dtype)
-            self.laser.set_current(current_laser)
-        else:
-            self.calibration_ref = None
+        self.dispatcher.noise_subtraction_active.clear()
 
-    def get_image(self):
+        current_laser = self.laser_settings.laser_power
+        self.laser.set_current(0)
+        n_image = 0
+        while n_image < n_images:
+            current_volume = self.get_volume()
+            if current_volume is not None:
+                current_image = current_volume[0, :, :]
+                if n_image == 0:
+                    calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
+                calibration_set[n_image, :, :] = current_image
+                n_image += 1
+        self.dispatcher.noise_subtraction_active.set()
+        self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
+        self.laser.set_current(current_laser)
+
+        self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
+
+    def reset_noise_subtraction(self):
+        self.calibration_ref = None
+        self.dispatcher.noise_subtraction_active.clear()
+
+    def get_volume(self):
         try:
-            image = self.camera.image_queue.get(timeout=0.001)
-            if self.calibration_ref is not None:
-                image = neg_dif(image, self.calibration_ref)
-            if self.saver.saving_signal.is_set():
-                if self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
-                    self.saver.save_queue.put(image)
-            return image
+            return self.dispatcher.viewer_queue.get(timeout=0.001)
         except Empty:
             return None
 
@@ -533,3 +555,4 @@ class State:
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
+        self.dispatcher.join(timeout=10)
