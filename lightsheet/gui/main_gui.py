@@ -74,7 +74,8 @@ class MainWindow(QMainWindow):
             DockedWidget(widget=self.wid_settings_tree, title="Metadata")
         )
 
-        self.st.camera_settings.sig_param_changed.connect(self.wid_status.wid_calibration.uncheck_noise)
+        self.st.camera_settings.sig_param_changed.connect(self.st.reset_noise_subtraction)
+        # TODO also change the check box of the button without triggering
 
         self.timer.start()
         self.timer.timeout.connect(self.check_end_experiment)

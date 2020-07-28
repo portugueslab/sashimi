@@ -488,27 +488,32 @@ class State:
         self.saver.save_queue.clear()
         self.send_scan_settings()
 
-    def obtain_signal_average(self, n_images=50, dtype=np.uint16):
+    def obtain_noise_average(self, n_images=50, dtype=np.uint16):
         '''
         Obtains average noise of n_images to subtract to acquired, both for display and saving
         '''
-        if self.calibration_ref is None:
-            current_laser = self.laser_settings.laser_power
-            self.laser.set_current(0)
-            n_image = 0
-            while n_image < n_images:
-                current_image = self.get_image()
-                if current_image is not None:
-                    if n_image == 0:
-                        calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
-                    calibration_set[n_image, :, :] = current_image
-                    n_image += 1
-            self.calibration_ref = np.average(calibration_set, axis=0)
-            self.calibration_ref = self.calibration_ref.astype(dtype=dtype)
-            self.laser.set_current(current_laser)
-        else:
-            self.calibration_ref = None
+        self.dispatcher.noise_subtraction_active.clear()
+
+        current_laser = self.laser_settings.laser_power
+        self.laser.set_current(0)
+        n_image = 0
+        while n_image < n_images:
+            current_volume = self.get_volume()
+            if current_volume is not None:
+                current_image = current_volume[0, :, :]
+                if n_image == 0:
+                    calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
+                calibration_set[n_image, :, :] = current_image
+                n_image += 1
+        self.dispatcher.noise_subtraction_active.set()
+        self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
+        self.laser.set_current(current_laser)
+
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
+
+    def reset_noise_subtraction(self):
+        self.calibration_ref = None
+        self.dispatcher.noise_subtraction_active.clear()
 
     def get_volume(self):
         try:

@@ -126,7 +126,7 @@ class CameraSettingsContainerWidget(QWidget):
         self.layout().addWidget(self.lbl_roi)
 
         self.update_camera_info()
-        self.set_full_size_frame_button
+        self.set_full_size_frame()
         self.camera_info_timer.start()
 
         self.set_roi_button.clicked.connect(self.set_roi)

@@ -28,6 +28,7 @@ class VolumeDispatcher(Process):
         self.volume_buffer = None
         self.current_frame = None
         self.calibration_ref = None
+        self.noise_subtraction_active = Event()
         self.n_planes = 1
         self.i_plane = 0
         self.first_volume = True
@@ -42,7 +43,7 @@ class VolumeDispatcher(Process):
 
     def process_frame(self):
         if self.current_frame is not None:
-            if self.calibration_ref is not None:
+            if self.calibration_ref is not None and self.noise_subtraction_active.is_set():
                 self.current_frame = neg_dif(self.current_frame, self.calibration_ref)
             if self.first_volume or self.volume_buffer.shape[1:3] != self.current_frame.shape:
                 self.volume_buffer = np.empty((self.n_planes, *self.current_frame.shape), dtype=np.uint16)
