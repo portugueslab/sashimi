@@ -39,23 +39,25 @@ class VolumeDispatcher(Process):
             if self.saving_signal.is_set() and not self.experiment_started:
                 self.check_experiment_start()
             self.get_frame()
-            self.loop()
+            self.process_frame()
 
-    def loop(self):
+    def process_frame(self):
         if self.current_frame is not None:
             if self.calibration_ref is not None:
                 self.current_frame = neg_dif(self.current_frame, self.calibration_ref)
             if self.first_volume:
-                self.volume_buffer = np.empty(self.n_planes, *self.current_frame)
+                self.volume_buffer = np.empty((self.n_planes, *self.current_frame.shape), dtype=np.uint16)
                 self.first_volume = False
             self.volume_buffer[self.i_plane, :, :] = self.current_frame
             self.i_plane += 1
-            if self.i_plane == self.n_planes - 1:
+            if self.i_plane == self.n_planes:
                 self.fill_queues()
+                self.i_plane = 0
 
     def fill_queues(self):
         if self.viewer_queue.queue.qsize() < 3:
             self.viewer_queue.put(self.volume_buffer)
+            print(self.n_planes)
         else:
             pass  # volume has been dropped from the viewer
         if self.saving_signal.is_set():
@@ -81,10 +83,14 @@ class VolumeDispatcher(Process):
     def send_receive(self):
         try:
             self.n_planes = self.n_planes_queue.get(timeout=0.001)
-            self.first_volume = True
+            self.reset()
         except Empty:
             pass
         try:
             self.calibration_ref = self.calibration_ref_queue.get(timeout=0.001)
         except Empty:
             pass
+
+    def reset(self):
+        self.first_volume = True
+        self.i_plane = 0

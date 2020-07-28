@@ -207,7 +207,7 @@ class ScanLoop:
         self.z_reader.read_many_sample(
             self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
         )
-        self.n_samples_read += self.write_arrays[1]
+        self.n_samples_read += self.write_arrays.shape[1]
         self.read_array[:] = self.read_array / PIEZO_SCALE
 
     def loop(self):
@@ -333,7 +333,7 @@ class VolumetricScanLoop(ScanLoop):
         return True
 
     def write(self):
-        super().read()
+        super().write()
         if self.camera_on:
             self.wait_signal.clear()
 

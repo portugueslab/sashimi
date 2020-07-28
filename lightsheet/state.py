@@ -17,7 +17,7 @@ from lightsheet.scanning import (
     ExperimentPrepareState,
 )
 from lightsheet.stytra_comm import StytraCom
-from lightsheet.boost import VolumeDispatcher
+from lightsheet.dispatcher import VolumeDispatcher
 from multiprocessing import Event
 import json
 from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode
@@ -410,6 +410,7 @@ class State:
         self.all_settings["camera"] = camera_params
 
     def send_scan_settings(self):
+        n_planes = 1
         if self.global_state == GlobalState.PAUSED:
             params = ScanParameters(state=ScanningState.PAUSED)
 
@@ -417,13 +418,11 @@ class State:
             params = convert_calibration_params(
                 self.planar_setting, self.calibration.z_settings
             )
-            n_planes = 1
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
                 self.planar_setting, self.single_plane_settings, self.calibration
             )
-            n_planes = 1
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
             params = convert_volume_params(
@@ -504,7 +503,7 @@ class State:
 
     def get_volume(self):
         try:
-            return self.dispatcher.viewer_queue.get()
+            return self.dispatcher.viewer_queue.get(timeout=0.001)
         except Empty:
             return None
 

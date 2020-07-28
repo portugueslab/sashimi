@@ -5,11 +5,11 @@ with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 setup(
-    name="lightsheet",
+    name="sashimi",
     version="0.2",
     author="Vilim Stih @portugueslab",
     author_email="vilim@neuro.mpg.de",
     packages=find_packages(),
     install_requires=requirements,
-    entry_points={"console_scripts" : ["fancyls = lightsheet.main:main"]},
+    entry_points={"console_scripts" : ["sashimi = lightsheet.main:main"]},
 )
