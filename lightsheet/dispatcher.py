@@ -14,7 +14,7 @@ class VolumeDispatcher(Process):
             wait_signal: Event,
             camera_queue: ArrayQueue,
             saver_queue: ArrayQueue,
-            max_queue_size=500
+            max_queue_size=1200
     ):
         super().__init__()
         self.stop_event = stop_event

@@ -160,6 +160,7 @@ class ScanLoop:
 
         self.started = False
         self.n_acquired = 0
+        self.first_update = True
 
         self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
         self.frontal_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
@@ -186,6 +187,7 @@ class ScanLoop:
             self.frontal_waveform = TriangleWaveform(
                 **asdict(self.parameters.xy.frontal)
             )
+            self.first_update = False
             return True
         return False
 
@@ -294,7 +296,7 @@ class VolumetricScanLoop(ScanLoop):
 
     def update_settings(self):
         updated = super().update_settings()
-        if not updated:
+        if not updated and not self.first_update:
             return False
 
         if self.parameters.state != ScanningState.VOLUMETRIC:
