@@ -9,19 +9,23 @@ import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
+from lightsheet.config import read_config
+
+conf = read_config()
 
 
 @dataclass
 class SavingParameters:
-    output_dir: Path = r"F:/Vilim"
+    output_dir: Path = conf["default_paths"]["data"]
     n_t: int = 10000
     n_planes: int = 1
     n_volumes: int = 10000
     chunk_size: int = 20
-    optimal_chunk_MB_RAM: int = 450  # Experimental value, might be different for different machines.
+    optimal_chunk_MB_RAM: int = conf["array_ram_MB"]  # Experimental value, might be different for different machines.
     notification_email: str = "None"
     framerate: float = 1
     voxel_size: tuple = (1, 1, 1)
+
 
 @dataclass
 class SavingStatus:
@@ -100,7 +104,7 @@ class StackSaver(Process):
             self.update_saved_status_queue()
             self.finalize_dataset()
             self.current_data = None
-            if self.save_parameters.notification_email != "None" and self.saving_signal.is_set():
+            if self.saving_signal.is_set():
                 self.send_email_end()
 
         self.saving_signal.clear()
@@ -108,11 +112,11 @@ class StackSaver(Process):
         self.saver_stopped_signal.set()
 
     def send_email_end(self):
-        sender_email = "fishgitbot@gmail.com" # TODO this should go to thecolonel
+        sender_email = conf["email"]["user"]  # TODO this should go to thecolonel
         # TODO: Send email every x minutes with image like in 2P
         receiver_email = self.save_parameters.notification_email
         subject = "Your lightsheet experiment is complete"
-        sender_password = "think_clear2020"
+        sender_password = conf["email"]["password"]
 
         yag = yagmail.SMTP(user=sender_email, password=sender_password)
 
@@ -123,12 +127,14 @@ class StackSaver(Process):
             "\n"
             "fishgitbot"
         ]
-
-        yag.send(
-            to=receiver_email,
-            subject=subject,
-            contents=body,
-        )
+        try:
+            yag.send(
+                to=receiver_email,
+                subject=subject,
+                contents=body,
+            )
+        except (yagmail.error.YagAddressError, yagmail.error.YagConnectionClosed, yagmail.error.YagInvalidEmailAddress):
+            pass
 
     def fill_dataset(self, volume):
         if self.current_data is None:
@@ -159,17 +165,17 @@ class StackSaver(Process):
 
     def finalize_dataset(self):
         with open(
-            (
-                Path(self.save_parameters.output_dir)
-                / "original"
-                / "stack_metadata.json"
-            ),
-            "w",
+                (
+                        Path(self.save_parameters.output_dir)
+                        / "original"
+                        / "stack_metadata.json"
+                ),
+                "w",
         ) as f:
             json.dump(
                 {
                     "shape_full": (
-                        self.save_parameters.n_t//self.current_data.shape[1],
+                        self.save_parameters.n_t // self.current_data.shape[1],
                         *self.current_data.shape[1:],
                     ),
                     "shape_block": (
@@ -210,7 +216,7 @@ class StackSaver(Process):
             pass
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
-            self.save_parameters.n_t = int(np.ceil(self.save_parameters.framerate*new_duration))
+            self.save_parameters.n_t = int(np.ceil(self.save_parameters.framerate * new_duration))
             self.save_parameters.n_volumes = int(np.ceil(self.save_parameters.n_t / self.save_parameters.n_planes))
         except Empty:
             pass

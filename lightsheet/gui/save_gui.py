@@ -41,6 +41,8 @@ class SaveWidget(QWidget):
             self.save_location_button.setStyleSheet(
                 "background-color:#b5880d; border-color:#fcc203"
             )
+            self.state.save_settings.overwrite_save_folder = 1
         else:
             self.save_location_button.setText("Save in " + pathtext)
             self.save_location_button.setStyleSheet("")
+            self.state.save_settings.overwrite_save_folder = 0

@@ -166,16 +166,15 @@ class CameraSettingsContainerWidget(QWidget):
             "Current frame dimensions are:\nHeight: {}\nWidth: {}".format(int(height), int(width)))
 
     def update_camera_info(self):
-        triggered_frame_rate = self.state.get_triggered_frame_rate()
-        if triggered_frame_rate is not None:
+        frame_rate = self.state.get_triggered_frame_rate()
+        if frame_rate is not None:
             if self.state.global_state == GlobalState.PAUSED:
                 self.lbl_camera_info.hide()
             else:
                 self.lbl_camera_info.setStyleSheet("color: white")
                 expected_frame_rate = None
                 if self.state.global_state == GlobalState.PREVIEW:
-                    frame_rate = self.state.current_camera_status.internal_frame_rate
-                    self.lbl_camera_info.setText("Internal frame rate: {} Hz".format(round(frame_rate, 2)))
+                    self.lbl_camera_info.setText("Camera frame rate: {} Hz".format(round(frame_rate, 2)))
                 if self.state.global_state == GlobalState.VOLUME_PREVIEW:
                     planes = self.state.volume_setting.n_planes - \
                              self.state.volume_setting.n_skip_start - self.state.volume_setting.n_skip_end
@@ -188,11 +187,11 @@ class CameraSettingsContainerWidget(QWidget):
                     self.lbl_camera_info.setText(
                         "\n".join(
                             [
-                                "Camera frame rate: {} Hz".format(round(triggered_frame_rate, 2))
+                                "Camera frame rate: {} Hz".format(round(frame_rate, 2))
                             ]
                             + (
                                 ["Camera is lagging behind. Decrease exposure, number of planes or frequency"]
-                                if expected_frame_rate > (triggered_frame_rate * 1.1)
+                                if expected_frame_rate > (frame_rate * 1.1)
                                 else [
                                     "Seems to follow well current speed"
                                 ]
@@ -200,7 +199,7 @@ class CameraSettingsContainerWidget(QWidget):
                         )
                     )
 
-                    if expected_frame_rate > (triggered_frame_rate * 1.1):
+                    if expected_frame_rate > (frame_rate * 1.1):
                         self.lbl_camera_info.setStyleSheet("color: red")
                     else:
                         self.lbl_camera_info.setStyleSheet("color: green")

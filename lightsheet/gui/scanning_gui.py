@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QPushButton,
     QLabel,
-    QCheckBox
+    QCheckBox,
+    QMessageBox
 )
 from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
@@ -56,12 +57,16 @@ class VolumeScanningWidget(QWidget):
         self.lbl_interplane_distance.setStyleSheet("color: yellow")
 
         self.wid_wave = WaveformWidget(
-            waveform_queue=self.state.scanner.waveform_queue,
             timer=self.timer,
             state=self.state
         )
         self.wid_collapsible_wave = CollapsibleWidget(child=self.wid_wave, name="Piezo impulse-response waveform")
         self.wid_collapsible_wave.toggle_collapse()
+
+        self.dialog_box = QMessageBox()
+        self.dialog_ok_button = self.dialog_box.addButton(self.dialog_box.Ok)
+        self.dialog_abort_button = self.dialog_box.addButton(self.dialog_box.Abort)
+        self.override_overwrite = False
 
         self.layout().addWidget(self.wid_volume)
         self.layout().addWidget(self.btn_start)
@@ -77,6 +82,7 @@ class VolumeScanningWidget(QWidget):
 
         self.timer_scope_info.timeout.connect(self.update_alignment)
         self.chk_pause.clicked.connect(self.change_pause_status)
+        self.dialog_ok_button.clicked.connect(self.overwrite_anyway)
 
         self.chk_pause.click()
 
@@ -109,5 +115,21 @@ class VolumeScanningWidget(QWidget):
         if self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
             # Here what happens if experiment is aborted
             self.state.saver.saving_signal.clear()
+        elif self.state.save_settings.overwrite_save_folder == 1 and not self.override_overwrite:
+            self.overwrite_alert_popup()
+            self.override_overwrite = False
         else:
             self.state.toggle_experiment_state()
+
+    def overwrite_alert_popup(self):
+        self.dialog_box.setIcon(QMessageBox.Warning)
+        self.dialog_box.setWindowTitle("Overwrite alert!")
+        self.dialog_box.setText(
+            "You are overwriting an existing folder with data. \n\n "
+            "Press ok to start the experiment anyway or abort to change saving folder."
+        )
+        self.dialog_box.show()
+
+    def overwrite_anyway(self):
+        self.override_overwrite = True
+        self.change_experiment_state()

@@ -11,7 +11,7 @@ import click
 def main(sample_rate):
     app = QApplication([])
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    app.setApplicationName("Lightsheet control")
+    app.setApplicationName("Sashimi")
     app.setWindowIcon(QIcon(r"icons/main_icon.png"))
     st = State(sample_rate=sample_rate)
     main_window = MainWindow(st)
