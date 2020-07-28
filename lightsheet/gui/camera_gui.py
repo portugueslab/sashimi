@@ -79,12 +79,16 @@ class ViewingWidget(QWidget):
 
     def refresh(self) -> None:
         current_image = self.state.get_volume()
+
         if current_image is None:
             return
 
         current_time = time_ns()
         delta_t = (current_time - self.last_time_updated) / 1e9
         if delta_t > 1 / self.display_settings.display_framerate:
+            # If not volumetric or out of range, reset indexes
+            if current_image.shape[0] == 1:
+                self.frame_layer.dims.reset()
             self.frame_layer.data = current_image
             voxel_size = get_voxel_size(self.state.volume_setting, self.state.camera_settings, self.state.scope_alignment_info)
             self.frame_layer.scale = [voxel_size[0]/voxel_size[1], 1.0, 1.0]
