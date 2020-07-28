@@ -74,7 +74,6 @@ class StackSaver(Process):
         self.i_frame = 0
         self.i_in_chunk = 0
         self.i_chunk = 0
-        self.i_plane = 0
         self.i_volume = 0
         self.current_data = None
         n_total = self.save_parameters.n_t
@@ -131,28 +130,18 @@ class StackSaver(Process):
             contents=body,
         )
 
-    def cast(self, frame):
-        """
-        Conversion into a format appropriate for saving
-        """
-        return frame
-
-    def fill_dataset(self, frame):
+    def fill_dataset(self, volume):
         if self.current_data is None:
-            self.calculate_optimal_size(frame)
+            self.calculate_optimal_size(volume)
             self.current_data = np.empty(
-                (self.save_parameters.chunk_size, self.save_parameters.n_planes, *frame.shape),
+                (self.save_parameters.chunk_size, *volume.shape),
                 dtype=self.dtype
             )
 
-        self.current_data[self.i_in_chunk, self.i_plane, :, :] = self.cast(frame)
+        self.current_data[self.i_in_chunk, :, :, :] = volume
 
-        self.i_plane += 1
-        if self.i_plane >= self.save_parameters.n_planes:
-            self.i_plane = 0
-            self.i_in_chunk += 1
-            self.i_volume += 1
-            self.update_saved_status_queue()
+        self.i_volume += 1
+        self.update_saved_status_queue()
 
         if self.i_in_chunk == self.save_parameters.chunk_size:
             self.save_chunk()
@@ -212,7 +201,7 @@ class StackSaver(Process):
             raise TypeError("Saving data type not supported. Only uint16 is supported")
 
         volume_megabytes = array_bytes * self.save_parameters.n_planes / 1048576
-        self.save_parameters.chunk_size = int(self.save_parameters.optimal_chunk_MB_RAM / volume_megabytes)
+        self.save_parameters.chunk_size = 10 # int(self.save_parameters.optimal_chunk_MB_RAM / volume_megabytes)
 
     def receive_save_parameters(self):
         try:

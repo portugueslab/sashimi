@@ -44,7 +44,7 @@ class VolumeDispatcher(Process):
         if self.current_frame is not None:
             if self.calibration_ref is not None:
                 self.current_frame = neg_dif(self.current_frame, self.calibration_ref)
-            if self.first_volume:
+            if self.first_volume or self.volume_buffer.shape[1:3] != self.current_frame.shape:
                 self.volume_buffer = np.empty((self.n_planes, *self.current_frame.shape), dtype=np.uint16)
                 self.first_volume = False
             self.volume_buffer[self.i_plane, :, :] = self.current_frame
@@ -93,3 +93,4 @@ class VolumeDispatcher(Process):
     def reset(self):
         self.first_volume = True
         self.i_plane = 0
+
