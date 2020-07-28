@@ -37,7 +37,6 @@ class ViewingWidget(QWidget):
 
         self.viewer = napari.Viewer(show=False)
         self.frame_layer = self.viewer.add_image(np.zeros([1, 1024, 1024]), blending='translucent', name="frame_layer")
-        self.frame_layer.events.data.connect(lambda e: self.frame_layer.reset_contrast_limits())
 
         self.roi = self.viewer.add_shapes(
             [np.array([[0, 0], [500, 0], [500, 500], [0, 500]])],
@@ -47,6 +46,7 @@ class ViewingWidget(QWidget):
         )
         self.toggle_roi_display()
         self.btn_display_roi = QPushButton("Show/Hide ROI")
+        self.btn_reset_contrast = QPushButton("Reset contrast limits")
 
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
@@ -55,6 +55,7 @@ class ViewingWidget(QWidget):
         self.bottom_layout = QHBoxLayout()
         self.bottom_layout.addWidget(self.wid_display_settings)
         self.bottom_layout.addWidget(self.btn_display_roi)
+        self.bottom_layout.addWidget(self.btn_reset_contrast)
         self.bottom_layout.addStretch()
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
@@ -73,6 +74,7 @@ class ViewingWidget(QWidget):
 
         self.timer.timeout.connect(self.refresh)
         self.btn_display_roi.clicked.connect(self.toggle_roi_display)
+        self.btn_reset_contrast.clicked.connect(self.update_contrast_limits)
 
     def refresh(self) -> None:
         current_image = self.state.get_volume()
@@ -92,6 +94,9 @@ class ViewingWidget(QWidget):
             self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
             self.experiment_progress.setValue(sstatus.i_volume)
             self.lbl_experiment_progress.setText("Saved chunks: {}".format(sstatus.i_chunk))
+
+    def update_contrast_limits(self):
+        self.frame_layer.reset_contrast_limits()
 
     def toggle_roi_display(self):
         if self.roi.visible:

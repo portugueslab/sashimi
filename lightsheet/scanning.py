@@ -157,20 +157,27 @@ class ScanLoop:
         self.experiment_start_event = experiment_start_signal
 
         self.parameters = initial_parameters
+        self.old_parameters = initial_parameters
 
         self.started = False
         self.n_acquired = 0
         self.first_update = True
+        self.i_sample = 0
+        self.n_samples_read = 0
 
         self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
         self.frontal_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
 
         self.time = np.arange(self.n_samples) / self.sample_rate
         self.shifted_time = self.time.copy()
+
+        self.wait_signal = wait_signal
+
+    def initialize(self):
+        self.n_acquired = 0
+        self.first_update = True
         self.i_sample = 0
         self.n_samples_read = 0
-        self.wait_signal = wait_signal
-        self.wait_signal.set()
 
     def n_samples_period(self):
         ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
@@ -220,6 +227,7 @@ class ScanLoop:
     def loop(self):
         while True:
             self.update_settings()
+            self.old_parameters = deepcopy(self.parameters)
             if not self.loop_condition():
                 break
             self.fill_arrays()
@@ -276,7 +284,13 @@ class VolumetricScanLoop(ScanLoop):
         self.recorded_signal = FillingRollingBuffer(buffer_len)
         self.camera_pulses = RollingBuffer(buffer_len)
         self.current_frequency = self.parameters.z.frequency
-        self.camera_on = True
+        self.camera_on = False
+        self.wait_signal.set()
+
+    def initialize(self):
+        super().initialize()
+        self.camera_on = False
+        self.wait_signal.set()
 
     def loop_condition(self):
         return (
@@ -302,12 +316,12 @@ class VolumetricScanLoop(ScanLoop):
         if self.parameters.state != ScanningState.VOLUMETRIC:
             return True
 
-        if self.parameters.z.frequency != self.current_frequency:
+        if self.parameters != self.old_parameters:
             if self.parameters.z.frequency > 0.1:
                 full_period = int(round(self.sample_rate / self.parameters.z.frequency))
                 self.recorded_signal = FillingRollingBuffer(full_period)
                 self.camera_pulses = RollingBuffer(full_period)
-                self.current_frequency = self.parameters.z.frequency
+                self.initialize()
 
         set_impulses(
             self.camera_pulses.buffer,
@@ -324,25 +338,16 @@ class VolumetricScanLoop(ScanLoop):
         )
 
         if (
-                self.camera_on
-                and self.parameters.experiment_state == ExperimentPrepareState.NO_TRIGGER
-        ):
-            self.camera_on = False
-        if (
                 not self.camera_on
-                and self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
                 and self.n_samples_read > self.n_samples_period()
         ):
             self.camera_on = True
             self.i_sample = 0  # puts it at the beginning of the cycle
             self.n_samples_read = 0
-
-        return True
-
-    def write(self):
-        super().write()
-        if self.camera_on:
             self.wait_signal.clear()
+        elif not self.camera_on:
+            self.wait_signal.set()
+        return True
 
     def read(self):
         super().read()
@@ -488,6 +493,7 @@ class Scanner(Process):
                     scanloop.loop()
                 except nidaqmx.errors.DaqError as e:
                     warn("NI error " + e.__repr__())
+                    scanloop.initialize()
                 self.parameters = deepcopy(
                     scanloop.parameters
                 )  # set the parameters to the last ones received in the loop
