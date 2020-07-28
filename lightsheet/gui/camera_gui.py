@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (
     QLabel,
     QProgressBar
 )
-import pyqtgraph as pg
 from lightparam.gui import ParameterGui
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
@@ -16,8 +15,6 @@ from lightsheet.state import convert_camera_params, GlobalState, State
 from time import time_ns
 import napari
 import numpy as np
-
-pg.setConfigOptions(imageAxisOrder="row-major")
 
 
 class DisplaySettings(ParametrizedQt):
