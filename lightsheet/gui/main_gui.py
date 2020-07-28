@@ -105,6 +105,7 @@ class MainWindow(QMainWindow):
                 self.wid_laser.btn_off.click()
             self.refresh_param_values(omit_wid_camera=True)
             self.wid_display.experiment_progress.hide()
+            self.wid_display.lbl_experiment_progress.hide()
             self.st.saver.saver_stopped_signal.clear()
 
 
