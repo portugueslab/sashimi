@@ -52,7 +52,6 @@ class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "experiment_settings"
-        self.n_frames = Param(10_000, (1, 10_000_000), gui=False, loadable=False)
         self.save_dir = Param(conf["default_paths"]["data"], gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("")
@@ -223,7 +222,6 @@ def convert_camera_params(camera_settings: CameraSettings):
 def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings,
                         camera_settings: CameraSettings, scope_alignment: ScopeAlignmentInfo):
     n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
-    framerate = scanning_settings.frequency * n_planes
     scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
 
     if camera_settings.binning == "1x1":
@@ -239,10 +237,9 @@ def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordi
 
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
-        n_t=int(save_settings.n_frames),
         n_planes=n_planes,
         notification_email=str(save_settings.notification_email),
-        framerate=framerate,
+        volumerate=scanning_settings.frequency,
         voxel_size=tuple(
             int(dimension * binning * 1000) / 1000 for dimension in (
                 inter_plane,

@@ -28,8 +28,9 @@ class SavingSettingsWidget(QWidget):
         self.btn_save = QPushButton("Save settings")
         self.btn_instructions = QPushButton("User guide")
         parent_dir = (Path(__file__).parents[2]).resolve()
-        f = open(parent_dir / "lightsheet_procedure.md")
-        self.html_markdown = markdown.markdown(f.read())
+        with open(parent_dir / "lightsheet_procedure.md") as f:
+            instructions = f.read()
+        self.html_markdown = markdown.markdown(instructions)
         self.instructions = QTextEdit(self.html_markdown)
         self.instructions.setReadOnly(True)
         self.popup_window = QDialog(None, Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
