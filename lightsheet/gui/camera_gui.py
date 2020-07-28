@@ -11,7 +11,7 @@ import pyqtgraph as pg
 from lightparam.gui import ParameterGui
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
-from lightsheet.state import convert_camera_params, GlobalState
+from lightsheet.state import convert_camera_params, GlobalState, State
 
 from time import time_ns
 import napari
@@ -28,7 +28,7 @@ class DisplaySettings(ParametrizedQt):
 
 
 class ViewingWidget(QWidget):
-    def __init__(self, state, timer):
+    def __init__(self, state: State, timer):
         super().__init__()
         self.state = state
         self.timer = timer
@@ -39,7 +39,7 @@ class ViewingWidget(QWidget):
         self.wid_display_settings = ParameterGui(self.display_settings)
 
         self.viewer = napari.Viewer(show=False)
-        self.frame_layer = self.viewer.add_image(np.zeros([1024, 1024]), blending='translucent', name="frame_layer")
+        self.frame_layer = self.viewer.add_image(np.zeros([1, 1024, 1024]), blending='translucent', name="frame_layer")
         self.frame_layer.events.data.connect(lambda e: self.frame_layer.reset_contrast_limits())
 
         self.roi = self.viewer.add_shapes(
@@ -78,7 +78,7 @@ class ViewingWidget(QWidget):
         self.btn_display_roi.clicked.connect(self.toggle_roi_display)
 
     def refresh(self) -> None:
-        current_image = self.state.get_image()
+        current_image = self.state.get_volume()
         if current_image is None:
             return
 

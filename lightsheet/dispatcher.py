@@ -39,7 +39,6 @@ class VolumeDispatcher(Process):
             if self.saving_signal.is_set() and not self.experiment_started:
                 self.check_experiment_start()
             self.get_frame()
-            self.process_frame()
 
     def process_frame(self):
         if self.current_frame is not None:
@@ -57,7 +56,6 @@ class VolumeDispatcher(Process):
     def fill_queues(self):
         if self.viewer_queue.queue.qsize() < 3:
             self.viewer_queue.put(self.volume_buffer)
-            print(self.n_planes)
         else:
             pass  # volume has been dropped from the viewer
         if self.saving_signal.is_set():
@@ -77,6 +75,7 @@ class VolumeDispatcher(Process):
     def get_frame(self):
         try:
             self.current_frame = self.camera_queue.get(timeout=0.001)
+            self.process_frame()
         except Empty:
             pass
 
