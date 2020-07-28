@@ -285,6 +285,7 @@ class VolumetricScanLoop(ScanLoop):
         self.camera_pulses = RollingBuffer(buffer_len)
         self.current_frequency = self.parameters.z.frequency
         self.camera_on = False
+        self.trigger_exp_start = False
         self.wait_signal.set()
 
     def initialize(self):
@@ -300,8 +301,11 @@ class VolumetricScanLoop(ScanLoop):
 
     def check_start(self):
         super().check_start()
-        if self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+        if self.trigger_exp_start:
             self.experiment_start_event.set()
+            self.trigger_exp_start = False
+
+        if self.parameters.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
             self.parameters.experiment_state = ExperimentPrepareState.PREVIEW
 
     def n_samples_period(self):
@@ -345,6 +349,7 @@ class VolumetricScanLoop(ScanLoop):
             self.i_sample = 0  # puts it at the beginning of the cycle
             self.n_samples_read = 0
             self.wait_signal.clear()
+            self.trigger_exp_start = True
         elif not self.camera_on:
             self.wait_signal.set()
         return True
