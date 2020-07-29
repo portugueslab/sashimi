@@ -13,3 +13,4 @@ click
 traitlets
 nidaqmx
 toml
+theknights

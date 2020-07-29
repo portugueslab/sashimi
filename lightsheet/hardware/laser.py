@@ -42,3 +42,17 @@ class CoboltLaser:
 
     def close(self):
         self.cobolt.close()
+
+
+class MockCoboltLaser:
+    def __init__(self, port="COM4"):
+        self.port = port
+
+    def set_current(self, current):
+        pass
+
+    def get_status(self):
+        pass
+
+    def close(self):
+        pass

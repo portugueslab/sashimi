@@ -55,7 +55,8 @@ TEMPLATE_CONF_DICT = {
             "user": "foo",
             "password": "foo"
         },
-    "array_ram_MB": 450
+    "array_ram_MB": 450,
+    "debug": False
 }
 
 
@@ -134,6 +135,23 @@ def write_config_value(dict_path, val, file_path=CONFIG_PATH):
 @click.option("-p", "--file_path", default=CONFIG_PATH,
               help="Path to the config file (optional)")
 def cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
+    file_path = Path(file_path)
+    if command == "edit":
+        conf = read_config(file_path=file_path)
+
+        # Cast the type of the previous variable
+        # (to avoid overwriting values with strings)
+        dict_path = name.split(".")
+        old_val = get_nested(conf, dict_path)
+        val = type(old_val)(val)  # Convert to keep the same type
+
+        write_config_value(dict_path, val, file_path)
+
+    elif command == "show":
+        click.echo(_print_config(file_path=file_path))
+
+
+def _cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
     file_path = Path(file_path)
     if command == "edit":
         conf = read_config(file_path=file_path)
