@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         )
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsContainerWidget(
-            st, self.wid_display.roi, self.timer
+            st, self.wid_display, self.timer
         )
 
         self.setCentralWidget(self.wid_display)
