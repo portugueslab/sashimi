@@ -243,7 +243,7 @@ class MockCameraProcess(Process):
         # this can be simplified by making the API nice
 
         # This is not sent to the camera but has to be updated with camera info directly (because of multiples of 4)
-        self.parameters.frame_shape = (subarray[2], subarray[3])
+        self.parameters.frame_shape = (subarray[2] // self.parameters.binning, subarray[3] // self.parameters.binning)
 
     def close_camera(self):
         pass
