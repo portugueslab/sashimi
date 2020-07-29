@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QFileDialog,
     QDialog,
-    QTextEdit
+    QTextEdit,
 )
 from PyQt5.QtCore import pyqtSignal, Qt
 from sashimi.state import State
@@ -33,7 +33,12 @@ class SavingSettingsWidget(QWidget):
         self.html_markdown = markdown.markdown(instructions)
         self.instructions = QTextEdit(self.html_markdown)
         self.instructions.setReadOnly(True)
-        self.popup_window = QDialog(None, Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        self.popup_window = QDialog(
+            None,
+            Qt.WindowSystemMenuHint
+            | Qt.WindowTitleHint
+            | Qt.WindowCloseButtonHint,
+        )
         self.layout().addWidget(self.btn_load)
         self.layout().addWidget(self.btn_save)
         self.layout().addWidget(self.btn_instructions)
@@ -44,7 +49,9 @@ class SavingSettingsWidget(QWidget):
         self.btn_instructions.clicked.connect(self.popup_window.show)
 
     def load(self):
-        file, _ = QFileDialog.getOpenFileName(None, "Open settings file", PRESETS_PATH, "*.json")
+        file, _ = QFileDialog.getOpenFileName(
+            None, "Open settings file", PRESETS_PATH, "*.json"
+        )
         if Path(file).is_file():
             self.state.restore_tree(file)
             self.sig_params_loaded.emit()

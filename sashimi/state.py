@@ -20,7 +20,13 @@ from sashimi.stytra_comm import StytraCom
 from sashimi.dispatcher import VolumeDispatcher
 from multiprocessing import Event
 import json
-from sashimi.camera import CameraProcess, CamParameters, CameraMode, TriggerMode, MockCameraProcess
+from sashimi.camera import (
+    CameraProcess,
+    CamParameters,
+    CameraMode,
+    TriggerMode,
+    MockCameraProcess,
+)
 from sashimi.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
@@ -54,7 +60,9 @@ class SaveSettings(ParametrizedQt):
         self.save_dir = Param(conf["default_paths"]["data"], gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("")
-        self.overwrite_save_folder = Param(0, (0, 1), gui=False, loadable=False)
+        self.overwrite_save_folder = Param(
+            0, (0, 1), gui=False, loadable=False
+        )
 
 
 class ScanningSettings(ParametrizedQt):
@@ -70,7 +78,7 @@ scanning_to_global_state = dict(
     Paused=GlobalState.PAUSED,
     Calibration=GlobalState.PREVIEW,
     Planar=GlobalState.PLANAR_PREVIEW,
-    Volume=GlobalState.VOLUME_PREVIEW
+    Volume=GlobalState.VOLUME_PREVIEW,
 )
 
 
@@ -108,7 +116,6 @@ class ZRecordingSettings(ParametrizedQt):
         self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
         self.frequency = Param(1.0, (0.1, 100), unit="volumes/s (Hz)")
         self.n_planes = Param(10, (2, 100))
-        self.i_freeze = Param(0, (0, 1000))
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
 
@@ -119,7 +126,9 @@ class CameraSettings(ParametrizedQt):
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
-        self.subarray = Param([0, 0, 2048, 2048], gui=False)  # order of params here is [hpos, vpos, hsize, vsize,]
+        self.subarray = Param(
+            [0, 0, 2048, 2048], gui=False
+        )  # order of params here is [hpos, vpos, hsize, vsize,]
 
 
 class LaserSettings(ParametrizedQt):
@@ -145,7 +154,7 @@ def convert_planar_params(planar: PlanarScanningSettings):
 
 
 def convert_calibration_params(
-        planar: PlanarScanningSettings, zsettings: CalibrationZSettings
+    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
         state=ScanningState.PLANAR,
@@ -165,7 +174,11 @@ class Calibration(ParametrizedQt):
 
     def add_calibration_point(self):
         self.calibrations_points.append(
-            (self.z_settings.piezo, self.z_settings.lateral, self.z_settings.frontal)
+            (
+                self.z_settings.piezo,
+                self.z_settings.lateral,
+                self.z_settings.frontal,
+            )
         )
         self.calculate_calibration()
 
@@ -217,9 +230,15 @@ def convert_camera_params(camera_settings: CameraSettings):
         subarray=tuple(camera_settings.subarray),
     )
 
-def get_voxel_size(scanning_settings: ZRecordingSettings, camera_settings: CameraSettings,
-                   scope_alignment: ScopeAlignmentInfo):
-    scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
+
+def get_voxel_size(
+    scanning_settings: ZRecordingSettings,
+    camera_settings: CameraSettings,
+    scope_alignment: ScopeAlignmentInfo,
+):
+    scan_length = (
+        scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
+    )
 
     if camera_settings.binning == "1x1":
         binning = 1
@@ -233,28 +252,38 @@ def get_voxel_size(scanning_settings: ZRecordingSettings, camera_settings: Camer
 
     inter_plane = scan_length / scanning_settings.n_planes
 
-    return (inter_plane,
-                scope_alignment.pixel_size_y*binning,
-                scope_alignment.pixel_size_x*binning)
+    return (
+        inter_plane,
+        scope_alignment.pixel_size_y * binning,
+        scope_alignment.pixel_size_x * binning,
+    )
 
 
-def convert_save_params(save_settings: SaveSettings, scanning_settings: ZRecordingSettings,
-                        camera_settings: CameraSettings, scope_alignment: ScopeAlignmentInfo):
-    n_planes = scanning_settings.n_planes - (scanning_settings.n_skip_start + scanning_settings.n_skip_end)
+def convert_save_params(
+    save_settings: SaveSettings,
+    scanning_settings: ZRecordingSettings,
+    camera_settings: CameraSettings,
+    scope_alignment: ScopeAlignmentInfo,
+):
+    n_planes = scanning_settings.n_planes - (
+        scanning_settings.n_skip_start + scanning_settings.n_skip_end
+    )
 
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
         n_planes=n_planes,
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
-        voxel_size=get_voxel_size(scanning_settings, camera_settings, scope_alignment)
+        voxel_size=get_voxel_size(
+            scanning_settings, camera_settings, scope_alignment
+        ),
     )
 
 
 def convert_single_plane_params(
-        planar: PlanarScanningSettings,
-        single_plane_setting: SinglePlaneSettings,
-        calibration: Calibration,
+    planar: PlanarScanningSettings,
+    single_plane_setting: SinglePlaneSettings,
+    calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -264,14 +293,16 @@ def convert_single_plane_params(
             lateral_sync=tuple(calibration.calibration[0]),
             frontal_sync=tuple(calibration.calibration[1]),
         ),
-        triggering=TriggeringParameters(frequency=single_plane_setting.frequency),
+        triggering=TriggeringParameters(
+            frequency=single_plane_setting.frequency
+        ),
     )
 
 
 def convert_volume_params(
-        planar: PlanarScanningSettings,
-        z_setting: ZRecordingSettings,
-        calibration: Calibration,
+    planar: PlanarScanningSettings,
+    z_setting: ZRecordingSettings,
+    calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
@@ -287,7 +318,6 @@ def convert_volume_params(
             n_planes=z_setting.n_planes,
             n_skip_start=z_setting.n_skip_start,
             n_skip_end=z_setting.n_skip_end,
-            i_freeze=z_setting.i_freeze,
             frequency=None,
         ),
     )
@@ -308,7 +338,7 @@ class State:
             self.laser = MockCoboltLaser()
             self.camera = MockCameraProcess(
                 experiment_start_event=self.experiment_start_event,
-                stop_event=self.stop_event
+                stop_event=self.stop_event,
             )
         else:
             self.laser = CoboltLaser()
@@ -320,7 +350,7 @@ class State:
         self.scanner = Scanner(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
-            sample_rate=self.sample_rate
+            sample_rate=self.sample_rate,
         )
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
@@ -334,14 +364,14 @@ class State:
         self.laser_settings = LaserSettings()
         self.stytra_comm = StytraCom(
             stop_event=self.stop_event,
-            experiment_start_event=self.experiment_start_event
+            experiment_start_event=self.experiment_start_event,
         )
 
         self.save_status: Optional[SavingStatus] = None
 
         self.saver = StackSaver(
             stop_event=self.stop_event,
-            duration_queue=self.stytra_comm.duration_queue
+            duration_queue=self.stytra_comm.duration_queue,
         )
 
         self.dispatcher = VolumeDispatcher(
@@ -365,22 +395,32 @@ class State:
             self.calibration.z_settings,
             self.camera_settings,
             self.save_settings,
-            self.scope_alignment_info
+            self.scope_alignment_info,
         ]:
             self.settings_tree.add(setting)
 
         self.status.sig_param_changed.connect(self.change_global_state)
 
         self.planar_setting.sig_param_changed.connect(self.send_scan_settings)
-        self.calibration.z_settings.sig_param_changed.connect(self.send_scan_settings)
-        self.single_plane_settings.sig_param_changed.connect(self.send_scan_settings)
+        self.calibration.z_settings.sig_param_changed.connect(
+            self.send_scan_settings
+        )
+        self.single_plane_settings.sig_param_changed.connect(
+            self.send_scan_settings
+        )
         self.volume_setting.sig_param_changed.connect(self.send_scan_settings)
 
-        self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
+        self.camera_settings.sig_param_changed.connect(
+            self.send_camera_settings
+        )
         self.save_settings.sig_param_changed.connect(self.send_scan_settings)
 
-        self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
-        self.single_plane_settings.sig_param_changed.connect(self.send_dispatcher_settings)
+        self.volume_setting.sig_param_changed.connect(
+            self.send_dispatcher_settings
+        )
+        self.single_plane_settings.sig_param_changed.connect(
+            self.send_dispatcher_settings
+        )
         self.status.sig_param_changed.connect(self.send_dispatcher_settings)
 
         self.camera.start()
@@ -403,13 +443,19 @@ class State:
             json.dump(self.settings_tree.serialize(), f)
 
     def change_global_state(self):
-        self.global_state = scanning_to_global_state[self.status.scanning_state]
+        self.global_state = scanning_to_global_state[
+            self.status.scanning_state
+        ]
         self.send_camera_settings()
         self.send_scan_settings()
 
     def send_camera_settings(self):
         camera_params = convert_camera_params(self.camera_settings)
-        camera_params.trigger_mode = TriggerMode.FREE if self.global_state == GlobalState.PREVIEW else TriggerMode.EXTERNAL_TRIGGER
+        camera_params.trigger_mode = (
+            TriggerMode.FREE
+            if self.global_state == GlobalState.PREVIEW
+            else TriggerMode.EXTERNAL_TRIGGER
+        )
         if self.global_state == GlobalState.PAUSED:
             camera_params.camera_mode = CameraMode.PAUSED
         else:
@@ -431,19 +477,27 @@ class State:
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
-                self.planar_setting, self.single_plane_settings, self.calibration
+                self.planar_setting,
+                self.single_plane_settings,
+                self.calibration,
             )
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
-            n_planes = self.volume_setting.n_planes - self.volume_setting.n_skip_start - self.volume_setting.n_skip_end
+            n_planes = (
+                self.volume_setting.n_planes
+                - self.volume_setting.n_skip_start
+                - self.volume_setting.n_skip_end
+            )
             if self.waveform is not None:
                 pulses = self.calculate_pulse_times() * self.sample_rate
                 try:
                     pulse_log = self.waveform[pulses.astype(int)]
-                    self.all_settings["piezo_log"] = {"trigger": pulse_log.tolist()}
+                    self.all_settings["piezo_log"] = {
+                        "trigger": pulse_log.tolist()
+                    }
                 except IndexError:
                     pass
 
@@ -454,7 +508,11 @@ class State:
         self.stytra_comm.current_settings_queue.put(self.all_settings)
 
         save_params = convert_save_params(
-            self.save_settings, self.volume_setting, self.camera_settings, self.scope_alignment_info)
+            self.save_settings,
+            self.volume_setting,
+            self.camera_settings,
+            self.scope_alignment_info,
+        )
         self.saver.saving_parameter_queue.put(save_params)
         self.dispatcher.n_planes_queue.put(n_planes)
 
@@ -463,7 +521,9 @@ class State:
 
     def get_camera_status(self):
         try:
-            current_camera_status = self.camera.camera_status_queue.get(timeout=0.001)
+            current_camera_status = self.camera.camera_status_queue.get(
+                timeout=0.001
+            )
             return current_camera_status
         except Empty:
             return None
@@ -477,7 +537,9 @@ class State:
             self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
             self.send_scan_settings()
 
-        elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+        elif (
+            self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
+        ):
             self.experiment_state = ExperimentPrepareState.PREVIEW
             self.end_experiment()
 
@@ -497,9 +559,9 @@ class State:
         self.send_scan_settings()
 
     def obtain_noise_average(self, n_images=50, dtype=np.uint16):
-        '''
+        """
         Obtains average noise of n_images to subtract to acquired, both for display and saving
-        '''
+        """
         self.dispatcher.noise_subtraction_active.clear()
 
         current_laser = self.laser_settings.laser_power
@@ -510,11 +572,15 @@ class State:
             if current_volume is not None:
                 current_image = current_volume[0, :, :]
                 if n_image == 0:
-                    calibration_set = np.empty(shape=(n_images, *current_image.shape), dtype=dtype)
+                    calibration_set = np.empty(
+                        shape=(n_images, *current_image.shape), dtype=dtype
+                    )
                 calibration_set[n_image, :, :] = current_image
                 n_image += 1
         self.dispatcher.noise_subtraction_active.set()
-        self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
+        self.calibration_ref = np.mean(calibration_set, axis=0).astype(
+            dtype=dtype
+        )
         self.laser.set_current(current_laser)
 
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
@@ -551,7 +617,7 @@ class State:
     def calculate_pulse_times(self):
         return np.arange(
             self.volume_setting.n_skip_start,
-            self.volume_setting.n_planes - self.volume_setting.n_skip_end
+            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
         ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
 
     def wrap_up(self):

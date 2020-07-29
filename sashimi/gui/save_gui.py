@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QLabel,
     QProgressBar,
-    QFileDialog
+    QFileDialog,
 )
 from lightparam.gui import ParameterGui
 from pathlib import Path

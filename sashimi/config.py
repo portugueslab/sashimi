@@ -16,47 +16,36 @@ CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 # TODO this will obvously have to change to fit scanning declarations
 TEMPLATE_CONF_DICT = {
     "sample_rate": 40000,
-    "default_paths":
-        {
-            "data": str(Path.home()),
-            "presets": str(PRESETS_DIR_PATH)
+    "default_paths": {
+        "data": str(Path.home()),
+        "presets": str(PRESETS_DIR_PATH),
+    },
+    "piezo": {
+        "position_read": {
+            "pos_chan": "Dev1/ai0:0",
+            "min_val": 0,
+            "max_val": 10,
         },
-    "piezo":
-        {
-            "position_read":
-                {
-                    "pos_chan": "Dev1/ai0:0",
-                    "min_val": 0,
-                    "max_val": 10
-                },
-            "position_write":
-                {
-                    "pos_chan": "Dev1/a00:0",
-                    "min_val": -5,
-                    "max_val": 10
-                },
-            "synchronization":
-                {
-                    "pos_chan": "/Dev1/ao/StartTrigger",
-                    "scale": 1/40
-                },
+        "position_write": {
+            "pos_chan": "Dev1/a00:0",
+            "min_val": -5,
+            "max_val": 10,
         },
-    "galvo_lateral":
-        {
-            "write_position":
-                {
-                    "pos_chan": "Dev12/a0:1",
-                    "min_val": -5,
-                    "max_val": 10
-                }
+        "synchronization": {
+            "pos_chan": "/Dev1/ao/StartTrigger",
+            "scale": 1 / 40,
         },
-    "email":
-        {
-            "user": "foo",
-            "password": "foo"
-        },
+    },
+    "galvo_lateral": {
+        "write_position": {
+            "pos_chan": "Dev12/a0:1",
+            "min_val": -5,
+            "max_val": 10,
+        }
+    },
+    "email": {"user": "foo", "password": "foo"},
     "array_ram_MB": 450,
-    "scopeless": False
+    "scopeless": False,
 }
 
 
@@ -128,12 +117,16 @@ def write_config_value(dict_path, val, file_path=CONFIG_PATH):
 
 @click.command()
 @click.argument("command")
-@click.option("-n", "--name",
-              help="Path (section/name) of parameter to be changed")
-@click.option("-v", "--val",
-              help="Value of parameter to be changed")
-@click.option("-p", "--file_path", default=CONFIG_PATH,
-              help="Path to the config file (optional)")
+@click.option(
+    "-n", "--name", help="Path (section/name) of parameter to be changed"
+)
+@click.option("-v", "--val", help="Value of parameter to be changed")
+@click.option(
+    "-p",
+    "--file_path",
+    default=CONFIG_PATH,
+    help="Path to the config file (optional)",
+)
 def cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
     file_path = Path(file_path)
     if command == "edit":

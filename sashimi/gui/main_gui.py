@@ -1,12 +1,11 @@
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import (
-    QWidget,
-    QMainWindow,
-    QDockWidget,
-    QTabWidget
-)
+from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget
 from sashimi.gui.calibration_gui import CalibrationWidget
-from sashimi.gui.scanning_gui import PlanarScanningWidget, VolumeScanningWidget, SinglePlaneScanningWidget
+from sashimi.gui.scanning_gui import (
+    PlanarScanningWidget,
+    VolumeScanningWidget,
+    SinglePlaneScanningWidget,
+)
 from sashimi.gui.laser_gui import LaserControlWidget
 from sashimi.gui.save_settings_gui import SavingSettingsWidget
 from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
@@ -34,47 +33,55 @@ class MainWindow(QMainWindow):
         self.resize(1800, 900)
 
         self.wid_settings_tree = SavingSettingsWidget(st)
-        self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
+        self.wid_settings_tree.sig_params_loaded.connect(
+            self.refresh_param_values
+        )
 
         self.wid_status = StatusWidget(st, self.timer)
         self.wid_display = ViewingWidget(st, self.timer)
         self.wid_save_options = SaveWidget(st, self.timer)
-        self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
+        self.wid_laser = LaserControlWidget(
+            st.laser, st.laser_settings, self.timer
+        )
         self.wid_scan = PlanarScanningWidget(st)
-        self.wid_camera = CameraSettingsContainerWidget(st, self.wid_display.roi, self.timer)
+        self.wid_camera = CameraSettingsContainerWidget(
+            st, self.wid_display.roi, self.timer
+        )
 
         self.setCentralWidget(self.wid_display)
 
         self.addDockWidget(
             Qt.LeftDockWidgetArea,
-            DockedWidget(widget=self.wid_status, title="Mode")
+            DockedWidget(widget=self.wid_status, title="Mode"),
         )
 
         self.addDockWidget(
             Qt.LeftDockWidgetArea,
-            DockedWidget(widget=self.wid_scan, title="Scanning settings")
+            DockedWidget(widget=self.wid_scan, title="Scanning settings"),
         )
 
         self.addDockWidget(
             Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_laser, title="Laser control")
+            DockedWidget(widget=self.wid_laser, title="Laser control"),
         )
 
         self.addDockWidget(
             Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_camera, title="Camera settings")
+            DockedWidget(widget=self.wid_camera, title="Camera settings"),
         )
 
         self.addDockWidget(
             Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_save_options, title="Saving")
+            DockedWidget(widget=self.wid_save_options, title="Saving"),
         )
         self.addDockWidget(
             Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_settings_tree, title="Metadata")
+            DockedWidget(widget=self.wid_settings_tree, title="Metadata"),
         )
 
-        self.st.camera_settings.sig_param_changed.connect(self.st.reset_noise_subtraction)
+        self.st.camera_settings.sig_param_changed.connect(
+            self.st.reset_noise_subtraction
+        )
         # TODO also change the check box of the button without triggering
 
         self.timer.start()
@@ -117,10 +124,17 @@ class StatusWidget(QTabWidget):
         self.state = st
         self.timer = timer
         self.scan_settings = self.state.status
-        self.option_dict = {0: "Paused", 1: "Calibration", 2: "Planar", 3: "Volume"}
+        self.option_dict = {
+            0: "Paused",
+            1: "Calibration",
+            2: "Planar",
+            3: "Volume",
+        }
 
         self.wid_paused = PausedWidget()
-        self.wid_calibration = CalibrationWidget(st, st.calibration, self.timer)
+        self.wid_calibration = CalibrationWidget(
+            st, st.calibration, self.timer
+        )
         self.wid_single_plane = SinglePlaneScanningWidget(st)
         self.wid_volume = VolumeScanningWidget(st, self.timer)
 
@@ -132,10 +146,11 @@ class StatusWidget(QTabWidget):
         self.currentChanged.connect(self.update_status)
 
     def update_status(self):
-        self.state.status.scanning_state = self.option_dict[self.currentIndex()]
+        self.state.status.scanning_state = self.option_dict[
+            self.currentIndex()
+        ]
 
 
 class PausedWidget(QWidget):
     def __init__(self):
         super().__init__()
-

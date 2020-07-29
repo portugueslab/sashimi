@@ -20,7 +20,9 @@ class SavingParameters:
     n_planes: int = 1
     n_volumes: int = 10000
     chunk_size: int = 20
-    optimal_chunk_MB_RAM: int = conf["array_ram_MB"]  # Experimental value, might be different for different machines.
+    optimal_chunk_MB_RAM: int = conf[
+        "array_ram_MB"
+    ]  # Experimental value, might be different for different machines.
     notification_email: str = "None"
     volumerate: float = 1
     voxel_size: tuple = (1, 1, 1)
@@ -32,6 +34,7 @@ class SavingStatus:
     i_in_chunk: int = 0
     i_volume: int = 0
     i_chunk: int = 0
+
 
 class StackSaver(Process):
     def __init__(self, stop_event, duration_queue, max_queue_size=2000):
@@ -55,16 +58,23 @@ class StackSaver(Process):
 
     def run(self):
         while not self.stop_event.is_set():
-            if self.saving_signal.is_set() and self.save_parameters is not None:
+            if (
+                self.saving_signal.is_set()
+                and self.save_parameters is not None
+            ):
                 self.save_loop()
             else:
                 self.receive_save_parameters()
 
     def save_loop(self):
         # remove files if some are found at the save location
-        Path(self.save_parameters.output_dir).mkdir(parents=True, exist_ok=True)
+        Path(self.save_parameters.output_dir).mkdir(
+            parents=True, exist_ok=True
+        )
         if (
-                Path(self.save_parameters.output_dir) / "original" / "stack_metadata.json"
+            Path(self.save_parameters.output_dir)
+            / "original"
+            / "stack_metadata.json"
         ).is_file():
             shutil.rmtree(Path(self.save_parameters.output_dir) / "original")
 
@@ -77,9 +87,9 @@ class StackSaver(Process):
         self.current_data = None
 
         while (
-                self.i_volume < self.save_parameters.n_volumes
-                and self.saving_signal.is_set()
-                and not self.stop_event.is_set()
+            self.i_volume < self.save_parameters.n_volumes
+            and self.saving_signal.is_set()
+            and not self.stop_event.is_set()
         ):
             self.receive_save_parameters()
 
@@ -103,7 +113,9 @@ class StackSaver(Process):
         self.saver_stopped_signal.set()
 
     def send_email_end(self):
-        sender_email = conf["email"]["user"]  # TODO this should go to thecolonel
+        sender_email = conf["email"][
+            "user"
+        ]  # TODO this should go to thecolonel
         # TODO: Send email every x minutes with image like in 2P
         receiver_email = self.save_parameters.notification_email
         subject = "Your lightsheet experiment is complete"
@@ -115,16 +127,17 @@ class StackSaver(Process):
             "Hey!",
             "\n",
             "Your lightsheet experiment has finished and was a success! Come pick up your little fish",
-            "\n"
-            "fishgitbot"
+            "\n" "fishgitbot",
         ]
         try:
             yag.send(
-                to=receiver_email,
-                subject=subject,
-                contents=body,
+                to=receiver_email, subject=subject, contents=body,
             )
-        except (yagmail.error.YagAddressError, yagmail.error.YagConnectionClosed, yagmail.error.YagInvalidEmailAddress):
+        except (
+            yagmail.error.YagAddressError,
+            yagmail.error.YagConnectionClosed,
+            yagmail.error.YagInvalidEmailAddress,
+        ):
             pass
 
     def fill_dataset(self, volume):
@@ -132,7 +145,7 @@ class StackSaver(Process):
             self.calculate_optimal_size(volume)
             self.current_data = np.empty(
                 (self.save_parameters.chunk_size, *volume.shape),
-                dtype=self.dtype
+                dtype=self.dtype,
             )
 
         self.current_data[self.i_in_chunk, :, :, :] = volume
@@ -156,12 +169,12 @@ class StackSaver(Process):
 
     def finalize_dataset(self):
         with open(
-                (
-                        Path(self.save_parameters.output_dir)
-                        / "original"
-                        / "stack_metadata.json"
-                ),
-                "w",
+            (
+                Path(self.save_parameters.output_dir)
+                / "original"
+                / "stack_metadata.json"
+            ),
+            "w",
         ) as f:
             json.dump(
                 {
@@ -185,7 +198,7 @@ class StackSaver(Process):
         fl.save(
             Path(self.save_parameters.output_dir)
             / "original/{:04d}.h5".format(self.i_chunk),
-            {"stack_4D": self.current_data[:self.i_in_chunk, :, :, :]},
+            {"stack_4D": self.current_data[: self.i_in_chunk, :, :, :]},
             compression="blosc",
         )
         self.i_in_chunk = 0
@@ -195,18 +208,26 @@ class StackSaver(Process):
         if self.dtype == np.uint16:
             array_bytes = 2 * frame.shape[0] * frame.shape[1]
         else:
-            raise TypeError("Saving data type not supported. Only uint16 is supported")
+            raise TypeError(
+                "Saving data type not supported. Only uint16 is supported"
+            )
 
-        volume_megabytes = array_bytes * self.save_parameters.n_planes / 1048576
-        self.save_parameters.chunk_size = 10 # int(self.save_parameters.optimal_chunk_MB_RAM / volume_megabytes)
+        volume_megabytes = (
+            array_bytes * self.save_parameters.n_planes / 1048576
+        )
+        self.save_parameters.chunk_size = 10  # int(self.save_parameters.optimal_chunk_MB_RAM / volume_megabytes)
 
     def receive_save_parameters(self):
         try:
-            self.save_parameters = self.saving_parameter_queue.get(timeout=0.001)
+            self.save_parameters = self.saving_parameter_queue.get(
+                timeout=0.001
+            )
         except Empty:
             pass
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
-            self.save_parameters.n_volumes = int(np.ceil(self.save_parameters.volumerate * new_duration))
+            self.save_parameters.n_volumes = int(
+                np.ceil(self.save_parameters.volumerate * new_duration)
+            )
         except Empty:
             pass

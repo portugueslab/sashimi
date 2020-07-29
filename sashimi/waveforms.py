@@ -61,52 +61,9 @@ class TriangleWaveform(Waveform):
         )
 
 
-class ImpulseWaveform(Waveform):
-    def __init__(self, *args, low=0, high=1, pulse_times, period, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.low = low
-        self.high = high
-        self.pulse_times = pulse_times
-        self.period = period
-
-    def values(self, t):
-        return make_impulses(t, self.low, self.high, self.pulse_times, self.period)
-
-
-@jit(nopython=True, cache=True)
-def make_impulses(t, low, high, pulse_times, period):
-    """ Make the camera trigger timing. Possibility of unequal timing, to
-    skip blurry/unequally spaced frames
-
-    :param t:
-    :param low:
-    :param high:
-    :param pulse_times:
-    :param period:
-    :return:
-    """
-
-    result = np.full_like(t, low)
-    if len(pulse_times) == 0:
-        return result
-
-    dt = t[1] - t[0]
-    n_repeats = int(np.ceil((t[-1] - t[0]) / period))
-    for pulse in pulse_times:
-        for i_repeat in range(n_repeats):
-            idx_set = int(np.round((i_repeat * period + pulse - t[0]) / dt))
-            if 0 <= idx_set < len(t):
-                result[idx_set] = high
-
-    return result
-
-
 @jit(nopython=True)
-def set_impulses(buffer, n_planes, n_skip_start, n_skip_end, i_freeze=-1, high=5):
+def set_impulses(buffer, n_planes, n_skip_start, n_skip_end, high=5):
     buffer[:] = 0
     n_between_planes = int(round(len(buffer) / n_planes))
-    if i_freeze > 0:
-        buffer[i_freeze * n_between_planes] = high
-    else:
-        for i in range(n_skip_start, n_planes - n_skip_end):
-            buffer[i * n_between_planes] = high
+    for i in range(n_skip_start, n_planes - n_skip_end):
+        buffer[i * n_between_planes] = high

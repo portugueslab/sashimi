@@ -10,5 +10,7 @@ if __name__ == "__main__":
     folder = QFileDialog.getExistingDirectory()
     ds = split_dataset.SplitDataset(folder)
     # TODO check opening as Dask
-    napari.view_image(ds, contrast_limits=(0, 2000), multiscale=False, scale=[1, 7, 0.6, 0.6])
+    napari.view_image(
+        ds, contrast_limits=(0, 2000), multiscale=False, scale=[1, 7, 0.6, 0.6]
+    )
     app.exec_()

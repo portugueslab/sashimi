@@ -34,14 +34,20 @@ class CalibrationWidget(QWidget):
         self.timer = timer
         self.wid_settings = ParameterGui(self.calibration_state.z_settings)
         self.btn_add_points = QPushButton("+")
-        self.btn_add_points.clicked.connect(self.calibration_state.add_calibration_point)
+        self.btn_add_points.clicked.connect(
+            self.calibration_state.add_calibration_point
+        )
         self.btn_rm_points = QPushButton("-")
-        self.btn_rm_points.clicked.connect(self.calibration_state.remove_calibration_point)
+        self.btn_rm_points.clicked.connect(
+            self.calibration_state.remove_calibration_point
+        )
         self.lbl_calibration = QLabel("")
         self.chk_noise_subtraction = QCheckBox()
         self.chk_noise_subtraction.setText("Enable noise subtraction")
         self.param_n_noise_subtraction = NoiseSubtractionSettings()
-        self.wid_n_noise_subtraction = ParameterGui(self.param_n_noise_subtraction)
+        self.wid_n_noise_subtraction = ParameterGui(
+            self.param_n_noise_subtraction
+        )
 
         self.main_layout = QVBoxLayout()
 
@@ -60,7 +66,9 @@ class CalibrationWidget(QWidget):
         self.dialog_box = QMessageBox()
         self.dialog_button = self.dialog_box.addButton(self.dialog_box.Ok)
 
-        self.chk_noise_subtraction.clicked.connect(self.set_noise_subtraction_mode)
+        self.chk_noise_subtraction.clicked.connect(
+            self.set_noise_subtraction_mode
+        )
         self.timer.timeout.connect(self.update_label)
 
     def refresh_widgets(self):
@@ -80,7 +88,9 @@ class CalibrationWidget(QWidget):
                     ["not enough points"]
                     if self.calibration_state.calibration is None
                     else [
-                        "offset: {:0.5f} amplitude {:0.5f}".format(*list(calib_row))
+                        "offset: {:0.5f} amplitude {:0.5f}".format(
+                            *list(calib_row)
+                        )
                         for calib_row in self.calibration_state.calibration
                     ]
                 )
@@ -106,10 +116,14 @@ class CalibrationWidget(QWidget):
         elif not finished:
             self.dialog_button.clicked.connect(self.perform_noise_subtraction)
         else:
-            self.dialog_button.clicked.disconnect(self.perform_noise_subtraction)
+            self.dialog_button.clicked.disconnect(
+                self.perform_noise_subtraction
+            )
             self.dialog_box.setText("Noise subtraction completed")
         self.dialog_box.show()
 
     def perform_noise_subtraction(self):
-        self.state.obtain_noise_average(n_images=self.param_n_noise_subtraction.average_n_frames)
+        self.state.obtain_noise_average(
+            n_images=self.param_n_noise_subtraction.average_n_frames
+        )
         self.show_dialog_box(finished=True)

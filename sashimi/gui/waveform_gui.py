@@ -24,7 +24,9 @@ class WaveformWidget(QWidget):
 
         self.timer.timeout.connect(self.update)
         self.state.volume_setting.sig_param_changed.connect(self.update_pulses)
-        self.state.camera_settings.sig_param_changed.connect(self.update_pulses)
+        self.state.camera_settings.sig_param_changed.connect(
+            self.update_pulses
+        )
 
     def update_pulses(self):
         pulse_times = self.state.calculate_pulse_times()
@@ -33,21 +35,26 @@ class WaveformWidget(QWidget):
             self.plot_widget.removeItem(self.pulse_regions[region])
         self.pulse_regions = [None] * len(pulse_times)
         for i_pulse, pulse in enumerate(pulse_times):
-            if self.state.volume_setting.i_freeze - 1 == i_pulse:
+            current_pulse = (
+                -1
+            )  # TODO get currently displayed plane from Napari viewer (if in single-plane mode)
+            if i_pulse == current_pulse:
                 self.pulse_regions[i_pulse] = pg.LinearRegionItem(
-                    values=(pulse, pulse + self.state.camera_settings.exposure / 1000),
+                    values=(
+                        pulse,
+                        pulse + self.state.camera_settings.exposure / 1000,
+                    ),
                     movable=False,
-                    brush=pg.mkBrush(
-                        *color_current_plane
-                    )
+                    brush=pg.mkBrush(*color_current_plane),
                 )
             else:
                 self.pulse_regions[i_pulse] = pg.LinearRegionItem(
-                    values=(pulse, pulse + self.state.camera_settings.exposure / 1000),
+                    values=(
+                        pulse,
+                        pulse + self.state.camera_settings.exposure / 1000,
+                    ),
                     movable=False,
-                    brush=pg.mkBrush(
-                        *color_plane
-                    )
+                    brush=pg.mkBrush(*color_plane),
                 )
             for line in self.pulse_regions[i_pulse].lines:
                 line.hide()
@@ -56,4 +63,7 @@ class WaveformWidget(QWidget):
     def update(self):
         current_waveform = self.state.get_waveform()
         if current_waveform is not None:
-            self.plot_curve.setData(np.arange(len(current_waveform)) / self.sample_rate, current_waveform)
+            self.plot_curve.setData(
+                np.arange(len(current_waveform)) / self.sample_rate,
+                current_waveform,
+            )

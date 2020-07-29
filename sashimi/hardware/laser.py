@@ -1,6 +1,11 @@
-import visa
+from warnings import warn
 
-rm = visa.ResourceManager()
+try:
+    import visa
+
+    rm = visa.ResourceManager()
+except ImportError:
+    warn("PyVisa not installed, no laser control available")
 
 
 class CoboltLaser:
@@ -15,7 +20,7 @@ class CoboltLaser:
                 "parity": visa.constants.Parity.none,
                 "stop_bits": visa.constants.StopBits.one,
                 "encoding": "ascii",
-            }
+            },
         )
 
     def set_current(self, current):

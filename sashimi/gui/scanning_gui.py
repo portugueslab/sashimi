@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QLabel,
     QCheckBox,
-    QMessageBox
+    QMessageBox,
 )
 from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
@@ -56,16 +56,17 @@ class VolumeScanningWidget(QWidget):
         self.lbl_interplane_distance = QLabel()
         self.lbl_interplane_distance.setStyleSheet("color: yellow")
 
-        self.wid_wave = WaveformWidget(
-            timer=self.timer,
-            state=self.state
+        self.wid_wave = WaveformWidget(timer=self.timer, state=self.state)
+        self.wid_collapsible_wave = CollapsibleWidget(
+            child=self.wid_wave, name="Piezo impulse-response waveform"
         )
-        self.wid_collapsible_wave = CollapsibleWidget(child=self.wid_wave, name="Piezo impulse-response waveform")
         self.wid_collapsible_wave.toggle_collapse()
 
         self.dialog_box = QMessageBox()
         self.dialog_ok_button = self.dialog_box.addButton(self.dialog_box.Ok)
-        self.dialog_abort_button = self.dialog_box.addButton(self.dialog_box.Abort)
+        self.dialog_abort_button = self.dialog_box.addButton(
+            self.dialog_box.Abort
+        )
         self.override_overwrite = False
 
         self.layout().addWidget(self.wid_volume)
@@ -90,32 +91,54 @@ class VolumeScanningWidget(QWidget):
         self.btn_start.setText(STATE_TEXTS[self.state.experiment_state])
         if self.state.experiment_state == ExperimentPrepareState.PREVIEW:
             self.btn_start.setChecked(False)
-        if self.state.experiment_state == ExperimentPrepareState.NO_TRIGGER or \
-                self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+        if (
+            self.state.experiment_state == ExperimentPrepareState.NO_TRIGGER
+            or self.state.experiment_state
+            == ExperimentPrepareState.EXPERIMENT_STARTED
+        ):
             self.btn_start.setChecked(True)
 
     def update_alignment(self):
-        scan_width = self.state.volume_setting.scan_range[1] - self.state.volume_setting.scan_range[0]
-        num_planes = self.state.volume_setting.n_planes - \
-                     self.state.volume_setting.n_skip_start - self.state.volume_setting.n_skip_end
-        plane_distance = scan_width / num_planes - self.state.scope_alignment_info.waist_width
+        scan_width = (
+            self.state.volume_setting.scan_range[1]
+            - self.state.volume_setting.scan_range[0]
+        )
+        num_planes = (
+            self.state.volume_setting.n_planes
+            - self.state.volume_setting.n_skip_start
+            - self.state.volume_setting.n_skip_end
+        )
+        plane_distance = (
+            scan_width / num_planes
+            - self.state.scope_alignment_info.waist_width
+        )
         if plane_distance > 0:
             self.lbl_interplane_distance.setText(
-                "With the current configuration, distance between planes is {:0.2f} um".format(plane_distance)
+                "With the current configuration, distance between planes is {:0.2f} um".format(
+                    plane_distance
+                )
             )
         if plane_distance <= 0:
             self.lbl_interplane_distance.setText(
-                "The current configuration covers the whole volume. Plane overlap is {:0.2f} um".format(-plane_distance)
+                "The current configuration covers the whole volume. Plane overlap is {:0.2f} um".format(
+                    -plane_distance
+                )
             )
 
     def change_pause_status(self):
         self.state.pause_after = self.chk_pause.isChecked()
 
     def change_experiment_state(self):
-        if self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+        if (
+            self.state.experiment_state
+            == ExperimentPrepareState.EXPERIMENT_STARTED
+        ):
             # Here what happens if experiment is aborted
             self.state.saver.saving_signal.clear()
-        elif self.state.save_settings.overwrite_save_folder == 1 and not self.override_overwrite:
+        elif (
+            self.state.save_settings.overwrite_save_folder == 1
+            and not self.override_overwrite
+        ):
             self.overwrite_alert_popup()
             self.override_overwrite = False
         else:
