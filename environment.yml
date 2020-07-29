@@ -13,5 +13,4 @@ dependencies:
   - ffmpeg
   - scikit-image
   - h5py
-  - pyqt
   - vispy

@@ -204,18 +204,14 @@ class StackSaver(Process):
         self.i_in_chunk = 0
         self.i_chunk += 1
 
-    def calculate_optimal_size(self, frame):
+    def calculate_optimal_size(self, volume):
         if self.dtype == np.uint16:
-            array_bytes = 2 * frame.shape[0] * frame.shape[1]
+            array_megabytes = 2 * volume.shape[0] * volume.shape[1] * volume.shape[2] / 1048576
         else:
             raise TypeError(
                 "Saving data type not supported. Only uint16 is supported"
             )
-
-        volume_megabytes = (
-            array_bytes * self.save_parameters.n_planes / 1048576
-        )
-        self.save_parameters.chunk_size = 10  # int(self.save_parameters.optimal_chunk_MB_RAM / volume_megabytes)
+        self.save_parameters.chunk_size = int(self.save_parameters.optimal_chunk_MB_RAM / array_megabytes)
 
     def receive_save_parameters(self):
         try:
