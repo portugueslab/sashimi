@@ -9,18 +9,18 @@ from lightsheet.state import State
 
 @click.command()
 @click.option("--sample-rate", default=40000, help="")
-@click.option("--debug", is_flag=True, help="")
-def main(sample_rate, debug):
-    if debug:
+@click.option("--scopeless", is_flag=True, help="")
+def main(sample_rate, scopeless):
+    if scopeless:
         _cli_modify_config("edit", "debug", True)
     else:
         _cli_modify_config("edit", "debug", False)
     app = QApplication([])
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     app.setApplicationName("Sashimi")
-    app.setWindowIcon(QIcon(r"icons/main_icon.png"))
     st = State(sample_rate=sample_rate)
     main_window = MainWindow(st)
+    app.setWindowIcon(QIcon(r"icons/main_icon.png"))
     main_window.show()
     app.exec()
 
