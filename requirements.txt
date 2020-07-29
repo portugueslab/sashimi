@@ -15,3 +15,4 @@ nidaqmx
 toml
 theknights
 pyqtgraph
+napari
