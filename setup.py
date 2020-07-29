@@ -11,6 +11,6 @@ setup(
     author_email="vilim@neuro.mpg.de",
     packages=find_packages(),
     install_requires=requirements,
-    entry_points={"console_scripts": ["sashimi=lightsheet.main:main",
-                                      "sashimi-config=lightsheet.config:cli_modify_config"]},
+    entry_points={"console_scripts": ["sashimi=sashimi.main:main",
+                                      "sashimi-config=sashimi.config:cli_modify_config"]},
 )
