@@ -1,20 +1,22 @@
 # Sashimi
 
 <a href="url"><img 
-src="https://github.com/portugueslab/lightsheet_take_two/blob/master/lightsheet/icons/main_icon.png" 
+src="https://github.com/portugueslab/sashimi/blob/master/sashimi/icons/main_icon.png" 
 align="left" 
 height="190" 
 width="270"></a>
 
-<br/>Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
+
+Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
 It was developed by members of the [PortuguesLab](http://www.portugueslab.com/)
  at the Technical University of Munich and Max Planck Institute of Neurobiology. Sashimi relies on the fast, multidimensional
- [Napari viewer](https://github.com/napari/napari) and is powered by [numba](https://github.com/numba/numba) for increased efficiency.
+ [Napari viewer](https://github.com/napari/napari) and is accelerated by [numba](https://github.com/numba/numba) for real-time processing.
+
  
 Hardware is controlled through [pyvisa](https://github.com/pyvisa/pyvisa) for serial communication and 
  [nidaqmx](https://github.com/ni/nidaqmx-python/) for National Instruments I/O boards.
  
-<br/><br/>
+
  
 # Installation
 
