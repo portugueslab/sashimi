@@ -11,6 +11,6 @@ click
 traitlets
 nidaqmx
 toml
-theknights
+scopecuisine
 pyqtgraph
 napari

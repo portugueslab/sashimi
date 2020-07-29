@@ -26,11 +26,13 @@ if not conf["scopeless"]:
     from nidaqmx.errors import DaqError
 
 else:
-    from theknights.stream_readers import AnalogSingleChannelReader
-    from theknights.stream_writers import AnalogMultiChannelWriter
-    from theknights.constants import Edge, AcquisitionType
-    from theknights.task import Task
-    from theknights.errors import DaqError
+    from scopecuisine.theknights.stream_readers import (
+        AnalogSingleChannelReader,
+    )
+    from scopecuisine.theknights.stream_writers import AnalogMultiChannelWriter
+    from scopecuisine.theknights.constants import Edge, AcquisitionType
+    from scopecuisine.theknights.task import Task
+    from scopecuisine.theknights.errors import DaqError
 
 PIEZO_SCALE = conf["piezo"]["synchronization"]["scale"]
 

@@ -1,4 +1,3 @@
-import configparser
 from pathlib import Path
 import click
 import toml
@@ -45,7 +44,7 @@ TEMPLATE_CONF_DICT = {
     },
     "email": {"user": "foo", "password": "foo"},
     "array_ram_MB": 450,
-    "scopeless": False,
+    "scopeless": True,
 }
 
 
