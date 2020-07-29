@@ -22,13 +22,13 @@ Hardware is controlled through [pyvisa](https://github.com/pyvisa/pyvisa) for se
 
 [Install the latest Anaconda](https://www.anaconda.com/) distribution of Python 3.
 
-Clone this repository and navigate to the main folder (`../sashimi`)
+Clone this repository and navigate to the main folder `../sashimi`
 
 ### Recommended: Create a new environment
 
-It is a good practice to create an environment for every project. You will now make an environment called `sashimi` which will run python 3.8:
+It is a good practice to create an environment for every project. We provide a file to automatically create the right environment. Make sure you are in the main folder `../sashimi` and run:
 
-    conda create -n sashimi python=3.8
+    conda env create -f environment.yml
 
 We will run all related to this software in this environment. You can activate the environment running:
 
