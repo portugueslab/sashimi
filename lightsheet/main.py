@@ -12,9 +12,9 @@ from lightsheet.state import State
 @click.option("--scopeless", is_flag=True, help="")
 def main(sample_rate, scopeless):
     if scopeless:
-        _cli_modify_config("edit", "debug", True)
+        _cli_modify_config("edit", "scopeless", True)
     else:
-        _cli_modify_config("edit", "debug", False)
+        _cli_modify_config("edit", "scopeless", False)
     app = QApplication([])
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     app.setApplicationName("Sashimi")

@@ -18,7 +18,7 @@ from lightsheet.config import read_config
 
 conf = read_config()
 
-if not conf["debug"]:
+if not conf["scopeless"]:
     from nidaqmx.task import Task
     from nidaqmx.stream_readers import AnalogSingleChannelReader
     from nidaqmx.stream_writers import AnalogMultiChannelWriter

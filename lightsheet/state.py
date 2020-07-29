@@ -24,7 +24,6 @@ from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerM
 from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
-from lightsheet.utilities import neg_dif
 import time
 from lightsheet.config import read_config
 
@@ -305,7 +304,7 @@ class State:
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
-        if self.conf["debug"]:
+        if self.conf["scopeless"]:
             self.laser = MockCoboltLaser()
             self.camera = MockCameraProcess(
                 experiment_start_event=self.experiment_start_event,

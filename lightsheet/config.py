@@ -56,7 +56,7 @@ TEMPLATE_CONF_DICT = {
             "password": "foo"
         },
     "array_ram_MB": 450,
-    "debug": False
+    "scopeless": False
 }
 
 
