@@ -56,7 +56,8 @@ class StytraCom(Process):
                     duration = None
                     if poller.poll(1000):
                         duration = zmq_socket.recv_json()
-                    self.duration_queue.put(duration)
+                    if duration is not None:
+                        self.duration_queue.put(duration)
                     self.start_stytra.clear()
                     zmq_socket.close()
                     zmq_context.destroy()
