@@ -6,15 +6,15 @@ from enum import Enum
 from queue import Empty
 from copy import deepcopy
 from math import gcd
-from lightsheet.rolling_buffer import RollingBuffer, FillingRollingBuffer
+from sashimi.rolling_buffer import RollingBuffer, FillingRollingBuffer
 from warnings import warn
 from arrayqueues.shared_arrays import ArrayQueue
 import numpy as np
 
 from typing import Union, Tuple
 
-from lightsheet.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
-from lightsheet.config import read_config
+from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
+from sashimi.config import read_config
 
 conf = read_config()
 

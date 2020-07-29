@@ -9,8 +9,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
 from lightparam.gui.collapsible_widget import CollapsibleWidget
-from lightsheet.gui.waveform_gui import WaveformWidget
-from lightsheet.scanning import ExperimentPrepareState
+from sashimi.gui.waveform_gui import WaveformWidget
+from sashimi.scanning import ExperimentPrepareState
 
 
 class PlanarScanningWidget(QWidget):

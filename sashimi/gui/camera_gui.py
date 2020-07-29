@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
 from lightparam.gui import ParameterGui
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
-from lightsheet.state import convert_camera_params, GlobalState, State, get_voxel_size
+from sashimi.state import convert_camera_params, GlobalState, State, get_voxel_size
 
 from time import time_ns
 import napari

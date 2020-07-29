@@ -2,7 +2,7 @@ import pytest
 import tempfile
 from pathlib import Path
 import shutil
-from lightsheet import config
+from sashimi import config
 from click.testing import CliRunner
 
 

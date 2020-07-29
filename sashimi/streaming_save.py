@@ -9,7 +9,7 @@ import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
-from lightsheet.config import read_config
+from sashimi.config import read_config
 
 conf = read_config()
 

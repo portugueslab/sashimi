@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
     QCheckBox,
 )
 from lightparam.gui import ParameterGui
-from lightsheet.state import Calibration
+from sashimi.state import Calibration
 import ctypes
 import numpy as np
 from lightparam.param_qt import ParametrizedQt

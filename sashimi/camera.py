@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
-from lightsheet.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
+from sashimi.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
 from dataclasses import dataclass
 from time import sleep
 import numpy as np

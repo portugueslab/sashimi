@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue, Event
 from queue import Empty, Full
 from arrayqueues.shared_arrays import ArrayQueue
-from lightsheet.utilities import neg_dif
+from sashimi.utilities import neg_dif
 import numpy as np
 import time
 

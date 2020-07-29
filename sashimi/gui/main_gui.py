@@ -5,13 +5,13 @@ from PyQt5.QtWidgets import (
     QDockWidget,
     QTabWidget
 )
-from lightsheet.gui.calibration_gui import CalibrationWidget
-from lightsheet.gui.scanning_gui import PlanarScanningWidget, VolumeScanningWidget, SinglePlaneScanningWidget
-from lightsheet.gui.laser_gui import LaserControlWidget
-from lightsheet.gui.save_settings_gui import SavingSettingsWidget
-from lightsheet.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
-from lightsheet.gui.save_gui import SaveWidget
-from lightsheet.state import State
+from sashimi.gui.calibration_gui import CalibrationWidget
+from sashimi.gui.scanning_gui import PlanarScanningWidget, VolumeScanningWidget, SinglePlaneScanningWidget
+from sashimi.gui.laser_gui import LaserControlWidget
+from sashimi.gui.save_settings_gui import SavingSettingsWidget
+from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
+from sashimi.gui.save_gui import SaveWidget
+from sashimi.state import State
 
 
 class DockedWidget(QDockWidget):

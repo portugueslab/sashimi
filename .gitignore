@@ -128,5 +128,5 @@ dmypy.json
 /.idea/
 
 # Configuration file
-lightsheet/hardware_config.conf
+sashimi/hardware_config.conf
 

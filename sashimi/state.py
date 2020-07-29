@@ -3,8 +3,8 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from lightsheet.hardware.laser import CoboltLaser, MockCoboltLaser
-from lightsheet.scanning import (
+from sashimi.hardware.laser import CoboltLaser, MockCoboltLaser
+from sashimi.scanning import (
     Scanner,
     PlanarScanning,
     ZScanning,
@@ -16,16 +16,16 @@ from lightsheet.scanning import (
     ScanningState,
     ExperimentPrepareState,
 )
-from lightsheet.stytra_comm import StytraCom
-from lightsheet.dispatcher import VolumeDispatcher
+from sashimi.stytra_comm import StytraCom
+from sashimi.dispatcher import VolumeDispatcher
 from multiprocessing import Event
 import json
-from lightsheet.camera import CameraProcess, CamParameters, CameraMode, TriggerMode, MockCameraProcess
-from lightsheet.streaming_save import StackSaver, SavingParameters, SavingStatus
+from sashimi.camera import CameraProcess, CamParameters, CameraMode, TriggerMode, MockCameraProcess
+from sashimi.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
 import time
-from lightsheet.config import read_config
+from sashimi.config import read_config
 
 conf = read_config()
 
