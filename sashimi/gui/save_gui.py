@@ -1,10 +1,7 @@
-from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QPushButton,
-    QLabel,
-    QProgressBar,
     QFileDialog,
 )
 from lightparam.gui import ParameterGui

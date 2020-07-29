@@ -1,20 +1,15 @@
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import (
     QMessageBox,
     QWidget,
-    QMainWindow,
-    QDockWidget,
     QVBoxLayout,
     QPushButton,
     QLabel,
     QHBoxLayout,
-    QGridLayout,
     QCheckBox,
 )
 from lightparam.gui import ParameterGui
 from sashimi.state import Calibration
-import ctypes
-import numpy as np
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
 

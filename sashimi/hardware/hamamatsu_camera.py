@@ -64,7 +64,7 @@ DCAMBUF_ATTACHKIND_FRAME = 0
 
 # Hamamatsu structures.
 
-## DCAMAPI_INIT
+# DCAMAPI_INIT
 #
 # The dcam initialization structure
 #
@@ -79,7 +79,7 @@ class DCAMAPI_INIT(ctypes.Structure):
     ]
 
 
-## DCAMDEV_OPEN
+# DCAMDEV_OPEN
 #
 # The dcam open structure
 #
@@ -91,7 +91,7 @@ class DCAMDEV_OPEN(ctypes.Structure):
     ]
 
 
-## DCAMWAIT_OPEN
+# DCAMWAIT_OPEN
 #
 # The dcam wait open structure
 #
@@ -104,7 +104,7 @@ class DCAMWAIT_OPEN(ctypes.Structure):
     ]
 
 
-## DCAMWAIT_START
+# DCAMWAIT_START
 #
 # The dcam wait start structure
 #
@@ -117,7 +117,7 @@ class DCAMWAIT_START(ctypes.Structure):
     ]
 
 
-## DCAMCAP_TRANSFERINFO
+# DCAMCAP_TRANSFERINFO
 #
 # The dcam capture info structure
 #
@@ -130,7 +130,7 @@ class DCAMCAP_TRANSFERINFO(ctypes.Structure):
     ]
 
 
-## DCAMBUF_ATTACH
+# DCAMBUF_ATTACH
 #
 # The dcam buffer attachment structure
 #
@@ -143,7 +143,7 @@ class DCAMBUF_ATTACH(ctypes.Structure):
     ]
 
 
-## DCAMBUF_FRAME
+# DCAMBUF_FRAME
 #
 # The dcam buffer frame structure
 #
@@ -166,7 +166,7 @@ class DCAMBUF_FRAME(ctypes.Structure):
     ]
 
 
-## DCAMDEV_STRING
+# DCAMDEV_STRING
 #
 # The dcam device string structure
 #
@@ -179,7 +179,7 @@ class DCAMDEV_STRING(ctypes.Structure):
     ]
 
 
-## DCAMPROP_ATTR
+# DCAMPROP_ATTR
 #
 # The dcam property attribute structure.
 #
@@ -206,7 +206,7 @@ class DCAMPROP_ATTR(ctypes.Structure):
     ]
 
 
-## DCAMPROP_VALUETEXT
+# DCAMPROP_VALUETEXT
 #
 # The dcam text property structure.
 #
@@ -241,21 +241,14 @@ class DCamAPI:
 
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
         paraminit.size = ctypes.sizeof(paraminit)
-        error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
-
-        n_cameras = paraminit.iDeviceCount
 
 
 class HCamData(object):
-    """
-    Hamamatsu camera data object.
-
-    Initially I tried to use create_string_buffer() to allocate storage for the 
+    """Hamamatsu camera data object. Initially I tried to use
+    create_string_buffer() to allocate storage for the
     data from the camera but this turned out to be too slow. The software
     kept falling behind the camera and create_string_buffer() seemed to be the
-    bottleneck.
-
-    Using numpy makes a lot more sense anyways..
+    bottleneck. Using numpy makes a lot more sense anyways..
     """
 
     def __init__(self, size=None, **kwds):
@@ -288,7 +281,6 @@ class HCamData(object):
 class HamamatsuCamera(object):
     """
     Basic camera interface class.
-    
     This version uses the Hamamatsu library to allocate camera buffers.
     Storage for the data from the camera is allocated dynamically and
     copied out of the camera buffers.
@@ -379,9 +371,7 @@ class HamamatsuCamera(object):
         if fn_return == DCAMERR_ERROR:
             c_buf_len = 80
             c_buf = ctypes.create_string_buffer(c_buf_len)
-            c_error = self.dcam.dcam_getlasterror(
-                self.camera_handle, c_buf, ctypes.c_int32(c_buf_len)
-            )
+
             raise DCAMException(
                 "dcam error " + str(fn_name) + " " + str(c_buf.value)
             )
@@ -448,11 +438,8 @@ class HamamatsuCamera(object):
         return properties
 
     def getFrames(self):
-        """
-        Gets all of the available frames.
-    
-        This will block waiting for new frames even if 
-        there new frames available when it is called.
+        """Gets all of the available frames. This will block waiting for
+        new frames even if there new frames available when it is called.
         """
         frames = []
         for n in self.newFrames():
@@ -478,8 +465,7 @@ class HamamatsuCamera(object):
         return [frames, [self.frame_x, self.frame_y]]
 
     def getModelInfo(self, camera_id):
-        """
-        Returns the model of the camera
+        """Returns the model of the camera
         """
 
         c_buf_len = 20
@@ -502,8 +488,7 @@ class HamamatsuCamera(object):
         return string_value.value.decode(self.encoding)
 
     def getProperties(self):
-        """
-        Return the list of camera properties. This is the one to call if you
+        """Return the list of camera properties. This is the one to call if you
         want to know the camera properties.
         """
         return self.properties
@@ -524,7 +509,6 @@ class HamamatsuCamera(object):
             "dcamprop_getattr",
         )
         if ret == 0:
-            print("property", property_id, "is not supported")
             return False
         else:
             return p_attr
@@ -563,7 +547,7 @@ class HamamatsuCamera(object):
 
     def getPropertyText(self, property_name):
         """
-        #Return the text options of a property (if any).
+        Return the text options of a property (if any).
         """
         prop_attr = self.getPropertyAttribute(property_name)
         if not (prop_attr.attribute & DCAMPROP_ATTR_HASVALUETEXT):
@@ -818,9 +802,7 @@ class HamamatsuCamera(object):
         """
         Set the acquisition mode to either run until aborted or to 
         stop after acquiring a set number of frames.
-
         mode should be either "fixed_length" or "run_till_abort"
-
         if mode is "fixed_length", then number_frames indicates the number
         of frames to acquire.
         """
@@ -930,7 +912,6 @@ class HamamatsuCamera(object):
 class HamamatsuCameraMR(HamamatsuCamera):
     """
     Memory recycling camera class.
-    
     This version allocates "user memory" for the Hamamatsu camera 
     buffers. This memory is also the location of the storage for
     the np_array element of a HCamData() class. The memory is
@@ -938,7 +919,6 @@ class HamamatsuCameraMR(HamamatsuCamera):
     that there is a lot less memory allocation & shuffling compared
     to the basic class, which performs one allocation and (I believe)
     two copies for each frame that is acquired.
-    
     WARNING: There is the potential here for chaos. Since the memory
              is now shared there is the possibility that downstream code
              will try and access the same bit of memory at the same time

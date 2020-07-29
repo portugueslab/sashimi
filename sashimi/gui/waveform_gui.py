@@ -1,6 +1,5 @@
 import pyqtgraph as pg
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
-from queue import Empty
 import numpy as np
 
 color_plane = (166, 196, 240, 100)

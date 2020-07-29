@@ -1,5 +1,5 @@
 from multiprocessing import Process, Queue, Event
-from queue import Empty, Full
+from queue import Empty
 from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.utilities import neg_dif
 import numpy as np
