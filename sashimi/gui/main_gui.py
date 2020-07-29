@@ -101,6 +101,7 @@ class MainWindow(QMainWindow):
         self.wid_display.wid_display_settings.refresh_widgets()
         if not omit_wid_camera:
             self.wid_camera.wid_camera_settings.refresh_widgets()
+            self.wid_camera.reshape_roi()
             self.wid_camera.set_roi()
         self.wid_save_options.wid_save_options.refresh_widgets()
         self.wid_save_options.set_locationbutton()

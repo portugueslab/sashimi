@@ -168,6 +168,17 @@ class CameraSettingsContainerWidget(QWidget):
         )
         self.camera_info_timer.timeout.connect(self.update_camera_info)
 
+    def reshape_roi(self):
+        subarray = self.state.camera_settings.subarray
+        self.roi.data = np.array(
+            [
+                [subarray[1], subarray[0]],
+                [subarray[1] + subarray[3], subarray[0]],
+                [subarray[1] + subarray[3], subarray[0] + subarray[2]],
+                [subarray[1], subarray[0] + subarray[2]]
+            ]
+        )
+
     def set_roi(self):
         roi_pos = (int(self.roi.data[0][0][1]), int(self.roi.data[0][0][0]))
         roi_size = (
@@ -175,8 +186,9 @@ class CameraSettingsContainerWidget(QWidget):
             int(self.roi.data[0][1][0] - self.roi.data[0][0][0]),
         )
         self.state.camera_settings.subarray = tuple(
-            [roi_pos[0], roi_pos[1], roi_size[0], roi_size[1]]
+            [roi_pos[1], roi_pos[0], roi_size[1], roi_size[0]]
         )
+        print(self.state.camera_settings.subarray)
         self.update_roi_info(width=roi_size[0], height=roi_size[1])
 
     def set_full_size_frame(self):
