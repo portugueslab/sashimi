@@ -64,9 +64,7 @@ class VolumeScanningWidget(QWidget):
 
         self.dialog_box = QMessageBox()
         self.dialog_ok_button = self.dialog_box.addButton(self.dialog_box.Ok)
-        self.dialog_abort_button = self.dialog_box.addButton(
-            self.dialog_box.Abort
-        )
+        self.dialog_abort_button = self.dialog_box.addButton(self.dialog_box.Abort)
         self.override_overwrite = False
 
         self.layout().addWidget(self.wid_volume)
@@ -93,8 +91,7 @@ class VolumeScanningWidget(QWidget):
             self.btn_start.setChecked(False)
         if (
             self.state.experiment_state == ExperimentPrepareState.NO_TRIGGER
-            or self.state.experiment_state
-            == ExperimentPrepareState.EXPERIMENT_STARTED
+            or self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
         ):
             self.btn_start.setChecked(True)
 
@@ -109,8 +106,7 @@ class VolumeScanningWidget(QWidget):
             - self.state.volume_setting.n_skip_end
         )
         plane_distance = (
-            scan_width / num_planes
-            - self.state.scope_alignment_info.waist_width
+            scan_width / num_planes - self.state.scope_alignment_info.waist_width
         )
         if plane_distance > 0:
             self.lbl_interplane_distance.setText(
@@ -129,10 +125,7 @@ class VolumeScanningWidget(QWidget):
         self.state.pause_after = self.chk_pause.isChecked()
 
     def change_experiment_state(self):
-        if (
-            self.state.experiment_state
-            == ExperimentPrepareState.EXPERIMENT_STARTED
-        ):
+        if self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
             # Here what happens if experiment is aborted
             self.state.saver.saving_signal.clear()
         elif (

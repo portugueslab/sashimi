@@ -46,9 +46,7 @@ class VolumeDispatcher(Process):
                 self.calibration_ref is not None
                 and self.noise_subtraction_active.is_set()
             ):
-                self.current_frame = neg_dif(
-                    self.current_frame, self.calibration_ref
-                )
+                self.current_frame = neg_dif(self.current_frame, self.calibration_ref)
             if (
                 self.first_volume
                 or self.volume_buffer.shape[1:3] != self.current_frame.shape
@@ -93,9 +91,7 @@ class VolumeDispatcher(Process):
         except Empty:
             pass
         try:
-            self.calibration_ref = self.calibration_ref_queue.get(
-                timeout=0.001
-            )
+            self.calibration_ref = self.calibration_ref_queue.get(timeout=0.001)
         except Empty:
             pass
 

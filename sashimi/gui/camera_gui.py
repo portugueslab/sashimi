@@ -42,9 +42,7 @@ class ViewingWidget(QWidget):
 
         self.viewer = napari.Viewer(show=False)
         self.frame_layer = self.viewer.add_image(
-            np.zeros([1, 1024, 1024]),
-            blending="translucent",
-            name="frame_layer",
+            np.zeros([1, 1024, 1024]), blending="translucent", name="frame_layer",
         )
 
         self.roi = self.viewer.add_shapes(
@@ -65,9 +63,7 @@ class ViewingWidget(QWidget):
         self.bottom_layout.addWidget(self.wid_display_settings)
         self.bottom_layout.addWidget(self.btn_display_roi)
         self.bottom_layout.addWidget(self.btn_reset_contrast)
-        self.bottom_layout.addWidget(
-            self.viewer.window.qt_viewer.viewerButtons
-        )
+        self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
         self.bottom_layout.addStretch()
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
@@ -113,9 +109,7 @@ class ViewingWidget(QWidget):
         if sstatus is not None:
             self.experiment_progress.show()
             self.lbl_experiment_progress.show()
-            self.experiment_progress.setMaximum(
-                sstatus.target_params.n_volumes
-            )
+            self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
             self.experiment_progress.setValue(sstatus.i_volume)
             self.lbl_experiment_progress.setText(
                 "Saved chunks: {}".format(sstatus.i_chunk)
@@ -163,9 +157,7 @@ class CameraSettingsContainerWidget(QWidget):
         self.camera_info_timer.start()
 
         self.set_roi_button.clicked.connect(self.set_roi)
-        self.set_full_size_frame_button.clicked.connect(
-            self.set_full_size_frame
-        )
+        self.set_full_size_frame_button.clicked.connect(self.set_full_size_frame)
         self.camera_info_timer.timeout.connect(self.update_camera_info)
 
     def set_roi(self):
@@ -188,8 +180,7 @@ class CameraSettingsContainerWidget(QWidget):
         ]
         camera_params = convert_camera_params(self.state.camera_settings)
         self.update_roi_info(
-            width=self.state.current_camera_status.image_width
-            / camera_params.binning,
+            width=self.state.current_camera_status.image_width / camera_params.binning,
             height=self.state.current_camera_status.image_height
             / camera_params.binning,
         )
@@ -219,21 +210,13 @@ class CameraSettingsContainerWidget(QWidget):
                         - self.state.volume_setting.n_skip_start
                         - self.state.volume_setting.n_skip_end
                     )
-                    expected_frame_rate = (
-                        self.state.volume_setting.frequency * planes
-                    )
+                    expected_frame_rate = self.state.volume_setting.frequency * planes
                 if self.state.global_state == GlobalState.PLANAR_PREVIEW:
-                    expected_frame_rate = (
-                        self.state.single_plane_settings.frequency
-                    )
+                    expected_frame_rate = self.state.single_plane_settings.frequency
                 if expected_frame_rate:
                     self.lbl_camera_info.setText(
                         "\n".join(
-                            [
-                                "Camera frame rate: {} Hz".format(
-                                    round(frame_rate, 2)
-                                )
-                            ]
+                            ["Camera frame rate: {} Hz".format(round(frame_rate, 2))]
                             + (
                                 [
                                     "Camera is lagging behind. Decrease exposure, number of planes or frequency"

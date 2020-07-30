@@ -62,9 +62,7 @@ class FramerateRecorder:
                 try:
                     self.current_framerate = (
                         self.n_fps_frames
-                        / (
-                            self.current_time - self.previous_time_fps
-                        ).total_seconds()
+                        / (self.current_time - self.previous_time_fps).total_seconds()
                     )
                 except ZeroDivisionError:
                     self.current_framerate = 0
@@ -105,9 +103,7 @@ class CameraProcess(Process):
     def initialize_camera(self):
         self.camera_status_queue.put(self.cast_parameters())
         self.dcam_api = DCamAPI()
-        self.camera = HamamatsuCameraMR(
-            self.dcam_api.dcam, camera_id=self.camera_id
-        )
+        self.camera = HamamatsuCameraMR(self.dcam_api.dcam, camera_id=self.camera_id)
 
         self.camera.setACQMode("run_till_abort")
         self.camera.setSubArrayMode()
@@ -143,9 +139,7 @@ class CameraProcess(Process):
             if frames:
                 for frame in frames:
                     self.image_queue.put(
-                        np.reshape(
-                            frame.getData(), self.parameters.frame_shape
-                        )
+                        np.reshape(frame.getData(), self.parameters.frame_shape)
                     )
                     self.update_framerate()
             try:
@@ -161,17 +155,13 @@ class CameraProcess(Process):
     def update_framerate(self):
         self.framerate_rec.update_framerate()
         if self.framerate_rec.i_fps == 0:
-            self.triggered_frame_rate_queue.put(
-                self.framerate_rec.current_framerate
-            )
+            self.triggered_frame_rate_queue.put(self.framerate_rec.current_framerate)
 
     # TODO: Move this to API
     def apply_parameters(self):
         subarray = self.parameters.subarray
         # quantizing the ROI dims in multiples of 4
-        subarray = [
-            min((i * self.parameters.binning // 4) * 4, 2048) for i in subarray
-        ]
+        subarray = [min((i * self.parameters.binning // 4) * 4, 2048) for i in subarray]
         # this can be simplified by making the API nice
         self.camera.setPropertyValue("binning", self.parameters.binning)
         self.camera.setPropertyValue(
@@ -276,16 +266,12 @@ class MockCameraProcess(Process):
     def update_framerate(self):
         self.framerate_rec.update_framerate()
         if self.framerate_rec.i_fps == 0:
-            self.triggered_frame_rate_queue.put(
-                self.framerate_rec.current_framerate
-            )
+            self.triggered_frame_rate_queue.put(self.framerate_rec.current_framerate)
 
     def apply_parameters(self):
         subarray = self.parameters.subarray
         # quantizing the ROI dims in multiples of 4
-        subarray = [
-            min((i * self.parameters.binning // 4) * 4, 2048) for i in subarray
-        ]
+        subarray = [min((i * self.parameters.binning // 4) * 4, 2048) for i in subarray]
         # this can be simplified by making the API nice
 
         # This is not sent to the camera but has to be updated with camera info directly (because of multiples of 4)

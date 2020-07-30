@@ -33,16 +33,12 @@ class MainWindow(QMainWindow):
         self.resize(1800, 900)
 
         self.wid_settings_tree = SavingSettingsWidget(st)
-        self.wid_settings_tree.sig_params_loaded.connect(
-            self.refresh_param_values
-        )
+        self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
 
         self.wid_status = StatusWidget(st, self.timer)
         self.wid_display = ViewingWidget(st, self.timer)
         self.wid_save_options = SaveWidget(st, self.timer)
-        self.wid_laser = LaserControlWidget(
-            st.laser, st.laser_settings, self.timer
-        )
+        self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsContainerWidget(
             st, self.wid_display.roi, self.timer
@@ -51,8 +47,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.wid_display)
 
         self.addDockWidget(
-            Qt.LeftDockWidgetArea,
-            DockedWidget(widget=self.wid_status, title="Mode"),
+            Qt.LeftDockWidgetArea, DockedWidget(widget=self.wid_status, title="Mode"),
         )
 
         self.addDockWidget(
@@ -132,9 +127,7 @@ class StatusWidget(QTabWidget):
         }
 
         self.wid_paused = PausedWidget()
-        self.wid_calibration = CalibrationWidget(
-            st, st.calibration, self.timer
-        )
+        self.wid_calibration = CalibrationWidget(st, st.calibration, self.timer)
         self.wid_single_plane = SinglePlaneScanningWidget(st)
         self.wid_volume = VolumeScanningWidget(st, self.timer)
 
@@ -146,9 +139,7 @@ class StatusWidget(QTabWidget):
         self.currentChanged.connect(self.update_status)
 
     def update_status(self):
-        self.state.status.scanning_state = self.option_dict[
-            self.currentIndex()
-        ]
+        self.state.status.scanning_state = self.option_dict[self.currentIndex()]
 
 
 class PausedWidget(QWidget):
