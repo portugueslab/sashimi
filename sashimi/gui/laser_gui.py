@@ -35,10 +35,7 @@ class LaserControlWidget(QWidget):
         timer.timeout.connect(self.update_current)
 
     def update_current(self):
-        if (
-            self.laser_on
-            and self.previous_current != self.parameters.laser_power
-        ):
+        if self.laser_on and self.previous_current != self.parameters.laser_power:
             self.laser.set_current(self.parameters.laser_power)
         self.previous_current = self.parameters.laser_power
 

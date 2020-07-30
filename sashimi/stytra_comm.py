@@ -41,9 +41,7 @@ class StytraCom(Process):
                     self.current_settings = self.current_settings_queue.get(
                         timeout=0.00001
                     )
-                    saved_data = dict(
-                        lightsheet=clean_json(self.current_settings)
-                    )
+                    saved_data = dict(lightsheet=clean_json(self.current_settings))
                 except Empty:
                     break
             if self.start_stytra.is_set():

@@ -58,23 +58,16 @@ class StackSaver(Process):
 
     def run(self):
         while not self.stop_event.is_set():
-            if (
-                self.saving_signal.is_set()
-                and self.save_parameters is not None
-            ):
+            if self.saving_signal.is_set() and self.save_parameters is not None:
                 self.save_loop()
             else:
                 self.receive_save_parameters()
 
     def save_loop(self):
         # remove files if some are found at the save location
-        Path(self.save_parameters.output_dir).mkdir(
-            parents=True, exist_ok=True
-        )
+        Path(self.save_parameters.output_dir).mkdir(parents=True, exist_ok=True)
         if (
-            Path(self.save_parameters.output_dir)
-            / "original"
-            / "stack_metadata.json"
+            Path(self.save_parameters.output_dir) / "original" / "stack_metadata.json"
         ).is_file():
             shutil.rmtree(Path(self.save_parameters.output_dir) / "original")
 
@@ -113,9 +106,7 @@ class StackSaver(Process):
         self.saver_stopped_signal.set()
 
     def send_email_end(self):
-        sender_email = conf["email"][
-            "user"
-        ]  # TODO this should go to thecolonel
+        sender_email = conf["email"]["user"]  # TODO this should go to thecolonel
         # TODO: Send email every x minutes with image like in 2P
         receiver_email = self.save_parameters.notification_email
         subject = "Your lightsheet experiment is complete"
@@ -144,8 +135,7 @@ class StackSaver(Process):
         if self.current_data is None:
             self.calculate_optimal_size(volume)
             self.current_data = np.empty(
-                (self.save_parameters.chunk_size, *volume.shape),
-                dtype=self.dtype,
+                (self.save_parameters.chunk_size, *volume.shape), dtype=self.dtype,
             )
 
         self.current_data[self.i_in_chunk, :, :, :] = volume
@@ -206,18 +196,18 @@ class StackSaver(Process):
 
     def calculate_optimal_size(self, volume):
         if self.dtype == np.uint16:
-            array_megabytes = 2 * volume.shape[0] * volume.shape[1] * volume.shape[2] / 1048576
-        else:
-            raise TypeError(
-                "Saving data type not supported. Only uint16 is supported"
+            array_megabytes = (
+                2 * volume.shape[0] * volume.shape[1] * volume.shape[2] / 1048576
             )
-        self.save_parameters.chunk_size = int(self.save_parameters.optimal_chunk_MB_RAM / array_megabytes)
+        else:
+            raise TypeError("Saving data type not supported. Only uint16 is supported")
+        self.save_parameters.chunk_size = int(
+            self.save_parameters.optimal_chunk_MB_RAM / array_megabytes
+        )
 
     def receive_save_parameters(self):
         try:
-            self.save_parameters = self.saving_parameter_queue.get(
-                timeout=0.001
-            )
+            self.save_parameters = self.saving_parameter_queue.get(timeout=0.001)
         except Empty:
             pass
         try:
