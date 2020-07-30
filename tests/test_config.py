@@ -24,25 +24,25 @@ def test_config_creation(conf_path):
 
 def test_write_config_val(conf_path):
     val = 6
-    config.write_config_value(["piezo", "position_read", "min_val"], val,
-                       file_path=conf_path)
+    config.write_config_value(
+        ["piezo", "position_read", "min_val"], val, file_path=conf_path
+    )
     conf = config.read_config(file_path=conf_path)
     assert conf["piezo"]["position_read"]["min_val"] == val
 
 
 def test_config_cli_show(conf_path):
     runner = CliRunner()
-    result = runner.invoke(config.cli_modify_config, ["show",
-                                                      "-p", str(conf_path)])
+    result = runner.invoke(config.cli_modify_config, ["show", "-p", str(conf_path)])
     assert result.exit_code == 0
     assert result.output == config._print_config(file_path=conf_path) + "\n"
 
 
 def test_config_cli_edit(conf_path):
     runner = CliRunner()
-    runner.invoke(config.cli_modify_config, ["edit",
-                                             "-n", "piezo.position_read.min_val",
-                                             "-v", "7",
-                                             "-p", str(conf_path)])
+    runner.invoke(
+        config.cli_modify_config,
+        ["edit", "-n", "piezo.position_read.min_val", "-v", "7", "-p", str(conf_path),],
+    )
     conf = config.read_config(conf_path)
     assert conf["piezo"]["position_read"]["min_val"] == 7

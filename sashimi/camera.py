@@ -3,7 +3,6 @@ from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
 from dataclasses import dataclass
-from time import sleep
 import numpy as np
 from copy import copy
 from queue import Empty
@@ -28,7 +27,12 @@ class TriggerMode(Enum):
 class CamParameters:
     exposure_time: float = 60
     binning: int = 2
-    subarray: tuple = (0, 0, 1024, 1024)  # order of params here is [hpos, vpos, hsize, vsize,]
+    subarray: tuple = (
+        0,
+        0,
+        1024,
+        1024,
+    )  # order of params here is [hpos, vpos, hsize, vsize,]
     image_height: int = 2048
     image_width: int = 2048
     frame_shape: tuple = (1024, 1024)
@@ -57,8 +61,8 @@ class FramerateRecorder:
             if self.previous_time_fps is not None:
                 try:
                     self.current_framerate = (
-                            self.n_fps_frames
-                            / (self.current_time - self.previous_time_fps).total_seconds()
+                        self.n_fps_frames
+                        / (self.current_time - self.previous_time_fps).total_seconds()
                     )
                 except ZeroDivisionError:
                     self.current_framerate = 0
@@ -69,7 +73,14 @@ class FramerateRecorder:
 
 
 class CameraProcess(Process):
-    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20):
+    def __init__(
+        self,
+        experiment_start_event,
+        stop_event,
+        camera_id=0,
+        max_queue_size=1200,
+        n_fps_frames=20,
+    ):
         super().__init__()
         self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event
@@ -127,12 +138,15 @@ class CameraProcess(Process):
             frames = self.camera.getFrames()
             if frames:
                 for frame in frames:
-                    self.image_queue.put(np.reshape(frame.getData(), self.parameters.frame_shape))
+                    self.image_queue.put(
+                        np.reshape(frame.getData(), self.parameters.frame_shape)
+                    )
                     self.update_framerate()
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.parameters.camera_mode == CameraMode.ABORT or \
-                        (self.new_parameters != self.parameters):
+                if self.parameters.camera_mode == CameraMode.ABORT or (
+                    self.new_parameters != self.parameters
+                ):
                     self.camera.stopAcquisition()
                     break
             except Empty:
@@ -149,28 +163,43 @@ class CameraProcess(Process):
         # quantizing the ROI dims in multiples of 4
         subarray = [min((i * self.parameters.binning // 4) * 4, 2048) for i in subarray]
         # this can be simplified by making the API nice
-        self.camera.setPropertyValue('binning', self.parameters.binning)
-        self.camera.setPropertyValue('exposure_time', 0.001 * self.parameters.exposure_time)
-        self.camera.setPropertyValue('subarray_vpos', subarray[1])
-        self.camera.setPropertyValue('subarray_hpos', subarray[0])
-        self.camera.setPropertyValue('subarray_vsize', subarray[3])
-        self.camera.setPropertyValue('subarray_hsize', subarray[2])
-        self.camera.setPropertyValue('trigger_source', self.parameters.trigger_mode.value)
+        self.camera.setPropertyValue("binning", self.parameters.binning)
+        self.camera.setPropertyValue(
+            "exposure_time", 0.001 * self.parameters.exposure_time
+        )
+        self.camera.setPropertyValue("subarray_vpos", subarray[1])
+        self.camera.setPropertyValue("subarray_hpos", subarray[0])
+        self.camera.setPropertyValue("subarray_vsize", subarray[3])
+        self.camera.setPropertyValue("subarray_hsize", subarray[2])
+        self.camera.setPropertyValue(
+            "trigger_source", self.parameters.trigger_mode.value
+        )
 
         # This is not sent to the camera but has to be updated with camera info directly (because of multiples of 4)
         self.parameters.frame_shape = (
-            self.camera.getPropertyValue('subarray_vsize')[0] // self.parameters.binning,
-            self.camera.getPropertyValue('subarray_hsize')[0] // self.parameters.binning
+            self.camera.getPropertyValue("subarray_vsize")[0]
+            // self.parameters.binning,
+            self.camera.getPropertyValue("subarray_hsize")[0]
+            // self.parameters.binning,
         )
 
-        self.parameters.internal_frame_rate = self.camera.getPropertyValue("internal_frame_rate")[0]
+        self.parameters.internal_frame_rate = self.camera.getPropertyValue(
+            "internal_frame_rate"
+        )[0]
 
     def close_camera(self):
         self.camera.shutdown()
 
 
 class MockCameraProcess(Process):
-    def __init__(self, experiment_start_event, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20):
+    def __init__(
+        self,
+        experiment_start_event,
+        stop_event,
+        camera_id=0,
+        max_queue_size=1200,
+        n_fps_frames=20,
+    ):
         super().__init__()
         self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event
@@ -220,13 +249,16 @@ class MockCameraProcess(Process):
             time.sleep(0.001)
             is_there_frame = np.random.random_sample(1)
             if is_there_frame < (1 / self.parameters.exposure_time):
-                frame = np.random.randint(0, 65534, size=self.parameters.frame_shape, dtype=np.uint16)
+                frame = np.random.randint(
+                    0, 65534, size=self.parameters.frame_shape, dtype=np.uint16
+                )
                 self.image_queue.put(frame)
                 self.update_framerate()
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.parameters.camera_mode == CameraMode.ABORT or \
-                        (self.new_parameters != self.parameters):
+                if self.parameters.camera_mode == CameraMode.ABORT or (
+                    self.new_parameters != self.parameters
+                ):
                     break
             except Empty:
                 pass
