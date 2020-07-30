@@ -11,8 +11,7 @@ click
 traitlets
 nidaqmx
 toml
-scopecuisine
+scopecuisine==1.2
 pyqtgraph
 napari
 numba
-dataclasses
