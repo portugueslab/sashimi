@@ -35,9 +35,7 @@ class SavingSettingsWidget(QWidget):
         self.instructions.setReadOnly(True)
         self.popup_window = QDialog(
             None,
-            Qt.WindowSystemMenuHint
-            | Qt.WindowTitleHint
-            | Qt.WindowCloseButtonHint,
+            Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint,
         )
         self.layout().addWidget(self.btn_load)
         self.layout().addWidget(self.btn_save)

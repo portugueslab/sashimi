@@ -26,11 +26,11 @@ if not conf["scopeless"]:
     from nidaqmx.errors import DaqError
 
 else:
-    from theknights.stream_readers import AnalogSingleChannelReader
-    from theknights.stream_writers import AnalogMultiChannelWriter
-    from theknights.constants import Edge, AcquisitionType
-    from theknights.task import Task
-    from theknights.errors import DaqError
+    from scopecuisine.theknights.stream_readers import AnalogSingleChannelReader
+    from scopecuisine.theknights.stream_writers import AnalogMultiChannelWriter
+    from scopecuisine.theknights.constants import Edge, AcquisitionType
+    from scopecuisine.theknights.task import Task
+    from scopecuisine.theknights.errors import DaqError
 
 PIEZO_SCALE = conf["piezo"]["synchronization"]["scale"]
 
@@ -148,12 +148,8 @@ class ScanLoop:
         self.i_sample = 0
         self.n_samples_read = 0
 
-        self.lateral_waveform = TriangleWaveform(
-            **asdict(self.parameters.xy.lateral)
-        )
-        self.frontal_waveform = TriangleWaveform(
-            **asdict(self.parameters.xy.lateral)
-        )
+        self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
+        self.frontal_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
 
         self.time = np.arange(self.n_samples) / self.sample_rate
         self.shifted_time = self.time.copy()
@@ -167,12 +163,8 @@ class ScanLoop:
         self.n_samples_read = 0
 
     def n_samples_period(self):
-        ns_lateral = int(
-            round(self.sample_rate / self.lateral_waveform.frequency)
-        )
-        ns_frontal = int(
-            round(self.sample_rate / self.frontal_waveform.frequency)
-        )
+        ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
+        ns_frontal = int(round(self.sample_rate / self.frontal_waveform.frequency))
         return lcm(ns_lateral, ns_frontal)
 
     def update_settings(self):
@@ -201,12 +193,8 @@ class ScanLoop:
 
     def fill_arrays(self):
         self.shifted_time[:] = self.time + self.i_sample / self.sample_rate
-        self.write_arrays[4, :] = self.lateral_waveform.values(
-            self.shifted_time
-        )
-        self.write_arrays[5, :] = self.frontal_waveform.values(
-            self.shifted_time
-        )
+        self.write_arrays[4, :] = self.lateral_waveform.values(self.shifted_time)
+        self.write_arrays[5, :] = self.frontal_waveform.values(self.shifted_time)
 
     def write(self):
         self.z_writer.write_many_sample(self.write_arrays[:4])
@@ -214,9 +202,7 @@ class ScanLoop:
 
     def read(self):
         self.z_reader.read_many_sample(
-            self.read_array,
-            number_of_samples_per_channel=self.n_samples,
-            timeout=1,
+            self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
         )
         self.n_samples_read += self.write_arrays.shape[1]
         self.read_array[:] = self.read_array / PIEZO_SCALE
@@ -231,9 +217,7 @@ class ScanLoop:
             self.write()
             self.check_start()
             self.read()
-            self.i_sample = (
-                self.i_sample + self.n_samples
-            ) % self.n_samples_period()
+            self.i_sample = (self.i_sample + self.n_samples) % self.n_samples_period()
             self.n_acquired += 1
 
 
@@ -244,8 +228,7 @@ def calc_sync(z, sync_coef):
 class PlanarScanLoop(ScanLoop):
     def loop_condition(self):
         return (
-            super().loop_condition()
-            and self.parameters.state == ScanningState.PLANAR
+            super().loop_condition() and self.parameters.state == ScanningState.PLANAR
         )
 
     def n_samples_period(self):
@@ -312,9 +295,7 @@ class VolumetricScanLoop(ScanLoop):
             self.parameters.experiment_state = ExperimentPrepareState.PREVIEW
 
     def n_samples_period(self):
-        n_samples_trigger = int(
-            round(self.sample_rate / self.parameters.z.frequency)
-        )
+        n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
         return lcm(n_samples_trigger, super().n_samples_period())
 
     def update_settings(self):
@@ -327,9 +308,7 @@ class VolumetricScanLoop(ScanLoop):
 
         if self.parameters != self.old_parameters:
             if self.parameters.z.frequency > 0.1:
-                full_period = int(
-                    round(self.sample_rate / self.parameters.z.frequency)
-                )
+                full_period = int(round(self.sample_rate / self.parameters.z.frequency))
                 self.recorded_signal = FillingRollingBuffer(full_period)
                 self.camera_pulses = RollingBuffer(full_period)
                 self.initialize()
@@ -347,10 +326,7 @@ class VolumetricScanLoop(ScanLoop):
             vmax=self.parameters.z.piezo_max,
         )
 
-        if (
-            not self.camera_on
-            and self.n_samples_read > self.n_samples_period()
-        ):
+        if not self.camera_on and self.n_samples_read > self.n_samples_period():
             self.camera_on = True
             self.i_sample = 0  # puts it at the beginning of the cycle
             self.n_samples_read = 0
@@ -362,9 +338,7 @@ class VolumetricScanLoop(ScanLoop):
 
     def read(self):
         super().read()
-        i_insert = (self.i_sample - self.n_samples) % len(
-            self.recorded_signal.buffer
-        )
+        i_insert = (self.i_sample - self.n_samples) % len(self.recorded_signal.buffer)
         self.recorded_signal.write(
             self.read_array[
                 : min(len(self.recorded_signal.buffer), len(self.read_array))
@@ -384,26 +358,20 @@ class VolumetricScanLoop(ScanLoop):
             max_wave, min_wave = (np.max(wave_part), np.min(wave_part))
             if (
                 -2 < calc_sync(min_wave, self.parameters.z.lateral_sync) < 2
-                and -2
-                < calc_sync(max_wave, self.parameters.z.lateral_sync)
-                < 2
+                and -2 < calc_sync(max_wave, self.parameters.z.lateral_sync) < 2
             ):
                 self.write_arrays[1, :] = calc_sync(
                     wave_part, self.parameters.z.lateral_sync
                 )
             if (
                 -2 < calc_sync(min_wave, self.parameters.z.frontal_sync) < 2
-                and -2
-                < calc_sync(max_wave, self.parameters.z.frontal_sync)
-                < 2
+                and -2 < calc_sync(max_wave, self.parameters.z.frontal_sync) < 2
             ):
                 self.write_arrays[2, :] = calc_sync(
                     wave_part, self.parameters.z.frontal_sync
                 )
         if self.camera_on:
-            self.write_arrays[3, :] = self.camera_pulses.read(
-                i_sample, self.n_samples
-            )
+            self.write_arrays[3, :] = self.camera_pulses.read(i_sample, self.n_samples)
         else:
             self.write_arrays[3, :] = 0
 

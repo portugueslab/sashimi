@@ -4,7 +4,7 @@ try:
     import visa
 
     rm = visa.ResourceManager()
-except ImportError:
+except (ImportError, ValueError):
     warn("PyVisa not installed, no laser control available")
 
 

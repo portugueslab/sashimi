@@ -60,9 +60,7 @@ class SaveSettings(ParametrizedQt):
         self.save_dir = Param(conf["default_paths"]["data"], gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("")
-        self.overwrite_save_folder = Param(
-            0, (0, 1), gui=False, loadable=False
-        )
+        self.overwrite_save_folder = Param(0, (0, 1), gui=False, loadable=False)
 
 
 class ScanningSettings(ParametrizedQt):
@@ -174,11 +172,7 @@ class Calibration(ParametrizedQt):
 
     def add_calibration_point(self):
         self.calibrations_points.append(
-            (
-                self.z_settings.piezo,
-                self.z_settings.lateral,
-                self.z_settings.frontal,
-            )
+            (self.z_settings.piezo, self.z_settings.lateral, self.z_settings.frontal,)
         )
         self.calculate_calibration()
 
@@ -236,9 +230,7 @@ def get_voxel_size(
     camera_settings: CameraSettings,
     scope_alignment: ScopeAlignmentInfo,
 ):
-    scan_length = (
-        scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
-    )
+    scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
 
     if camera_settings.binning == "1x1":
         binning = 1
@@ -274,9 +266,7 @@ def convert_save_params(
         n_planes=n_planes,
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
-        voxel_size=get_voxel_size(
-            scanning_settings, camera_settings, scope_alignment
-        ),
+        voxel_size=get_voxel_size(scanning_settings, camera_settings, scope_alignment),
     )
 
 
@@ -293,9 +283,7 @@ def convert_single_plane_params(
             lateral_sync=tuple(calibration.calibration[0]),
             frontal_sync=tuple(calibration.calibration[1]),
         ),
-        triggering=TriggeringParameters(
-            frequency=single_plane_setting.frequency
-        ),
+        triggering=TriggeringParameters(frequency=single_plane_setting.frequency),
     )
 
 
@@ -370,8 +358,7 @@ class State:
         self.save_status: Optional[SavingStatus] = None
 
         self.saver = StackSaver(
-            stop_event=self.stop_event,
-            duration_queue=self.stytra_comm.duration_queue,
+            stop_event=self.stop_event, duration_queue=self.stytra_comm.duration_queue,
         )
 
         self.dispatcher = VolumeDispatcher(
@@ -402,22 +389,14 @@ class State:
         self.status.sig_param_changed.connect(self.change_global_state)
 
         self.planar_setting.sig_param_changed.connect(self.send_scan_settings)
-        self.calibration.z_settings.sig_param_changed.connect(
-            self.send_scan_settings
-        )
-        self.single_plane_settings.sig_param_changed.connect(
-            self.send_scan_settings
-        )
+        self.calibration.z_settings.sig_param_changed.connect(self.send_scan_settings)
+        self.single_plane_settings.sig_param_changed.connect(self.send_scan_settings)
         self.volume_setting.sig_param_changed.connect(self.send_scan_settings)
 
-        self.camera_settings.sig_param_changed.connect(
-            self.send_camera_settings
-        )
+        self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
         self.save_settings.sig_param_changed.connect(self.send_scan_settings)
 
-        self.volume_setting.sig_param_changed.connect(
-            self.send_dispatcher_settings
-        )
+        self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
         self.single_plane_settings.sig_param_changed.connect(
             self.send_dispatcher_settings
         )
@@ -443,9 +422,7 @@ class State:
             json.dump(self.settings_tree.serialize(), f)
 
     def change_global_state(self):
-        self.global_state = scanning_to_global_state[
-            self.status.scanning_state
-        ]
+        self.global_state = scanning_to_global_state[self.status.scanning_state]
         self.send_camera_settings()
         self.send_scan_settings()
 
@@ -477,9 +454,7 @@ class State:
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
-                self.planar_setting,
-                self.single_plane_settings,
-                self.calibration,
+                self.planar_setting, self.single_plane_settings, self.calibration,
             )
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
@@ -495,9 +470,7 @@ class State:
                 pulses = self.calculate_pulse_times() * self.sample_rate
                 try:
                     pulse_log = self.waveform[pulses.astype(int)]
-                    self.all_settings["piezo_log"] = {
-                        "trigger": pulse_log.tolist()
-                    }
+                    self.all_settings["piezo_log"] = {"trigger": pulse_log.tolist()}
                 except IndexError:
                     pass
 
@@ -521,9 +494,7 @@ class State:
 
     def get_camera_status(self):
         try:
-            current_camera_status = self.camera.camera_status_queue.get(
-                timeout=0.001
-            )
+            current_camera_status = self.camera.camera_status_queue.get(timeout=0.001)
             return current_camera_status
         except Empty:
             return None
@@ -537,9 +508,7 @@ class State:
             self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
             self.send_scan_settings()
 
-        elif (
-            self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
-        ):
+        elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
             self.experiment_state = ExperimentPrepareState.PREVIEW
             self.end_experiment()
 
@@ -578,9 +547,7 @@ class State:
                 calibration_set[n_image, :, :] = current_image
                 n_image += 1
         self.dispatcher.noise_subtraction_active.set()
-        self.calibration_ref = np.mean(calibration_set, axis=0).astype(
-            dtype=dtype
-        )
+        self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
         self.laser.set_current(current_laser)
 
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)

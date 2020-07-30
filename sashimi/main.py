@@ -23,4 +23,3 @@ def main(sample_rate, scopeless):
     app.setWindowIcon(QIcon(r"icons/main_icon.png"))
     main_window.show()
     app.exec()
-
