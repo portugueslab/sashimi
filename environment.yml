@@ -1,4 +1,4 @@
-name: sashimi
+name: shirashi
 channels:
   - conda-forge
 dependencies:

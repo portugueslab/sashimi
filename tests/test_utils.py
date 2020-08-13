@@ -1,5 +1,5 @@
 import numpy as np
-from sashimi.utilities import neg_dif
+from shirashi.utilities import neg_dif
 
 
 def test_noise_subtraction():

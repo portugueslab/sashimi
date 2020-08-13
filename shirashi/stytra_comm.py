@@ -24,7 +24,7 @@ class StytraCom(Process):
         self,
         stop_event: Event,
         experiment_start_event: Event,
-        stytra_address="tcp://O1-589:5555",
+        stytra_address="tcp://LM-114:5555",  # here the address of the stytra computer needs to be added
     ):
         super().__init__()
         self.current_settings_queue = Queue()
@@ -41,7 +41,7 @@ class StytraCom(Process):
                     self.current_settings = self.current_settings_queue.get(
                         timeout=0.00001
                     )
-                    saved_data = dict(lightsheet=clean_json(self.current_settings))
+                    saved_data = dict(lightfield=clean_json(self.current_settings))
                 except Empty:
                     break
             if self.start_stytra.is_set():

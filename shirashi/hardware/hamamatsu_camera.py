@@ -333,7 +333,6 @@ class HamamatsuCamera(object):
         self.properties = self.getCameraProperties()
 
         # Get camera max width, height.
-
         self.max_width = self.getPropertyValue("image_width")[0]
         self.max_height = self.getPropertyValue("image_height")[0]
 

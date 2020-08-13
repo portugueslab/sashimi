@@ -4,7 +4,7 @@ import toml
 from lightparam import set_nested, get_nested
 
 CONFIG_FILENAME = "hardware_config.toml"
-CONFIG_DIR_PATH = Path.home() / ".sashimi"
+CONFIG_DIR_PATH = Path.home() / ".shirashi"
 CONFIG_DIR_PATH.mkdir(exist_ok=True)
 PRESETS_DIR_PATH = Path.home() / "presets"
 PRESETS_DIR_PATH.mkdir(exist_ok=True)
@@ -58,7 +58,7 @@ def read_config(file_path=CONFIG_PATH):
     Returns
     -------
     ConfigParser object
-        sashimi configuration
+        shirashi configuration
     """
 
     # If no config file exists yet, write the default one:

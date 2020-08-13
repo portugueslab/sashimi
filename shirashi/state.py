@@ -3,35 +3,29 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from sashimi.hardware.laser import CoboltLaser, MockCoboltLaser
-from sashimi.scanning import (
+from shirashi.scanning import (
     Scanner,
-    PlanarScanning,
-    ZScanning,
-    ZSynced,
-    ZManual,
-    XYScanning,
     ScanParameters,
     TriggeringParameters,
     ScanningState,
     ExperimentPrepareState,
 )
-from sashimi.stytra_comm import StytraCom
-from sashimi.dispatcher import VolumeDispatcher
+from shirashi.stytra_comm import StytraCom
+from shirashi.dispatcher import VolumeDispatcher
 from multiprocessing import Event
 import json
-from sashimi.camera import (
+from shirashi.camera import (
     CameraProcess,
     CamParameters,
     CameraMode,
     TriggerMode,
     MockCameraProcess,
 )
-from sashimi.streaming_save import StackSaver, SavingParameters, SavingStatus
+from shirashi.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
 import time
-from sashimi.config import read_config
+from shirashi.config import read_config
 
 conf = read_config()
 
@@ -39,8 +33,8 @@ conf = read_config()
 class GlobalState(Enum):
     PAUSED = 0
     PREVIEW = 1
-    PLANAR_PREVIEW = 2
-    VOLUME_PREVIEW = 3
+    TBD_PREVIEW = 2
+    EXP_PREVIEW = 3
     EXPERIMENT_RUNNING = 4
 
 
@@ -68,15 +62,15 @@ class ScanningSettings(ParametrizedQt):
         super().__init__()
         self.name = "general/scanning_state"
         self.scanning_state = Param(
-            "Paused", ["Paused", "Calibration", "Planar", "Volume"],
+            "Paused", ["Paused", "Preview", "TBD", "Experiment"],
         )
 
 
 scanning_to_global_state = dict(
     Paused=GlobalState.PAUSED,
-    Calibration=GlobalState.PREVIEW,
-    Planar=GlobalState.PLANAR_PREVIEW,
-    Volume=GlobalState.VOLUME_PREVIEW,
+    Preview=GlobalState.PREVIEW,
+    TBD=GlobalState.TBD_PREVIEW,
+    Experiment=GlobalState.EXP_PREVIEW,
 )
 
 
@@ -99,73 +93,22 @@ class CalibrationZSettings(ParametrizedQt):
         self.frontal = Param(0.0, (-2.0, 2.0), gui="slider")
 
 
-class SinglePlaneSettings(ParametrizedQt):
-    def __init__(self):
-        super().__init__()
-        self.name = "scanning/z_single_plane"
-        self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
-        self.frequency = Param(1.0, (0.1, 1000), unit="planes/s (Hz)")
-
-
-class ZRecordingSettings(ParametrizedQt):
-    def __init__(self):
-        super().__init__(self)
-        self.name = "scanning/volumetric_recording"
-        self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
-        self.frequency = Param(1.0, (0.1, 100), unit="volumes/s (Hz)")
-        self.n_planes = Param(10, (2, 100))
-        self.n_skip_start = Param(0, (0, 20))
-        self.n_skip_end = Param(0, (0, 20))
-
-
 class CameraSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
-        self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
+        self.binning = Param("1x1", ["1x1", "2x2", "4x4"])
         self.subarray = Param(
             [0, 0, 2048, 2048], gui=False
         )  # order of params here is [hpos, vpos, hsize, vsize,]
 
 
-class LaserSettings(ParametrizedQt):
+
+class Preview(ParametrizedQt):
     def __init__(self):
         super().__init__()
-        self.name = "general/laser"
-        self.laser_power = Param(0, (0, 40), unit="mA")
-
-
-def convert_planar_params(planar: PlanarScanningSettings):
-    return PlanarScanning(
-        lateral=XYScanning(
-            vmin=planar.lateral_range[0],
-            vmax=planar.lateral_range[1],
-            frequency=planar.lateral_frequency,
-        ),
-        frontal=XYScanning(
-            vmin=planar.frontal_range[0],
-            vmax=planar.frontal_range[1],
-            frequency=planar.frontal_frequency,
-        ),
-    )
-
-
-def convert_calibration_params(
-    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
-):
-    sp = ScanParameters(
-        state=ScanningState.PLANAR,
-        xy=convert_planar_params(planar),
-        z=ZManual(**zsettings.params.values),
-    )
-    return sp
-
-
-class Calibration(ParametrizedQt):
-    def __init__(self):
-        super().__init__()
-        self.name = "general/calibration"
+        self.name = "general/preview"
         self.z_settings = CalibrationZSettings()
         self.calibrations_points = []
         self.calibration = Param([(0, 0.01), (0, 0.01)], gui=False)
@@ -226,12 +169,9 @@ def convert_camera_params(camera_settings: CameraSettings):
 
 
 def get_voxel_size(
-    scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
     scope_alignment: ScopeAlignmentInfo,
 ):
-    scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
-
     if camera_settings.binning == "1x1":
         binning = 1
     elif camera_settings.binning == "2x2":
@@ -242,10 +182,8 @@ def get_voxel_size(
     else:
         binning = 2
 
-    inter_plane = scan_length / scanning_settings.n_planes
 
     return (
-        inter_plane,
         scope_alignment.pixel_size_y * binning,
         scope_alignment.pixel_size_x * binning,
     )
@@ -253,62 +191,17 @@ def get_voxel_size(
 
 def convert_save_params(
     save_settings: SaveSettings,
-    scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
     scope_alignment: ScopeAlignmentInfo,
 ):
-    n_planes = scanning_settings.n_planes - (
-        scanning_settings.n_skip_start + scanning_settings.n_skip_end
-    )
-
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
-        n_planes=n_planes,
+        n_planes= 10, #todo change
         notification_email=str(save_settings.notification_email),
-        volumerate=scanning_settings.frequency,
-        voxel_size=get_voxel_size(scanning_settings, camera_settings, scope_alignment),
+        voxel_size=get_voxel_size(camera_settings, scope_alignment),
     )
 
 
-def convert_single_plane_params(
-    planar: PlanarScanningSettings,
-    single_plane_setting: SinglePlaneSettings,
-    calibration: Calibration,
-):
-    return ScanParameters(
-        state=ScanningState.PLANAR,
-        xy=convert_planar_params(planar),
-        z=ZSynced(
-            piezo=single_plane_setting.piezo,
-            lateral_sync=tuple(calibration.calibration[0]),
-            frontal_sync=tuple(calibration.calibration[1]),
-        ),
-        triggering=TriggeringParameters(frequency=single_plane_setting.frequency),
-    )
-
-
-def convert_volume_params(
-    planar: PlanarScanningSettings,
-    z_setting: ZRecordingSettings,
-    calibration: Calibration,
-):
-    return ScanParameters(
-        state=ScanningState.VOLUMETRIC,
-        xy=convert_planar_params(planar),
-        z=ZScanning(
-            piezo_min=z_setting.scan_range[0],
-            piezo_max=z_setting.scan_range[1],
-            frequency=z_setting.frequency,
-            lateral_sync=tuple(calibration.calibration[0]),
-            frontal_sync=tuple(calibration.calibration[1]),
-        ),
-        triggering=TriggeringParameters(
-            n_planes=z_setting.n_planes,
-            n_skip_start=z_setting.n_skip_start,
-            n_skip_end=z_setting.n_skip_end,
-            frequency=None,
-        ),
-    )
 
 
 class State:
@@ -329,7 +222,6 @@ class State:
                 stop_event=self.stop_event,
             )
         else:
-            self.laser = CoboltLaser()
             self.camera = CameraProcess(
                 experiment_start_event=self.experiment_start_event,
                 stop_event=self.stop_event,
@@ -349,7 +241,6 @@ class State:
         self.pause_after = False
 
         self.planar_setting = PlanarScanningSettings()
-        self.laser_settings = LaserSettings()
         self.stytra_comm = StytraCom(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
@@ -369,17 +260,12 @@ class State:
             saver_queue=self.saver.save_queue,
         )
 
-        self.single_plane_settings = SinglePlaneSettings()
-        self.volume_setting = ZRecordingSettings()
-        self.calibration = Calibration()
+        self.preview = Preview()
 
         for setting in [
             self.planar_setting,
-            self.laser_settings,
-            self.single_plane_settings,
-            self.volume_setting,
-            self.calibration,
-            self.calibration.z_settings,
+            self.preview,
+            self.preview.z_settings,
             self.camera_settings,
             self.save_settings,
             self.scope_alignment_info,
@@ -389,17 +275,15 @@ class State:
         self.status.sig_param_changed.connect(self.change_global_state)
 
         self.planar_setting.sig_param_changed.connect(self.send_scan_settings)
-        self.calibration.z_settings.sig_param_changed.connect(self.send_scan_settings)
-        self.single_plane_settings.sig_param_changed.connect(self.send_scan_settings)
-        self.volume_setting.sig_param_changed.connect(self.send_scan_settings)
+        self.preview.z_settings.sig_param_changed.connect(self.send_scan_settings)
 
         self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
         self.save_settings.sig_param_changed.connect(self.send_scan_settings)
-
-        self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
-        self.single_plane_settings.sig_param_changed.connect(
-            self.send_dispatcher_settings
-        )
+        #
+        # self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
+        # self.single_plane_settings.sig_param_changed.connect(
+        #     self.send_dispatcher_settings
+        # )
         self.status.sig_param_changed.connect(self.send_dispatcher_settings)
 
         self.camera.start()
@@ -444,35 +328,28 @@ class State:
 
     def send_scan_settings(self):
         n_planes = 1
+        params = ScanParameters(state=ScanningState.PAUSED)
         if self.global_state == GlobalState.PAUSED:
             params = ScanParameters(state=ScanningState.PAUSED)
 
         elif self.global_state == GlobalState.PREVIEW:
-            params = convert_calibration_params(
-                self.planar_setting, self.calibration.z_settings
-            )
+            pass
+            # params = convert_calibration_params(
+            #     self.planar_setting, self.preview.z_settings
+            # )
 
-        elif self.global_state == GlobalState.PLANAR_PREVIEW:
-            params = convert_single_plane_params(
-                self.planar_setting, self.single_plane_settings, self.calibration,
-            )
+        elif self.global_state == GlobalState.TBD_PREVIEW:
+            pass
+            # params = convert_single_plane_params(
+            #     self.planar_setting, self.single_plane_settings, self.preview,
+            # )
 
-        elif self.global_state == GlobalState.VOLUME_PREVIEW:
-            params = convert_volume_params(
-                self.planar_setting, self.volume_setting, self.calibration
-            )
-            n_planes = (
-                self.volume_setting.n_planes
-                - self.volume_setting.n_skip_start
-                - self.volume_setting.n_skip_end
-            )
-            if self.waveform is not None:
-                pulses = self.calculate_pulse_times() * self.sample_rate
-                try:
-                    pulse_log = self.waveform[pulses.astype(int)]
-                    self.all_settings["piezo_log"] = {"trigger": pulse_log.tolist()}
-                except IndexError:
-                    pass
+        elif self.global_state == GlobalState.EXP_PREVIEW:
+            pass
+        # params = convert_volume_params(
+            #     self.planar_setting, self.volume_setting, self.preview
+            # )
+
 
         params.experiment_state = self.experiment_state
         self.all_settings["scanning"] = params
@@ -482,7 +359,6 @@ class State:
 
         save_params = convert_save_params(
             self.save_settings,
-            self.volume_setting,
             self.camera_settings,
             self.scope_alignment_info,
         )
@@ -533,8 +409,6 @@ class State:
         """
         self.dispatcher.noise_subtraction_active.clear()
 
-        current_laser = self.laser_settings.laser_power
-        self.laser.set_current(0)
         n_image = 0
         while n_image < n_images:
             current_volume = self.get_volume()
@@ -574,22 +448,8 @@ class State:
         except Empty:
             return None
 
-    def get_waveform(self):
-        try:
-            self.waveform = self.scanner.waveform_queue.get(timeout=0.001)
-            return self.waveform
-        except Empty:
-            return None
-
-    def calculate_pulse_times(self):
-        return np.arange(
-            self.volume_setting.n_skip_start,
-            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
-
     def wrap_up(self):
         self.stop_event.set()
-        self.laser.close()
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
