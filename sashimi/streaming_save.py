@@ -36,6 +36,8 @@ class SavingStatus:
     i_chunk: int = 0
 
 
+print ("hello")
+
 class StackSaver(Process):
     def __init__(self, stop_event, duration_queue, max_queue_size=2000):
         super().__init__()
