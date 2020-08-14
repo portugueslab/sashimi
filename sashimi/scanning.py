@@ -490,3 +490,27 @@ class Scanner(Process):
                 self.parameters = deepcopy(
                     scanloop.parameters
                 )  # set the parameters to the last ones received in the loop
+
+class MockScanner(Scanner):
+    def __init__(
+        self,
+        stop_event: Event,
+        experiment_start_event,
+        n_samples_waveform=10000,
+        sample_rate=40000,
+    ):
+        super().__init__(stop_event,
+        experiment_start_event,
+        n_samples_waveform=10000,
+        sample_rate=40000,)
+
+        self.name ="mocklaser"
+
+    def setup_tasks(self, read_task, write_task_z, write_task_xy):
+        pass
+
+    def retrieve_parameters(self):
+        pass
+
+    def run(self):
+        pass

@@ -27,6 +27,7 @@ TEMPLATE_CONF_DICT = {
     "email": {"user": "foo", "password": "foo"},
     "array_ram_MB": 450,
     "scopeless": False,
+    "shirashi": False
 }
 
 
@@ -107,7 +108,6 @@ def cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
     file_path = Path(file_path)
     if command == "edit":
         conf = read_config(file_path=file_path)
-
         # Cast the type of the previous variable
         # (to avoid overwriting values with strings)
         dict_path = name.split(".")
@@ -124,7 +124,6 @@ def _cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
     file_path = Path(file_path)
     if command == "edit":
         conf = read_config(file_path=file_path)
-
         # Cast the type of the previous variable
         # (to avoid overwriting values with strings)
         dict_path = name.split(".")

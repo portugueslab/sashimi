@@ -15,7 +15,8 @@ from sashimi.scanning import (
     TriggeringParameters,
     ScanningState,
     ExperimentPrepareState,
-)
+    MockScanner
+    )
 from sashimi.stytra_comm import StytraCom
 from sashimi.dispatcher import VolumeDispatcher
 from multiprocessing import Event
@@ -207,6 +208,21 @@ class Calibration(ParametrizedQt):
         return True
 
 
+class MockCalibration(Calibration):
+    def __init__(self):
+        super().__init__()
+        self.name = "general/mockcalibration"
+
+    def add_calibration_point(self):
+        pass
+
+    def remove_calibration_point(self):
+        pass
+
+    def calculate_calibration(self):
+        pass
+
+
 def convert_camera_params(camera_settings: CameraSettings):
     if camera_settings.binning == "1x1":
         binning = 1
@@ -322,24 +338,51 @@ class State:
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
-        if self.conf["scopeless"]:
+
+        if self.conf["shirashi"]:
+            self.camera = CameraProcess(
+                        experiment_start_event=self.experiment_start_event,
+                        stop_event=self.stop_event,
+                    )
             self.laser = MockCoboltLaser()
-            self.camera = MockCameraProcess(
+            self.scanner = MockScanner( stop_event=self.stop_event,
                 experiment_start_event=self.experiment_start_event,
-                stop_event=self.stop_event,
-            )
+                sample_rate=self.sample_rate,)
+            self.calibration = MockCalibration()
         else:
             self.laser = CoboltLaser()
-            self.camera = CameraProcess(
-                experiment_start_event=self.experiment_start_event,
+            self.scanner = Scanner(
                 stop_event=self.stop_event,
+                experiment_start_event=self.experiment_start_event,
+                sample_rate=self.sample_rate,
             )
+            self.calibration = Calibration()
 
-        self.scanner = Scanner(
-            stop_event=self.stop_event,
-            experiment_start_event=self.experiment_start_event,
-            sample_rate=self.sample_rate,
-        )
+        # if self.conf["scopeless"]:
+        #     self.laser = MockCoboltLaser()
+        #     self.camera = MockCameraProcess(
+        #         experiment_start_event=self.experiment_start_event,
+        #         stop_event=self.stop_event,
+        #     )
+        #     self.scanner = Scanner(
+        #         stop_event=self.stop_event,
+        #         experiment_start_event=self.experiment_start_event,
+        #         sample_rate=self.sample_rate,
+        #     )
+        #     self.calibration = Calibration()
+        # else:
+        #     self.laser = CoboltLaser()
+        #     self.camera = CameraProcess(
+        #         experiment_start_event=self.experiment_start_event,
+        #         stop_event=self.stop_event,
+        #     )
+        #     self.scanner = Scanner(
+        #         stop_event=self.stop_event,
+        #         experiment_start_event=self.experiment_start_event,
+        #         sample_rate=self.sample_rate,
+        #     )
+        #     self.calibration = Calibration()
+
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
 
@@ -371,7 +414,6 @@ class State:
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
-        self.calibration = Calibration()
 
         for setting in [
             self.planar_setting,
