@@ -356,9 +356,13 @@ class State:
                 experiment_start_event=self.experiment_start_event,
                 sample_rate=self.sample_rate,
             )
+            self.camera = CameraProcess(
+                experiment_start_event=self.experiment_start_event,
+                stop_event=self.stop_event,
+            )
             self.calibration = Calibration()
 
-        # if self.conf["scopeless"]:
+        # if self.conf["scopeless"] and self.conf["shirashi"]==False:
         #     self.laser = MockCoboltLaser()
         #     self.camera = MockCameraProcess(
         #         experiment_start_event=self.experiment_start_event,
@@ -475,10 +479,34 @@ class State:
             if self.global_state == GlobalState.PREVIEW
             else TriggerMode.EXTERNAL_TRIGGER
         )
-        if self.global_state == GlobalState.PAUSED:
-            camera_params.camera_mode = CameraMode.PAUSED
+
+        if self.conf["shirashi"]:
+            print ("here")
+            if self.global_state == GlobalState.PREVIEW:
+                camera_params.trigger_mode = TriggerMode.FREE
+                camera_params.camera_mode = CameraMode.PREVIEW
+
+            if self.global_state == GlobalState.VOLUME_PREVIEW:
+                camera_params.camera_mode = CameraMode.PREVIEW
+                camera_params.trigger_mode = TriggerMode.FREE
+
+            if self.global_state == GlobalState.PLANAR_PREVIEW:
+                camera_params.camera_mode = CameraMode.PREVIEW
+                camera_params.trigger_mode = TriggerMode.FREE
+
+            if self.global_state == GlobalState.PAUSED:
+                camera_params.camera_mode = CameraMode.PAUSED
+            else:
+                camera_params.camera_mode = CameraMode.PREVIEW
         else:
-            camera_params.camera_mode = CameraMode.PREVIEW
+            print ("else")
+            if self.global_state == GlobalState.PAUSED:
+                camera_params.camera_mode = CameraMode.PAUSED
+            else:
+                camera_params.camera_mode = CameraMode.PREVIEW
+
+        print("tigger,camera mode", camera_params.trigger_mode, camera_params.camera_mode)
+        print("global",self.global_state)
 
         self.camera.image_queue.clear()
         self.camera.parameter_queue.put(camera_params)
@@ -541,6 +569,21 @@ class State:
         except Empty:
             return None
 
+    def send_save_settings(self): #todo i added this
+        params.experiment_state = self.experiment_state
+        self.all_settings["scanning"] = params
+
+        self.scanner.parameter_queue.put(params)
+        self.stytra_comm.current_settings_queue.put(self.all_settings)
+        save_params = convert_save_params(
+            self.save_settings,
+            self.volume_setting,
+            self.camera_settings,
+            self.scope_alignment_info,
+        )
+        self.saver.saving_parameter_queue.put(save_params)
+        self.dispatcher.n_planes_queue.put(n_planes)
+
     def toggle_experiment_state(self):
         if self.experiment_state == ExperimentPrepareState.PREVIEW:
             self.experiment_state = ExperimentPrepareState.NO_TRIGGER
@@ -548,11 +591,16 @@ class State:
 
         elif self.experiment_state == ExperimentPrepareState.NO_TRIGGER:
             self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
+            if self.conf["shirashi"]:#i added this, LS the scanning module sets the event
+                self.experiment_start_event.set()
+                self.send_save_settings()
+
             self.send_scan_settings()
 
         elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
             self.experiment_state = ExperimentPrepareState.PREVIEW
             self.end_experiment()
+            self.send_save_settings()
 
     def start_experiment(self):
         # TODO disable the GUI except the abort button
