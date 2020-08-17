@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import QApplication
 import qdarkstyle
-from sashimi.gui.main_gui import MainWindow
+from shirashi.gui.main_gui import MainWindow
 from PyQt5.QtGui import QIcon
 import click
-from sashimi.config import _cli_modify_config
-from sashimi.state import State
+from shirashi.config import _cli_modify_config
+from shirashi.state import State
 
 
 @click.command()
@@ -23,7 +23,7 @@ def main(sample_rate, scopeless, shirashi):
 
     app = QApplication([])
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
-    app.setApplicationName("Sashimi")
+    app.setApplicationName("Shirashi")
     st = State(sample_rate=sample_rate)
     main_window = MainWindow(st)
     app.setWindowIcon(QIcon(r"icons/main_icon.png"))

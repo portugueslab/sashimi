@@ -7,11 +7,11 @@ from PyQt5.QtWidgets import (
     QTextEdit,
 )
 from PyQt5.QtCore import pyqtSignal, Qt
-from sashimi.state import State
+from shirashi.state import State
 from pathlib import Path
 from datetime import datetime
 import markdown
-from sashimi.config import read_config
+from shirashi.config import read_config
 
 conf = read_config()
 PRESETS_PATH = conf["default_paths"]["presets"]

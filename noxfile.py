@@ -15,14 +15,14 @@ def tests(session):
     session.install("pytest-cov")
     session.install("-r", "requirements.txt")
     session.install(".")
-    session.run("pytest", "--cov=sashimi")
+    session.run("pytest", "--cov=shirashi")
 
 
 @nox.session
 def lint(session):
     session.install(*lint_dependencies)
 
-    files = ["sashimi", "tests", "noxfile.py", "setup.py"]
+    files = ["shirashi", "tests", "noxfile.py", "setup.py"]
 
     session.run("black", "--check", *files)
     session.run("flake8", *files)

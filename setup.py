@@ -5,7 +5,7 @@ with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
 setup(
-    name="sashimi",
+    name="shirashi",
     version="0.2.0",
     author="Vilim Stih @portugueslab",
     author_email="vilim@neuro.mpg.de",
@@ -23,8 +23,8 @@ setup(
     description="A user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).",
     entry_points={
         "console_scripts": [
-            "sashimi=sashimi.main:main",
-            "sashimi-config=sashimi.config:cli_modify_config",
+            "shirashi=shirashi.main:main",
+            "shirashi-config=shirashi.config:cli_modify_config",
         ]
     },
 )
