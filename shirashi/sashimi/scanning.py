@@ -4,16 +4,16 @@ from dataclasses import dataclass
 from dataclasses import asdict
 from enum import Enum
 from copy import deepcopy
-from sashimi.rolling_buffer import RollingBuffer, FillingRollingBuffer
+from shirashi.sashimi.rolling_buffer import RollingBuffer, FillingRollingBuffer
 from warnings import warn
 from arrayqueues.shared_arrays import ArrayQueue
 import numpy as np
 
 from typing import Union, Tuple
 
-from sashimi.utilities import lcm, get_last_parameters
-from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
-from sashimi.config import read_config
+from shirashi.sashimi.utilities import lcm, get_last_parameters
+from shirashi.sashimi.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
+from shirashi.sashimi.config import read_config
 
 conf = read_config()
 
@@ -491,7 +491,9 @@ class Scanner(Process):
                     scanloop.parameters
                 )  # set the parameters to the last ones received in the loop
 
-class MockScanner(Scanner):
+
+
+class MockScanner(Process):
     def __init__(
         self,
         stop_event: Event,
@@ -499,14 +501,22 @@ class MockScanner(Scanner):
         n_samples_waveform=10000,
         sample_rate=40000,
     ):
-        super().__init__(stop_event,
-        experiment_start_event,
-        n_samples_waveform=10000,
-        sample_rate=40000,)
+        super().__init__()
 
-        self.name ="mocklaser"
+        self.stop_event = stop_event
+        self.experiment_start_event = experiment_start_event
+        self.wait_signal = Event()
+
+        self.parameter_queue = Queue()
+
+        self.waveform_queue = ArrayQueue(max_mbytes=100)
+        self.n_samples = n_samples_waveform
+        self.sample_rate = sample_rate
+
+        self.parameters = ScanParameters()
 
     def setup_tasks(self, read_task, write_task_z, write_task_xy):
+        # Configure the channels
         pass
 
     def retrieve_parameters(self):

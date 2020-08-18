@@ -1,14 +1,16 @@
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget
-from shirashi.gui.preview_gui import PreviewWidget
-from shirashi.gui.experiment_gui import (
-    ExperimentWidget,
-    TBDWidget,
+from shirashi.sashimi.gui.calibration_gui import CalibrationWidget
+from shirashi.sashimi.gui.scanning_gui import (
+    PlanarScanningWidget,
+    VolumeScanningWidget,
+    SinglePlaneScanningWidget,
 )
-from shirashi.gui.save_settings_gui import SavingSettingsWidget
-from shirashi.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
-from shirashi.gui.save_gui import SaveWidget
-from shirashi.state import State
+from shirashi.sashimi.gui.laser_gui import LaserControlWidget
+from shirashi.sashimi.gui.save_settings_gui import SavingSettingsWidget
+from shirashi.sashimi.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
+from shirashi.sashimi.gui.save_gui import SaveWidget
+from shirashi.sashimi.state import State
 
 
 class DockedWidget(QDockWidget):
@@ -36,14 +38,26 @@ class MainWindow(QMainWindow):
         self.wid_status = StatusWidget(st, self.timer)
         self.wid_display = ViewingWidget(st, self.timer)
         self.wid_save_options = SaveWidget(st, self.timer)
+        self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
+        self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsContainerWidget(
-            st, self.timer
+            st, self.wid_display.roi, self.timer
         )
 
         self.setCentralWidget(self.wid_display)
 
         self.addDockWidget(
             Qt.LeftDockWidgetArea, DockedWidget(widget=self.wid_status, title="Mode"),
+        )
+
+        self.addDockWidget(
+            Qt.LeftDockWidgetArea,
+            DockedWidget(widget=self.wid_scan, title="Scanning settings"),
+        )
+
+        self.addDockWidget(
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_laser, title="Laser control"),
         )
 
         self.addDockWidget(
@@ -60,6 +74,11 @@ class MainWindow(QMainWindow):
             DockedWidget(widget=self.wid_settings_tree, title="Metadata"),
         )
 
+        self.st.camera_settings.sig_param_changed.connect(
+            self.st.reset_noise_subtraction
+        )
+        # TODO also change the check box of the button without triggering
+
         self.timer.start()
         self.timer.timeout.connect(self.check_end_experiment)
 
@@ -69,11 +88,15 @@ class MainWindow(QMainWindow):
 
     def refresh_param_values(self, omit_wid_camera=False):
         # TODO should be possible with lightparam, when it's implemented there remove here
-        self.wid_status.wid_preview.refresh_widgets()
-        self.wid_status.wid_tbd.refresh_widgets()
+        self.wid_laser.wid_settings.refresh_widgets()
+        self.wid_scan.wid_planar.refresh_widgets()
+        self.wid_status.wid_volume.wid_volume.refresh_widgets()
+        self.wid_status.wid_calibration.refresh_widgets()
+        self.wid_status.wid_single_plane.wid_singleplane.refresh_widgets()
         self.wid_display.wid_display_settings.refresh_widgets()
         if not omit_wid_camera:
             self.wid_camera.wid_camera_settings.refresh_widgets()
+            self.wid_camera.set_roi()
         self.wid_save_options.wid_save_options.refresh_widgets()
         self.wid_save_options.set_locationbutton()
 
@@ -82,6 +105,7 @@ class MainWindow(QMainWindow):
             self.st.toggle_experiment_state()
             if self.st.pause_after:
                 self.wid_status.setCurrentIndex(0)
+                self.wid_laser.btn_off.click()
             self.refresh_param_values(omit_wid_camera=True)
             self.wid_display.experiment_progress.hide()
             self.wid_display.lbl_experiment_progress.hide()
@@ -97,20 +121,20 @@ class StatusWidget(QTabWidget):
         self.scan_settings = self.state.status
         self.option_dict = {
             0: "Paused",
-            1: "Preview",
-            2: "TBD",
-            3: "Experiment",
+            1: "Calibration",
+            2: "Planar",
+            3: "Volume",
         }
 
         self.wid_paused = PausedWidget()
-        self.wid_preview = PreviewWidget(st, st.preview, self.timer)
-        self.wid_tbd = TBDWidget(st)
-        self.wid_exp = ExperimentWidget(st, self.timer)
+        self.wid_calibration = CalibrationWidget(st, st.calibration, self.timer)
+        self.wid_single_plane = SinglePlaneScanningWidget(st)
+        self.wid_volume = VolumeScanningWidget(st, self.timer)
 
         self.addTab(self.wid_paused, self.option_dict[0])
-        self.addTab(self.wid_preview, self.option_dict[1])
-        self.addTab(self.wid_tbd, self.option_dict[2])
-        self.addTab(self.wid_exp, self.option_dict[3])
+        self.addTab(self.wid_calibration, self.option_dict[1])
+        self.addTab(self.wid_single_plane, self.option_dict[2])
+        self.addTab(self.wid_volume, self.option_dict[3])
 
         self.currentChanged.connect(self.update_status)
 

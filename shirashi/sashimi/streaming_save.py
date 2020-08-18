@@ -9,7 +9,7 @@ import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
-from shirashi.config import read_config
+from shirashi.sashimi.config import read_config
 
 conf = read_config()
 
@@ -34,6 +34,7 @@ class SavingStatus:
     i_in_chunk: int = 0
     i_volume: int = 0
     i_chunk: int = 0
+
 
 class StackSaver(Process):
     def __init__(self, stop_event, duration_queue, max_queue_size=2000):
@@ -108,7 +109,7 @@ class StackSaver(Process):
         sender_email = conf["email"]["user"]  # TODO this should go to thecolonel
         # TODO: Send email every x minutes with image like in 2P
         receiver_email = self.save_parameters.notification_email
-        subject = "Your lightfield experiment is complete"
+        subject = "Your lightsheet experiment is complete"
         sender_password = conf["email"]["password"]
 
         yag = yagmail.SMTP(user=sender_email, password=sender_password)
@@ -116,7 +117,7 @@ class StackSaver(Process):
         body = [
             "Hey!",
             "\n",
-            "Your lightfield experiment has finished and was a success! Come pick up your little fish! love,",
+            "Your lightsheet experiment has finished and was a success! Come pick up your little fish",
             "\n" "fishgitbot",
         ]
         try:

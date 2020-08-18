@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
-from shirashi.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
+from shirashi.sashimi.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
 from dataclasses import dataclass
 import numpy as np
 from copy import copy
@@ -25,8 +25,8 @@ class TriggerMode(Enum):
 
 @dataclass
 class CamParameters:
-    exposure_time: float = 40
-    binning: int = 1
+    exposure_time: float = 60
+    binning: int = 2
     subarray: tuple = (
         0,
         0,

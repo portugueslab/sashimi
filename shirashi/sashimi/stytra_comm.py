@@ -24,7 +24,7 @@ class StytraCom(Process):
         self,
         stop_event: Event,
         experiment_start_event: Event,
-        stytra_address="tcp://LM-114:5555"
+        stytra_address="tcp://LM-114:5555",  # here the address of the stytra computer needs to be added
     ):
         super().__init__()
         self.current_settings_queue = Queue()

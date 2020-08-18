@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import QApplication
 import qdarkstyle
-from shirashi.gui.main_gui import MainWindow
+from shirashi.sashimi.gui.main_gui import MainWindow
 from PyQt5.QtGui import QIcon
 import click
-from shirashi.config import _cli_modify_config
-from shirashi.state import State
+from shirashi.sashimi.config import _cli_modify_config
+from shirashi.sashimi.state import State
 
 
 @click.command()

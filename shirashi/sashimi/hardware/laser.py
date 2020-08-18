@@ -1,8 +1,7 @@
 from warnings import warn
 
 try:
-    # import visa
-    import pyvisa as visa
+    import visa
 
     rm = visa.ResourceManager()
 except (ImportError, ValueError):
@@ -51,7 +50,7 @@ class CoboltLaser:
 
 
 class MockCoboltLaser:
-    def __init__(self, port=None):
+    def __init__(self, port="COM4"):
         self.port = port
 
     def set_current(self, current):

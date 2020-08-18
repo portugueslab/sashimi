@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue, Event
 from queue import Empty
 from arrayqueues.shared_arrays import ArrayQueue
-from shirashi.utilities import neg_dif
+from shirashi.sashimi.utilities import neg_dif
 import numpy as np
 
 
@@ -54,6 +54,7 @@ class VolumeDispatcher(Process):
                 self.volume_buffer = np.empty(
                     (self.n_planes, *self.current_frame.shape), dtype=np.uint16
                 )
+                print("current frame shape", self.current_frame.shape)
                 self.first_volume = False
             self.volume_buffer[self.i_plane, :, :] = self.current_frame
             self.i_plane += 1

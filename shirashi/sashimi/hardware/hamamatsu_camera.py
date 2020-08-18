@@ -241,7 +241,8 @@ class DCamAPI:
 
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
         paraminit.size = ctypes.sizeof(paraminit)
-
+        error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
+        n_cameras = paraminit.iDeviceCount
 
 class HCamData(object):
     """
@@ -333,6 +334,7 @@ class HamamatsuCamera(object):
         self.properties = self.getCameraProperties()
 
         # Get camera max width, height.
+
         self.max_width = self.getPropertyValue("image_width")[0]
         self.max_height = self.getPropertyValue("image_height")[0]
 

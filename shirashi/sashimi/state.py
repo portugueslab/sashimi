@@ -3,8 +3,8 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from sashimi.hardware.laser import CoboltLaser, MockCoboltLaser
-from sashimi.scanning import (
+from shirashi.sashimi.hardware.laser import CoboltLaser, MockCoboltLaser
+from shirashi.sashimi.scanning import (
     Scanner,
     PlanarScanning,
     ZScanning,
@@ -17,22 +17,22 @@ from sashimi.scanning import (
     ExperimentPrepareState,
     MockScanner
     )
-from sashimi.stytra_comm import StytraCom
-from sashimi.dispatcher import VolumeDispatcher
+from shirashi.sashimi.stytra_comm import StytraCom
+from shirashi.sashimi.dispatcher import VolumeDispatcher
 from multiprocessing import Event
 import json
-from sashimi.camera import (
+from shirashi.sashimi.camera import (
     CameraProcess,
     CamParameters,
     CameraMode,
     TriggerMode,
     MockCameraProcess,
 )
-from sashimi.streaming_save import StackSaver, SavingParameters, SavingStatus
+from shirashi.sashimi.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path
 from enum import Enum
 import time
-from sashimi.config import read_config
+from shirashi.sashimi.config import read_config
 
 conf = read_config()
 
@@ -345,7 +345,7 @@ class State:
                         stop_event=self.stop_event,
                     )
             self.laser = MockCoboltLaser()
-            self.scanner = MockScanner( stop_event=self.stop_event,
+            self.scanner = MockScanner(stop_event=self.stop_event,
                 experiment_start_event=self.experiment_start_event,
                 sample_rate=self.sample_rate,)
             self.calibration = MockCalibration()
@@ -476,37 +476,13 @@ class State:
         camera_params = convert_camera_params(self.camera_settings)
         camera_params.trigger_mode = (
             TriggerMode.FREE
-            if self.global_state == GlobalState.PREVIEW
+            if self.global_state == GlobalState.PREVIEW or self.conf["shirashi"] #i added this otherwise during volume aqisition no live image and image saving
             else TriggerMode.EXTERNAL_TRIGGER
         )
-
-        if self.conf["shirashi"]:
-            print ("here")
-            if self.global_state == GlobalState.PREVIEW:
-                camera_params.trigger_mode = TriggerMode.FREE
-                camera_params.camera_mode = CameraMode.PREVIEW
-
-            if self.global_state == GlobalState.VOLUME_PREVIEW:
-                camera_params.camera_mode = CameraMode.PREVIEW
-                camera_params.trigger_mode = TriggerMode.FREE
-
-            if self.global_state == GlobalState.PLANAR_PREVIEW:
-                camera_params.camera_mode = CameraMode.PREVIEW
-                camera_params.trigger_mode = TriggerMode.FREE
-
-            if self.global_state == GlobalState.PAUSED:
-                camera_params.camera_mode = CameraMode.PAUSED
-            else:
-                camera_params.camera_mode = CameraMode.PREVIEW
+        if self.global_state == GlobalState.PAUSED:
+            camera_params.camera_mode = CameraMode.PAUSED
         else:
-            print ("else")
-            if self.global_state == GlobalState.PAUSED:
-                camera_params.camera_mode = CameraMode.PAUSED
-            else:
-                camera_params.camera_mode = CameraMode.PREVIEW
-
-        print("tigger,camera mode", camera_params.trigger_mode, camera_params.camera_mode)
-        print("global",self.global_state)
+            camera_params.camera_mode = CameraMode.PREVIEW
 
         self.camera.image_queue.clear()
         self.camera.parameter_queue.put(camera_params)
@@ -569,20 +545,6 @@ class State:
         except Empty:
             return None
 
-    def send_save_settings(self): #todo i added this
-        params.experiment_state = self.experiment_state
-        self.all_settings["scanning"] = params
-
-        self.scanner.parameter_queue.put(params)
-        self.stytra_comm.current_settings_queue.put(self.all_settings)
-        save_params = convert_save_params(
-            self.save_settings,
-            self.volume_setting,
-            self.camera_settings,
-            self.scope_alignment_info,
-        )
-        self.saver.saving_parameter_queue.put(save_params)
-        self.dispatcher.n_planes_queue.put(n_planes)
 
     def toggle_experiment_state(self):
         if self.experiment_state == ExperimentPrepareState.PREVIEW:
@@ -591,16 +553,13 @@ class State:
 
         elif self.experiment_state == ExperimentPrepareState.NO_TRIGGER:
             self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
-            if self.conf["shirashi"]:#i added this, LS the scanning module sets the event
+            if self.conf["shirashi"]:#i added this, LS the scanning module sets the event, needed for synch with stytra
                 self.experiment_start_event.set()
-                self.send_save_settings()
-
             self.send_scan_settings()
 
         elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
             self.experiment_state = ExperimentPrepareState.PREVIEW
             self.end_experiment()
-            self.send_save_settings()
 
     def start_experiment(self):
         # TODO disable the GUI except the abort button
