@@ -241,7 +241,8 @@ class DCamAPI:
 
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
         paraminit.size = ctypes.sizeof(paraminit)
-
+        error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
+        n_cameras = paraminit.iDeviceCount
 
 class HCamData(object):
     """
