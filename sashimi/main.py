@@ -10,11 +10,16 @@ from sashimi.state import State
 @click.command()
 @click.option("--sample-rate", default=40000, help="")
 @click.option("--scopeless", is_flag=True, help="")
+@click.option("--shirashi", is_flag=True, help="")
 def main(sample_rate, scopeless):
     if scopeless:
         _cli_modify_config("edit", "scopeless", True)
     else:
         _cli_modify_config("edit", "scopeless", False)
+    if scopeless:
+        _cli_modify_config("edit", "shirashi", True)
+    else:
+        _cli_modify_config("edit", "shirashi", False)
     app = QApplication([])
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     app.setApplicationName("Sashimi")
