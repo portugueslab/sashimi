@@ -15,7 +15,8 @@ from sashimi.scanning import (
     TriggeringParameters,
     ScanningState,
     ExperimentPrepareState,
-)
+    MockScanner
+    )
 from sashimi.stytra_comm import StytraCom
 from sashimi.dispatcher import VolumeDispatcher
 from multiprocessing import Event
@@ -207,6 +208,21 @@ class Calibration(ParametrizedQt):
         return True
 
 
+class MockCalibration(Calibration):
+    def __init__(self):
+        super().__init__()
+        self.name = "general/mockcalibration"
+
+    def add_calibration_point(self):
+        pass
+
+    def remove_calibration_point(self):
+        pass
+
+    def calculate_calibration(self):
+        pass
+
+
 def convert_camera_params(camera_settings: CameraSettings):
     if camera_settings.binning == "1x1":
         binning = 1
@@ -322,24 +338,44 @@ class State:
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
-        if self.conf["scopeless"]:
+
+        if self.conf["shirashi"]:
+            self.camera = CameraProcess(
+                        experiment_start_event=self.experiment_start_event,
+                        stop_event=self.stop_event,
+                    )
             self.laser = MockCoboltLaser()
-            self.camera = MockCameraProcess(
+            self.scanner = MockScanner(stop_event=self.stop_event,
                 experiment_start_event=self.experiment_start_event,
-                stop_event=self.stop_event,
-            )
+                sample_rate=self.sample_rate,)
+            self.calibration = MockCalibration()
+
+        elif self.conf["scopeless"]:
+             self.laser = MockCoboltLaser()
+             self.camera = MockCameraProcess(
+                 experiment_start_event=self.experiment_start_event,
+                 stop_event=self.stop_event,
+             )
+             self.scanner = Scanner(
+                 stop_event=self.stop_event,
+                 experiment_start_event=self.experiment_start_event,
+                 sample_rate=self.sample_rate,
+             )
+             self.calibration = Calibration()
+
         else:
             self.laser = CoboltLaser()
+            self.scanner = Scanner(
+                stop_event=self.stop_event,
+                experiment_start_event=self.experiment_start_event,
+                sample_rate=self.sample_rate,
+            )
             self.camera = CameraProcess(
                 experiment_start_event=self.experiment_start_event,
                 stop_event=self.stop_event,
             )
+            self.calibration = Calibration()
 
-        self.scanner = Scanner(
-            stop_event=self.stop_event,
-            experiment_start_event=self.experiment_start_event,
-            sample_rate=self.sample_rate,
-        )
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
 
@@ -371,7 +407,6 @@ class State:
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
-        self.calibration = Calibration()
 
         for setting in [
             self.planar_setting,
@@ -430,7 +465,7 @@ class State:
         camera_params = convert_camera_params(self.camera_settings)
         camera_params.trigger_mode = (
             TriggerMode.FREE
-            if self.global_state == GlobalState.PREVIEW
+            if self.global_state == GlobalState.PREVIEW or self.conf["shirashi"] #i added this otherwise during volume aqisition no live image and image saving
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
@@ -499,6 +534,7 @@ class State:
         except Empty:
             return None
 
+
     def toggle_experiment_state(self):
         if self.experiment_state == ExperimentPrepareState.PREVIEW:
             self.experiment_state = ExperimentPrepareState.NO_TRIGGER
@@ -506,6 +542,8 @@ class State:
 
         elif self.experiment_state == ExperimentPrepareState.NO_TRIGGER:
             self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
+            if self.conf["shirashi"]:#i added this, LS the scanning module sets the event, needed for synch with stytra
+                self.experiment_start_event.set()
             self.send_scan_settings()
 
         elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
