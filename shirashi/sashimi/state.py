@@ -349,6 +349,20 @@ class State:
                 experiment_start_event=self.experiment_start_event,
                 sample_rate=self.sample_rate,)
             self.calibration = MockCalibration()
+
+        elif self.conf["scopeless"]:
+             self.laser = MockCoboltLaser()
+             self.camera = MockCameraProcess(
+                 experiment_start_event=self.experiment_start_event,
+                 stop_event=self.stop_event,
+             )
+             self.scanner = Scanner(
+                 stop_event=self.stop_event,
+                 experiment_start_event=self.experiment_start_event,
+                 sample_rate=self.sample_rate,
+             )
+             self.calibration = Calibration()
+
         else:
             self.laser = CoboltLaser()
             self.scanner = Scanner(
@@ -361,31 +375,6 @@ class State:
                 stop_event=self.stop_event,
             )
             self.calibration = Calibration()
-
-        # if self.conf["scopeless"] and self.conf["shirashi"]==False:
-        #     self.laser = MockCoboltLaser()
-        #     self.camera = MockCameraProcess(
-        #         experiment_start_event=self.experiment_start_event,
-        #         stop_event=self.stop_event,
-        #     )
-        #     self.scanner = Scanner(
-        #         stop_event=self.stop_event,
-        #         experiment_start_event=self.experiment_start_event,
-        #         sample_rate=self.sample_rate,
-        #     )
-        #     self.calibration = Calibration()
-        # else:
-        #     self.laser = CoboltLaser()
-        #     self.camera = CameraProcess(
-        #         experiment_start_event=self.experiment_start_event,
-        #         stop_event=self.stop_event,
-        #     )
-        #     self.scanner = Scanner(
-        #         stop_event=self.stop_event,
-        #         experiment_start_event=self.experiment_start_event,
-        #         sample_rate=self.sample_rate,
-        #     )
-        #     self.calibration = Calibration()
 
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
