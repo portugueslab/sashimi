@@ -5,6 +5,7 @@ from PyQt5.QtGui import QIcon
 import click
 from sashimi.config import _cli_modify_config
 from sashimi.state import State
+import logging
 
 
 @click.command()
@@ -15,6 +16,9 @@ def main(sample_rate, scopeless):
         _cli_modify_config("edit", "scopeless", True)
     else:
         _cli_modify_config("edit", "scopeless", False)
+
+    # TODO configure logging with CLI
+
     app = QApplication([])
     app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
     app.setApplicationName("Sashimi")

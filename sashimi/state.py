@@ -18,6 +18,7 @@ from sashimi.scanning import (
 )
 from sashimi.stytra_comm import StytraCom
 from sashimi.dispatcher import VolumeDispatcher
+from sashimi.processes import ConcurrenceLogger
 from multiprocessing import Event
 import json
 from sashimi.camera import (
@@ -372,6 +373,7 @@ class State:
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
         self.calibration = Calibration()
+        self.logger = ConcurrenceLogger("main")
 
         for setting in [
             self.planar_setting,
@@ -412,6 +414,7 @@ class State:
 
         self.current_camera_status = CamParameters()
         self.send_scan_settings()
+        self.logger.log_event("initialized")
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -595,3 +598,4 @@ class State:
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
         self.dispatcher.join(timeout=10)
+        self.logger.close()

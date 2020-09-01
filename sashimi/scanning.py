@@ -14,6 +14,7 @@ from typing import Union, Tuple
 from sashimi.utilities import lcm, get_last_parameters
 from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
 from sashimi.config import read_config
+from sashimi.processes import LoggingProcess, ConcurrenceLogger
 
 conf = read_config()
 
@@ -115,6 +116,7 @@ class ScanLoop:
         waveform_queue: ArrayQueue,
         experiment_start_signal: Event,
         wait_signal: Event,
+        logger: ConcurrenceLogger,
     ):
 
         self.sample_rate = sample_rate
@@ -129,6 +131,7 @@ class ScanLoop:
         self.z_reader = AnalogSingleChannelReader(read_task.in_stream)
 
         self.stop_event = stop_event
+        self.logger = logger
 
         self.read_array = np.zeros(n_samples)
         self.write_arrays = np.zeros(
@@ -199,11 +202,13 @@ class ScanLoop:
     def write(self):
         self.z_writer.write_many_sample(self.write_arrays[:4])
         self.xy_writer.write_many_sample(self.write_arrays[4:])
+        self.logger.log_event("samples written")
 
     def read(self):
         self.z_reader.read_many_sample(
             self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
         )
+        self.logger.log_event("samples read")
         self.n_samples_read += self.write_arrays.shape[1]
         self.read_array[:] = self.read_array / PIEZO_SCALE
 
@@ -331,6 +336,7 @@ class VolumetricScanLoop(ScanLoop):
             self.i_sample = 0  # puts it at the beginning of the cycle
             self.n_samples_read = 0
             self.wait_signal.clear()
+            self.logger.log_event("wait stopped")
             self.trigger_exp_start = True
         elif not self.camera_on:
             self.wait_signal.set()
@@ -376,7 +382,7 @@ class VolumetricScanLoop(ScanLoop):
             self.write_arrays[3, :] = 0
 
 
-class Scanner(Process):
+class Scanner(LoggingProcess):
     def __init__(
         self,
         stop_event: Event,
@@ -384,7 +390,7 @@ class Scanner(Process):
         n_samples_waveform=10000,
         sample_rate=40000,
     ):
-        super().__init__()
+        super().__init__(name="scanner")
 
         self.stop_event = stop_event
         self.experiment_start_event = experiment_start_event
@@ -457,6 +463,7 @@ class Scanner(Process):
             self.parameters = new_params
 
     def run(self):
+        self.logger.log_event("started")
         while not self.stop_event.is_set():
             if self.parameters.state == ScanningState.PAUSED:
                 self.retrieve_parameters()
@@ -481,6 +488,7 @@ class Scanner(Process):
                     self.waveform_queue,
                     self.experiment_start_event,
                     self.wait_signal,
+                    self.logger,
                 )
                 try:
                     scanloop.loop()
@@ -490,3 +498,4 @@ class Scanner(Process):
                 self.parameters = deepcopy(
                     scanloop.parameters
                 )  # set the parameters to the last ones received in the loop
+        self.close_log()

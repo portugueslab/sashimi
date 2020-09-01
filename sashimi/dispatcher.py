@@ -1,11 +1,12 @@
-from multiprocessing import Process, Queue, Event
+from multiprocessing import Queue, Event
 from queue import Empty
 from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.utilities import neg_dif
+from sashimi.processes import LoggingProcess
 import numpy as np
 
 
-class VolumeDispatcher(Process):
+class VolumeDispatcher(LoggingProcess):
     def __init__(
         self,
         stop_event: Event,
@@ -15,7 +16,7 @@ class VolumeDispatcher(Process):
         saver_queue: ArrayQueue,
         max_queue_size=1200,
     ):
-        super().__init__()
+        super().__init__(name="dispatcher")
         self.stop_event = stop_event
         self.saving_signal = saving_signal
         self.wait_signal = wait_signal
@@ -36,9 +37,11 @@ class VolumeDispatcher(Process):
         self.first_volume = True
 
     def run(self):
+        self.logger.log_event("started")
         while not self.stop_event.is_set():
             self.send_receive()
             self.get_frame()
+        self.close_log()
 
     def process_frame(self):
         if self.current_frame is not None:
@@ -55,6 +58,7 @@ class VolumeDispatcher(Process):
                     (self.n_planes, *self.current_frame.shape), dtype=np.uint16
                 )
                 self.first_volume = False
+            self.logger.log_event(f"received plane {self.i_plane}")
             self.volume_buffer[self.i_plane, :, :] = self.current_frame
             self.i_plane += 1
             if self.i_plane == self.n_planes:
@@ -71,12 +75,14 @@ class VolumeDispatcher(Process):
 
     def get_frame(self):
         if self.wait_signal.is_set():
+            self.logger.log_event("wait starting")
             self.saver_queue.clear()
             while self.wait_signal.is_set():
                 try:
                     _ = self.camera_queue.get(timeout=0.001)
                 except Empty:
                     pass
+            self.logger.log_event("wait over")
             self.i_plane = 0
         try:
             self.current_frame = self.camera_queue.get(timeout=0.001)
