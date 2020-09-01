@@ -202,13 +202,13 @@ class ScanLoop:
     def write(self):
         self.z_writer.write_many_sample(self.write_arrays[:4])
         self.xy_writer.write_many_sample(self.write_arrays[4:])
-        self.logger.log_event("samples written")
+        self.logger.log_event("write")
 
     def read(self):
         self.z_reader.read_many_sample(
             self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
         )
-        self.logger.log_event("samples read")
+        self.logger.log_event("read")
         self.n_samples_read += self.write_arrays.shape[1]
         self.read_array[:] = self.read_array / PIEZO_SCALE
 
@@ -336,9 +336,10 @@ class VolumetricScanLoop(ScanLoop):
             self.i_sample = 0  # puts it at the beginning of the cycle
             self.n_samples_read = 0
             self.wait_signal.clear()
-            self.logger.log_event("wait stopped")
+            self.logger.log_event("camera trig. act.")
             self.trigger_exp_start = True
         elif not self.camera_on:
+            self.logger.log_event("camera trig. deact.")
             self.wait_signal.set()
         return True
 

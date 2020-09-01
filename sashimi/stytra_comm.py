@@ -51,7 +51,7 @@ class StytraCom(LoggingProcess):
                 with zmq_context.socket(zmq.REQ) as zmq_socket:
                     zmq_socket.connect(self.zmq_tcp_address)
                     zmq_socket.send_json(saved_data)
-
+                    self.logger.log_event("sent stytra")
                     poller = zmq.Poller()
                     poller.register(zmq_socket, zmq.POLLIN)
                     duration = None
@@ -60,5 +60,5 @@ class StytraCom(LoggingProcess):
                     if duration is not None:
                         self.duration_queue.put(duration)
                     self.start_stytra.clear()
-                    self.close_log()
                     zmq_context.destroy()
+        self.close_log()

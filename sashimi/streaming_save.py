@@ -10,6 +10,7 @@ import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
 from sashimi.config import read_config
+from sashimi.processes import LoggingProcess
 
 conf = read_config()
 
@@ -36,9 +37,9 @@ class SavingStatus:
     i_chunk: int = 0
 
 
-class StackSaver(Process):
+class StackSaver(LoggingProcess):
     def __init__(self, stop_event, duration_queue, max_queue_size=2000):
-        super().__init__()
+        super().__init__(name="saver")
         self.stop_event = stop_event
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.saving_signal = Event()
@@ -57,11 +58,13 @@ class StackSaver(Process):
         self.duration_queue = duration_queue
 
     def run(self):
+        self.logger.log_event("started")
         while not self.stop_event.is_set():
             if self.saving_signal.is_set() and self.save_parameters is not None:
                 self.save_loop()
             else:
                 self.receive_save_parameters()
+        self.close_log()
 
     def save_loop(self):
         # remove files if some are found at the save location
@@ -88,6 +91,7 @@ class StackSaver(Process):
 
             try:
                 frame = self.save_queue.get(timeout=0.01)
+                self.logger.log_event("received volume")
                 self.fill_dataset(frame)
             except Empty:
                 pass
@@ -158,6 +162,7 @@ class StackSaver(Process):
         )
 
     def finalize_dataset(self):
+        self.logger.log_event("finished saving")
         with open(
             (
                 Path(self.save_parameters.output_dir)
@@ -185,6 +190,7 @@ class StackSaver(Process):
             )
 
     def save_chunk(self):
+        self.logger.log_event("saved chunk")
         fl.save(
             Path(self.save_parameters.output_dir)
             / "original/{:04d}.h5".format(self.i_chunk),

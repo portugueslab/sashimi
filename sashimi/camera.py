@@ -2,6 +2,7 @@ from multiprocessing import Process, Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
+from sashimi.processes import LoggingProcess
 from dataclasses import dataclass
 import numpy as np
 from copy import copy
@@ -72,7 +73,7 @@ class FramerateRecorder:
         self.i_fps = (self.i_fps + 1) % self.n_fps_frames
 
 
-class CameraProcess(Process):
+class CameraProcess(LoggingProcess):
     def __init__(
         self,
         experiment_start_event,
@@ -81,7 +82,7 @@ class CameraProcess(Process):
         max_queue_size=1200,
         n_fps_frames=20,
     ):
-        super().__init__()
+        super().__init__("camera")
         self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
@@ -118,9 +119,11 @@ class CameraProcess(Process):
                 pass
 
     def run(self):
+        self.logger.log_event("started")
         self.initialize_camera()
         self.run_camera()
         self.camera.shutdown()
+        self.logger.close()
 
     def run_camera(self):
         while not self.stop_event.is_set():
@@ -137,6 +140,7 @@ class CameraProcess(Process):
         while not self.stop_event.is_set():
             frames = self.camera.getFrames()
             if frames:
+                self.logger.log_event("received frames")
                 for frame in frames:
                     self.image_queue.put(
                         np.reshape(frame.getData(), self.parameters.frame_shape)

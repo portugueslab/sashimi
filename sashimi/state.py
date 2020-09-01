@@ -517,6 +517,7 @@ class State:
 
     def start_experiment(self):
         # TODO disable the GUI except the abort button
+        self.logger.log_event("started experiment")
         self.send_scan_settings()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
@@ -525,6 +526,7 @@ class State:
         self.toggle_experiment_state()
 
     def end_experiment(self):
+        self.logger.log_event("experiment ended")
         self.saver.saving_signal.clear()
         self.experiment_start_event.clear()
         self.saver.save_queue.clear()

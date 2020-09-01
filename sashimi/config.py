@@ -17,7 +17,11 @@ CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 # TODO this will obvously have to change to fit scanning declarations
 TEMPLATE_CONF_DICT = {
     "sample_rate": 40000,
-    "default_paths": {"data": str(Path.home()), "presets": str(PRESETS_DIR_PATH), "log": str(LOGS_DIR_PATH)},
+    "default_paths": {
+        "data": str(Path.home()),
+        "presets": str(PRESETS_DIR_PATH),
+        "log": str(LOGS_DIR_PATH),
+    },
     "piezo": {
         "position_read": {"pos_chan": "Dev1/ai0:0", "min_val": 0, "max_val": 10,},
         "position_write": {"pos_chan": "Dev1/a00:0", "min_val": -5, "max_val": 10,},
