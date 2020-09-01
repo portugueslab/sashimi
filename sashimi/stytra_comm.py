@@ -60,5 +60,5 @@ class StytraCom(LoggingProcess):
                     if duration is not None:
                         self.duration_queue.put(duration)
                     self.start_stytra.clear()
-                    zmq_socket.close_log()
+                    self.close_log()
                     zmq_context.destroy()

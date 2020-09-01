@@ -3,12 +3,15 @@ import time
 from pathlib import Path
 from typing import Optional, TextIO
 
+from sashimi import config
+
 
 class ConcurrenceLogger:
     def __init__(self, process_name):
         self.file: Optional[TextIO] = None
         self.process_name = process_name
-        self.root = Path("C:/Users/Vilim/logs")  # TODO use config
+        configuration = config.read_config()
+        self.root = Path(configuration["default_paths"]["log"])
         # TODO log things into a list and only write it out on program end
 
     def log_event(self, event_name):
