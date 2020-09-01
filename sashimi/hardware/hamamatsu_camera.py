@@ -244,6 +244,7 @@ class DCamAPI:
         error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
         n_cameras = paraminit.iDeviceCount
 
+
 class HCamData(object):
     """
     Hamamatsu camera data object.
