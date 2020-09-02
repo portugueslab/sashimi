@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
-from sashimi.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
+from sashimi.hardware.cameras.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
 from dataclasses import dataclass
 import numpy as np
 from copy import copy
