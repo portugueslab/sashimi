@@ -8,8 +8,6 @@ CONFIG_DIR_PATH = Path.home() / ".sashimi"
 CONFIG_DIR_PATH.mkdir(exist_ok=True)
 PRESETS_DIR_PATH = Path.home() / "presets"
 PRESETS_DIR_PATH.mkdir(exist_ok=True)
-SCOPE_INSTRUCTIONS_PATH = Path()
-
 
 CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 
@@ -17,9 +15,7 @@ CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 # TODO this will obvously have to change to fit scanning declarations
 TEMPLATE_CONF_DICT = {
     "sample_rate": 40000,
-    "default_paths": {"data": str(Path.home()),
-                      "presets": str(PRESETS_DIR_PATH),
-                       "scope_instructions": str(SCOPE_INSTRUCTIONS_PATH)},
+    "default_paths": {"data": str(Path.home()), "presets": str(PRESETS_DIR_PATH),},
     "piezo": {
         "position_read": {"pos_chan": "Dev1/ai0:0", "min_val": 0, "max_val": 10,},
         "position_write": {"pos_chan": "Dev1/a00:0", "min_val": -5, "max_val": 10,},
