@@ -1,5 +1,6 @@
 from multiprocessing import Process, Queue, Event
 from sashimi.processes import LoggingProcess
+from sashimi.events import SashimiEvents, LoggedEvent
 from queue import Empty
 import zmq
 from dataclasses import asdict, is_dataclass
@@ -30,7 +31,9 @@ class StytraCom(LoggingProcess):
         super().__init__(name="stytracomm")
         self.current_settings_queue = Queue()
         self.current_settings = None
-        self.start_stytra = experiment_start_event
+        self.start_stytra = LoggedEvent(
+            self.logger, SashimiEvents.TRIGGER_STYTRA, experiment_start_event
+        )
         self.stop_event = stop_event
         self.zmq_tcp_address = stytra_address
         self.duration_queue = Queue()
