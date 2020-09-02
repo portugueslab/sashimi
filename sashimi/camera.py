@@ -75,15 +75,9 @@ class FramerateRecorder:
 
 class CameraProcess(LoggingProcess):
     def __init__(
-        self,
-        experiment_start_event,
-        stop_event,
-        camera_id=0,
-        max_queue_size=1200,
-        n_fps_frames=20,
+        self, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20,
     ):
         super().__init__("camera")
-        self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.parameter_queue = Queue()
@@ -119,7 +113,7 @@ class CameraProcess(LoggingProcess):
                 pass
 
     def run(self):
-        self.logger.log_event("started")
+        self.logger.log_message("started")
         self.initialize_camera()
         self.run_camera()
         self.camera.shutdown()
@@ -140,7 +134,7 @@ class CameraProcess(LoggingProcess):
         while not self.stop_event.is_set():
             frames = self.camera.getFrames()
             if frames:
-                self.logger.log_event("received frames")
+                self.logger.log_message("received frames")
                 for frame in frames:
                     self.image_queue.put(
                         np.reshape(frame.getData(), self.parameters.frame_shape)
@@ -197,15 +191,9 @@ class CameraProcess(LoggingProcess):
 
 class MockCameraProcess(Process):
     def __init__(
-        self,
-        experiment_start_event,
-        stop_event,
-        camera_id=0,
-        max_queue_size=1200,
-        n_fps_frames=20,
+        self, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20,
     ):
         super().__init__()
-        self.experiment_start_event = experiment_start_event
         self.stop_event = stop_event
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.parameter_queue = Queue()

@@ -15,6 +15,7 @@ from sashimi.utilities import lcm, get_last_parameters
 from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
 from sashimi.config import read_config
 from sashimi.processes import LoggingProcess, ConcurrenceLogger
+from sashimi.events import LoggedEvent, SashimiEvents
 
 conf = read_config()
 
@@ -202,13 +203,13 @@ class ScanLoop:
     def write(self):
         self.z_writer.write_many_sample(self.write_arrays[:4])
         self.xy_writer.write_many_sample(self.write_arrays[4:])
-        self.logger.log_event("write")
+        self.logger.log_message("write")
 
     def read(self):
         self.z_reader.read_many_sample(
             self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
         )
-        self.logger.log_event("read")
+        self.logger.log_message("read")
         self.n_samples_read += self.write_arrays.shape[1]
         self.read_array[:] = self.read_array / PIEZO_SCALE
 
@@ -274,6 +275,7 @@ class VolumetricScanLoop(ScanLoop):
         self.current_frequency = self.parameters.z.frequency
         self.camera_on = False
         self.trigger_exp_start = False
+        self.camera_was_off = True
         self.wait_signal.set()
 
     def initialize(self):
@@ -333,13 +335,11 @@ class VolumetricScanLoop(ScanLoop):
 
         if not self.camera_on and self.n_samples_read > self.n_samples_period():
             self.camera_on = True
-            self.i_sample = 0  # puts it at the beginning of the cycle
-            self.n_samples_read = 0
             self.wait_signal.clear()
-            self.logger.log_event("camera trig. act.")
+            self.logger.log_message("wait off")
             self.trigger_exp_start = True
         elif not self.camera_on:
-            self.logger.log_event("camera trig. deact.")
+            self.logger.log_message("wait on")
             self.wait_signal.set()
         return True
 
@@ -377,10 +377,26 @@ class VolumetricScanLoop(ScanLoop):
                 self.write_arrays[2, :] = calc_sync(
                     wave_part, self.parameters.z.frontal_sync
                 )
+
+        camera_pulses = 0
         if self.camera_on:
-            self.write_arrays[3, :] = self.camera_pulses.read(i_sample, self.n_samples)
-        else:
-            self.write_arrays[3, :] = 0
+            if self.camera_was_off:
+                # calculate how many samples are remaining until we are in a new period
+                if i_sample == 0:
+                    camera_pulses = self.camera_pulses.read(i_sample, self.n_samples)
+                    self.camera_was_off = False
+                else:
+                    n_to_next_start = self.n_samples_period() - i_sample
+                    if n_to_next_start < self.n_samples:
+                        camera_pulses = self.camera_pulses.read(
+                            i_sample, self.n_samples
+                        ).copy()
+                        camera_pulses[:n_to_next_start] = 0
+                        self.camera_was_off = False
+            else:
+                camera_pulses = self.camera_pulses.read(i_sample, self.n_samples)
+
+        self.write_arrays[3, :] = camera_pulses
 
 
 class Scanner(LoggingProcess):
@@ -395,7 +411,9 @@ class Scanner(LoggingProcess):
 
         self.stop_event = stop_event
         self.experiment_start_event = experiment_start_event
-        self.wait_signal = Event()
+        self.wait_signal = LoggedEvent(
+            self.logger, SashimiEvents.WAITING_FOR_TRIGGER, Event()
+        )
 
         self.parameter_queue = Queue()
 
@@ -464,7 +482,7 @@ class Scanner(LoggingProcess):
             self.parameters = new_params
 
     def run(self):
-        self.logger.log_event("started")
+        self.logger.log_message("started")
         while not self.stop_event.is_set():
             if self.parameters.state == ScanningState.PAUSED:
                 self.retrieve_parameters()

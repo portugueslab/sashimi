@@ -29,6 +29,7 @@ from sashimi.camera import (
     MockCameraProcess,
 )
 from sashimi.streaming_save import StackSaver, SavingParameters, SavingStatus
+from sashimi.events import LoggedEvent, SashimiEvents
 from pathlib import Path
 from enum import Enum
 import time
@@ -316,31 +317,52 @@ class State:
     def __init__(self, sample_rate):
         self.conf = read_config()
         self.sample_rate = sample_rate
+
+        self.logger = ConcurrenceLogger("main")
+
         self.calibration_ref = None
         self.waveform = None
-        self.stop_event = Event()
+        self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL, Event())
         self.experiment_start_event = Event()
+        self.noise_subtraction_active = LoggedEvent(
+            self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, Event()
+        )
+
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
         if self.conf["scopeless"]:
             self.laser = MockCoboltLaser()
-            self.camera = MockCameraProcess(
-                experiment_start_event=self.experiment_start_event,
-                stop_event=self.stop_event,
-            )
+            self.camera = MockCameraProcess(stop_event=self.stop_event.event,)
         else:
             self.laser = CoboltLaser()
-            self.camera = CameraProcess(
-                experiment_start_event=self.experiment_start_event,
-                stop_event=self.stop_event,
-            )
+            self.camera = CameraProcess(stop_event=self.stop_event.event,)
 
         self.scanner = Scanner(
-            stop_event=self.stop_event,
+            stop_event=self.stop_event.event,
             experiment_start_event=self.experiment_start_event,
             sample_rate=self.sample_rate,
         )
+
+        self.stytra_comm = StytraCom(
+            stop_event=self.stop_event.event,
+            experiment_start_event=self.experiment_start_event,
+        )
+
+        self.saver = StackSaver(
+            stop_event=self.stop_event.event,
+            duration_queue=self.stytra_comm.duration_queue,
+        )
+
+        self.dispatcher = VolumeDispatcher(
+            stop_event=self.stop_event.event,
+            saving_signal=self.saver.saving_signal,
+            wait_signal=self.scanner.wait_signal.event,
+            noise_subtaction_on=self.noise_subtraction_active.event,
+            camera_queue=self.camera.image_queue,
+            saver_queue=self.saver.save_queue,
+        )
+
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
 
@@ -351,29 +373,12 @@ class State:
 
         self.planar_setting = PlanarScanningSettings()
         self.laser_settings = LaserSettings()
-        self.stytra_comm = StytraCom(
-            stop_event=self.stop_event,
-            experiment_start_event=self.experiment_start_event,
-        )
 
         self.save_status: Optional[SavingStatus] = None
-
-        self.saver = StackSaver(
-            stop_event=self.stop_event, duration_queue=self.stytra_comm.duration_queue,
-        )
-
-        self.dispatcher = VolumeDispatcher(
-            stop_event=self.stop_event,
-            saving_signal=self.saver.saving_signal,
-            wait_signal=self.scanner.wait_signal,
-            camera_queue=self.camera.image_queue,
-            saver_queue=self.saver.save_queue,
-        )
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
         self.calibration = Calibration()
-        self.logger = ConcurrenceLogger("main")
 
         for setting in [
             self.planar_setting,
@@ -414,7 +419,7 @@ class State:
 
         self.current_camera_status = CamParameters()
         self.send_scan_settings()
-        self.logger.log_event("initialized")
+        self.logger.log_message("initialized")
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -517,7 +522,7 @@ class State:
 
     def start_experiment(self):
         # TODO disable the GUI except the abort button
-        self.logger.log_event("started experiment")
+        self.logger.log_message("started experiment")
         self.send_scan_settings()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
@@ -526,7 +531,7 @@ class State:
         self.toggle_experiment_state()
 
     def end_experiment(self):
-        self.logger.log_event("experiment ended")
+        self.logger.log_message("experiment ended")
         self.saver.saving_signal.clear()
         self.experiment_start_event.clear()
         self.saver.save_queue.clear()
@@ -536,7 +541,7 @@ class State:
         """
         Obtains average noise of n_images to subtract to acquired, both for display and saving
         """
-        self.dispatcher.noise_subtraction_active.clear()
+        self.noise_subtraction_active.clear()
 
         current_laser = self.laser_settings.laser_power
         self.laser.set_current(0)
@@ -551,7 +556,7 @@ class State:
                     )
                 calibration_set[n_image, :, :] = current_image
                 n_image += 1
-        self.dispatcher.noise_subtraction_active.set()
+        self.noise_subtraction_active.set()
         self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
         self.laser.set_current(current_laser)
 
@@ -559,7 +564,7 @@ class State:
 
     def reset_noise_subtraction(self):
         self.calibration_ref = None
-        self.dispatcher.noise_subtraction_active.clear()
+        self.noise_subtraction_active.clear()
 
     def get_volume(self):
         try:

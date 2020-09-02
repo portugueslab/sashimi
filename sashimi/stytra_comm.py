@@ -36,7 +36,7 @@ class StytraCom(LoggingProcess):
         self.duration_queue = Queue()
 
     def run(self):
-        self.logger.log_event("started")
+        self.logger.log_message("started")
         while not self.stop_event.is_set():
             while True:
                 try:
@@ -51,7 +51,7 @@ class StytraCom(LoggingProcess):
                 with zmq_context.socket(zmq.REQ) as zmq_socket:
                     zmq_socket.connect(self.zmq_tcp_address)
                     zmq_socket.send_json(saved_data)
-                    self.logger.log_event("sent stytra")
+                    self.logger.log_message("sent stytra")
                     poller = zmq.Poller()
                     poller.register(zmq_socket, zmq.POLLIN)
                     duration = None

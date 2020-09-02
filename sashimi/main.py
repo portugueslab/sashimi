@@ -5,7 +5,6 @@ from PyQt5.QtGui import QIcon
 import click
 from sashimi.config import _cli_modify_config
 from sashimi.state import State
-import logging
 
 
 @click.command()

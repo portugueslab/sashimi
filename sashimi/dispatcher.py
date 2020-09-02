@@ -3,6 +3,7 @@ from queue import Empty
 from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.utilities import neg_dif
 from sashimi.processes import LoggingProcess
+from sashimi.events import SashimiEvents, LoggedEvent
 import numpy as np
 
 
@@ -12,15 +13,22 @@ class VolumeDispatcher(LoggingProcess):
         stop_event: Event,
         saving_signal: Event,
         wait_signal: Event,
+        noise_subtaction_on: Event,
         camera_queue: ArrayQueue,
         saver_queue: ArrayQueue,
         max_queue_size=1200,
     ):
         super().__init__(name="dispatcher")
         self.stop_event = stop_event
-        self.saving_signal = saving_signal
-        self.wait_signal = wait_signal
-        self.noise_subtraction_active = Event()
+        self.saving_signal = LoggedEvent(
+            self.logger, SashimiEvents.IS_SAVING, saving_signal
+        )
+        self.wait_signal = LoggedEvent(
+            self.logger, SashimiEvents.WAITING_FOR_TRIGGER, wait_signal
+        )
+        self.noise_subtraction_active = LoggedEvent(
+            self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, noise_subtaction_on
+        )
 
         self.camera_queue = camera_queue
         self.saver_queue = saver_queue
@@ -37,7 +45,7 @@ class VolumeDispatcher(LoggingProcess):
         self.first_volume = True
 
     def run(self):
-        self.logger.log_event("started")
+        self.logger.log_message("started")
         while not self.stop_event.is_set():
             self.send_receive()
             self.get_frame()
@@ -58,7 +66,7 @@ class VolumeDispatcher(LoggingProcess):
                     (self.n_planes, *self.current_frame.shape), dtype=np.uint16
                 )
                 self.first_volume = False
-            self.logger.log_event(f"received plane {self.i_plane}")
+            self.logger.log_message(f"received plane {self.i_plane}")
             self.volume_buffer[self.i_plane, :, :] = self.current_frame
             self.i_plane += 1
             if self.i_plane == self.n_planes:
@@ -75,14 +83,14 @@ class VolumeDispatcher(LoggingProcess):
 
     def get_frame(self):
         if self.wait_signal.is_set():
-            self.logger.log_event("wait starting")
+            self.logger.log_message("wait starting")
             self.saver_queue.clear()
             while self.wait_signal.is_set():
                 try:
                     _ = self.camera_queue.get(timeout=0.001)
                 except Empty:
                     pass
-            self.logger.log_event("wait over")
+            self.logger.log_message("wait over")
             self.i_plane = 0
         try:
             self.current_frame = self.camera_queue.get(timeout=0.001)
