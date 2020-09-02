@@ -77,7 +77,7 @@ class CameraProcess(LoggingProcess):
     def __init__(
         self, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20,
     ):
-        super().__init__("camera")
+        super().__init__(name="camera")
         self.stop_event = stop_event
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.parameter_queue = Queue()
