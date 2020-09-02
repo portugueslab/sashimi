@@ -1,6 +1,7 @@
 class BasicCamera:
-    def __init__(self):
-        pass
+    def __init__(self, camera_id=0):
+        self.encoding = "utf-8"
+        self.camera_id = camera_id
 
     def get_frames(self):
         """

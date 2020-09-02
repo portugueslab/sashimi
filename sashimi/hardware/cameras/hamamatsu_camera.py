@@ -1062,7 +1062,7 @@ if __name__ == "__main__":
         print(hcam.setPropertyValue("binning", "1x1"))
         print(hcam.setPropertyValue("readout_speed", 2))
 
-        hcam.setSubArrayMode()
+        hcam.set_subarray_mode()
         # hcam.startAcquisition()
         # hcam.stopAcquisition()
 
@@ -1102,7 +1102,7 @@ if __name__ == "__main__":
     if False:
         for j in range(10000):
             print("Testing fixed length acquisition")
-            hcam.setACQMode("fixed_length", number_frames=10)
+            hcam.set_acquisition_mode("fixed_length", number_frames=10)
             hcam.startAcquisition()
             cnt = 0
             iterations = 0
@@ -1122,7 +1122,7 @@ if __name__ == "__main__":
             print("Frames acquired: " + str(cnt))
             hcam.stopAcquisition()
 
-            hcam.setACQMode("run_till_abort")
+            hcam.set_acquisition_mode("run_till_abort")
             hcam.startAcquisition()
             time.sleep(random.random())
             contFrames = hcam.getFrames()
@@ -1142,7 +1142,7 @@ if __name__ == "__main__":
         # hcam.setPropertyValue("readout_speed", 2)
         print(Fore.YELLOW + "\n Running test ORCA-FLASH-4.0 codename: APOLLO \n")
         print(Style.RESET_ALL)
-        hcam.setACQMode("run_till_abort", number_frames=test_size)
+        hcam.set_acquisition_mode("run_till_abort", number_frames=test_size)
         params = [
             "internal_frame_rate",
             "timing_readout_time",
