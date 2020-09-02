@@ -12,13 +12,13 @@ class BasicCamera:
         """
         pass
 
-    def get_property_value(self):
+    def get_property_value(self, property_name):
         """
         Return the current value of a particular property.
         """
         pass
 
-    def set_property_value(self):
+    def set_property_value(self, property_name, property_value):
         """
         Set the value of a particular property.
         """
