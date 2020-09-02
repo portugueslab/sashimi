@@ -36,6 +36,7 @@ def get_last_parameters(parameter_queue, timeout=0.0001):
             break
     return params
 
+
 # TODO: Consider this for ScopeCuisine
 class SpeedyArrayBuffer:
     """
@@ -55,15 +56,15 @@ class SpeedyArrayBuffer:
     def __getitem__(self, slice):
         return self.np_array[slice]
 
-    def copyData(self, address):
+    def copy_data(self, address):
         """
         Uses the C memmove function to copy data from an address in memory
         into RAM allocated for the numpy array of this object.
         """
         ctypes.memmove(self.np_array.ctypes.data, address, self.size)
 
-    def getData(self):
+    def get_data(self):
         return self.np_array
 
-    def getDataPtr(self):
+    def get_data_pr(self):
         return self.np_array.ctypes.data

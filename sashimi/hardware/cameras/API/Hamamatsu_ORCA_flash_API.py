@@ -1,8 +1,6 @@
-import ctypes
-import numpy as np
 from sashimi.utilities import SpeedyArrayBuffer
 from sashimi.hardware.cameras import BasicCamera
-from sashimi.hardware.cameras.Hamamatsu_ORCA_flash_SDK import *
+from sashimi.hardware.cameras.SDK.Hamamatsu_ORCA_flash_SDK import *
 
 
 class HamamatsuOrcaFlashCamera(BasicCamera):
@@ -49,6 +47,40 @@ class HamamatsuOrcaFlashCamera(BasicCamera):
         self.max_height = self.get_property_value("image_height")[0]
 
         self.set_subarray_mode()
+
+    def apply_parameters(self, parameters, *args, **kwargs):
+        super().apply_parameters(*args, **kwargs)
+        subarray = parameters.subarray
+        # quantizing the ROI dims in multiples of 4
+        subarray = [min((i * parameters.binning // 4) * 4, 2048) for i in subarray]
+        # this can be simplified by making the API nice
+        self.set_property_value("binning", parameters.binning)
+        self.set_property_value(
+            "exposure_time", 0.001 * parameters.exposure_time
+        )
+        self.set_property_value("subarray_vpos", subarray[1])
+        self.set_property_value("subarray_hpos", subarray[0])
+        self.set_property_value("subarray_vsize", subarray[3])
+        self.set_property_value("subarray_hsize", subarray[2])
+        self.set_property_value(
+            "trigger_source", parameters.trigger_mode.value
+        )
+
+    @staticmethod
+    def check_status(fn_return, fn_name="unknown"):
+        if fn_return == DCAMERR_ERROR:
+            c_buf_len = 80
+            c_buf = ctypes.create_string_buffer(c_buf_len)
+            raise Exception("dcam error " + str(fn_name) + " " + str(c_buf.value))
+        return fn_return
+
+    @staticmethod
+    def convert_property_name(p_name):
+        """
+        Regularizes a property name to lowercase names with
+        the spaces replaced by underscores.
+        """
+        return p_name.lower().replace(" ", "_")
 
     def get_camera_properties(self):
         super().get_camera_properties()
@@ -102,57 +134,6 @@ class HamamatsuOrcaFlashCamera(BasicCamera):
                 "dcamprop_getname",
             )
         return properties
-
-    @staticmethod
-    def check_status(fn_return, fn_name="unknown"):
-        if fn_return == DCAMERR_ERROR:
-            c_buf_len = 80
-            c_buf = ctypes.create_string_buffer(c_buf_len)
-            raise Exception("dcam error " + str(fn_name) + " " + str(c_buf.value))
-        return fn_return
-
-    @staticmethod
-    def convert_property_name(p_name):
-        """
-        Regularizes a property name to lowercase names with
-        the spaces replaced by underscores.
-        """
-        return p_name.lower().replace(" ", "_")
-
-    def set_acquisition_mode(self, mode, number_frames=None):
-        """
-        Set the acquisition mode to either run until aborted or to
-        stop after acquiring a set number of frames.
-
-        mode should be either "fixed_length" or "run_till_abort"
-
-        if mode is "fixed_length", then property number_frames indicates the number
-        of frames to be acquired.
-        """
-
-        self.stop_acquistion()
-
-        if mode == ("fixed_length" or "run_till_abort"):
-            self.acquisition_mode = mode
-            self.number_frames = number_frames
-        else:
-            raise Exception("Unrecognized acquisition mode: " + mode)
-
-    def set_subarray_mode(self):
-        """
-        This sets the sub-array mode as appropriate based on the current ROI.
-        """
-
-        # Check ROI properties.
-        roi_w = self.get_property_value("subarray_hsize")[0]
-        roi_h = self.get_property_value("subarray_vsize")[0]
-
-        # If the ROI is smaller than the entire frame tu
-        # rn on subarray mode
-        if (roi_w == self.max_width) and (roi_h == self.max_height):
-            self.set_property_value("subarray_mode", "OFF")
-        else:
-            self.set_property_value("subarray_mode", "ON")
 
     def get_frames(self):
         super().get_frames()
@@ -212,9 +193,23 @@ class HamamatsuOrcaFlashCamera(BasicCamera):
         self.buffer_index = cur_buffer_index
 
         for n in new_frames:
-            frames.append(self.hcam_data[n])
+            frames.append(self.hcam_data[n].get_data())
 
         return frames
+
+    def get_internal_parameters(self, parameters, *args, **kwargs):
+        super().get_internal_parameters(*args, **kwargs)
+        # subarray has to be updated with camera info directly because it must be a multiple of 4
+        frame_shape = (
+            self.get_property_value("subarray_vsize")[0]
+            // parameters.binning,
+            self.get_property_value("subarray_hsize")[0]
+            // parameters.binning,
+        )
+
+        internal_frame_rate = self.get_property_value("internal_frame_rate")[0]
+
+        return tuple([frame_shape, internal_frame_rate])
 
     def get_property_attribute(self, property_name):
         """
@@ -243,45 +238,7 @@ class HamamatsuOrcaFlashCamera(BasicCamera):
         else:
             return [int(prop_attr.valuemin), int(prop_attr.valuemax)]
 
-    def get_property_value(self, property_name, *args, **kwargs):
-        super().get_property_value(*args, **kwargs)
-
-        # Check if the property exists.
-        if not (property_name in self.properties):
-            print(" unknown property name:", property_name)
-            return False
-        prop_id = self.properties[property_name]
-
-        # Get the property attributes.
-        prop_attr = self.get_property_value(property_name)
-
-        # Get the property value.
-        c_value = ctypes.c_double(0)
-        self.check_status(
-            self.dcam.dcamprop_getvalue(
-                self.camera_handle, ctypes.c_int32(prop_id), ctypes.byref(c_value),
-            ),
-            "dcamprop_getvalue",
-        )
-
-        # Convert type based on attribute type.
-        temp = prop_attr.attribute & DCAMPROP_TYPE_MASK
-        if temp == DCAMPROP_TYPE_MODE:
-            prop_type = "MODE"
-            prop_value = int(c_value.value)
-        elif temp == DCAMPROP_TYPE_LONG:
-            prop_type = "LONG"
-            prop_value = int(c_value.value)
-        elif temp == DCAMPROP_TYPE_REAL:
-            prop_type = "REAL"
-            prop_value = c_value.value
-        else:
-            prop_type = "NONE"
-            prop_value = False
-
-        return [prop_value, prop_type]
-
-    def getPropertyText(self, property_name):
+    def get_property_text(self, property_name):
         """
         Return the text options of a property (if any).
         """
@@ -330,6 +287,63 @@ class HamamatsuOrcaFlashCamera(BasicCamera):
 
             return text_options
 
+    def get_property_value(self, property_name, *args, **kwargs):
+        super().get_property_value(*args, **kwargs)
+
+        # Check if the property exists.
+        if not (property_name in self.properties):
+            print(" unknown property name:", property_name)
+            return False
+        prop_id = self.properties[property_name]
+
+        # Get the property attributes.
+        prop_attr = self.get_property_value(property_name)
+
+        # Get the property value.
+        c_value = ctypes.c_double(0)
+        self.check_status(
+            self.dcam.dcamprop_getvalue(
+                self.camera_handle, ctypes.c_int32(prop_id), ctypes.byref(c_value),
+            ),
+            "dcamprop_getvalue",
+        )
+
+        # Convert type based on attribute type.
+        temp = prop_attr.attribute & DCAMPROP_TYPE_MASK
+        if temp == DCAMPROP_TYPE_MODE:
+            prop_type = "MODE"
+            prop_value = int(c_value.value)
+        elif temp == DCAMPROP_TYPE_LONG:
+            prop_type = "LONG"
+            prop_value = int(c_value.value)
+        elif temp == DCAMPROP_TYPE_REAL:
+            prop_type = "REAL"
+            prop_value = c_value.value
+        else:
+            prop_type = "NONE"
+            prop_value = False
+
+        return [prop_value, prop_type]
+
+    def set_acquisition_mode(self, mode, number_frames=None):
+        """
+        Set the acquisition mode to either run until aborted or to
+        stop after acquiring a set number of frames.
+
+        mode should be either "fixed_length" or "run_till_abort"
+
+        if mode is "fixed_length", then property number_frames indicates the number
+        of frames to be acquired.
+        """
+
+        self.stop_acquistion()
+
+        if mode == ("fixed_length" or "run_till_abort"):
+            self.acquisition_mode = mode
+            self.number_frames = number_frames
+        else:
+            raise Exception("Unrecognized acquisition mode: " + mode)
+
     def set_property_value(self, property_name, property_value, *args, **kwargs):
         super().set_property_value(*args, **kwargs)
         # Check if the property exists.
@@ -340,7 +354,7 @@ class HamamatsuOrcaFlashCamera(BasicCamera):
         # If the value is text, figure out what the
         # corresponding numerical property value is.
         if isinstance(property_value, str):
-            text_values = self.getPropertyText(property_name)
+            text_values = self.get_property_text(property_name)
             if property_value in text_values:
                 property_value = float(text_values[property_value])
             else:
@@ -389,6 +403,22 @@ class HamamatsuOrcaFlashCamera(BasicCamera):
         )
         return p_value.value
 
+    def set_subarray_mode(self):
+        """
+        This sets the sub-array mode as appropriate based on the current ROI.
+        """
+
+        # Check ROI properties.
+        roi_w = self.get_property_value("subarray_hsize")[0]
+        roi_h = self.get_property_value("subarray_vsize")[0]
+
+        # If the ROI is smaller than the entire frame tu
+        # rn on subarray mode
+        if (roi_w == self.max_width) and (roi_h == self.max_height):
+            self.set_property_value("subarray_mode", "OFF")
+        else:
+            self.set_property_value("subarray_mode", "ON")
+
     def start_acquisition(self):
         super().start_acquisition()
         self.buffer_index = -1
@@ -426,7 +456,7 @@ class HamamatsuOrcaFlashCamera(BasicCamera):
             self.hcam_data = []
             for i in range(self.number_image_buffers):
                 hc_data = SpeedyArrayBuffer(self.frame_bytes)
-                self.hcam_ptr[i] = hc_data.getDataPtr()
+                self.hcam_ptr[i] = hc_data.get_data_pr()
                 self.hcam_data.append(hc_data)
 
             self.old_frame_bytes = self.frame_bytes

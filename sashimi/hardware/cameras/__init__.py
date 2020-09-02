@@ -8,6 +8,13 @@ class BasicCamera:
         self.encoding = "utf-8"
         self.camera_id = conf["camera"]["id"]
 
+    def apply_parameters(self, parameters):
+        """
+        Selects which parameters are sent to the camera. This is accomplished
+        through self.set_property_value(foo, foo)
+        """
+        pass
+
     def get_camera_properties(self):
         """
         Return the ids & names of all the properties that the camera supports. This
@@ -21,6 +28,13 @@ class BasicCamera:
 
         This will block waiting for new frames even if there new frames
         available when it is called.
+        """
+        pass
+
+    def get_internal_parameters(self, parameters):
+        """
+        Gets those parameters that cannot be calculated otherwise and have to
+        be informed directly by the hardware
         """
         pass
 

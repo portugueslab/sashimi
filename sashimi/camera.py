@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
-from sashimi.hardware.cameras.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
+from sashimi.hardware.cameras.API.Hamamatsu_ORCA_flash_API import HamamatsuOrcaFlashCamera
 from dataclasses import dataclass
 import numpy as np
 from copy import copy
@@ -102,11 +102,7 @@ class CameraProcess(Process):
     # TODO: Move last two rows to API
     def initialize_camera(self):
         self.camera_status_queue.put(self.cast_parameters())
-        self.dcam_api = DCamAPI()
-        self.camera = HamamatsuCameraMR(self.dcam_api.dcam, camera_id=self.camera_id)
-
-        self.camera.setACQMode("run_till_abort")
-        self.camera.setSubArrayMode()
+        self.camera = HamamatsuOrcaFlashCamera()
 
     def pause_loop(self):
         while not self.stop_event.is_set():
@@ -125,21 +121,23 @@ class CameraProcess(Process):
     def run_camera(self):
         while not self.stop_event.is_set():
             self.parameters = self.new_parameters
-            self.apply_parameters()
+            self.camera.apply_parameters(self.parameters)
+            self.parameters.frame_shape, self.parameters.internal_frame_rate = \
+                self.camera.get_internal_parameters(self.parameters)
             self.camera_status_queue.put(self.cast_parameters())
             if self.parameters.camera_mode == CameraMode.PAUSED:
                 self.pause_loop()
             else:
-                self.camera.startAcquisition()
+                self.camera.start_acquisition()
                 self.camera_loop()
 
     def camera_loop(self):
         while not self.stop_event.is_set():
-            frames = self.camera.getFrames()
+            frames = self.camera.get_frames()
             if frames:
                 for frame in frames:
                     self.image_queue.put(
-                        np.reshape(frame.getData(), self.parameters.frame_shape)
+                        np.reshape(frame, self.parameters.frame_shape)
                     )
                     self.update_framerate()
             try:
@@ -147,7 +145,7 @@ class CameraProcess(Process):
                 if self.parameters.camera_mode == CameraMode.ABORT or (
                     self.new_parameters != self.parameters
                 ):
-                    self.camera.stopAcquisition()
+                    self.camera.stop_acquisition()
                     break
             except Empty:
                 pass
@@ -156,36 +154,6 @@ class CameraProcess(Process):
         self.framerate_rec.update_framerate()
         if self.framerate_rec.i_fps == 0:
             self.triggered_frame_rate_queue.put(self.framerate_rec.current_framerate)
-
-    # TODO: Move this to API
-    def apply_parameters(self):
-        subarray = self.parameters.subarray
-        # quantizing the ROI dims in multiples of 4
-        subarray = [min((i * self.parameters.binning // 4) * 4, 2048) for i in subarray]
-        # this can be simplified by making the API nice
-        self.camera.setPropertyValue("binning", self.parameters.binning)
-        self.camera.setPropertyValue(
-            "exposure_time", 0.001 * self.parameters.exposure_time
-        )
-        self.camera.setPropertyValue("subarray_vpos", subarray[1])
-        self.camera.setPropertyValue("subarray_hpos", subarray[0])
-        self.camera.setPropertyValue("subarray_vsize", subarray[3])
-        self.camera.setPropertyValue("subarray_hsize", subarray[2])
-        self.camera.setPropertyValue(
-            "trigger_source", self.parameters.trigger_mode.value
-        )
-
-        # This is not sent to the camera but has to be updated with camera info directly (because of multiples of 4)
-        self.parameters.frame_shape = (
-            self.camera.getPropertyValue("subarray_vsize")[0]
-            // self.parameters.binning,
-            self.camera.getPropertyValue("subarray_hsize")[0]
-            // self.parameters.binning,
-        )
-
-        self.parameters.internal_frame_rate = self.camera.getPropertyValue(
-            "internal_frame_rate"
-        )[0]
 
     def close_camera(self):
         self.camera.shutdown()
