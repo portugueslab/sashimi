@@ -1,7 +1,19 @@
+from sashimi.config import read_config
+
+conf = read_config()
+
+
 class BasicCamera:
-    def __init__(self, camera_id=0):
+    def __init__(self):
         self.encoding = "utf-8"
-        self.camera_id = camera_id
+        self.camera_id = conf["camera"]["id"]
+
+    def get_camera_properties(self):
+        """
+        Return the ids & names of all the properties that the camera supports. This
+        is used at initialization to populate the self.properties attribute.
+        """
+        pass
 
     def get_frames(self):
         """
@@ -40,4 +52,4 @@ class BasicCamera:
         """
         Close down the connection to the camera.
         """
-        pass
+        self.stop_acquistion()
