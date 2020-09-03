@@ -142,19 +142,17 @@ class CameraProcess(LoggingProcess):
 
     def camera_loop(self):
         while not self.stop_event.is_set():
-            self.was_waiting = False
-            while self.wait_event.is_set():
-                time.sleep(0.0001)
-                self.was_waiting = True
+            is_waiting = self.wait_event.is_set()
             frames = self.camera.getFrames()
             if frames:
-                self.logger.log_message("received frames")
-                if self.was_waiting:
-                    self.experiment_trigger_event.set()
                 for frame in frames:
+                    self.logger.log_message("received frames")
+                    if self.was_waiting:
+                        self.experiment_trigger_event.set()
                     self.image_queue.put(
                         np.reshape(frame.getData(), self.parameters.frame_shape)
                     )
+                    self.was_waiting = is_waiting
                     self.update_framerate()
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
