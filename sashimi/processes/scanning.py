@@ -14,7 +14,7 @@ from typing import Union, Tuple
 from sashimi.utilities import lcm, get_last_parameters
 from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
 from sashimi.config import read_config
-from sashimi.processes import LoggingProcess, ConcurrenceLogger
+from sashimi.processes.logging import LoggingProcess, ConcurrenceLogger
 from sashimi.events import LoggedEvent, SashimiEvents
 
 conf = read_config()
@@ -115,9 +115,10 @@ class ScanLoop:
         n_samples,
         sample_rate,
         waveform_queue: ArrayQueue,
-        experiment_start_signal: Event,
-        wait_signal: Event,
+        experiment_start_signal,
+        wait_signal,
         logger: ConcurrenceLogger,
+        trigger_exp_from_scanner,
     ):
 
         self.sample_rate = sample_rate
@@ -145,6 +146,8 @@ class ScanLoop:
 
         self.parameters = initial_parameters
         self.old_parameters = initial_parameters
+
+        self.trigger_exp_from_scanner = trigger_exp_from_scanner
 
         self.started = False
         self.n_acquired = 0
@@ -292,7 +295,8 @@ class VolumetricScanLoop(ScanLoop):
     def check_start(self):
         super().check_start()
         if self.trigger_exp_start:
-            self.experiment_start_event.set()
+            if self.trigger_exp_from_scanner:
+                self.experiment_start_event.set()
             self.trigger_exp_start = False
 
         if (
@@ -402,15 +406,16 @@ class VolumetricScanLoop(ScanLoop):
 class Scanner(LoggingProcess):
     def __init__(
         self,
-        stop_event: Event,
-        experiment_start_event,
+        stop_event: LoggedEvent,
+        experiment_start_event: LoggedEvent,
+        start_experiment_from_scanner=False,
         n_samples_waveform=10000,
         sample_rate=40000,
     ):
         super().__init__(name="scanner")
 
-        self.stop_event = stop_event
-        self.experiment_start_event = experiment_start_event
+        self.stop_event = stop_event.new_reference(self.logger)
+        self.experiment_start_event = experiment_start_event.new_reference(self.logger)
         self.wait_signal = LoggedEvent(
             self.logger, SashimiEvents.WAITING_FOR_TRIGGER, Event()
         )
@@ -422,6 +427,7 @@ class Scanner(LoggingProcess):
         self.sample_rate = sample_rate
 
         self.parameters = ScanParameters()
+        self.start_experiment_from_scanner = start_experiment_from_scanner
 
     def setup_tasks(self, read_task, write_task_z, write_task_xy):
         # Configure the channels
@@ -508,6 +514,7 @@ class Scanner(LoggingProcess):
                     self.experiment_start_event,
                     self.wait_signal,
                     self.logger,
+                    self.start_experiment_from_scanner,
                 )
                 try:
                     scanloop.loop()

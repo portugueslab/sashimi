@@ -2,33 +2,27 @@ from multiprocessing import Queue, Event
 from queue import Empty
 from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.utilities import neg_dif
-from sashimi.processes import LoggingProcess
-from sashimi.events import SashimiEvents, LoggedEvent
+from sashimi.processes.logging import LoggingProcess
+from sashimi.events import LoggedEvent
 import numpy as np
 
 
 class VolumeDispatcher(LoggingProcess):
     def __init__(
         self,
-        stop_event: Event,
-        saving_signal: Event,
-        wait_signal: Event,
-        noise_subtaction_on: Event,
+        stop_event: LoggedEvent,
+        saving_signal: LoggedEvent,
+        wait_signal: LoggedEvent,
+        noise_subtraction_on: Event,
         camera_queue: ArrayQueue,
         saver_queue: ArrayQueue,
         max_queue_size=1200,
     ):
         super().__init__(name="dispatcher")
         self.stop_event = stop_event
-        self.saving_signal = LoggedEvent(
-            self.logger, SashimiEvents.IS_SAVING, saving_signal
-        )
-        self.wait_signal = LoggedEvent(
-            self.logger, SashimiEvents.WAITING_FOR_TRIGGER, wait_signal
-        )
-        self.noise_subtraction_active = LoggedEvent(
-            self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, noise_subtaction_on
-        )
+        self.saving_signal = saving_signal.new_reference(self.logger)
+        self.wait_signal = wait_signal.new_reference(self.logger)
+        self.noise_subtraction_active = noise_subtraction_on.new_reference(self.logger)
 
         self.camera_queue = camera_queue
         self.saver_queue = saver_queue

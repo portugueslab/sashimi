@@ -2,7 +2,8 @@ from multiprocessing import Process, Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.hardware.hamamatsu_camera import HamamatsuCameraMR, DCamAPI
-from sashimi.processes import LoggingProcess
+from sashimi.processes.logging import LoggingProcess
+from sashimi.events import LoggedEvent
 from dataclasses import dataclass
 import numpy as np
 from copy import copy
@@ -75,10 +76,18 @@ class FramerateRecorder:
 
 class CameraProcess(LoggingProcess):
     def __init__(
-        self, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20,
+        self,
+        stop_event: LoggedEvent,
+        wait_event: LoggedEvent,
+        exp_trigger_event: LoggedEvent,
+        camera_id=0,
+        max_queue_size=1200,
+        n_fps_frames=20,
     ):
         super().__init__(name="camera")
-        self.stop_event = stop_event
+        self.stop_event = stop_event.new_reference(self.logger)
+        self.wait_event = wait_event.new_reference(self.logger)
+        self.experiment_trigger_event = exp_trigger_event.new_reference(self.logger)
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.parameter_queue = Queue()
         self.camera_id = camera_id
@@ -88,6 +97,7 @@ class CameraProcess(LoggingProcess):
         self.camera_status_queue = Queue()
         self.triggered_frame_rate_queue = Queue()
         self.framerate_rec = FramerateRecorder(n_fps_frames=n_fps_frames)
+        self.was_waiting = False
 
     def cast_parameters(self):
         params = self.parameters
@@ -132,9 +142,15 @@ class CameraProcess(LoggingProcess):
 
     def camera_loop(self):
         while not self.stop_event.is_set():
+            self.was_waiting = False
+            while self.wait_event.is_set():
+                time.sleep(0.0001)
+                self.was_waiting = True
             frames = self.camera.getFrames()
             if frames:
                 self.logger.log_message("received frames")
+                if self.was_waiting:
+                    self.experiment_trigger_event.set()
                 for frame in frames:
                     self.image_queue.put(
                         np.reshape(frame.getData(), self.parameters.frame_shape)
@@ -191,7 +207,13 @@ class CameraProcess(LoggingProcess):
 
 class MockCameraProcess(Process):
     def __init__(
-        self, stop_event, camera_id=0, max_queue_size=1200, n_fps_frames=20,
+        self,
+        stop_event: LoggedEvent,
+        wait_event,
+        exp_trigger_event,
+        camera_id=0,
+        max_queue_size=1200,
+        n_fps_frames=20,
     ):
         super().__init__()
         self.stop_event = stop_event

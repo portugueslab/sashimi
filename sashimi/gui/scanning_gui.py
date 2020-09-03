@@ -10,7 +10,7 @@ from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
 from lightparam.gui.collapsible_widget import CollapsibleWidget
 from sashimi.gui.waveform_gui import WaveformWidget
-from sashimi.scanning import ExperimentPrepareState
+from sashimi.processes.scanning import ExperimentPrepareState
 
 
 class PlanarScanningWidget(QWidget):

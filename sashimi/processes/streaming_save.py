@@ -10,7 +10,7 @@ import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
 from sashimi.config import read_config
-from sashimi.processes import LoggingProcess
+from sashimi.processes.logging import LoggingProcess
 from sashimi.events import LoggedEvent, SashimiEvents
 
 conf = read_config()
@@ -39,12 +39,20 @@ class SavingStatus:
 
 
 class StackSaver(LoggingProcess):
-    def __init__(self, stop_event, duration_queue, max_queue_size=2000):
+    def __init__(
+        self,
+        stop_event: LoggedEvent,
+        is_saving_event: LoggedEvent,
+        duration_queue: Queue,
+        max_queue_size=2000,
+    ):
         super().__init__(name="saver")
-        self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL, stop_event)
+        self.stop_event = stop_event.new_reference(self.logger)
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
-        self.saving_signal = Event()
-        self.saver_stopped_signal = Event()
+        self.saving_signal = is_saving_event
+        self.saver_stopped_signal = LoggedEvent(
+            self.logger, SashimiEvents.SAVING_STOPPED
+        )
         self.saving = False
         self.saving_parameter_queue = Queue()
         self.save_parameters: Optional[SavingParameters] = SavingParameters()

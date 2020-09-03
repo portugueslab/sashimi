@@ -1,5 +1,5 @@
 from multiprocessing import Process, Queue, Event
-from sashimi.processes import LoggingProcess
+from sashimi.processes.logging import LoggingProcess
 from sashimi.events import SashimiEvents, LoggedEvent
 from queue import Empty
 import zmq
@@ -24,17 +24,17 @@ def clean_json(d):
 class StytraCom(LoggingProcess):
     def __init__(
         self,
-        stop_event: Event,
-        experiment_start_event: Event,
+        stop_event: LoggedEvent,
+        experiment_start_event: LoggedEvent,
+        is_saving_event: LoggedEvent,
         stytra_address="tcp://O1-589:5555",
     ):
         super().__init__(name="stytracomm")
         self.current_settings_queue = Queue()
         self.current_settings = None
-        self.start_stytra = LoggedEvent(
-            self.logger, SashimiEvents.TRIGGER_STYTRA, experiment_start_event
-        )
-        self.stop_event = stop_event
+        self.start_stytra = experiment_start_event.new_reference(self.logger)
+        self.stop_event = stop_event.new_reference(self.logger)
+        self.saving_event = is_saving_event.new_reference(self.logger)
         self.zmq_tcp_address = stytra_address
         self.duration_queue = Queue()
 
@@ -49,7 +49,7 @@ class StytraCom(LoggingProcess):
                     saved_data = dict(lightsheet=clean_json(self.current_settings))
                 except Empty:
                     break
-            if self.start_stytra.is_set():
+            if self.start_stytra.is_set() and self.saving_event.is_set():
                 zmq_context = zmq.Context()
                 with zmq_context.socket(zmq.REQ) as zmq_socket:
                     zmq_socket.connect(self.zmq_tcp_address)

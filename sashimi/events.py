@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from multiprocessing import Event
+from typing import Optional
 
 
 class AutoName(Enum):
@@ -12,16 +13,23 @@ class SashimiEvents(AutoName):
     TRIGGER_STYTRA = auto()
     IS_SAVING = auto()
     NOISE_SUBTRACTION_ACTIVE = auto()
+    SAVING_STOPPED = auto()
     CLOSE_ALL = auto()
 
 
 class LoggedEvent:
-    def __init__(self, logger, name: SashimiEvents, event=None):
+    def __init__(self, logger, name: SashimiEvents, event: Optional[Event] = None):
         super().__init__()
-        self.event: Event = event if (Event is not None) else Event()
+        if event is None:
+            self.event = Event()
+        else:
+            self.event = event
         self.logger = logger
         self.name = name
         self.was_set = False
+
+    def new_reference(self, logger):
+        return LoggedEvent(logger, self.name, self.event)
 
     def set(self):
         self.event.set()

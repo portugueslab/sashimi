@@ -4,7 +4,7 @@ from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
 from sashimi.hardware.laser import CoboltLaser, MockCoboltLaser
-from sashimi.scanning import (
+from sashimi.processes.scanning import (
     Scanner,
     PlanarScanning,
     ZScanning,
@@ -16,9 +16,9 @@ from sashimi.scanning import (
     ScanningState,
     ExperimentPrepareState,
 )
-from sashimi.stytra_comm import StytraCom
-from sashimi.dispatcher import VolumeDispatcher
-from sashimi.processes import ConcurrenceLogger
+from sashimi.processes.stytra_comm import StytraCom
+from sashimi.processes.dispatcher import VolumeDispatcher
+from sashimi.processes.logging import ConcurrenceLogger
 from multiprocessing import Event
 import json
 from sashimi.camera import (
@@ -28,7 +28,7 @@ from sashimi.camera import (
     TriggerMode,
     MockCameraProcess,
 )
-from sashimi.streaming_save import StackSaver, SavingParameters, SavingStatus
+from sashimi.processes.streaming_save import StackSaver, SavingParameters, SavingStatus
 from sashimi.events import LoggedEvent, SashimiEvents
 from pathlib import Path
 from enum import Enum
@@ -322,43 +322,57 @@ class State:
 
         self.calibration_ref = None
         self.waveform = None
-        self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL, Event())
-        self.experiment_start_event = Event()
+        self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
+        self.experiment_start_event = LoggedEvent(
+            self.logger, SashimiEvents.TRIGGER_STYTRA
+        )
         self.noise_subtraction_active = LoggedEvent(
             self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, Event()
         )
+        self.is_saving_event = LoggedEvent(self.logger, SashimiEvents.IS_SAVING)
 
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
-        if self.conf["scopeless"]:
-            self.laser = MockCoboltLaser()
-            self.camera = MockCameraProcess(stop_event=self.stop_event.event,)
-        else:
-            self.laser = CoboltLaser()
-            self.camera = CameraProcess(stop_event=self.stop_event.event,)
 
         self.scanner = Scanner(
-            stop_event=self.stop_event.event,
+            stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
             sample_rate=self.sample_rate,
         )
 
+        if self.conf["scopeless"]:
+            self.laser = MockCoboltLaser()
+            self.camera = MockCameraProcess(
+                stop_event=self.stop_event.event,
+                wait_event=self.scanner.wait_signal,
+                exp_trigger_event=self.experiment_start_event,
+            )
+        else:
+            self.laser = CoboltLaser()
+            self.camera = CameraProcess(
+                stop_event=self.stop_event,
+                wait_event=self.scanner.wait_signal,
+                exp_trigger_event=self.experiment_start_event,
+            )
+
         self.stytra_comm = StytraCom(
-            stop_event=self.stop_event.event,
+            stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
+            is_saving_event=self.is_saving_event,
         )
 
         self.saver = StackSaver(
-            stop_event=self.stop_event.event,
+            stop_event=self.stop_event,
+            is_saving_event=self.is_saving_event,
             duration_queue=self.stytra_comm.duration_queue,
         )
 
         self.dispatcher = VolumeDispatcher(
-            stop_event=self.stop_event.event,
+            stop_event=self.stop_event,
             saving_signal=self.saver.saving_signal,
-            wait_signal=self.scanner.wait_signal.event,
-            noise_subtaction_on=self.noise_subtraction_active.event,
+            wait_signal=self.scanner.wait_signal,
+            noise_subtraction_on=self.noise_subtraction_active,
             camera_queue=self.camera.image_queue,
             saver_queue=self.saver.save_queue,
         )
@@ -526,13 +540,13 @@ class State:
         self.send_scan_settings()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
-        self.saver.saving_signal.set()
+        self.is_saving_event.set()
         time.sleep(0.5)
         self.toggle_experiment_state()
 
     def end_experiment(self):
         self.logger.log_message("experiment ended")
-        self.saver.saving_signal.clear()
+        self.is_saving_event.clear()
         self.experiment_start_event.clear()
         self.saver.save_queue.clear()
         self.send_scan_settings()
@@ -600,9 +614,10 @@ class State:
     def wrap_up(self):
         self.stop_event.set()
         self.laser.close()
+        self.logger.close()
+
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
         self.dispatcher.join(timeout=10)
-        self.logger.close()
