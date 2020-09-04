@@ -4,17 +4,17 @@ from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
 from sashimi.hardware.laser import CoboltLaser, MockCoboltLaser
-from sashimi.processes.scanning import (
-    Scanner,
-    PlanarScanning,
-    ZScanning,
-    ZSynced,
-    ZManual,
-    XYScanning,
-    ScanParameters,
-    TriggeringParameters,
+from sashimi.processes.scanning import Scanner
+from sashimi.hardware.scanning.scanloops import (
     ScanningState,
     ExperimentPrepareState,
+    XYScanning,
+    PlanarScanning,
+    ZManual,
+    ZSynced,
+    ZScanning,
+    TriggeringParameters,
+    ScanParameters,
 )
 from sashimi.processes.stytra_comm import StytraCom
 from sashimi.processes.dispatcher import VolumeDispatcher
