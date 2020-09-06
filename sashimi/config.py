@@ -25,11 +25,16 @@ TEMPLATE_CONF_DICT = {
         "write_position": {"pos_chan": "Dev12/a0:1", "min_val": -5, "max_val": 10}
     },
     "camera": {
-        "id": 0
+        "id": 0,
+        "name": "Hamamatsu",
+        "test": False
     },
     "email": {"user": "foo", "password": "foo"},
     "array_ram_MB": 450,
     "scopeless": False,
+    "scanning": {
+        "test": False
+    }
 }
 
 
