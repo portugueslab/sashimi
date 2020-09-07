@@ -339,7 +339,7 @@ class State:
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
 
-        if self.conf["shirashi"]:
+        if self.conf["chirashi"]:
             self.camera = CameraProcess(
                         experiment_start_event=self.experiment_start_event,
                         stop_event=self.stop_event,
@@ -465,7 +465,7 @@ class State:
         camera_params = convert_camera_params(self.camera_settings)
         camera_params.trigger_mode = (
             TriggerMode.FREE
-            if self.global_state == GlobalState.PREVIEW or self.conf["shirashi"] #i added this otherwise during volume aqisition no live image and image saving
+            if self.global_state == GlobalState.PREVIEW or self.conf["chirashi"] #i added this otherwise during volume aqisition no live image and image saving
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
@@ -542,7 +542,7 @@ class State:
 
         elif self.experiment_state == ExperimentPrepareState.NO_TRIGGER:
             self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
-            if self.conf["shirashi"]:#i added this, LS the scanning module sets the event, needed for synch with stytra
+            if self.conf["chirashi"]:#i added this, LS the scanning module sets the event, needed for synch with stytra
                 self.experiment_start_event.set()
             self.send_scan_settings()
 

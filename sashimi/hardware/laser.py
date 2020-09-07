@@ -2,8 +2,8 @@ from warnings import warn
 
 try:
     import visa
-
-    rm = visa.ResourceManager()
+    from pyvisa.highlevel import ResourceManager
+    rm = ResourceManager()
 except (ImportError, ValueError):
     warn("PyVisa not installed, no laser control available")
 

@@ -27,7 +27,7 @@ TEMPLATE_CONF_DICT = {
     "email": {"user": "foo", "password": "foo"},
     "array_ram_MB": 450,
     "scopeless": False,
-    "shirashi": False,
+    "chirashi": False,
 }
 
 
