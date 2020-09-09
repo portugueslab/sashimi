@@ -1,12 +1,14 @@
 from sashimi.config import read_config
 import time
 import numpy as np
+from sashimi.hardware.cameras.interface import AbstractCameraInterface
 
 conf = read_config()
 
 
-class BasicCamera:
+class BasicCamera(AbstractCameraInterface):
     def __init__(self):
+        super().__init__()
         self.encoding = "utf-8"
         self.camera_id = conf["camera"]["id"]
 
