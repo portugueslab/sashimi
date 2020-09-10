@@ -106,7 +106,7 @@ class SinglePlaneSettings(ParametrizedQt):
         self.name = "scanning/z_single_plane"
         self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
         self.frequency = Param(1.0, (0.1, 1000), unit="planes/s (Hz)")
-
+        self.n_planes = Param(1, (1, 1))
 
 class ZRecordingSettings(ParametrizedQt):
     def __init__(self):
@@ -114,7 +114,7 @@ class ZRecordingSettings(ParametrizedQt):
         self.name = "scanning/volumetric_recording"
         self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
         self.frequency = Param(1.0, (0.1, 100), unit="volumes/s (Hz)")
-        self.n_planes = Param(10, (2, 100))
+        self.n_planes = Param(10, (1, 100)) #todo changed this
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
 
@@ -128,6 +128,7 @@ class CameraSettings(ParametrizedQt):
         self.subarray = Param(
             [0, 0, 2048, 2048], gui=False
         )  # order of params here is [hpos, vpos, hsize, vsize,]
+
 
 
 class LaserSettings(ParametrizedQt):
@@ -394,7 +395,7 @@ class State:
         self.save_status: Optional[SavingStatus] = None
 
         self.saver = StackSaver(
-            stop_event=self.stop_event, duration_queue=self.stytra_comm.duration_queue,
+            stop_event=self.stop_event, duration_queue=self.stytra_comm.duration_queue, triggered_frame_rate_queue_copy=self.camera.triggered_frame_rate_queue_copy
         )
 
         self.dispatcher = VolumeDispatcher(

@@ -92,6 +92,7 @@ class CameraProcess(Process):
         self.new_parameters = copy(self.parameters)
         self.camera_status_queue = Queue()
         self.triggered_frame_rate_queue = Queue()
+        self.triggered_frame_rate_queue_copy = Queue()
         self.framerate_rec = FramerateRecorder(n_fps_frames=n_fps_frames)
 
     def cast_parameters(self):
@@ -156,6 +157,7 @@ class CameraProcess(Process):
         self.framerate_rec.update_framerate()
         if self.framerate_rec.i_fps == 0:
             self.triggered_frame_rate_queue.put(self.framerate_rec.current_framerate)
+            self.triggered_frame_rate_queue_copy.put(self.framerate_rec.current_framerate)
 
     # TODO: Move this to API
     def apply_parameters(self):

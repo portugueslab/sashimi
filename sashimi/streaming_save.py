@@ -10,7 +10,6 @@ import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
 from sashimi.config import read_config
-
 conf = read_config()
 
 
@@ -19,7 +18,7 @@ class SavingParameters:
     output_dir: Path = conf["default_paths"]["data"]
     n_planes: int = 1
     n_volumes: int = 10000
-    chunk_size: int = 20
+    chunk_size: int =  20
     optimal_chunk_MB_RAM: int = conf[
         "array_ram_MB"
     ]  # Experimental value, might be different for different machines.
@@ -37,7 +36,7 @@ class SavingStatus:
 
 
 class StackSaver(Process):
-    def __init__(self, stop_event, duration_queue, max_queue_size=2000):
+    def __init__(self, stop_event, duration_queue, triggered_frame_rate_queue_copy, max_queue_size=2000):
         super().__init__()
         self.stop_event = stop_event
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
@@ -55,6 +54,9 @@ class StackSaver(Process):
         self.frame_shape = None
         self.dtype = np.uint16
         self.duration_queue = duration_queue
+        self.conf = read_config()
+        self.triggered_frame_rate_queue_copy =triggered_frame_rate_queue_copy
+        self.frame_rate = None
 
     def run(self):
         while not self.stop_event.is_set():
@@ -80,9 +82,9 @@ class StackSaver(Process):
         self.current_data = None
 
         while (
-            self.i_volume < self.save_parameters.n_volumes
-            and self.saving_signal.is_set()
-            and not self.stop_event.is_set()
+                self.i_volume < self.save_parameters.n_volumes
+                and self.saving_signal.is_set()
+                and not self.stop_event.is_set()
         ):
             self.receive_save_parameters()
 
@@ -99,7 +101,8 @@ class StackSaver(Process):
             self.finalize_dataset()
             self.current_data = None
             if self.saving_signal.is_set():
-                self.send_email_end()
+                print("Done")
+                    # self.send_email_end()
 
         self.saving_signal.clear()
         self.save_parameters = None
@@ -157,6 +160,7 @@ class StackSaver(Process):
             )
         )
 
+
     def finalize_dataset(self):
         with open(
             (
@@ -207,13 +211,21 @@ class StackSaver(Process):
 
     def receive_save_parameters(self):
         try:
+            self.frame_rate = self.triggered_frame_rate_queue_copy.get(timeout=0.001)
+        except Empty:
+            pass
+        try:
             self.save_parameters = self.saving_parameter_queue.get(timeout=0.001)
         except Empty:
             pass
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
-            self.save_parameters.n_volumes = int(
-                np.ceil(self.save_parameters.volumerate * new_duration)
-            )
+            if self.conf["chirashi"]:
+                self.save_parameters.n_volumes = int(round(
+                    np.ceil(int(self.frame_rate) * new_duration)))
+            else:
+                self.save_parameters.n_volumes = int(
+                    np.ceil(self.save_parameters.volumerate * new_duration)
+                )
         except Empty:
             pass
