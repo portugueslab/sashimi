@@ -1,6 +1,6 @@
 from sashimi.utilities import SpeedyArrayBuffer
 from sashimi.hardware.cameras import BasicCamera
-from sashimi.hardware.cameras.SDK.Hamamatsu_SDK import *
+from sashimi.hardware.cameras.SDK.hamamatsu_sdk import *
 
 
 class HamamatsuCamera(BasicCamera):

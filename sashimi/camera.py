@@ -1,7 +1,7 @@
 from multiprocessing import Process, Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
-from sashimi.hardware.cameras.Hamamatsu_wrapper import HamamatsuCamera
+from sashimi.hardware.cameras.hamamatsu_wrapper import HamamatsuCamera
 from dataclasses import dataclass
 import numpy as np
 from copy import copy
@@ -103,7 +103,6 @@ class CameraProcess(Process):
         params.subarray = list(params.subarray)
         return params
 
-    # TODO: Move last two rows to API
     def initialize_camera(self):
         self.camera_status_queue.put(self.cast_parameters())
         self.camera = camera_class_dict[conf["camera"]["name"]]

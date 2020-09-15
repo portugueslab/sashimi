@@ -125,7 +125,7 @@ class AbstractCameraConfigurator:
         pass
 
     def __enter__(self):
-        return AbstractCameraInterface()
+        return BasicCamera()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
@@ -134,16 +134,32 @@ class AbstractCameraConfigurator:
 class MockCamera(BasicCamera):
     def __init__(self):
         super().__init__()
-        self.frame_shape: tuple = (1024, 1024)
-        self.exposure_time = 60
+        self.internal_frame_shape: tuple = (1024, 1024)
+        self.internal_exposure_time = 60
 
     def apply_parameters(self, parameters, *args, **kwargs):
         super().apply_parameters(*args, **kwargs)
+        self.exposure_time = parameters
+        self.frame_shape = parameters
+
+    @property
+    def exposure_time(self):
+        return self.internal_exposure_time
+
+    @exposure_time.setter
+    def exposure_time(self, parameters):
+        self.internal_exposure_time = parameters.exposure_time
+
+    @property
+    def frame_shape(self):
+        return self.internal_frame_shape
+
+    @frame_shape.setter
+    def frame_shape(self, parameters):
         subarray = parameters.subarray
         # quantizing the ROI dims in multiples of 4
         subarray = [min((i * parameters.binning // 4) * 4, 2048) for i in subarray]
-        self.frame_shape = (subarray[2], subarray[3])
-        self.exposure_time = parameters.exposure_time
+        self.internal_frame_shape = (subarray[2], subarray[3])
 
     def get_frames(self):
         super().get_frames()
