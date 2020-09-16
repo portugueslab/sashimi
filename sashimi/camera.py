@@ -147,7 +147,7 @@ class CameraProcess(LoggingProcess):
             if frames:
                 for frame in frames:
                     self.logger.log_message("received frames")
-                    if self.was_waiting:
+                    if self.was_waiting and not is_waiting:
                         self.experiment_trigger_event.set()
                     self.image_queue.put(
                         np.reshape(frame.getData(), self.parameters.frame_shape)

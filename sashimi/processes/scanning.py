@@ -8,7 +8,7 @@ from sashimi.hardware.scanning.scanloops import (
     PlanarScanLoop,
     VolumetricScanLoop,
 )
-from sashimi.hardware.scanning.interface import ScanningError, AbstractScanInterface
+from sashimi.hardware.scanning.interface import ScanningError
 from sashimi.hardware.scanning.mock import open_mockboard
 
 try:

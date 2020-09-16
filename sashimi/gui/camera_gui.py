@@ -44,7 +44,7 @@ class ViewingWidget(QWidget):
         Timer from the main GUI.
     """
 
-    def __init__(self, state: State, timer):
+    def __init__(self, state: State, timer: QTimer):
         super().__init__()
         self.state = state
 

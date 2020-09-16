@@ -4,7 +4,6 @@ from contextlib import contextmanager
 
 from nidaqmx.task import Task
 from nidaqmx.constants import Edge, AcquisitionType
-from nidaqmx.errors import DaqError
 from nidaqmx.stream_readers import AnalogSingleChannelReader
 from nidaqmx.stream_writers import AnalogMultiChannelWriter
 

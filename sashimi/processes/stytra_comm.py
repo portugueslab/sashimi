@@ -1,6 +1,6 @@
-from multiprocessing import Process, Queue, Event
+from multiprocessing import Queue
 from sashimi.processes.logging import LoggingProcess
-from sashimi.events import SashimiEvents, LoggedEvent
+from sashimi.events import LoggedEvent
 from queue import Empty
 import zmq
 from dataclasses import asdict, is_dataclass

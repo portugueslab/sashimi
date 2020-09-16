@@ -1,4 +1,4 @@
-from multiprocessing import Process, Event, Queue
+from multiprocessing import Queue
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional

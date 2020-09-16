@@ -173,6 +173,7 @@ class ScanLoop:
         self.logger.log_message("write")
 
     def read(self):
+        self.board.read()
         self.logger.log_message("read")
         self.n_samples_read += self.board.n_samples
 
