@@ -24,7 +24,7 @@ TEMPLATE_CONF_DICT = {
         "data": str(Path.home()),
         "presets": str(PRESETS_DIR_PATH),
         "log": str(LOGS_DIR_PATH),
-        "scope_instructions": str(SCOPE_INSTRUCTIONS_PATH)},
+        "scope_instructions": str(SCOPE_INSTRUCTIONS_PATH),
     },
     "z_board": {
         "read": {

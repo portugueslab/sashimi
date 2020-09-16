@@ -22,7 +22,8 @@ import napari
 import numpy as np
 
 
-IMAGE_SIZE = (1024, 1024)  #TODO this should probably be configurable
+IMAGE_SIZE = (1024, 1024)  # TODO this should probably be configurable
+
 
 class DisplaySettings(ParametrizedQt):
     def __init__(self):
@@ -42,6 +43,7 @@ class ViewingWidget(QWidget):
     timer : QTimer
         Timer from the main GUI.
     """
+
     def __init__(self, state: State, timer):
         super().__init__()
         self.state = state
@@ -61,7 +63,16 @@ class ViewingWidget(QWidget):
         )
 
         self.roi = self.viewer.add_shapes(
-            [np.array([[0, 0], [IMAGE_SIZE[0], 0], [IMAGE_SIZE[0], IMAGE_SIZE[1]], [0, IMAGE_SIZE[1]]])],
+            [
+                np.array(
+                    [
+                        [0, 0],
+                        [IMAGE_SIZE[0], 0],
+                        [IMAGE_SIZE[0], IMAGE_SIZE[1]],
+                        [0, IMAGE_SIZE[1]],
+                    ]
+                )
+            ],
             blending="translucent",
             opacity=0.1,
             face_color="yellow",
@@ -101,14 +112,13 @@ class ViewingWidget(QWidget):
     @property
     def voxel_size(self):
         return get_voxel_size(
-                self.state.volume_setting,
-                self.state.camera_settings,
-                self.state.scope_alignment_info,
-            )
+            self.state.volume_setting,
+            self.state.camera_settings,
+            self.state.scope_alignment_info,
+        )
 
     def refresh(self) -> None:
-        """Main refresh loop called by timeout of the main timer.
-        """
+        """Main refresh loop called by timeout of the main timer."""
         self.refresh_image()
         self.refresh_progress_bar()
 
@@ -164,6 +174,7 @@ class CameraSettingsContainerWidget(QWidget):
     roi : default ROI size
     timer : QTimer
     """
+
     def __init__(self, state, roi, timer):
 
         super().__init__()
@@ -201,12 +212,12 @@ class CameraSettingsContainerWidget(QWidget):
 
     @property
     def roi_size(self):
-        return int(self.roi.data[0][3][1] - self.roi.data[0][0][1]), \
-               int(self.roi.data[0][1][0] - self.roi.data[0][0][0])
+        return int(self.roi.data[0][3][1] - self.roi.data[0][0][1]), int(
+            self.roi.data[0][1][0] - self.roi.data[0][0][0]
+        )
 
     def set_roi(self):
-        """Set ROI size from loaded params.
-        """
+        """Set ROI size from loaded params."""
         self.state.camera_settings.subarray = tuple(
             [self.roi_pos[0], self.roi_pos[1], self.roi_size[0], self.roi_size[1]]
         )
