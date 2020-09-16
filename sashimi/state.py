@@ -32,7 +32,6 @@ from sashimi.processes.streaming_save import StackSaver, SavingParameters, Savin
 from sashimi.events import LoggedEvent, SashimiEvents
 from pathlib import Path
 from enum import Enum
-import time
 from sashimi.config import read_config
 
 conf = read_config()
