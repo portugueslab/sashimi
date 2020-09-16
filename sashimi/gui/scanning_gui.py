@@ -10,7 +10,7 @@ from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
 from lightparam.gui.collapsible_widget import CollapsibleWidget
 from sashimi.gui.waveform_gui import WaveformWidget
-from sashimi.scanning import ExperimentPrepareState
+from sashimi.hardware.scanning.scanloops import ExperimentPrepareState
 
 
 class PlanarScanningWidget(QWidget):
@@ -81,7 +81,7 @@ class VolumeScanningWidget(QWidget):
 
         self.timer_scope_info.timeout.connect(self.update_alignment)
         self.chk_pause.clicked.connect(self.change_pause_status)
-        self.dialog_ok_button.clicked.connect(self.overwrite_anyway)
+        self.dialog_ok_button.clicked.connect(self.state.start_experiment)
 
         self.chk_pause.click()
 
@@ -127,15 +127,12 @@ class VolumeScanningWidget(QWidget):
     def change_experiment_state(self):
         if self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
             # Here what happens if experiment is aborted
-            self.state.saver.saving_signal.clear()
-        elif (
-            self.state.save_settings.overwrite_save_folder == 1
-            and not self.override_overwrite
-        ):
-            self.overwrite_alert_popup()
-            self.override_overwrite = False
+            self.state.end_experiment()
         else:
-            self.state.toggle_experiment_state()
+            if self.state.save_settings.overwrite_save_folder == 1:
+                self.overwrite_alert_popup()
+            else:
+                self.state.start_experiment()
 
     def overwrite_alert_popup(self):
         self.dialog_box.setIcon(QMessageBox.Warning)
@@ -145,7 +142,3 @@ class VolumeScanningWidget(QWidget):
             "Press ok to start the experiment anyway or abort to change saving folder."
         )
         self.dialog_box.show()
-
-    def overwrite_anyway(self):
-        self.override_overwrite = True
-        self.change_experiment_state()

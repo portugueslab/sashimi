@@ -1,4 +1,6 @@
-from multiprocessing import Process, Queue, Event
+from multiprocessing import Queue
+from sashimi.processes.logging import LoggingProcess
+from sashimi.events import LoggedEvent
 from queue import Empty
 import zmq
 from dataclasses import asdict, is_dataclass
@@ -19,22 +21,25 @@ def clean_json(d):
         return d
 
 
-class StytraCom(Process):
+class StytraCom(LoggingProcess):
     def __init__(
         self,
-        stop_event: Event,
-        experiment_start_event: Event,
+        stop_event: LoggedEvent,
+        experiment_start_event: LoggedEvent,
+        is_saving_event: LoggedEvent,
         stytra_address="tcp://O1-589:5555",
     ):
-        super().__init__()
+        super().__init__(name="stytracomm")
         self.current_settings_queue = Queue()
         self.current_settings = None
-        self.start_stytra = experiment_start_event
-        self.stop_event = stop_event
+        self.start_stytra = experiment_start_event.new_reference(self.logger)
+        self.stop_event = stop_event.new_reference(self.logger)
+        self.saving_event = is_saving_event.new_reference(self.logger)
         self.zmq_tcp_address = stytra_address
         self.duration_queue = Queue()
 
     def run(self):
+        self.logger.log_message("started")
         while not self.stop_event.is_set():
             while True:
                 try:
@@ -44,11 +49,12 @@ class StytraCom(Process):
                     saved_data = dict(lightsheet=clean_json(self.current_settings))
                 except Empty:
                     break
-            if self.start_stytra.is_set():
+            if self.start_stytra.is_set() and self.saving_event.is_set():
                 zmq_context = zmq.Context()
                 with zmq_context.socket(zmq.REQ) as zmq_socket:
                     zmq_socket.connect(self.zmq_tcp_address)
                     zmq_socket.send_json(saved_data)
+                    self.logger.log_message("sent stytra")
                     poller = zmq.Poller()
                     poller.register(zmq_socket, zmq.POLLIN)
                     duration = None
@@ -57,5 +63,5 @@ class StytraCom(Process):
                     if duration is not None:
                         self.duration_queue.put(duration)
                     self.start_stytra.clear()
-                    zmq_socket.close()
                     zmq_context.destroy()
+        self.close_log()

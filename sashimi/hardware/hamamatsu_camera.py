@@ -241,14 +241,14 @@ class DCamAPI:
 
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
         paraminit.size = ctypes.sizeof(paraminit)
-        error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
-        n_cameras = paraminit.iDeviceCount
+        self.error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
+
 
 class HCamData(object):
     """
     Hamamatsu camera data object.
 
-    Initially I tried to use create_string_buffer() to allocate storage for the 
+    Initially I tried to use create_string_buffer() to allocate storage for the
     data from the camera but this turned out to be too slow. The software
     kept falling behind the camera and create_string_buffer() seemed to be the
     bottleneck.
@@ -286,7 +286,7 @@ class HCamData(object):
 class HamamatsuCamera(object):
     """
     Basic camera interface class.
-    
+
     This version uses the Hamamatsu library to allocate camera buffers.
     Storage for the data from the camera is allocated dynamically and
     copied out of the camera buffers.
@@ -427,7 +427,10 @@ class HamamatsuCamera(object):
                 self.checkStatus(ret, "dcamprop_getnextid")
             self.checkStatus(
                 self.dcam.dcamprop_getname(
-                    self.camera_handle, prop_id, c_buf, ctypes.c_int32(c_buf_len),
+                    self.camera_handle,
+                    prop_id,
+                    c_buf,
+                    ctypes.c_int32(c_buf_len),
                 ),
                 "dcamprop_getname",
             )
@@ -436,8 +439,8 @@ class HamamatsuCamera(object):
     def getFrames(self):
         """
         Gets all of the available frames.
-    
-        This will block waiting for new frames even if 
+
+        This will block waiting for new frames even if
         there new frames available when it is called.
         """
         frames = []
@@ -469,7 +472,10 @@ class HamamatsuCamera(object):
         c_buf_len = 20
         string_value = ctypes.create_string_buffer(c_buf_len)
         paramstring = DCAMDEV_STRING(
-            0, DCAM_IDSTR_MODEL, ctypes.cast(string_value, ctypes.c_char_p), c_buf_len,
+            0,
+            DCAM_IDSTR_MODEL,
+            ctypes.cast(string_value, ctypes.c_char_p),
+            c_buf_len,
         )
         paramstring.size = ctypes.sizeof(paramstring)
 
@@ -492,7 +498,7 @@ class HamamatsuCamera(object):
     def getPropertyAttribute(self, property_name):
         """
         Return the attribute structure of a particular property.
-        
+
         FIXME (OPTIMIZATION): Keep track of known attributes?
         """
         p_attr = DCAMPROP_ATTR()
@@ -606,7 +612,9 @@ class HamamatsuCamera(object):
         c_value = ctypes.c_double(0)
         self.checkStatus(
             self.dcam.dcamprop_getvalue(
-                self.camera_handle, ctypes.c_int32(prop_id), ctypes.byref(c_value),
+                self.camera_handle,
+                ctypes.c_int32(prop_id),
+                ctypes.byref(c_value),
             ),
             "dcamprop_getvalue",
         )
@@ -642,7 +650,7 @@ class HamamatsuCamera(object):
         Return a list of the ids of all the new frames since the last check.
         Returns an empty list if the camera has already stopped and no frames
         are available.
-    
+
         This will block waiting for at least one new frame.
         """
 
@@ -654,7 +662,10 @@ class HamamatsuCamera(object):
         # Wait for a new frame if the camera is acquiring.
         if captureStatus.value == DCAMCAP_STATUS_BUSY:
             paramstart = DCAMWAIT_START(
-                0, 0, DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED, 100,
+                0,
+                0,
+                DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED,
+                100,
             )
             paramstart.size = ctypes.sizeof(paramstart)
             self.checkStatus(
@@ -779,7 +790,7 @@ class HamamatsuCamera(object):
 
     def setACQMode(self, mode, number_frames=None):
         """
-        Set the acquisition mode to either run until aborted or to 
+        Set the acquisition mode to either run until aborted or to
         stop after acquiring a set number of frames.
 
         mode should be either "fixed_length" or "run_till_abort"
@@ -879,22 +890,22 @@ class HamamatsuCamera(object):
 class HamamatsuCameraMR(HamamatsuCamera):
     """
     Memory recycling camera class.
-    
-    This version allocates "user memory" for the Hamamatsu camera 
+
+    This version allocates "user memory" for the Hamamatsu camera
     buffers. This memory is also the location of the storage for
     the np_array element of a HCamData() class. The memory is
     allocated once at the beginning, then recycled. This means
     that there is a lot less memory allocation & shuffling compared
     to the basic class, which performs one allocation and (I believe)
     two copies for each frame that is acquired.
-    
+
     WARNING: There is the potential here for chaos. Since the memory
              is now shared there is the possibility that downstream code
              will try and access the same bit of memory at the same time
              as the camera and this could end badly.
 
     FIXME: Use lockbits (and unlockbits) to avoid memory clashes?
-           This would probably also involve some kind of reference 
+           This would probably also involve some kind of reference
            counting scheme.
     """
 
@@ -908,10 +919,10 @@ class HamamatsuCameraMR(HamamatsuCamera):
     def getFrames(self):
         """
         Gets all of the available frames.
-        
-        This will block waiting for new frames even if there new frames 
+
+        This will block waiting for new frames even if there new frames
         available when it is called.
-        
+
         FIXME: It does not always seem to block? The length of frames can
                be zero. Are frames getting dropped? Some sort of race condition?
         """
@@ -963,7 +974,10 @@ class HamamatsuCameraMR(HamamatsuCamera):
         # between acquisitions.
 
         paramattach = DCAMBUF_ATTACH(
-            0, DCAMBUF_ATTACHKIND_FRAME, self.hcam_ptr, self.number_image_buffers,
+            0,
+            DCAMBUF_ATTACHKIND_FRAME,
+            self.hcam_ptr,
+            self.number_image_buffers,
         )
         paramattach.size = ctypes.sizeof(paramattach)
 
@@ -1188,7 +1202,8 @@ if __name__ == "__main__":
 
         hcam.setPropertyValue("subarray_hsize", size)
         print(
-            "Subarray horizontal size: ", hcam.getPropertyValue("subarray_hsize")[0],
+            "Subarray horizontal size: ",
+            hcam.getPropertyValue("subarray_hsize")[0],
         )
 
 

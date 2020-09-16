@@ -4,20 +4,21 @@ from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
 from sashimi.hardware.laser import CoboltLaser, MockCoboltLaser
-from sashimi.scanning import (
-    Scanner,
-    PlanarScanning,
-    ZScanning,
-    ZSynced,
-    ZManual,
-    XYScanning,
-    ScanParameters,
-    TriggeringParameters,
+from sashimi.processes.scanning import Scanner
+from sashimi.hardware.scanning.scanloops import (
     ScanningState,
     ExperimentPrepareState,
+    XYScanning,
+    PlanarScanning,
+    ZManual,
+    ZSynced,
+    ZScanning,
+    TriggeringParameters,
+    ScanParameters,
 )
-from sashimi.stytra_comm import StytraCom
-from sashimi.dispatcher import VolumeDispatcher
+from sashimi.processes.stytra_comm import StytraCom
+from sashimi.processes.dispatcher import VolumeDispatcher
+from sashimi.processes.logging import ConcurrenceLogger
 from multiprocessing import Event
 import json
 from sashimi.camera import (
@@ -27,7 +28,8 @@ from sashimi.camera import (
     TriggerMode,
     MockCameraProcess,
 )
-from sashimi.streaming_save import StackSaver, SavingParameters, SavingStatus
+from sashimi.processes.streaming_save import StackSaver, SavingParameters, SavingStatus
+from sashimi.events import LoggedEvent, SashimiEvents
 from pathlib import Path
 from enum import Enum
 import time
@@ -68,7 +70,8 @@ class ScanningSettings(ParametrizedQt):
         super().__init__()
         self.name = "general/scanning_state"
         self.scanning_state = Param(
-            "Paused", ["Paused", "Calibration", "Planar", "Volume"],
+            "Paused",
+            ["Paused", "Calibration", "Planar", "Volume"],
         )
 
 
@@ -172,7 +175,11 @@ class Calibration(ParametrizedQt):
 
     def add_calibration_point(self):
         self.calibrations_points.append(
-            (self.z_settings.piezo, self.z_settings.lateral, self.z_settings.frontal,)
+            (
+                self.z_settings.piezo,
+                self.z_settings.lateral,
+                self.z_settings.frontal,
+            )
         )
         self.calculate_calibration()
 
@@ -315,31 +322,68 @@ class State:
     def __init__(self, sample_rate):
         self.conf = read_config()
         self.sample_rate = sample_rate
+
+        self.logger = ConcurrenceLogger("main")
+
         self.calibration_ref = None
         self.waveform = None
-        self.stop_event = Event()
-        self.experiment_start_event = Event()
+        self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
+        self.restart_event = LoggedEvent(self.logger, SashimiEvents.RESTART_SCANNING)
+        self.experiment_start_event = LoggedEvent(
+            self.logger, SashimiEvents.TRIGGER_STYTRA
+        )
+        self.noise_subtraction_active = LoggedEvent(
+            self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, Event()
+        )
+        self.is_saving_event = LoggedEvent(self.logger, SashimiEvents.IS_SAVING)
+
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
+
+        self.scanner = Scanner(
+            stop_event=self.stop_event,
+            restart_event=self.restart_event,
+            experiment_start_event=self.experiment_start_event,
+            sample_rate=self.sample_rate,
+        )
+
         if self.conf["scopeless"]:
             self.laser = MockCoboltLaser()
             self.camera = MockCameraProcess(
-                experiment_start_event=self.experiment_start_event,
-                stop_event=self.stop_event,
+                stop_event=self.stop_event.event,
+                wait_event=self.scanner.wait_signal,
+                exp_trigger_event=self.experiment_start_event,
             )
         else:
             self.laser = CoboltLaser()
             self.camera = CameraProcess(
-                experiment_start_event=self.experiment_start_event,
                 stop_event=self.stop_event,
+                wait_event=self.scanner.wait_signal,
+                exp_trigger_event=self.experiment_start_event,
             )
 
-        self.scanner = Scanner(
+        self.stytra_comm = StytraCom(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
-            sample_rate=self.sample_rate,
+            is_saving_event=self.is_saving_event,
         )
+
+        self.saver = StackSaver(
+            stop_event=self.stop_event,
+            is_saving_event=self.is_saving_event,
+            duration_queue=self.stytra_comm.duration_queue,
+        )
+
+        self.dispatcher = VolumeDispatcher(
+            stop_event=self.stop_event,
+            saving_signal=self.saver.saving_signal,
+            wait_signal=self.scanner.wait_signal,
+            noise_subtraction_on=self.noise_subtraction_active,
+            camera_queue=self.camera.image_queue,
+            saver_queue=self.saver.save_queue,
+        )
+
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
 
@@ -350,24 +394,8 @@ class State:
 
         self.planar_setting = PlanarScanningSettings()
         self.laser_settings = LaserSettings()
-        self.stytra_comm = StytraCom(
-            stop_event=self.stop_event,
-            experiment_start_event=self.experiment_start_event,
-        )
 
         self.save_status: Optional[SavingStatus] = None
-
-        self.saver = StackSaver(
-            stop_event=self.stop_event, duration_queue=self.stytra_comm.duration_queue,
-        )
-
-        self.dispatcher = VolumeDispatcher(
-            stop_event=self.stop_event,
-            saving_signal=self.saver.saving_signal,
-            wait_signal=self.scanner.wait_signal,
-            camera_queue=self.camera.image_queue,
-            saver_queue=self.saver.save_queue,
-        )
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
@@ -412,6 +440,7 @@ class State:
 
         self.current_camera_status = CamParameters()
         self.send_scan_settings()
+        self.logger.log_message("initialized")
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -454,7 +483,9 @@ class State:
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
-                self.planar_setting, self.single_plane_settings, self.calibration,
+                self.planar_setting,
+                self.single_plane_settings,
+                self.calibration,
             )
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
@@ -499,30 +530,19 @@ class State:
         except Empty:
             return None
 
-    def toggle_experiment_state(self):
-        if self.experiment_state == ExperimentPrepareState.PREVIEW:
-            self.experiment_state = ExperimentPrepareState.NO_TRIGGER
-            self.start_experiment()
-
-        elif self.experiment_state == ExperimentPrepareState.NO_TRIGGER:
-            self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
-            self.send_scan_settings()
-
-        elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
-            self.experiment_state = ExperimentPrepareState.PREVIEW
-            self.end_experiment()
-
     def start_experiment(self):
         # TODO disable the GUI except the abort button
+        self.logger.log_message("started experiment")
         self.send_scan_settings()
+        self.scanner.wait_signal.set()
+        self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
-        self.saver.saving_signal.set()
-        time.sleep(0.5)
-        self.toggle_experiment_state()
+        self.is_saving_event.set()
 
     def end_experiment(self):
-        self.saver.saving_signal.clear()
+        self.logger.log_message("experiment ended")
+        self.is_saving_event.clear()
         self.experiment_start_event.clear()
         self.saver.save_queue.clear()
         self.send_scan_settings()
@@ -531,7 +551,7 @@ class State:
         """
         Obtains average noise of n_images to subtract to acquired, both for display and saving
         """
-        self.dispatcher.noise_subtraction_active.clear()
+        self.noise_subtraction_active.clear()
 
         current_laser = self.laser_settings.laser_power
         self.laser.set_current(0)
@@ -546,7 +566,7 @@ class State:
                     )
                 calibration_set[n_image, :, :] = current_image
                 n_image += 1
-        self.dispatcher.noise_subtraction_active.set()
+        self.noise_subtraction_active.set()
         self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
         self.laser.set_current(current_laser)
 
@@ -554,7 +574,7 @@ class State:
 
     def reset_noise_subtraction(self):
         self.calibration_ref = None
-        self.dispatcher.noise_subtraction_active.clear()
+        self.noise_subtraction_active.clear()
 
     def get_volume(self):
         try:
@@ -582,14 +602,19 @@ class State:
             return None
 
     def calculate_pulse_times(self):
-        return np.arange(
-            self.volume_setting.n_skip_start,
-            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
+        return (
+            np.arange(
+                self.volume_setting.n_skip_start,
+                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+            )
+            / (self.volume_setting.frequency * self.volume_setting.n_planes)
+        )
 
     def wrap_up(self):
         self.stop_event.set()
+        self.logger.close()
         self.laser.close()
+
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)

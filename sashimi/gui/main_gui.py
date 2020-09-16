@@ -47,7 +47,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.wid_display)
 
         self.addDockWidget(
-            Qt.LeftDockWidgetArea, DockedWidget(widget=self.wid_status, title="Mode"),
+            Qt.LeftDockWidgetArea,
+            DockedWidget(widget=self.wid_status, title="Mode"),
         )
 
         self.addDockWidget(
@@ -102,7 +103,7 @@ class MainWindow(QMainWindow):
 
     def check_end_experiment(self):
         if self.st.saver.saver_stopped_signal.is_set():
-            self.st.toggle_experiment_state()
+            self.st.end_experiment()
             if self.st.pause_after:
                 self.wid_status.setCurrentIndex(0)
                 self.wid_laser.btn_off.click()
