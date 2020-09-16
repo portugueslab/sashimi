@@ -10,6 +10,8 @@ import json
 from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
 from sashimi.config import read_config
+from sashimi.processes.logging import LoggingProcess
+from sashimi.events import LoggedEvent, SashimiEvents
 
 conf = read_config()
 
@@ -36,13 +38,21 @@ class SavingStatus:
     i_chunk: int = 0
 
 
-class StackSaver(Process):
-    def __init__(self, stop_event, duration_queue, max_queue_size=2000):
-        super().__init__()
-        self.stop_event = stop_event
+class StackSaver(LoggingProcess):
+    def __init__(
+        self,
+        stop_event: LoggedEvent,
+        is_saving_event: LoggedEvent,
+        duration_queue: Queue,
+        max_queue_size=2000,
+    ):
+        super().__init__(name="saver")
+        self.stop_event = stop_event.new_reference(self.logger)
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
-        self.saving_signal = Event()
-        self.saver_stopped_signal = Event()
+        self.saving_signal = is_saving_event
+        self.saver_stopped_signal = LoggedEvent(
+            self.logger, SashimiEvents.SAVING_STOPPED
+        )
         self.saving = False
         self.saving_parameter_queue = Queue()
         self.save_parameters: Optional[SavingParameters] = SavingParameters()
@@ -57,11 +67,13 @@ class StackSaver(Process):
         self.duration_queue = duration_queue
 
     def run(self):
+        self.logger.log_message("started")
         while not self.stop_event.is_set():
             if self.saving_signal.is_set() and self.save_parameters is not None:
                 self.save_loop()
             else:
                 self.receive_save_parameters()
+        self.close_log()
 
     def save_loop(self):
         # remove files if some are found at the save location
@@ -88,6 +100,7 @@ class StackSaver(Process):
 
             try:
                 frame = self.save_queue.get(timeout=0.01)
+                self.logger.log_message("received volume")
                 self.fill_dataset(frame)
             except Empty:
                 pass
@@ -122,7 +135,9 @@ class StackSaver(Process):
         ]
         try:
             yag.send(
-                to=receiver_email, subject=subject, contents=body,
+                to=receiver_email,
+                subject=subject,
+                contents=body,
             )
         except (
             yagmail.error.YagAddressError,
@@ -135,7 +150,8 @@ class StackSaver(Process):
         if self.current_data is None:
             self.calculate_optimal_size(volume)
             self.current_data = np.empty(
-                (self.save_parameters.chunk_size, *volume.shape), dtype=self.dtype,
+                (self.save_parameters.chunk_size, *volume.shape),
+                dtype=self.dtype,
             )
 
         self.current_data[self.i_in_chunk, :, :, :] = volume
@@ -158,6 +174,7 @@ class StackSaver(Process):
         )
 
     def finalize_dataset(self):
+        self.logger.log_message("finished saving")
         with open(
             (
                 Path(self.save_parameters.output_dir)
@@ -185,6 +202,7 @@ class StackSaver(Process):
             )
 
     def save_chunk(self):
+        self.logger.log_message("saved chunk")
         fl.save(
             Path(self.save_parameters.output_dir)
             / "original/{:04d}.h5".format(self.i_chunk),

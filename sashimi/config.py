@@ -8,25 +8,49 @@ CONFIG_DIR_PATH = Path.home() / ".sashimi"
 CONFIG_DIR_PATH.mkdir(exist_ok=True)
 PRESETS_DIR_PATH = Path.home() / "presets"
 PRESETS_DIR_PATH.mkdir(exist_ok=True)
+LOGS_DIR_PATH = Path.home() / "logs"
+LOGS_DIR_PATH.mkdir(exist_ok=True)
+SCOPE_INSTRUCTIONS_PATH = Path()
 
 CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 
 # 2 level dictionary for sections and values:
-# TODO this will obvously have to change to fit scanning declarations
+# TODO this will obviously have to change to fit scanning declarations
 TEMPLATE_CONF_DICT = {
+    "scanning": "mock",
+    "scopeless": False,
     "sample_rate": 40000,
-    "default_paths": {"data": str(Path.home()), "presets": str(PRESETS_DIR_PATH),},
-    "piezo": {
-        "position_read": {"pos_chan": "Dev1/ai0:0", "min_val": 0, "max_val": 10,},
-        "position_write": {"pos_chan": "Dev1/a00:0", "min_val": -5, "max_val": 10,},
-        "synchronization": {"pos_chan": "/Dev1/ao/StartTrigger", "scale": 1 / 40,},
+    "default_paths": {
+        "data": str(Path.home()),
+        "presets": str(PRESETS_DIR_PATH),
+        "log": str(LOGS_DIR_PATH),
+        "scope_instructions": str(SCOPE_INSTRUCTIONS_PATH)},
     },
-    "galvo_lateral": {
-        "write_position": {"pos_chan": "Dev12/a0:1", "min_val": -5, "max_val": 10,}
+    "z_board": {
+        "read": {
+            "channel": "Dev1/ai0:0",
+            "min_val": 0,
+            "max_val": 10,
+        },
+        "write": {
+            "channel": "Dev1/ao0:3",
+            "min_val": -5,
+            "max_val": 10,
+        },
+        "sync": {"channel": "/Dev1/ao/StartTrigger"},
+    },
+    "piezo": {
+        "scale": 1 / 40,
+    },
+    "xy_board": {
+        "write": {
+            "channel": "Dev2/ao0:1",
+            "min_val": -5,
+            "max_val": 10,
+        }
     },
     "email": {"user": "foo", "password": "foo"},
     "array_ram_MB": 450,
-    "scopeless": False,
 }
 
 
@@ -101,44 +125,33 @@ def write_config_value(dict_path, val, file_path=CONFIG_PATH):
 @click.option("-n", "--name", help="Path (section/name) of parameter to be changed")
 @click.option("-v", "--val", help="Value of parameter to be changed")
 @click.option(
-    "-p", "--file_path", default=CONFIG_PATH, help="Path to the config file (optional)",
+    "-p",
+    "--file_path",
+    default=CONFIG_PATH,
+    help="Path to the config file (optional)",
 )
 def cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
     file_path = Path(file_path)
     if command == "edit":
-        conf = read_config(file_path=file_path)
-
-        # Cast the type of the previous variable
-        # (to avoid overwriting values with strings)
-        dict_path = name.split(".")
-        old_val = get_nested(conf, dict_path)
-        val = type(old_val)(val)  # Convert to keep the same type
-
-        write_config_value(dict_path, val, file_path)
+        cli_edit_config(name, val, file_path)
 
     elif command == "show":
         click.echo(_print_config(file_path=file_path))
 
 
-def _cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
-    file_path = Path(file_path)
-    if command == "edit":
-        conf = read_config(file_path=file_path)
+def cli_edit_config(name=None, val=None, file_path=CONFIG_PATH):
+    conf = read_config(file_path=file_path)
 
-        # Cast the type of the previous variable
-        # (to avoid overwriting values with strings)
-        dict_path = name.split(".")
-        old_val = get_nested(conf, dict_path)
-        val = type(old_val)(val)  # Convert to keep the same type
+    # Cast the type of the previous variable
+    # (to avoid overwriting values with strings)
+    dict_path = name.split(".")
+    old_val = get_nested(conf, dict_path)
+    val = type(old_val)(val)  # Convert to keep the same type
 
-        write_config_value(dict_path, val, file_path)
-
-    elif command == "show":
-        click.echo(_print_config(file_path=file_path))
+    write_config_value(dict_path, val, file_path)
 
 
 def _print_config(file_path=CONFIG_PATH):
-    """Return configuration string for printing.
-    """
+    """Return configuration string for printing."""
     config = read_config(file_path=file_path)
     return toml.dumps(config)
