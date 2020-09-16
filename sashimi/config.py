@@ -25,12 +25,28 @@ TEMPLATE_CONF_DICT = {
         "log": str(LOGS_DIR_PATH),
     },
     "z_board": {
-        "read": {"channel": "Dev1/ai0:0", "min_val": 0, "max_val": 10,},
-        "write": {"channel": "Dev1/ao0:3", "min_val": -5, "max_val": 10,},
+        "read": {
+            "channel": "Dev1/ai0:0",
+            "min_val": 0,
+            "max_val": 10,
+        },
+        "write": {
+            "channel": "Dev1/ao0:3",
+            "min_val": -5,
+            "max_val": 10,
+        },
         "sync": {"channel": "/Dev1/ao/StartTrigger"},
     },
-    "piezo": {"scale": 1 / 40,},
-    "xy_board": {"write": {"channel": "Dev2/ao0:1", "min_val": -5, "max_val": 10,}},
+    "piezo": {
+        "scale": 1 / 40,
+    },
+    "xy_board": {
+        "write": {
+            "channel": "Dev2/ao0:1",
+            "min_val": -5,
+            "max_val": 10,
+        }
+    },
     "email": {"user": "foo", "password": "foo"},
     "array_ram_MB": 450,
 }
@@ -107,7 +123,10 @@ def write_config_value(dict_path, val, file_path=CONFIG_PATH):
 @click.option("-n", "--name", help="Path (section/name) of parameter to be changed")
 @click.option("-v", "--val", help="Value of parameter to be changed")
 @click.option(
-    "-p", "--file_path", default=CONFIG_PATH, help="Path to the config file (optional)",
+    "-p",
+    "--file_path",
+    default=CONFIG_PATH,
+    help="Path to the config file (optional)",
 )
 def cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
     file_path = Path(file_path)
@@ -131,7 +150,6 @@ def cli_edit_config(name=None, val=None, file_path=CONFIG_PATH):
 
 
 def _print_config(file_path=CONFIG_PATH):
-    """Return configuration string for printing.
-    """
+    """Return configuration string for printing."""
     config = read_config(file_path=file_path)
     return toml.dumps(config)

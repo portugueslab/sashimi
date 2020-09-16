@@ -109,7 +109,9 @@ class NIBoards(AbstractScanInterface):
 
     def read(self):
         self.z_reader.read_many_sample(
-            self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
+            self.read_array,
+            number_of_samples_per_channel=self.n_samples,
+            timeout=1,
         )
         self.read_array[:] = self.read_array
 

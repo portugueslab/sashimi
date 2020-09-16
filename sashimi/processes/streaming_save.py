@@ -135,7 +135,9 @@ class StackSaver(LoggingProcess):
         ]
         try:
             yag.send(
-                to=receiver_email, subject=subject, contents=body,
+                to=receiver_email,
+                subject=subject,
+                contents=body,
             )
         except (
             yagmail.error.YagAddressError,
@@ -148,7 +150,8 @@ class StackSaver(LoggingProcess):
         if self.current_data is None:
             self.calculate_optimal_size(volume)
             self.current_data = np.empty(
-                (self.save_parameters.chunk_size, *volume.shape), dtype=self.dtype,
+                (self.save_parameters.chunk_size, *volume.shape),
+                dtype=self.dtype,
             )
 
         self.current_data[self.i_in_chunk, :, :, :] = volume
