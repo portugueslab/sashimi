@@ -1,5 +1,12 @@
+from contextlib import contextmanager
+
+class ScanningError(Exception):
+    pass
+
+
 class AbstractScanInterface:
-    def __init__(self, n_samples, conf, *args, **kwargs):
+    def __init__(self, sample_rate, n_samples, conf, *args, **kwargs):
+        self.sample_rate = sample_rate
         self.n_samples = n_samples
         self.conf = conf
 
@@ -61,13 +68,9 @@ class AbstractScanInterface:
         pass
 
 
-class AbstractScanConfigurator:
-    def __init__(self, n_samples, conf):
-        self.n_samples = n_samples
-        self.conf = conf
-
-    def __enter__(self):
-        return AbstractScanInterface(self.n_samples, self.conf)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
+@contextmanager
+def open_abstract_interface(sample_rate, n_samples, conf) -> AbstractScanInterface:
+    try:
+        yield AbstractScanInterface(sample_rate, n_samples, conf)
+    finally:
         pass

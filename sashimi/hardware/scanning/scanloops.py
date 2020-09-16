@@ -3,6 +3,7 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 from multiprocessing.queues import Queue
 from typing import Tuple, Union
+from arrayqueues.shared_arrays import ArrayQueue
 
 import numpy as np
 

@@ -1,5 +1,6 @@
 from multiprocessing import Queue, Event
 from copy import deepcopy
+from pprint import pprint
 
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
@@ -7,6 +8,14 @@ from sashimi.hardware.scanning.scanloops import (
     PlanarScanLoop,
     VolumetricScanLoop,
 )
+from sashimi.hardware.scanning.interface import ScanningError, AbstractScanInterface
+from sashimi.hardware.scanning.mock import open_mockboard
+try:
+    from sashimi.hardware.scanning.ni import open_niboard
+    NI_AVAILABLE = True
+except ImportError:
+    NI_AVAILABLE = False
+
 from warnings import warn
 from arrayqueues.shared_arrays import ArrayQueue
 
@@ -15,20 +24,15 @@ from sashimi.config import read_config
 from sashimi.processes.logging import LoggingProcess
 from sashimi.events import LoggedEvent, SashimiEvents
 
-from sashimi.hardware.scanning import ni
 
 conf = read_config()
 
+scan_conf_dict = dict(
+    mock=open_mockboard
+)
 
-if not conf["scopeless"]:
-    from nidaqmx.task import Task
-    from nidaqmx.constants import Edge, AcquisitionType
-    from nidaqmx.errors import DaqError
-
-else:
-    from scopecuisine.theknights.constants import Edge, AcquisitionType
-    from scopecuisine.theknights.task import Task
-    from scopecuisine.theknights.errors import DaqError
+if NI_AVAILABLE:
+    scan_conf_dict["ni"] = open_niboard
 
 
 class Scanner(LoggingProcess):
@@ -64,11 +68,13 @@ class Scanner(LoggingProcess):
 
     def run(self):
         self.logger.log_message("started")
+        configurator = scan_conf_dict[conf["scanning"]]
         while not self.stop_event.is_set():
             if self.parameters.state == ScanningState.PAUSED:
                 self.retrieve_parameters()
                 continue
-            with ni.NIScanConfigurator(self.n_samples, conf) as board:
+            with configurator(self.sample_rate, self.n_samples, conf) as board:
+                pprint(type(board))
                 if self.parameters.state == ScanningState.PLANAR:
                     loop = PlanarScanLoop
                 elif self.parameters.state == ScanningState.VOLUMETRIC:
@@ -89,7 +95,7 @@ class Scanner(LoggingProcess):
                 )
                 try:
                     scanloop.loop()
-                except DaqError as e:
+                except ScanningError as e:
                     warn("NI error " + e.__repr__())
                     scanloop.initialize()
                 self.parameters = deepcopy(

@@ -1,7 +1,8 @@
 from sashimi.hardware.scanning.interface import (
     AbstractScanInterface,
-    AbstractScanConfigurator,
 )
+
+from contextlib import contextmanager
 
 from nidaqmx.task import Task
 from nidaqmx.constants import Edge, AcquisitionType
@@ -11,21 +12,20 @@ from nidaqmx.stream_writers import AnalogMultiChannelWriter
 
 import numpy as np
 
-
-class NIScanConfigurator(AbstractScanConfigurator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def __enter__(self):
-        with Task() as read_task, Task() as write_task_z, Task() as write_task_xy:
-            return NIBoards(
-                self.n_samples, self.conf, read_task, write_task_z, write_task_xy
+@contextmanager
+def open_niboard(sample_rate, n_samples, conf):
+    with Task() as read_task, Task() as write_task_z, Task() as write_task_xy:
+        try:
+            yield NIBoards(
+                sample_rate, n_samples, conf, read_task=read_task, write_task_z=write_task_z, write_task_xy=write_task_xy
             )
+        finally:
+            pass
 
 
 class NIBoards(AbstractScanInterface):
-    def __init__(self, n_samples, conf, read_task, write_task_z, write_task_xy):
-        super().__init__(n_samples, conf)
+    def __init__(self, *args, read_task, write_task_z, write_task_xy):
+        super().__init__(*args)
         self.read_task = read_task
         self.write_task_xy = write_task_xy
         self.write_task_z = write_task_z
@@ -34,10 +34,10 @@ class NIBoards(AbstractScanInterface):
         self.xy_writer = AnalogMultiChannelWriter(write_task_xy.out_stream)
         self.z_reader = AnalogSingleChannelReader(read_task.in_stream)
 
-        self.xy_array = np.zeros((2, n_samples))
-        self.z_array = np.zeros((2, n_samples))
+        self.xy_array = np.zeros((2, self.n_samples))
+        self.z_array = np.zeros((4, self.n_samples))
 
-        self.read_array = np.zeros(n_samples)
+        self.read_array = np.zeros(self.n_samples)
 
         self.setup_tasks()
 
@@ -46,23 +46,23 @@ class NIBoards(AbstractScanInterface):
 
         # read channel is only the piezo position on board 1
         self.read_task.ai_channels.add_ai_voltage_chan(
-            self.conf["piezo"]["position_read"]["pos_chan"],
-            min_val=self.conf["piezo"]["position_read"]["min_val"],
-            max_val=self.conf["piezo"]["position_read"]["max_val"],
+            self.conf["z_board"]["read"]["channel"],
+            min_val=self.conf["z_board"]["read"]["min_val"],
+            max_val=self.conf["z_board"]["read"]["max_val"],
         )
 
         # write channels are on board 1: piezo and z galvos
         self.write_task_z.ao_channels.add_ao_voltage_chan(
-            self.conf["piezo"]["position_write"]["pos_chan"],
-            min_val=self.conf["piezo"]["position_write"]["min_val"],
-            max_val=self.conf["piezo"]["position_write"]["max_val"],
+            self.conf["z_board"]["write"]["channel"],
+            min_val=self.conf["z_board"]["write"]["min_val"],
+            max_val=self.conf["z_board"]["write"]["max_val"],
         )
 
         # on board 2: lateral galvos
         self.write_task_xy.ao_channels.add_ao_voltage_chan(
-            self.conf["galvo_lateral"]["write_position"]["pos_chan"],
-            min_val=self.conf["galvo_lateral"]["write_position"]["min_val"],
-            max_val=self.conf["galvo_lateral"]["write_position"]["max_val"],
+            self.conf["xy_board"]["write"]["channel"],
+            min_val=self.conf["xy_board"]["write"]["min_val"],
+            max_val=self.conf["xy_board"]["write"]["max_val"],
         )
 
         # Set the timing of both to the onboard clock so that they are synchronised
@@ -91,7 +91,7 @@ class NIBoards(AbstractScanInterface):
 
         # This is necessary to synchronise reading and writing
         self.read_task.triggers.start_trigger.cfg_dig_edge_start_trig(
-            self.conf["piezo"]["synchronization"]["pos_chan"], Edge.RISING
+            self.conf["z_board"]["sync"]["channel"], Edge.RISING
         )
 
     def start(self):
@@ -108,16 +108,24 @@ class NIBoards(AbstractScanInterface):
             self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
         )
         self.read_array[:] = (
-            self.read_array / self.conf["piezo"]["synchronization"]["scale"]
+            self.read_array
         )
 
     @property
     def z_piezo(self):
-        return self.read_array
+        return self.read_array / self.conf["piezo"]["scale"]
 
     @z_piezo.setter
     def z_piezo(self, waveform):
-        self.z_array[0, :] = waveform * self.conf["piezo"]["synchronization"]["scale"]
+        self.z_array[0, :] = waveform * self.conf["piezo"]["scale"]
+
+    @property
+    def z_lateral(self):
+        return self.z_array[1, :]
+
+    @property
+    def z_frontal(self):
+        return self.z_array[2, :]
 
     @z_lateral.setter
     def z_lateral(self, waveform):
@@ -127,6 +135,26 @@ class NIBoards(AbstractScanInterface):
     def z_frontal(self, waveform):
         self.z_array[2, :] = waveform
 
+    @property
+    def camera_trigger(self):
+        return self.z_array[3, :]
+
     @camera_trigger.setter
     def camera_trigger(self, waveform):
         self.z_array[3, :] = waveform
+
+    @property
+    def xy_frontal(self):
+        return self.xy_array[1, :]
+
+    @xy_frontal.setter
+    def xy_frontal(self, waveform):
+        self.xy_array[1, :] = waveform
+
+    @property
+    def xy_lateral(self):
+        return self.xy_array[0, :]
+
+    @xy_lateral.setter
+    def xy_lateral(self, waveform):
+        self.xy_array[0, :] = waveform
