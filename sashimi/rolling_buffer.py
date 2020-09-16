@@ -38,7 +38,7 @@ class RollingBuffer:
         self.buffer = np.zeros(length)
 
     def read(self, start, n_samples_total):
-        """ Function to read from circular numpy buffer
+        """Function to read from circular numpy buffer
 
         :param arr:
         :param start:
@@ -48,7 +48,7 @@ class RollingBuffer:
         return read_circular(self.buffer, start, n_samples_total)
 
     def write(self, to_write, start):
-        """ Function to write to circular numpy buffer
+        """Function to write to circular numpy buffer
 
         :param arr:
         :param to_write: array to fill the buffer

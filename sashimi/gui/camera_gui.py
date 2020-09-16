@@ -55,7 +55,9 @@ class ViewingWidget(QWidget):
 
         self.viewer = napari.Viewer(show=False)
         self.frame_layer = self.viewer.add_image(
-            np.zeros((1, ) + IMAGE_SIZE), blending="translucent", name="frame_layer",
+            np.zeros([1, 1024, 1024]),
+            blending="translucent",
+            name="frame_layer",
         )
 
         self.roi = self.viewer.add_shapes(
