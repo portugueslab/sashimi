@@ -4,13 +4,12 @@ lightparam>=0.4, <0.5
 pyqt5>=5.15
 pyzmq
 QDarkStyle==2.7
-yagmail==0.11.224
 markdown==3.2.2
 click
 traitlets
 nidaqmx
 toml
-scopecuisine==0.1.2
+scopecuisine>=0.1.2
 pyqtgraph
 napari
 numba

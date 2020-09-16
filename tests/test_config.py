@@ -24,9 +24,7 @@ def test_config_creation(conf_path):
 
 def test_write_config_val(conf_path):
     val = 6
-    config.write_config_value(
-        ["z_board", "read", "min_val"], val, file_path=conf_path
-    )
+    config.write_config_value(["z_board", "read", "min_val"], val, file_path=conf_path)
     conf = config.read_config(file_path=conf_path)
     assert conf["z_board"]["read"]["min_val"] == val
 

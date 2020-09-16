@@ -8,7 +8,7 @@ import numpy as np
 import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
-import yagmail
+from scopecuisine.notifiers import notifiers
 from sashimi.config import read_config
 from sashimi.processes.logging import LoggingProcess
 from sashimi.events import LoggedEvent, SashimiEvents
@@ -65,6 +65,7 @@ class StackSaver(LoggingProcess):
         self.frame_shape = None
         self.dtype = np.uint16
         self.duration_queue = duration_queue
+        self.notifier = notifiers[conf["notifier"]]
 
     def run(self):
         self.logger.log_message("started")
@@ -76,6 +77,7 @@ class StackSaver(LoggingProcess):
         self.close_log()
 
     def save_loop(self):
+        notifier = self.notifier("lightsheet", **conf["notifier_options"])
         # remove files if some are found at the save location
         Path(self.save_parameters.output_dir).mkdir(parents=True, exist_ok=True)
         if (
@@ -97,7 +99,6 @@ class StackSaver(LoggingProcess):
             and not self.stop_event.is_set()
         ):
             self.receive_save_parameters()
-
             try:
                 frame = self.save_queue.get(timeout=0.01)
                 self.logger.log_message("received volume")
@@ -112,39 +113,11 @@ class StackSaver(LoggingProcess):
             self.finalize_dataset()
             self.current_data = None
             if self.saving_signal.is_set():
-                self.send_email_end()
+                notifier.notify()
 
         self.saving_signal.clear()
         self.save_parameters = None
         self.saver_stopped_signal.set()
-
-    def send_email_end(self):
-        sender_email = conf["email"]["user"]  # TODO this should go to thecolonel
-        # TODO: Send email every x minutes with image like in 2P
-        receiver_email = self.save_parameters.notification_email
-        subject = "Your lightsheet experiment is complete"
-        sender_password = conf["email"]["password"]
-
-        yag = yagmail.SMTP(user=sender_email, password=sender_password)
-
-        body = [
-            "Hey!",
-            "\n",
-            "Your lightsheet experiment has finished and was a success! Come pick up your little fish",
-            "\n" "fishgitbot",
-        ]
-        try:
-            yag.send(
-                to=receiver_email,
-                subject=subject,
-                contents=body,
-            )
-        except (
-            yagmail.error.YagAddressError,
-            yagmail.error.YagConnectionClosed,
-            yagmail.error.YagInvalidEmailAddress,
-        ):
-            pass
 
     def fill_dataset(self, volume):
         if self.current_data is None:

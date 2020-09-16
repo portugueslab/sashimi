@@ -139,7 +139,7 @@ class ViewingWidget(QWidget):
 
     def refresh_progress_bar(self):
         sstatus = self.state.get_save_status()
-        if self.state.get_save_status() is not None:
+        if sstatus is not None:
             self.experiment_progress.show()
             self.lbl_experiment_progress.show()
             self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)

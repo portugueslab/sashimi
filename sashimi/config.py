@@ -49,7 +49,8 @@ TEMPLATE_CONF_DICT = {
             "max_val": 10,
         }
     },
-    "email": {"user": "foo", "password": "foo"},
+    "notifier": "none",
+    "notifier_options": {},
     "array_ram_MB": 450,
 }
 
