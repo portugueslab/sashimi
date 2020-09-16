@@ -1,6 +1,5 @@
 from multiprocessing import Queue, Event
 from copy import deepcopy
-from pprint import pprint
 
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
@@ -40,6 +39,7 @@ class Scanner(LoggingProcess):
         self,
         stop_event: LoggedEvent,
         experiment_start_event: LoggedEvent,
+        restart_event: LoggedEvent,
         start_experiment_from_scanner=False,
         n_samples_waveform=10000,
         sample_rate=40000,
@@ -47,6 +47,7 @@ class Scanner(LoggingProcess):
         super().__init__(name="scanner")
 
         self.stop_event = stop_event.new_reference(self.logger)
+        self.restart_event = restart_event.new_reference(self.logger)
         self.experiment_start_event = experiment_start_event.new_reference(self.logger)
         self.wait_signal = LoggedEvent(
             self.logger, SashimiEvents.WAITING_FOR_TRIGGER, Event()
@@ -74,7 +75,6 @@ class Scanner(LoggingProcess):
                 self.retrieve_parameters()
                 continue
             with configurator(self.sample_rate, self.n_samples, conf) as board:
-                pprint(type(board))
                 if self.parameters.state == ScanningState.PLANAR:
                     loop = PlanarScanLoop
                 elif self.parameters.state == ScanningState.VOLUMETRIC:
@@ -83,6 +83,7 @@ class Scanner(LoggingProcess):
                 scanloop = loop(
                     board,
                     self.stop_event,
+                    self.restart_event,
                     self.parameters,
                     self.parameter_queue,
                     self.n_samples,

@@ -89,6 +89,7 @@ class ScanLoop:
         self,
         board: AbstractScanInterface,
         stop_event,
+        restart_event,
         initial_parameters: ScanParameters,
         parameter_queue: Queue,
         n_samples,
@@ -106,6 +107,7 @@ class ScanLoop:
         self.board = board
 
         self.stop_event = stop_event
+        self.restart_event = restart_event
         self.logger = logger
 
         self.parameter_queue = parameter_queue
@@ -157,6 +159,9 @@ class ScanLoop:
         return False
 
     def loop_condition(self):
+        if self.restart_event.is_set():
+            self.restart_event.clear()
+            return False
         return not self.stop_event.is_set()
 
     def check_start(self):
@@ -295,7 +300,7 @@ class VolumetricScanLoop(ScanLoop):
             vmax=self.parameters.z.piezo_max,
         )
 
-        if not self.camera_on and self.n_samples_read > self.n_samples_period():
+        if not self.camera_on and self.n_samples_read > self.n_samples_period() * 2:
             self.camera_on = True
             self.wait_signal.clear()
             self.trigger_exp_start = True

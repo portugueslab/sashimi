@@ -328,6 +328,7 @@ class State:
         self.calibration_ref = None
         self.waveform = None
         self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
+        self.restart_event = LoggedEvent(self.logger, SashimiEvents.RESTART_SCANNING)
         self.experiment_start_event = LoggedEvent(
             self.logger, SashimiEvents.TRIGGER_STYTRA
         )
@@ -342,6 +343,7 @@ class State:
 
         self.scanner = Scanner(
             stop_event=self.stop_event,
+            restart_event=self.restart_event,
             experiment_start_event=self.experiment_start_event,
             sample_rate=self.sample_rate,
         )
@@ -528,28 +530,15 @@ class State:
         except Empty:
             return None
 
-    def toggle_experiment_state(self):
-        if self.experiment_state == ExperimentPrepareState.PREVIEW:
-            self.experiment_state = ExperimentPrepareState.NO_TRIGGER
-            self.start_experiment()
-
-        elif self.experiment_state == ExperimentPrepareState.NO_TRIGGER:
-            self.experiment_state = ExperimentPrepareState.EXPERIMENT_STARTED
-            self.send_scan_settings()
-
-        elif self.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
-            self.experiment_state = ExperimentPrepareState.PREVIEW
-            self.end_experiment()
-
     def start_experiment(self):
         # TODO disable the GUI except the abort button
         self.logger.log_message("started experiment")
         self.send_scan_settings()
+        self.scanner.wait_signal.set()
+        self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
         self.is_saving_event.set()
-        time.sleep(0.5)
-        self.toggle_experiment_state()
 
     def end_experiment(self):
         self.logger.log_message("experiment ended")
@@ -623,8 +612,8 @@ class State:
 
     def wrap_up(self):
         self.stop_event.set()
-        self.laser.close()
         self.logger.close()
+        self.laser.close()
 
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)

@@ -15,6 +15,7 @@ class SashimiEvents(AutoName):
     NOISE_SUBTRACTION_ACTIVE = auto()
     SAVING_STOPPED = auto()
     CLOSE_ALL = auto()
+    RESTART_SCANNING = auto()
 
 
 class LoggedEvent:

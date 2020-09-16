@@ -34,6 +34,7 @@ class ConcurrenceLogger:
 
     def close(self):
         if self.file is not None:
+            self.file.flush()
             self.file.close()
 
 
