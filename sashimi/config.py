@@ -25,16 +25,12 @@ TEMPLATE_CONF_DICT = {
         "log": str(LOGS_DIR_PATH),
     },
     "z_board": {
-        "read": {"channel": "Dev1/ai0:0", "min_val": 0, "max_val": 10, },
+        "read": {"channel": "Dev1/ai0:0", "min_val": 0, "max_val": 10,},
         "write": {"channel": "Dev1/ao0:3", "min_val": -5, "max_val": 10,},
         "sync": {"channel": "/Dev1/ao/StartTrigger"},
     },
-    "piezo": {
-        "scale": 1 / 40,
-    },
-    "xy_board": {
-        "write": {"channel": "Dev2/ao0:1", "min_val": -5, "max_val": 10,}
-    },
+    "piezo": {"scale": 1 / 40,},
+    "xy_board": {"write": {"channel": "Dev2/ao0:1", "min_val": -5, "max_val": 10,}},
     "email": {"user": "foo", "password": "foo"},
     "array_ram_MB": 450,
 }

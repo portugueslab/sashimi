@@ -8,7 +8,11 @@ from sashimi.state import State
 
 
 @click.command()
-@click.option("--sample-rate", default=40000, help="Sample rate of the board that controls the scanning")
+@click.option(
+    "--sample-rate",
+    default=40000,
+    help="Sample rate of the board that controls the scanning",
+)
 @click.option("--scanning", default="mock", help="The scanning interface")
 def main(sample_rate, scanning, **kwargs):
     cli_edit_config("scanning", scanning)

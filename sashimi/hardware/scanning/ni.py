@@ -1,6 +1,4 @@
-from sashimi.hardware.scanning.interface import (
-    AbstractScanInterface,
-)
+from sashimi.hardware.scanning.interface import AbstractScanInterface
 
 from contextlib import contextmanager
 
@@ -12,12 +10,18 @@ from nidaqmx.stream_writers import AnalogMultiChannelWriter
 
 import numpy as np
 
+
 @contextmanager
 def open_niboard(sample_rate, n_samples, conf):
     with Task() as read_task, Task() as write_task_z, Task() as write_task_xy:
         try:
             yield NIBoards(
-                sample_rate, n_samples, conf, read_task=read_task, write_task_z=write_task_z, write_task_xy=write_task_xy
+                sample_rate,
+                n_samples,
+                conf,
+                read_task=read_task,
+                write_task_z=write_task_z,
+                write_task_xy=write_task_xy,
             )
         finally:
             pass
@@ -107,9 +111,7 @@ class NIBoards(AbstractScanInterface):
         self.z_reader.read_many_sample(
             self.read_array, number_of_samples_per_channel=self.n_samples, timeout=1,
         )
-        self.read_array[:] = (
-            self.read_array
-        )
+        self.read_array[:] = self.read_array
 
     @property
     def z_piezo(self):

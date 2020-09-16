@@ -10,8 +10,10 @@ from sashimi.hardware.scanning.scanloops import (
 )
 from sashimi.hardware.scanning.interface import ScanningError, AbstractScanInterface
 from sashimi.hardware.scanning.mock import open_mockboard
+
 try:
     from sashimi.hardware.scanning.ni import open_niboard
+
     NI_AVAILABLE = True
 except ImportError:
     NI_AVAILABLE = False
@@ -27,9 +29,7 @@ from sashimi.events import LoggedEvent, SashimiEvents
 
 conf = read_config()
 
-scan_conf_dict = dict(
-    mock=open_mockboard
-)
+scan_conf_dict = dict(mock=open_mockboard)
 
 if NI_AVAILABLE:
     scan_conf_dict["ni"] = open_niboard
