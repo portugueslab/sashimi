@@ -47,7 +47,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.wid_display)
 
         self.addDockWidget(
-            Qt.LeftDockWidgetArea, DockedWidget(widget=self.wid_status, title="Mode"),
+            Qt.LeftDockWidgetArea,
+            DockedWidget(widget=self.wid_status, title="Mode"),
         )
 
         self.addDockWidget(

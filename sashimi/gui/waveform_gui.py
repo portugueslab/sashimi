@@ -37,13 +37,19 @@ class WaveformWidget(QWidget):
             )  # TODO get currently displayed plane from Napari viewer (if in single-plane mode)
             if i_pulse == current_pulse:
                 self.pulse_regions[i_pulse] = pg.LinearRegionItem(
-                    values=(pulse, pulse + self.state.camera_settings.exposure / 1000,),
+                    values=(
+                        pulse,
+                        pulse + self.state.camera_settings.exposure / 1000,
+                    ),
                     movable=False,
                     brush=pg.mkBrush(*color_current_plane),
                 )
             else:
                 self.pulse_regions[i_pulse] = pg.LinearRegionItem(
-                    values=(pulse, pulse + self.state.camera_settings.exposure / 1000,),
+                    values=(
+                        pulse,
+                        pulse + self.state.camera_settings.exposure / 1000,
+                    ),
                     movable=False,
                     brush=pg.mkBrush(*color_plane),
                 )
@@ -55,5 +61,6 @@ class WaveformWidget(QWidget):
         current_waveform = self.state.get_waveform()
         if current_waveform is not None:
             self.plot_curve.setData(
-                np.arange(len(current_waveform)) / self.sample_rate, current_waveform,
+                np.arange(len(current_waveform)) / self.sample_rate,
+                current_waveform,
             )
