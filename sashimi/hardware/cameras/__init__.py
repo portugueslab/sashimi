@@ -5,14 +5,12 @@ import numpy as np
 conf = read_config()
 
 
-class BasicCamera:
+class AbstractCamera:
     def __init__(self):
         super().__init__()
-        self.encoding = "utf-8"
         self.camera_id = conf["camera"]["id"]
-        self.image_height = 2048
-        self.image_width = 2048
-        self.frame_shape: tuple = (1024, 1024)
+        self._sensor_resolution = (2048, 2048)
+        self._frame_shape: tuple = (1024, 1024)
 
     def apply_parameters(self, parameters):
         """
@@ -119,47 +117,78 @@ class BasicCamera:
     def camera_mode(self, parameters):
         pass
 
+    @property
+    def frame_rate(self):
+        return None
+
+    @frame_rate.setter
+    def frame_rate(self, parameters):
+        pass
+
+    @property
+    def sensor_resolution(self):
+        return tuple([None, None])
+
+    @sensor_resolution.setter
+    def sensor_resolution(self, parameters):
+        pass
+
+    @property
+    def frame_shape(self):
+        return tuple([None, None])
+
+    @frame_shape.setter
+    def frame_shape(self, parameters):
+        pass
+
 
 class AbstractCameraConfigurator:
     def __init__(self):
         pass
 
     def __enter__(self):
-        return BasicCamera()
+        return AbstractCamera()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
 
-class MockCamera(BasicCamera):
+class MockCamera(AbstractCamera):
     def __init__(self):
         super().__init__()
-        self.internal_frame_shape: tuple = (1024, 1024)
-        self.internal_exposure_time = 60
+        self._frame_shape: tuple = (1024, 1024)
+        self._exposure_time = 60
+        self._sensor_resolution = (2048, 2048)
+        self._frame_rate = 1 / self._exposure_time
 
-    def apply_parameters(self, parameters, *args, **kwargs):
-        super().apply_parameters(*args, **kwargs)
-        self.exposure_time = parameters
-        self.frame_shape = parameters
+    # TODO: Modify camera.py to access properties directly and not on-top functions like apply_parameters()
 
     @property
     def exposure_time(self):
-        return self.internal_exposure_time
+        return self._exposure_time
 
     @exposure_time.setter
     def exposure_time(self, parameters):
-        self.internal_exposure_time = parameters.exposure_time
+        self._exposure_time = parameters.exposure_time
 
     @property
     def frame_shape(self):
-        return self.internal_frame_shape
+        return self._frame_shape
 
     @frame_shape.setter
     def frame_shape(self, parameters):
         subarray = parameters.subarray
         # quantizing the ROI dims in multiples of 4
         subarray = [min((i * parameters.binning // 4) * 4, 2048) for i in subarray]
-        self.internal_frame_shape = (subarray[2], subarray[3])
+        self._frame_shape = (subarray[2] // parameters.binning, subarray[3] // parameters.binning)
+
+    @property
+    def frame_rate(self):
+        return self._frame_rate
+
+    @frame_rate.setter
+    def frame_rate(self, parameters):
+        self._frame_rate = 1 / parameters.exposure_time
 
     def get_frames(self):
         super().get_frames()
@@ -172,9 +201,3 @@ class MockCamera(BasicCamera):
             )
             frames.append(frame)
         return frames
-
-    def get_internal_parameters(self, parameters, *args, **kwargs):
-        super().get_internal_parameters(*args, **kwargs)
-        frame_shape = parameters.subarray // parameters.binning
-        internal_frame_rate = 1 / parameters.exposure_time
-        return tuple([frame_shape, internal_frame_rate])

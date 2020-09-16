@@ -1,9 +1,9 @@
 from sashimi.utilities import SpeedyArrayBuffer
-from sashimi.hardware.cameras import BasicCamera
+from sashimi.hardware.cameras import AbstractCamera
 from sashimi.hardware.cameras.SDK.hamamatsu_sdk import *
 
 
-class HamamatsuCamera(BasicCamera):
+class HamamatsuCamera(AbstractCamera):
     def __init__(self, *args, **kwargs):
         super().__init__()
         self.dcam = ctypes.windll.dcamapi

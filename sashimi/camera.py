@@ -123,10 +123,7 @@ class CameraProcess(Process):
 
     def run_camera(self):
         while not self.stop_event.is_set():
-            self.parameters = self.new_parameters
-            self.camera.apply_parameters(self.parameters)
-            self.parameters.frame_shape, self.parameters.internal_frame_rate = \
-                self.camera.get_internal_parameters(self.parameters)
+            self.update_parameters()
             self.camera_status_queue.put(self.cast_parameters())
             if self.parameters.camera_mode == CameraMode.PAUSED:
                 self.pause_loop()
@@ -152,6 +149,13 @@ class CameraProcess(Process):
                     break
             except Empty:
                 pass
+
+    def update_parameters(self):
+        self.parameters = self.new_parameters
+        self.camera.exposure_time = self.parameters
+        self.camera.frame_shape = self.parameters
+        self.parameters.frame_shape = self.camera.frame_shape
+        self.parameters.internal_frame_rate = self.camera.frame_rate
 
     def update_framerate(self):
         self.framerate_rec.update_framerate()
