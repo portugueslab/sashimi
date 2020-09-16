@@ -10,6 +10,7 @@ PRESETS_DIR_PATH = Path.home() / "presets"
 PRESETS_DIR_PATH.mkdir(exist_ok=True)
 LOGS_DIR_PATH = Path.home() / "logs"
 LOGS_DIR_PATH.mkdir(exist_ok=True)
+SCOPE_INSTRUCTIONS_PATH = Path()
 
 CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 
@@ -23,6 +24,7 @@ TEMPLATE_CONF_DICT = {
         "data": str(Path.home()),
         "presets": str(PRESETS_DIR_PATH),
         "log": str(LOGS_DIR_PATH),
+        "scope_instructions": str(SCOPE_INSTRUCTIONS_PATH)},
     },
     "z_board": {
         "read": {
