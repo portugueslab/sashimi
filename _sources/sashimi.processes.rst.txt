@@ -1,0 +1,54 @@
+sashimi.processes package
+=========================
+
+Submodules
+----------
+
+sashimi.processes.dispatcher module
+-----------------------------------
+
+.. automodule:: sashimi.processes.dispatcher
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.processes.logging module
+--------------------------------
+
+.. automodule:: sashimi.processes.logging
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.processes.scanning module
+---------------------------------
+
+.. automodule:: sashimi.processes.scanning
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.processes.streaming\_save module
+----------------------------------------
+
+.. automodule:: sashimi.processes.streaming_save
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.processes.stytra\_comm module
+-------------------------------------
+
+.. automodule:: sashimi.processes.stytra_comm
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sashimi.processes
+   :members:
+   :undoc-members:
+   :show-inheritance:

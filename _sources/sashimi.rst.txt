@@ -1,0 +1,88 @@
+sashimi package
+===============
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   sashimi.gui
+   sashimi.hardware
+   sashimi.processes
+
+Submodules
+----------
+
+sashimi.camera module
+---------------------
+
+.. automodule:: sashimi.camera
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.config module
+---------------------
+
+.. automodule:: sashimi.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.events module
+---------------------
+
+.. automodule:: sashimi.events
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.main module
+-------------------
+
+.. automodule:: sashimi.main
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.rolling\_buffer module
+------------------------------
+
+.. automodule:: sashimi.rolling_buffer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.state module
+--------------------
+
+.. automodule:: sashimi.state
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.utilities module
+------------------------
+
+.. automodule:: sashimi.utilities
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.waveforms module
+------------------------
+
+.. automodule:: sashimi.waveforms
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sashimi
+   :members:
+   :undoc-members:
+   :show-inheritance:

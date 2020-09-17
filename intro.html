@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sashimi &#8212; Sashimi 0.2.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Another page" href="another_page.html" />
+    <link rel="prev" title="Welcome to the Sashimi documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="warning admonition">
+<p class="admonition-title">Here’s my title</p>
+<p>Here’s my admonition content</p>
+</div>
+<div class="section" id="sashimi">
+<h1>Sashimi<a class="headerlink" href="#sashimi" title="Permalink to this headline">¶</a></h1>
+<p><a href="url"><img 
+src="https://github.com/portugueslab/sashimi/blob/master/sashimi/icons/main_icon.png" 
+align="left" 
+height="190" 
+width="270"></a></p>
+<p>Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
+It was developed by members of the <a class="reference external" href="http://www.portugueslab.com/">PortuguesLab</a>
+at the Technical University of Munich and Max Planck Institute of Neurobiology. Sashimi relies on the fast, multidimensional
+<a class="reference external" href="https://github.com/napari/napari">Napari viewer</a> and is accelerated by <a class="reference external" href="https://github.com/numba/numba">numba</a> for real-time processing.</p>
+<p>Hardware is controlled through <a class="reference external" href="https://github.com/pyvisa/pyvisa">pyvisa</a> for serial communication and
+<a class="reference external" href="https://github.com/ni/nidaqmx-python/">nidaqmx</a> for National Instruments I/O boards.</p>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://www.anaconda.com/">Install the latest Anaconda</a> distribution of Python 3.</p>
+<p>Clone this repository and navigate to the main folder <code class="docutils literal notranslate"><span class="pre">../sashimi</span></code></p>
+<div class="section" id="recommended-create-a-new-environment">
+<h3>Recommended: Create a new environment<a class="headerlink" href="#recommended-create-a-new-environment" title="Permalink to this headline">¶</a></h3>
+<p>It is a good practice to create an environment for every project. We provide a file to automatically create the right environment. Make sure you are in the main folder <code class="docutils literal notranslate"><span class="pre">../sashimi</span></code> and run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda env create -f environment.yml
+</pre></div>
+</div>
+<p>We will run all related to this software in this environment. You can activate the environment running:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda activate sashimi
+</pre></div>
+</div>
+</div>
+<div class="section" id="install-with-pip">
+<h3>Install with pip<a class="headerlink" href="#install-with-pip" title="Permalink to this headline">¶</a></h3>
+<p>For a non-editable installation run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install .
+</pre></div>
+</div>
+<p>Otherwise, if you want to contribute to the project as a developer, for editable installation run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install -e .
+</pre></div>
+</div>
+<p>Now you are ready to go!</p>
+</div>
+</div>
+<div class="section" id="starting-the-software-from-command-line">
+<h2>Starting the software from command line<a class="headerlink" href="#starting-the-software-from-command-line" title="Permalink to this headline">¶</a></h2>
+<p>Open a new anaconda prompt and activate your environment like above. Then run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi
+</pre></div>
+</div>
+<p>Press <strong>User guide</strong> to pop-up instructions that will drive you through the whole experiment preparation, acquisition and termination.</p>
+</div>
+<div class="section" id="configuring-sashimi">
+<h2>Configuring sashimi<a class="headerlink" href="#configuring-sashimi" title="Permalink to this headline">¶</a></h2>
+<p>You can ask sashimi for help:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi --help
+</pre></div>
+</div>
+<p>Running <code class="docutils literal notranslate"><span class="pre">sashimi</span> <span class="pre">--debug</span></code> lets you start the software without any hardware connected to the machine. Sashimi includes the
+<code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> module that lets you interact with the hardware and software settings from command line. You can display the
+current configuration of the system by running:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config show
+</pre></div>
+</div>
+<p>More information on its usage can be found by asking <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> for help:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config --help
+</pre></div>
+</div>
+<p>You can add and modify parameters just from the command line. For example, to set the piezo waveform readout channel to <code class="docutils literal notranslate"><span class="pre">Dev1/ao0:0</span></code> just run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n piezo.position_write.pos_chan -v Dev1/ao0:0
+</pre></div>
+</div>
+<p>Or to modify the minimum and maximum voltage (in Volts) of the channel:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n piezo.position_write.min_val -v 0
+sashimi-config edit -n piezo.position_write.max_val -v 10
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Sashimi</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sashimi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#recommended-create-a-new-environment">Recommended: Create a new environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-with-pip">Install with pip</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#starting-the-software-from-command-line">Starting the software from command line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuring-sashimi">Configuring sashimi</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="another_page.html">Another page</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to the Sashimi documentation!</a></li>
+      <li>Next: <a href="another_page.html" title="next chapter">Another page</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;Portugues lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/intro.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

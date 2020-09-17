@@ -1,0 +1,595 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>sashimi.hardware.scanning package &#8212; Sashimi 0.2.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="sashimi-hardware-scanning-package">
+<h1>sashimi.hardware.scanning package<a class="headerlink" href="#sashimi-hardware-scanning-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-sashimi.hardware.scanning.interface">
+<span id="sashimi-hardware-scanning-interface-module"></span><h2>sashimi.hardware.scanning.interface module<a class="headerlink" href="#module-sashimi.hardware.scanning.interface" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.interface.</code><code class="sig-name descname">AbstractScanInterface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample_rate</span></em>, <em class="sig-param"><span class="n">n_samples</span></em>, <em class="sig-param"><span class="n">conf</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface.camera_trigger">
+<em class="property">property </em><code class="sig-name descname">camera_trigger</code><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface.camera_trigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface.xy_frontal">
+<em class="property">property </em><code class="sig-name descname">xy_frontal</code><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface.xy_frontal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface.xy_lateral">
+<em class="property">property </em><code class="sig-name descname">xy_lateral</code><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface.xy_lateral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface.z_frontal">
+<em class="property">property </em><code class="sig-name descname">z_frontal</code><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface.z_frontal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface.z_lateral">
+<em class="property">property </em><code class="sig-name descname">z_lateral</code><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface.z_lateral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.interface.AbstractScanInterface.z_piezo">
+<em class="property">property </em><code class="sig-name descname">z_piezo</code><a class="headerlink" href="#sashimi.hardware.scanning.interface.AbstractScanInterface.z_piezo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt id="sashimi.hardware.scanning.interface.ScanningError">
+<em class="property">exception </em><code class="sig-prename descclassname">sashimi.hardware.scanning.interface.</code><code class="sig-name descname">ScanningError</code><a class="headerlink" href="#sashimi.hardware.scanning.interface.ScanningError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="sashimi.hardware.scanning.interface.open_abstract_interface">
+<code class="sig-prename descclassname">sashimi.hardware.scanning.interface.</code><code class="sig-name descname">open_abstract_interface</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample_rate</span></em>, <em class="sig-param"><span class="n">n_samples</span></em>, <em class="sig-param"><span class="n">conf</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#sashimi.hardware.scanning.interface.AbstractScanInterface" title="sashimi.hardware.scanning.interface.AbstractScanInterface">sashimi.hardware.scanning.interface.AbstractScanInterface</a><a class="headerlink" href="#sashimi.hardware.scanning.interface.open_abstract_interface" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sashimi.hardware.scanning.mock">
+<span id="sashimi-hardware-scanning-mock-module"></span><h2>sashimi.hardware.scanning.mock module<a class="headerlink" href="#module-sashimi.hardware.scanning.mock" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.mock.MockBoard">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.mock.</code><code class="sig-name descname">MockBoard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample_rate</span></em>, <em class="sig-param"><span class="n">n_samples</span></em>, <em class="sig-param"><span class="n">conf</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.mock.MockBoard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sashimi.hardware.scanning.interface.AbstractScanInterface" title="sashimi.hardware.scanning.interface.AbstractScanInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">sashimi.hardware.scanning.interface.AbstractScanInterface</span></code></a></p>
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.mock.MockBoard.z_piezo">
+<em class="property">property </em><code class="sig-name descname">z_piezo</code><a class="headerlink" href="#sashimi.hardware.scanning.mock.MockBoard.z_piezo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="sashimi.hardware.scanning.mock.open_mockboard">
+<code class="sig-prename descclassname">sashimi.hardware.scanning.mock.</code><code class="sig-name descname">open_mockboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample_rate</span></em>, <em class="sig-param"><span class="n">n_samples</span></em>, <em class="sig-param"><span class="n">conf</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#sashimi.hardware.scanning.mock.MockBoard" title="sashimi.hardware.scanning.mock.MockBoard">sashimi.hardware.scanning.mock.MockBoard</a><a class="headerlink" href="#sashimi.hardware.scanning.mock.open_mockboard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sashimi.hardware.scanning.ni">
+<span id="sashimi-hardware-scanning-ni-module"></span><h2>sashimi.hardware.scanning.ni module<a class="headerlink" href="#module-sashimi.hardware.scanning.ni" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.ni.NIBoards">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.ni.</code><code class="sig-name descname">NIBoards</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">read_task</span></em>, <em class="sig-param"><span class="n">write_task_z</span></em>, <em class="sig-param"><span class="n">write_task_xy</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sashimi.hardware.scanning.interface.AbstractScanInterface" title="sashimi.hardware.scanning.interface.AbstractScanInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">sashimi.hardware.scanning.interface.AbstractScanInterface</span></code></a></p>
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.camera_trigger">
+<em class="property">property </em><code class="sig-name descname">camera_trigger</code><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.camera_trigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.setup_tasks">
+<code class="sig-name descname">setup_tasks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.setup_tasks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.start">
+<code class="sig-name descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.xy_frontal">
+<em class="property">property </em><code class="sig-name descname">xy_frontal</code><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.xy_frontal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.xy_lateral">
+<em class="property">property </em><code class="sig-name descname">xy_lateral</code><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.xy_lateral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.z_frontal">
+<em class="property">property </em><code class="sig-name descname">z_frontal</code><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.z_frontal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.z_lateral">
+<em class="property">property </em><code class="sig-name descname">z_lateral</code><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.z_lateral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.ni.NIBoards.z_piezo">
+<em class="property">property </em><code class="sig-name descname">z_piezo</code><a class="headerlink" href="#sashimi.hardware.scanning.ni.NIBoards.z_piezo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="sashimi.hardware.scanning.ni.open_niboard">
+<code class="sig-prename descclassname">sashimi.hardware.scanning.ni.</code><code class="sig-name descname">open_niboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample_rate</span></em>, <em class="sig-param"><span class="n">n_samples</span></em>, <em class="sig-param"><span class="n">conf</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.ni.open_niboard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sashimi.hardware.scanning.scanloops">
+<span id="sashimi-hardware-scanning-scanloops-module"></span><h2>sashimi.hardware.scanning.scanloops module<a class="headerlink" href="#module-sashimi.hardware.scanning.scanloops" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.ExperimentPrepareState">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">ExperimentPrepareState</code><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ExperimentPrepareState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ExperimentPrepareState.ABORT">
+<code class="sig-name descname">ABORT</code><em class="property"> = 4</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ExperimentPrepareState.ABORT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ExperimentPrepareState.EXPERIMENT_STARTED">
+<code class="sig-name descname">EXPERIMENT_STARTED</code><em class="property"> = 3</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ExperimentPrepareState.EXPERIMENT_STARTED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ExperimentPrepareState.NO_TRIGGER">
+<code class="sig-name descname">NO_TRIGGER</code><em class="property"> = 2</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ExperimentPrepareState.NO_TRIGGER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ExperimentPrepareState.PREVIEW">
+<code class="sig-name descname">PREVIEW</code><em class="property"> = 1</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ExperimentPrepareState.PREVIEW" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.PlanarScanLoop">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">PlanarScanLoop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">board</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#sashimi.hardware.scanning.interface.AbstractScanInterface" title="sashimi.hardware.scanning.interface.AbstractScanInterface">sashimi.hardware.scanning.interface.AbstractScanInterface</a></span></em>, <em class="sig-param"><span class="n">stop_event</span></em>, <em class="sig-param"><span class="n">restart_event</span></em>, <em class="sig-param"><span class="n">initial_parameters</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#sashimi.hardware.scanning.scanloops.ScanParameters" title="sashimi.hardware.scanning.scanloops.ScanParameters">sashimi.hardware.scanning.scanloops.ScanParameters</a></span></em>, <em class="sig-param"><span class="n">parameter_queue</span><span class="p">:</span> <span class="n">multiprocessing.queues.Queue</span></em>, <em class="sig-param"><span class="n">n_samples</span></em>, <em class="sig-param"><span class="n">sample_rate</span></em>, <em class="sig-param"><span class="n">waveform_queue</span><span class="p">:</span> <span class="n">arrayqueues.shared_arrays.ArrayQueue</span></em>, <em class="sig-param"><span class="n">experiment_start_signal</span></em>, <em class="sig-param"><span class="n">wait_signal</span></em>, <em class="sig-param"><span class="n">logger</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.processes.html#sashimi.processes.logging.ConcurrenceLogger" title="sashimi.processes.logging.ConcurrenceLogger">sashimi.processes.logging.ConcurrenceLogger</a></span></em>, <em class="sig-param"><span class="n">trigger_exp_from_scanner</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.PlanarScanLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sashimi.hardware.scanning.scanloops.ScanLoop" title="sashimi.hardware.scanning.scanloops.ScanLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">sashimi.hardware.scanning.scanloops.ScanLoop</span></code></a></p>
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.PlanarScanLoop.fill_arrays">
+<code class="sig-name descname">fill_arrays</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.PlanarScanLoop.fill_arrays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.PlanarScanLoop.loop_condition">
+<code class="sig-name descname">loop_condition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.PlanarScanLoop.loop_condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.PlanarScanLoop.n_samples_period">
+<code class="sig-name descname">n_samples_period</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.PlanarScanLoop.n_samples_period" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.PlanarScanning">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">PlanarScanning</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lateral</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#sashimi.hardware.scanning.scanloops.XYScanning" title="sashimi.hardware.scanning.scanloops.XYScanning">sashimi.hardware.scanning.scanloops.XYScanning</a></span> <span class="o">=</span> <span class="default_value">XYScanning(vmin=1, vmax=0, frequency=800)</span></em>, <em class="sig-param"><span class="n">frontal</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#sashimi.hardware.scanning.scanloops.XYScanning" title="sashimi.hardware.scanning.scanloops.XYScanning">sashimi.hardware.scanning.scanloops.XYScanning</a></span> <span class="o">=</span> <span class="default_value">XYScanning(vmin=1, vmax=0, frequency=800)</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.PlanarScanning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.PlanarScanning.frontal">
+<code class="sig-name descname">frontal</code><em class="property">: sashimi.hardware.scanning.scanloops.XYScanning</em><em class="property"> = XYScanning(vmin=1, vmax=0, frequency=800)</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.PlanarScanning.frontal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.PlanarScanning.lateral">
+<code class="sig-name descname">lateral</code><em class="property">: sashimi.hardware.scanning.scanloops.XYScanning</em><em class="property"> = XYScanning(vmin=1, vmax=0, frequency=800)</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.PlanarScanning.lateral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">ScanLoop</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">board</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#sashimi.hardware.scanning.interface.AbstractScanInterface" title="sashimi.hardware.scanning.interface.AbstractScanInterface">sashimi.hardware.scanning.interface.AbstractScanInterface</a></span></em>, <em class="sig-param"><span class="n">stop_event</span></em>, <em class="sig-param"><span class="n">restart_event</span></em>, <em class="sig-param"><span class="n">initial_parameters</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#sashimi.hardware.scanning.scanloops.ScanParameters" title="sashimi.hardware.scanning.scanloops.ScanParameters">sashimi.hardware.scanning.scanloops.ScanParameters</a></span></em>, <em class="sig-param"><span class="n">parameter_queue</span><span class="p">:</span> <span class="n">multiprocessing.queues.Queue</span></em>, <em class="sig-param"><span class="n">n_samples</span></em>, <em class="sig-param"><span class="n">sample_rate</span></em>, <em class="sig-param"><span class="n">waveform_queue</span><span class="p">:</span> <span class="n">arrayqueues.shared_arrays.ArrayQueue</span></em>, <em class="sig-param"><span class="n">experiment_start_signal</span></em>, <em class="sig-param"><span class="n">wait_signal</span></em>, <em class="sig-param"><span class="n">logger</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.processes.html#sashimi.processes.logging.ConcurrenceLogger" title="sashimi.processes.logging.ConcurrenceLogger">sashimi.processes.logging.ConcurrenceLogger</a></span></em>, <em class="sig-param"><span class="n">trigger_exp_from_scanner</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop.check_start">
+<code class="sig-name descname">check_start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop.check_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop.fill_arrays">
+<code class="sig-name descname">fill_arrays</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop.fill_arrays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop.initialize">
+<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop.initialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop.loop">
+<code class="sig-name descname">loop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop.loop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop.loop_condition">
+<code class="sig-name descname">loop_condition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop.loop_condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop.n_samples_period">
+<code class="sig-name descname">n_samples_period</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop.n_samples_period" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop.update_settings">
+<code class="sig-name descname">update_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop.update_settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.ScanLoop.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanLoop.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.ScanParameters">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">ScanParameters</code><span class="sig-paren">(</span><em class="sig-param">state: sashimi.hardware.scanning.scanloops.ScanningState = &lt;ScanningState.PAUSED: 1&gt;</em>, <em class="sig-param">experiment_state: sashimi.hardware.scanning.scanloops.ExperimentPrepareState = &lt;ExperimentPrepareState.PREVIEW: 1&gt;</em>, <em class="sig-param">z: Union[sashimi.hardware.scanning.scanloops.ZScanning</em>, <em class="sig-param">sashimi.hardware.scanning.scanloops.ZManual</em>, <em class="sig-param">sashimi.hardware.scanning.scanloops.ZSynced] = ZManual(piezo=0</em>, <em class="sig-param">lateral=0</em>, <em class="sig-param">frontal=0)</em>, <em class="sig-param">xy: sashimi.hardware.scanning.scanloops.PlanarScanning = PlanarScanning(lateral=XYScanning(vmin=1</em>, <em class="sig-param">vmax=0</em>, <em class="sig-param">frequency=800)</em>, <em class="sig-param">frontal=XYScanning(vmin=1</em>, <em class="sig-param">vmax=0</em>, <em class="sig-param">frequency=800))</em>, <em class="sig-param">triggering: sashimi.hardware.scanning.scanloops.TriggeringParameters = TriggeringParameters(n_planes=0</em>, <em class="sig-param">n_skip_start=0</em>, <em class="sig-param">n_skip_end=0</em>, <em class="sig-param">frequency=None)</em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ScanParameters.experiment_state">
+<code class="sig-name descname">experiment_state</code><em class="property">: sashimi.hardware.scanning.scanloops.ExperimentPrepareState</em><em class="property"> = 1</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanParameters.experiment_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ScanParameters.state">
+<code class="sig-name descname">state</code><em class="property">: sashimi.hardware.scanning.scanloops.ScanningState</em><em class="property"> = 1</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanParameters.state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ScanParameters.triggering">
+<code class="sig-name descname">triggering</code><em class="property">: sashimi.hardware.scanning.scanloops.TriggeringParameters</em><em class="property"> = TriggeringParameters(n_planes=0, n_skip_start=0, n_skip_end=0, frequency=None)</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanParameters.triggering" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ScanParameters.xy">
+<code class="sig-name descname">xy</code><em class="property">: sashimi.hardware.scanning.scanloops.PlanarScanning</em><em class="property"> = PlanarScanning(lateral=XYScanning(vmin=1, vmax=0, frequency=800), frontal=XYScanning(vmin=1, vmax=0, frequency=800))</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanParameters.xy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ScanParameters.z">
+<code class="sig-name descname">z</code><em class="property">: Union[sashimi.hardware.scanning.scanloops.ZScanning, sashimi.hardware.scanning.scanloops.ZManual, sashimi.hardware.scanning.scanloops.ZSynced]</em><em class="property"> = ZManual(piezo=0, lateral=0, frontal=0)</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanParameters.z" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.ScanningState">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">ScanningState</code><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanningState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ScanningState.PAUSED">
+<code class="sig-name descname">PAUSED</code><em class="property"> = 1</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanningState.PAUSED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ScanningState.PLANAR">
+<code class="sig-name descname">PLANAR</code><em class="property"> = 2</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanningState.PLANAR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ScanningState.VOLUMETRIC">
+<code class="sig-name descname">VOLUMETRIC</code><em class="property"> = 3</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ScanningState.VOLUMETRIC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.TriggeringParameters">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">TriggeringParameters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n_planes</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">n_skip_start</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">n_skip_end</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">frequency</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>NoneType<span class="p">, </span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.TriggeringParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.TriggeringParameters.frequency">
+<code class="sig-name descname">frequency</code><em class="property">: Union[None, float]</em><em class="property"> = None</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.TriggeringParameters.frequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.TriggeringParameters.n_planes">
+<code class="sig-name descname">n_planes</code><em class="property">: int</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.TriggeringParameters.n_planes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.TriggeringParameters.n_skip_end">
+<code class="sig-name descname">n_skip_end</code><em class="property">: int</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.TriggeringParameters.n_skip_end" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.TriggeringParameters.n_skip_start">
+<code class="sig-name descname">n_skip_start</code><em class="property">: int</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.TriggeringParameters.n_skip_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.VolumetricScanLoop">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">VolumetricScanLoop</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.VolumetricScanLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sashimi.hardware.scanning.scanloops.ScanLoop" title="sashimi.hardware.scanning.scanloops.ScanLoop"><code class="xref py py-class docutils literal notranslate"><span class="pre">sashimi.hardware.scanning.scanloops.ScanLoop</span></code></a></p>
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.VolumetricScanLoop.check_start">
+<code class="sig-name descname">check_start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.VolumetricScanLoop.check_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.VolumetricScanLoop.fill_arrays">
+<code class="sig-name descname">fill_arrays</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.VolumetricScanLoop.fill_arrays" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.VolumetricScanLoop.initialize">
+<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.VolumetricScanLoop.initialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.VolumetricScanLoop.loop_condition">
+<code class="sig-name descname">loop_condition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.VolumetricScanLoop.loop_condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.VolumetricScanLoop.n_samples_period">
+<code class="sig-name descname">n_samples_period</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.VolumetricScanLoop.n_samples_period" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.VolumetricScanLoop.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.VolumetricScanLoop.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.hardware.scanning.scanloops.VolumetricScanLoop.update_settings">
+<code class="sig-name descname">update_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.VolumetricScanLoop.update_settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.XYScanning">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">XYScanning</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vmin</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">frequency</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">800</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.XYScanning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.XYScanning.frequency">
+<code class="sig-name descname">frequency</code><em class="property">: float</em><em class="property"> = 800</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.XYScanning.frequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.XYScanning.vmax">
+<code class="sig-name descname">vmax</code><em class="property">: float</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.XYScanning.vmax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.XYScanning.vmin">
+<code class="sig-name descname">vmin</code><em class="property">: float</em><em class="property"> = 1</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.XYScanning.vmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.ZManual">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">ZManual</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">piezo</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">lateral</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">frontal</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZManual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZManual.frontal">
+<code class="sig-name descname">frontal</code><em class="property">: float</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZManual.frontal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZManual.lateral">
+<code class="sig-name descname">lateral</code><em class="property">: float</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZManual.lateral" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZManual.piezo">
+<code class="sig-name descname">piezo</code><em class="property">: float</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZManual.piezo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.ZScanning">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">ZScanning</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">piezo_min</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">piezo_max</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">frequency</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">1</span></em>, <em class="sig-param"><span class="n">lateral_sync</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0, 0.0</span></em>, <em class="sig-param"><span class="n">frontal_sync</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0, 0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZScanning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZScanning.frequency">
+<code class="sig-name descname">frequency</code><em class="property">: float</em><em class="property"> = 1</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZScanning.frequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZScanning.frontal_sync">
+<code class="sig-name descname">frontal_sync</code><em class="property">: Tuple[float, float]</em><em class="property"> = (0.0, 0.0)</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZScanning.frontal_sync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZScanning.lateral_sync">
+<code class="sig-name descname">lateral_sync</code><em class="property">: Tuple[float, float]</em><em class="property"> = (0.0, 0.0)</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZScanning.lateral_sync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZScanning.piezo_max">
+<code class="sig-name descname">piezo_max</code><em class="property">: float</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZScanning.piezo_max" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZScanning.piezo_min">
+<code class="sig-name descname">piezo_min</code><em class="property">: float</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZScanning.piezo_min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.hardware.scanning.scanloops.ZSynced">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">ZSynced</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">piezo</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">lateral_sync</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0, 0.0</span></em>, <em class="sig-param"><span class="n">frontal_sync</span><span class="p">:</span> <span class="n">Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">0.0, 0.0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZSynced" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZSynced.frontal_sync">
+<code class="sig-name descname">frontal_sync</code><em class="property">: Tuple[float, float]</em><em class="property"> = (0.0, 0.0)</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZSynced.frontal_sync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZSynced.lateral_sync">
+<code class="sig-name descname">lateral_sync</code><em class="property">: Tuple[float, float]</em><em class="property"> = (0.0, 0.0)</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZSynced.lateral_sync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="sashimi.hardware.scanning.scanloops.ZSynced.piezo">
+<code class="sig-name descname">piezo</code><em class="property">: float</em><em class="property"> = 0</em><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.ZSynced.piezo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="sashimi.hardware.scanning.scanloops.calc_sync">
+<code class="sig-prename descclassname">sashimi.hardware.scanning.scanloops.</code><code class="sig-name descname">calc_sync</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">z</span></em>, <em class="sig-param"><span class="n">sync_coef</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.scanning.scanloops.calc_sync" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-sashimi.hardware.scanning">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-sashimi.hardware.scanning" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Sashimi</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="another_page.html">Another page</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;Portugues lab.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/sashimi.hardware.scanning.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

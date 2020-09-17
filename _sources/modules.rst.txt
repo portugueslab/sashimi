@@ -1,0 +1,7 @@
+sashimi
+=======
+
+.. toctree::
+   :maxdepth: 4
+
+   sashimi
