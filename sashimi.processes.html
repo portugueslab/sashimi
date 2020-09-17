@@ -124,7 +124,7 @@
 <span id="sashimi-processes-scanning-module"></span><h2>sashimi.processes.scanning module<a class="headerlink" href="#module-sashimi.processes.scanning" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="sashimi.processes.scanning.Scanner">
-<em class="property">class </em><code class="sig-prename descclassname">sashimi.processes.scanning.</code><code class="sig-name descname">Scanner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stop_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">experiment_start_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">restart_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">start_experiment_from_scanner</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">n_samples_waveform</span><span class="o">=</span><span class="default_value">10000</span></em>, <em class="sig-param"><span class="n">sample_rate</span><span class="o">=</span><span class="default_value">40000</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.scanning.Scanner" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.processes.scanning.</code><code class="sig-name descname">Scanner</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stop_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">waiting_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">restart_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">start_experiment_from_scanner</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">n_samples_waveform</span><span class="o">=</span><span class="default_value">10000</span></em>, <em class="sig-param"><span class="n">sample_rate</span><span class="o">=</span><span class="default_value">40000</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.scanning.Scanner" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sashimi.processes.logging.LoggingProcess" title="sashimi.processes.logging.LoggingProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">sashimi.processes.logging.LoggingProcess</span></code></a></p>
 <dl class="py method">
 <dt id="sashimi.processes.scanning.Scanner.retrieve_parameters">
@@ -265,14 +265,41 @@
 <div class="section" id="module-sashimi.processes.stytra_comm">
 <span id="sashimi-processes-stytra-comm-module"></span><h2>sashimi.processes.stytra_comm module<a class="headerlink" href="#module-sashimi.processes.stytra_comm" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="sashimi.processes.stytra_comm.StytraCom">
-<em class="property">class </em><code class="sig-prename descclassname">sashimi.processes.stytra_comm.</code><code class="sig-name descname">StytraCom</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stop_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">experiment_start_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">is_saving_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">stytra_address</span><span class="o">=</span><span class="default_value">'tcp://O1-589:5555'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.stytra_comm.StytraCom" title="Permalink to this definition">¶</a></dt>
+<dt id="sashimi.processes.stytra_comm.AbstractComm">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.processes.stytra_comm.</code><code class="sig-name descname">AbstractComm</code><a class="headerlink" href="#sashimi.processes.stytra_comm.AbstractComm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="sashimi.processes.stytra_comm.AbstractComm.trigger_and_receive_duration">
+<code class="sig-name descname">trigger_and_receive_duration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>float<span class="p">]</span><a class="headerlink" href="#sashimi.processes.stytra_comm.AbstractComm.trigger_and_receive_duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.processes.stytra_comm.ExternalComm">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.processes.stytra_comm.</code><code class="sig-name descname">ExternalComm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">stop_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">experiment_start_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">is_saving_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">is_waiting_event</span><span class="p">:</span> <span class="n"><a class="reference internal" href="sashimi.html#sashimi.events.LoggedEvent" title="sashimi.events.LoggedEvent">sashimi.events.LoggedEvent</a></span></em>, <em class="sig-param"><span class="n">stytra_address</span><span class="o">=</span><span class="default_value">'tcp://O1-589:5555'</span></em>, <em class="sig-param"><span class="n">scanning_trigger</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.stytra_comm.ExternalComm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#sashimi.processes.logging.LoggingProcess" title="sashimi.processes.logging.LoggingProcess"><code class="xref py py-class docutils literal notranslate"><span class="pre">sashimi.processes.logging.LoggingProcess</span></code></a></p>
 <dl class="py method">
-<dt id="sashimi.processes.stytra_comm.StytraCom.run">
-<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.stytra_comm.StytraCom.run" title="Permalink to this definition">¶</a></dt>
+<dt id="sashimi.processes.stytra_comm.ExternalComm.run">
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.stytra_comm.ExternalComm.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to be run in sub-process; can be overridden in sub-class</p>
 </dd></dl>
+
+<dl class="py method">
+<dt id="sashimi.processes.stytra_comm.ExternalComm.trigger_condition">
+<code class="sig-name descname">trigger_condition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.stytra_comm.ExternalComm.trigger_condition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="sashimi.processes.stytra_comm.StytraComm">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.processes.stytra_comm.</code><code class="sig-name descname">StytraComm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">computer_adderss</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.stytra_comm.StytraComm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#sashimi.processes.stytra_comm.AbstractComm" title="sashimi.processes.stytra_comm.AbstractComm"><code class="xref py py-class docutils literal notranslate"><span class="pre">sashimi.processes.stytra_comm.AbstractComm</span></code></a></p>
+<dl class="py method">
+<dt id="sashimi.processes.stytra_comm.StytraComm.trigger_and_receive_duration">
+<code class="sig-name descname">trigger_and_receive_duration</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">config</span></em><span class="sig-paren">)</span> &#x2192; Optional<span class="p">[</span>float<span class="p">]</span><a class="headerlink" href="#sashimi.processes.stytra_comm.StytraComm.trigger_and_receive_duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -306,7 +333,8 @@
 <h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Sashimi</a></li>
-<li class="toctree-l1"><a class="reference internal" href="another_page.html">Another page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Microscope hardware</a></li>
 </ul>
 
 <div class="relations">

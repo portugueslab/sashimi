@@ -68,6 +68,8 @@
         <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.scanloops.ExperimentPrepareState.ABORT">(sashimi.hardware.scanning.scanloops.ExperimentPrepareState attribute)</a>
 </li>
       </ul></li>
+      <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.AbstractComm">AbstractComm (class in sashimi.processes.stytra_comm)</a>
+</li>
       <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.interface.AbstractScanInterface">AbstractScanInterface (class in sashimi.hardware.scanning.interface)</a>
 </li>
       <li><a href="sashimi.html#sashimi.state.Calibration.add_calibration_point">add_calibration_point() (sashimi.state.Calibration method)</a>
@@ -284,10 +286,10 @@
         <li><a href="sashimi.html#sashimi.state.GlobalState.EXPERIMENT_RUNNING">(sashimi.state.GlobalState attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.scanloops.ExperimentPrepareState.EXPERIMENT_STARTED">EXPERIMENT_STARTED (sashimi.hardware.scanning.scanloops.ExperimentPrepareState attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.scanloops.ScanParameters.experiment_state">experiment_state (sashimi.hardware.scanning.scanloops.ScanParameters attribute)</a>
 </li>
       <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.scanloops.ExperimentPrepareState">ExperimentPrepareState (class in sashimi.hardware.scanning.scanloops)</a>
@@ -297,6 +299,8 @@
       <li><a href="sashimi.html#sashimi.camera.CamParameters.exposure_time">exposure_time (sashimi.camera.CamParameters attribute)</a>
 </li>
       <li><a href="sashimi.html#sashimi.camera.TriggerMode.EXTERNAL_TRIGGER">EXTERNAL_TRIGGER (sashimi.camera.TriggerMode attribute)</a>
+</li>
+      <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.ExternalComm">ExternalComm (class in sashimi.processes.stytra_comm)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -856,7 +860,7 @@
 </li>
         <li><a href="sashimi.processes.html#sashimi.processes.streaming_save.StackSaver.run">(sashimi.processes.streaming_save.StackSaver method)</a>
 </li>
-        <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.StytraCom.run">(sashimi.processes.stytra_comm.StytraCom method)</a>
+        <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.ExternalComm.run">(sashimi.processes.stytra_comm.ExternalComm method)</a>
 </li>
       </ul></li>
       <li><a href="sashimi.html#sashimi.camera.CameraProcess.run_camera">run_camera() (sashimi.camera.CameraProcess method)</a>
@@ -1229,7 +1233,7 @@
         <li><a href="sashimi.hardware.html#sashimi.hardware.hamamatsu_camera.HamamatsuCameraMR.stopAcquisition">(sashimi.hardware.hamamatsu_camera.HamamatsuCameraMR method)</a>
 </li>
       </ul></li>
-      <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.StytraCom">StytraCom (class in sashimi.processes.stytra_comm)</a>
+      <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.StytraComm">StytraComm (class in sashimi.processes.stytra_comm)</a>
 </li>
       <li><a href="sashimi.html#sashimi.camera.CamParameters.subarray">subarray (sashimi.camera.CamParameters attribute)</a>
 </li>
@@ -1263,11 +1267,19 @@
 </li>
       <li><a href="sashimi.gui.html#sashimi.gui.camera_gui.ViewingWidget.toggle_roi_display">toggle_roi_display() (sashimi.gui.camera_gui.ViewingWidget method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sashimi.hardware.html#sashimi.hardware.hamamatsu_camera.DCAMBUF_FRAME.top">top (sashimi.hardware.hamamatsu_camera.DCAMBUF_FRAME attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sashimi.html#sashimi.waveforms.TriangleWaveform">TriangleWaveform (class in sashimi.waveforms)</a>
+</li>
+      <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.AbstractComm.trigger_and_receive_duration">trigger_and_receive_duration() (sashimi.processes.stytra_comm.AbstractComm method)</a>
+
+      <ul>
+        <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.StytraComm.trigger_and_receive_duration">(sashimi.processes.stytra_comm.StytraComm method)</a>
+</li>
+      </ul></li>
+      <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.ExternalComm.trigger_condition">trigger_condition() (sashimi.processes.stytra_comm.ExternalComm method)</a>
 </li>
       <li><a href="sashimi.html#sashimi.camera.CamParameters.trigger_mode">trigger_mode (sashimi.camera.CamParameters attribute)</a>
 </li>
@@ -1504,7 +1516,8 @@
 <h3>Navigation</h3>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Sashimi</a></li>
-<li class="toctree-l1"><a class="reference internal" href="another_page.html">Another page</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware.html">Microscope hardware</a></li>
 </ul>
 
 <div class="relations">
