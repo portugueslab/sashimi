@@ -37,7 +37,7 @@ deploy:
         secure: "lOfXKhZ6HgSZY8HpIz9I54esCYyqRNr34rIUYV76kBZAZS9RuvA4CjaL3yhtCYIZj1uSgATQ6c/MAaGBerppciJPQz3sqKgcnhaUw/b6YlvYX4ZHH3GLwDWvfSbQzSVgRWqFh1x7Up+1lpv3S61G97lyYqJyUZf2rbdadAbx9pPvFDUZYVHBYYx6CenoUFXa+G8ro4Pr+zD3lqnyhJaePZDZHP2sT0+KPzpZw+nHP32THffL4fUUtJn5jholstVH6dHioiFKd/lOJCBMwfnEOCQbESl00hQsMwEsiEeEltc5RcIT3DlE1FfhN240Dr8ccI6dH7CJ1z7gzkR53DXhzCkUkelLeCOqiGg+cX9h31km9XNlQ6muT9XN4pbfXqkmomNJAk/cN8w+NJO0H3AFPD9iglqToBOauCrfi68vfiU7ghU3i94dx1n1VUKpAFDQ0n2pid5YwYhMp0TwbXHR+VkWfm93NNikZKzaNiLJFEcI9EOUMxX5o0H7TutRaYAQPUbOyLtNAnMM/ZbTIPWn2nyIqev0lT/al+EZ672r+TQxUg6R6xwo7KvnFWfmV6mS2H2axjn5EQh6TNULMsuql/iME8UxAJ3fy1ggIracO/iztRa/KDAF0WaKRHHpKgSLZl/fq/yT5FfUlsfboUcz1rtDXQLyiMhA5IFMHE32jkI="
     on:
       python: 3.7
-      all_branches: true
+      branch: master
     local-dir: docs/build/html
     committer-from-gh: true
     target_branch: gh-pages
