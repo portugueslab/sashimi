@@ -43,23 +43,24 @@ src="https://github.com/portugueslab/sashimi/blob/master/sashimi/icons/main_icon
 align="left" 
 height="190" 
 width="270"></a></p>
+<p><a class="reference external" href="https://travis-ci.com/portugueslab/sashimi"><img alt="Build Status" src="https://travis-ci.com/portugueslab/sashimi.svg?branch=master" /></a></p>
 <p>Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
-It was developed by members of the <a class="reference external" href="http://www.portugueslab.com/">PortuguesLab</a>
+It is developed by members of the <a class="reference external" href="http://www.portugueslab.com/">PortuguesLab</a>
 at the Technical University of Munich and Max Planck Institute of Neurobiology. Sashimi relies on the fast, multidimensional
-<a class="reference external" href="https://github.com/napari/napari">Napari viewer</a> and is accelerated by <a class="reference external" href="https://github.com/numba/numba">numba</a> for real-time processing.</p>
-<p>Hardware is controlled through <a class="reference external" href="https://github.com/pyvisa/pyvisa">pyvisa</a> for serial communication and
-<a class="reference external" href="https://github.com/ni/nidaqmx-python/">nidaqmx</a> for National Instruments I/O boards.</p>
+<a class="reference external" href="https://github.com/napari/napari">Napari viewer</a>.</p>
+<p>While built for a particular microscope configuration, the modular architecture allows for easy replacement of
+hardware by other vendors (we will help with and welcome contributions for supporting other cameras, boards and light sources).</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://www.anaconda.com/">Install the latest Anaconda</a> distribution of Python 3.</p>
 <p>Clone this repository and navigate to the main folder <code class="docutils literal notranslate"><span class="pre">../sashimi</span></code></p>
 <div class="section" id="recommended-create-a-new-environment">
 <h3>Recommended: Create a new environment<a class="headerlink" href="#recommended-create-a-new-environment" title="Permalink to this headline">¶</a></h3>
-<p>It is a good practice to create an environment for every project. We provide a file to automatically create the right environment. Make sure you are in the main folder <code class="docutils literal notranslate"><span class="pre">../sashimi</span></code> and run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda env create -f environment.yml
+<p>It is a good practice to create an environment for every project. The provided <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> sets up all required dependencies.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda env create -f {path to environment.yml}
 </pre></div>
 </div>
-<p>We will run all related to this software in this environment. You can activate the environment running:</p>
+<p>You can activate the environment by running:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda activate sashimi
 </pre></div>
 </div>
@@ -102,7 +103,7 @@ current configuration of the system by running:</p>
 </pre></div>
 </div>
 <p>You can add and modify parameters just from the command line. For example, to set the piezo waveform readout channel to <code class="docutils literal notranslate"><span class="pre">Dev1/ao0:0</span></code> just run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n piezo.position_write.pos_chan -v Dev1/ao0:0
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n z_board.write.channel -v Dev1/ao0:0
 </pre></div>
 </div>
 <p>Or to modify the minimum and maximum voltage (in Volts) of the channel:</p>
