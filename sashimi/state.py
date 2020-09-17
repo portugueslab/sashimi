@@ -16,7 +16,7 @@ from sashimi.hardware.scanning.scanloops import (
     TriggeringParameters,
     ScanParameters,
 )
-from sashimi.processes.stytra_comm import StytraCom
+from sashimi.processes.stytra_comm import ExternalComm
 from sashimi.processes.dispatcher import VolumeDispatcher
 from sashimi.processes.logging import ConcurrenceLogger
 from multiprocessing import Event
@@ -335,6 +335,9 @@ class State:
             self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, Event()
         )
         self.is_saving_event = LoggedEvent(self.logger, SashimiEvents.IS_SAVING)
+        self.is_waiting_event = LoggedEvent(
+            self.logger, SashimiEvents.WAITING_FOR_TRIGGER
+        )
 
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
@@ -343,7 +346,7 @@ class State:
         self.scanner = Scanner(
             stop_event=self.stop_event,
             restart_event=self.restart_event,
-            experiment_start_event=self.experiment_start_event,
+            waiting_event=self.is_waiting_event,
             sample_rate=self.sample_rate,
         )
 
@@ -362,10 +365,11 @@ class State:
                 exp_trigger_event=self.experiment_start_event,
             )
 
-        self.stytra_comm = StytraCom(
+        self.stytra_comm = ExternalComm(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
             is_saving_event=self.is_saving_event,
+            is_waiting_event=self.is_waiting_event,
         )
 
         self.saver = StackSaver(
@@ -611,7 +615,6 @@ class State:
 
     def wrap_up(self):
         self.stop_event.set()
-        self.logger.close()
         self.laser.close()
 
         self.scanner.join(timeout=10)
@@ -619,3 +622,4 @@ class State:
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
         self.dispatcher.join(timeout=10)
+        self.logger.close()

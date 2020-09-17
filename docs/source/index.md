@@ -4,12 +4,14 @@ An index here:
 
 ```{toctree}
 intro
-another_page
+configuration
+development
+hardware
 :maxdepth: 3
 :caption: Contents:
 ```
 
-API documentation here:
+API documentation:
 
 ```{eval-rst}
 :ref:`modindex`
