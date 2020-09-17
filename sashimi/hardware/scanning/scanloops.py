@@ -265,7 +265,7 @@ class VolumetricScanLoop(ScanLoop):
 
     def n_samples_period(self):
         n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
-        return lcm(n_samples_trigger, super().n_samples_period())
+        return max(n_samples_trigger, super().n_samples_period())
 
     def update_settings(self):
         updated = super().update_settings()
@@ -295,7 +295,7 @@ class VolumetricScanLoop(ScanLoop):
             vmax=self.parameters.z.piezo_max,
         )
 
-        if not self.camera_on and self.n_samples_read > self.n_samples_period() * 2:
+        if not self.camera_on and self.n_samples_read > self.n_samples_period():
             self.camera_on = True
             self.wait_signal.clear()
             self.trigger_exp_start = True
@@ -339,6 +339,7 @@ class VolumetricScanLoop(ScanLoop):
         camera_pulses = 0
         if self.camera_on:
             if self.camera_was_off:
+                self.logger.log_message("Camera was off")
                 # calculate how many samples are remaining until we are in a new period
                 if i_sample == 0:
                     camera_pulses = self.camera_pulses.read(i_sample, self.n_samples)

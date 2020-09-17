@@ -62,10 +62,13 @@ class VolumeScanningWidget(QWidget):
         )
         self.wid_collapsible_wave.toggle_collapse()
 
-        self.dialog_box = QMessageBox()
-        self.dialog_ok_button = self.dialog_box.addButton(self.dialog_box.Ok)
-        self.dialog_abort_button = self.dialog_box.addButton(self.dialog_box.Abort)
-        self.override_overwrite = False
+        self.overwrite_dialog = QMessageBox()
+        self.btn_overwrite_ok = self.overwrite_dialog.addButton(
+            self.overwrite_dialog.Ok
+        )
+        self.btn_overwrite_abort = self.overwrite_dialog.addButton(
+            self.overwrite_dialog.Abort
+        )
 
         self.layout().addWidget(self.wid_volume)
         self.layout().addWidget(self.btn_start)
@@ -81,7 +84,7 @@ class VolumeScanningWidget(QWidget):
 
         self.timer_scope_info.timeout.connect(self.update_alignment)
         self.chk_pause.clicked.connect(self.change_pause_status)
-        self.dialog_ok_button.clicked.connect(self.state.start_experiment)
+        self.btn_overwrite_ok.clicked.connect(self.state.start_experiment)
 
         self.chk_pause.click()
 
@@ -125,7 +128,7 @@ class VolumeScanningWidget(QWidget):
         self.state.pause_after = self.chk_pause.isChecked()
 
     def change_experiment_state(self):
-        if self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+        if self.state.is_saving_event.is_set():
             # Here what happens if experiment is aborted
             self.state.end_experiment()
         else:
@@ -135,10 +138,10 @@ class VolumeScanningWidget(QWidget):
                 self.state.start_experiment()
 
     def overwrite_alert_popup(self):
-        self.dialog_box.setIcon(QMessageBox.Warning)
-        self.dialog_box.setWindowTitle("Overwrite alert!")
-        self.dialog_box.setText(
+        self.overwrite_dialog.setIcon(QMessageBox.Warning)
+        self.overwrite_dialog.setWindowTitle("Overwrite alert!")
+        self.overwrite_dialog.setText(
             "You are overwriting an existing folder with data. \n\n "
             "Press ok to start the experiment anyway or abort to change saving folder."
         )
-        self.dialog_box.show()
+        self.overwrite_dialog.show()

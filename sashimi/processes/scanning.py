@@ -1,4 +1,4 @@
-from multiprocessing import Queue, Event
+from multiprocessing import Queue
 from copy import deepcopy
 
 from sashimi.hardware.scanning.scanloops import (
@@ -23,7 +23,7 @@ from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.utilities import get_last_parameters
 from sashimi.config import read_config
 from sashimi.processes.logging import LoggingProcess
-from sashimi.events import LoggedEvent, SashimiEvents
+from sashimi.events import LoggedEvent
 
 
 conf = read_config()
