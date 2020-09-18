@@ -152,10 +152,10 @@ class CameraProcess(Process):
 
     def update_parameters(self):
         self.parameters = self.new_parameters
-        self.camera.exposure_time = self.parameters
-        self.camera.frame_shape = self.parameters
-        self.parameters.frame_shape = self.camera.frame_shape
-        self.parameters.internal_frame_rate = self.camera.frame_rate
+        self.camera.exposure_time = self.parameters.exposure_time
+        self.camera.binning = self.parameters.binning
+        self.camera.subarray = self.parameters.subarray
+        self.parameters.frame_shape = self.camera.frame_shape  # this is done to match internals of the camera
 
     def update_framerate(self):
         self.framerate_rec.update_framerate()

@@ -27,6 +27,7 @@ TEMPLATE_CONF_DICT = {
     "camera": {
         "id": 0,
         "name": "hamamatsu",
+        "sensor_resolution": (2048, 2048)
     },
     "email": {"user": "foo", "password": "foo"},
     "array_ram_MB": 450,

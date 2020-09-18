@@ -1,6 +1,7 @@
 from sashimi.config import read_config
 import time
 import numpy as np
+from skimage.measure import block_reduce
 
 conf = read_config()
 
@@ -9,8 +10,7 @@ class AbstractCamera:
     def __init__(self):
         super().__init__()
         self.camera_id = conf["camera"]["id"]
-        self._sensor_resolution = (2048, 2048)
-        self._frame_shape: tuple = (1024, 1024)
+        self._sensor_resolution = conf["camera"]["sensor_resolution"]
 
     def apply_parameters(self, parameters):
         """
@@ -28,10 +28,8 @@ class AbstractCamera:
 
     def get_frames(self):
         """
-        Gets all of the available frames.
-
-        This will block waiting for new frames even if there new frames
-        available when it is called.
+        Returns a list of arrays, each of which corresponds to an available frame. If no frames where found returns an
+        empty list.
         """
         pass
 
@@ -78,7 +76,7 @@ class AbstractCamera:
         return None
 
     @exposure_time.setter
-    def exposure_time(self, parameters):
+    def exposure_time(self, exp_val):
         pass
 
     @property
@@ -86,7 +84,7 @@ class AbstractCamera:
         return None
 
     @binning.setter
-    def binning(self, parameters):
+    def binning(self, exp_val):
         pass
 
     @property
@@ -94,7 +92,7 @@ class AbstractCamera:
         return None
 
     @subarray.setter
-    def subarray(self, parameters):
+    def subarray(self, exp_val: tuple):
         pass
 
     @property
@@ -106,7 +104,7 @@ class AbstractCamera:
         return None
 
     @trigger_mode.setter
-    def trigger_mode(self, parameters):
+    def trigger_mode(self, exp_val):
         pass
 
     @property
@@ -114,32 +112,20 @@ class AbstractCamera:
         return None
 
     @camera_mode.setter
-    def camera_mode(self, parameters):
+    def camera_mode(self, exp_val):
         pass
 
     @property
     def frame_rate(self):
         return None
 
-    @frame_rate.setter
-    def frame_rate(self, parameters):
-        pass
-
     @property
     def sensor_resolution(self):
-        return tuple([None, None])
-
-    @sensor_resolution.setter
-    def sensor_resolution(self, parameters):
-        pass
+        return self._sensor_resolution
 
     @property
     def frame_shape(self):
         return tuple([None, None])
-
-    @frame_shape.setter
-    def frame_shape(self, parameters):
-        pass
 
 
 class AbstractCameraConfigurator:
@@ -156,48 +142,75 @@ class AbstractCameraConfigurator:
 class MockCamera(AbstractCamera):
     def __init__(self):
         super().__init__()
-        self._frame_shape: tuple = (1024, 1024)
         self._exposure_time = 60
-        self._sensor_resolution = (2048, 2048)
+        self._sensor_resolution: tuple = (2048, 2048)
+        self._frame_shape = self._sensor_resolution
+        self._subarray = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
         self._frame_rate = 1 / self._exposure_time
-
-    # TODO: Modify camera.py to access properties directly and not on-top functions like apply_parameters()
+        self._binning = 1
+        self.full_mock_image = np.random.randint(0, 65534, size=self._frame_shape, dtype=np.uint16)
+        self.current_mock_image = self.full_mock_image
+        self.previous_frame_time = None
+        self.current_time = time.time_ns()
+        self.elapsed = 0
 
     @property
     def exposure_time(self):
         return self._exposure_time
 
     @exposure_time.setter
-    def exposure_time(self, parameters):
-        self._exposure_time = parameters.exposure_time
+    def exposure_time(self, exp_val):
+        self._exposure_time = exp_val
+        self._frame_rate = 1 / exp_val
 
     @property
     def frame_shape(self):
         return self._frame_shape
 
-    @frame_shape.setter
-    def frame_shape(self, parameters):
-        subarray = parameters.subarray
-        # quantizing the ROI dims in multiples of 4
-        subarray = [min((i * parameters.binning // 4) * 4, 2048) for i in subarray]
-        self._frame_shape = (subarray[2] // parameters.binning, subarray[3] // parameters.binning)
-
     @property
     def frame_rate(self):
         return self._frame_rate
 
-    @frame_rate.setter
-    def frame_rate(self, parameters):
-        self._frame_rate = 1 / parameters.exposure_time
+    @property
+    def binning(self):
+        return self._binning
+
+    @binning.setter
+    def binning(self, exp_val):
+        self._binning = exp_val
+        self._frame_shape = (self._sensor_resolution[0] // exp_val, self._sensor_resolution[1] // exp_val)
+        self.prepare_mock_image()
+
+    @property
+    def subarray(self):
+        return self._subarray
+
+    @subarray.setter
+    def subarray(self, exp_val: tuple):
+        self._subarray = exp_val
+        self.prepare_mock_image()
+
+    def prepare_mock_image(self):
+        self.current_mock_image = block_reduce(
+            self.full_mock_image[
+                self._subarray[0]:self._subarray[2],
+                self._subarray[1]:self._subarray[3]
+                ],
+            (self._binning, self._binning),
+            func=np.max
+        )
 
     def get_frames(self):
         super().get_frames()
-        time.sleep(0.001)
+        self.current_time = time.time_ns()
         frames = []
-        is_there_frame = np.random.random_sample(1)
-        if is_there_frame < (1 / self.exposure_time):
-            frame = np.random.randint(
-                0, 65534, size=self.frame_shape, dtype=np.uint16
-            )
-            frames.append(frame)
+        if self.previous_frame_time is not None:
+            time.sleep(0.0001)
+            self.elapsed = (self.current_time - self.previous_frame_time) * 1e-9
+            if self.elapsed >= 1 / self._frame_rate:
+                multiplier = np.random.randint(1, 5, 1)
+                frames.append(self.current_mock_image * multiplier)
+                self.previous_frame_time = self.current_time
+        else:
+            self.previous_frame_time = self.current_time
         return frames
