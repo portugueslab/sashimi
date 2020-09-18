@@ -1,7 +1,6 @@
 from multiprocessing import Process, Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
-from sashimi.hardware.cameras.hamamatsu_wrapper import HamamatsuCamera
 from dataclasses import dataclass
 import numpy as np
 from copy import copy
@@ -155,7 +154,10 @@ class CameraProcess(Process):
         self.camera.exposure_time = self.parameters.exposure_time
         self.camera.binning = self.parameters.binning
         self.camera.subarray = self.parameters.subarray
-        self.parameters.frame_shape = self.camera.frame_shape  # this is done to match internals of the camera
+        self.camera.trigger_mode = self.parameters.trigger_mode
+        # this is done to match internals of the camera for if only some values are valid (e.g. multiples of 4)
+        self.parameters.frame_shape = self.camera.frame_shape
+        self.parameters.subarray = self.camera.subarray
 
     def update_framerate(self):
         self.framerate_rec.update_framerate()

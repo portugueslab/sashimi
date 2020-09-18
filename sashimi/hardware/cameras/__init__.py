@@ -12,20 +12,6 @@ class AbstractCamera:
         self.camera_id = conf["camera"]["id"]
         self._sensor_resolution = conf["camera"]["sensor_resolution"]
 
-    def apply_parameters(self, parameters):
-        """
-        Selects which parameters are sent to the camera. This is accomplished
-        through self.set_property_value(foo, foo)
-        """
-        pass
-
-    def get_camera_properties(self):
-        """
-        Return the ids & names of all the properties that the camera supports. This
-        is used at initialization to populate the self.properties attribute.
-        """
-        pass
-
     def get_frames(self):
         """
         Returns a list of arrays, each of which corresponds to an available frame. If no frames where found returns an
@@ -33,23 +19,15 @@ class AbstractCamera:
         """
         pass
 
-    def get_internal_parameters(self, parameters):
-        """
-        Gets those parameters that cannot be calculated otherwise and have to
-        be informed directly by the hardware. Returns frame shape and internal frame
-        rate from the camera as a tuple: ([frame_shape, internal_frame_rate])
-        """
-        pass
-
     def get_property_value(self, property_name):
         """
-        Return the current value of a particular property.
+        Returns the current value of a particular property from internal memory of the hardware.
         """
         pass
 
     def set_property_value(self, property_name, property_value):
         """
-        Set the value of a particular property.
+        Configures the value of a particular property in the hardware.
         """
         pass
 
@@ -96,23 +74,11 @@ class AbstractCamera:
         pass
 
     @property
-    def internal_frame_rate(self):
-        return None
-
-    @property
     def trigger_mode(self):
         return None
 
     @trigger_mode.setter
     def trigger_mode(self, exp_val):
-        pass
-
-    @property
-    def camera_mode(self):
-        return None
-
-    @camera_mode.setter
-    def camera_mode(self, exp_val):
         pass
 
     @property
@@ -178,7 +144,10 @@ class MockCamera(AbstractCamera):
     @binning.setter
     def binning(self, exp_val):
         self._binning = exp_val
-        self._frame_shape = (self._sensor_resolution[0] // exp_val, self._sensor_resolution[1] // exp_val)
+        self._frame_shape = (
+            self._sensor_resolution[0] // exp_val,
+            self._sensor_resolution[1] // exp_val
+        )
         self.prepare_mock_image()
 
     @property

@@ -25,7 +25,6 @@ from sashimi.camera import (
     CamParameters,
     CameraMode,
     TriggerMode,
-    MockCameraProcess,
 )
 from sashimi.streaming_save import StackSaver, SavingParameters, SavingStatus
 from pathlib import Path

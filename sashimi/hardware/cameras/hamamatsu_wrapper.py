@@ -1,6 +1,15 @@
 from sashimi.utilities import SpeedyArrayBuffer
 from sashimi.hardware.cameras import AbstractCamera
 from sashimi.hardware.cameras.SDK.hamamatsu_sdk import *
+from enum import Enum
+
+
+# TODO: Adapt to new structure of camera.py
+
+
+class TriggerMode(Enum):
+    FREE = 1
+    EXTERNAL_TRIGGER = 2
 
 
 class HamamatsuCamera(AbstractCamera):
@@ -12,20 +21,26 @@ class HamamatsuCamera(AbstractCamera):
         error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
         n_cameras = paraminit.iDeviceCount
 
+        self._exposure_time = 60
+        self._sensor_resolution: tuple = (
+            self.get_property_value("image_width"),
+            self.get_property_value("image_height")
+        )
+        self._frame_shape = self._sensor_resolution
+        self._subarray = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
+        self._frame_rate = 1 / self._exposure_time
+        self._binning = 1
+        self._trigger_mode = TriggerMode.FREE
+        self._frame_bytes = 0
+
         self.buffer_index = 0
-        self.debug = False
-        self.frame_bytes = 0
-        self.frame_x = 0
-        self.frame_y = 0
         self.last_frame_number = 0
-        self.properties = None
         self.max_backlog = 0
         self.number_image_buffers = 0
         self.hcam_data = []
         self.hcam_ptr = False
         self.old_frame_bytes = -1
 
-        self.acquisition_mode = "run_till_abort"
         self.number_frames = 0
 
         # Open the camera.
@@ -43,28 +58,48 @@ class HamamatsuCamera(AbstractCamera):
         # Get camera properties.
         self.properties = self.get_camera_properties()
 
-        self.max_width = self.get_property_value("image_width")[0]
-        self.max_height = self.get_property_value("image_height")[0]
+    @property
+    def binning(self):
+        return self._binning
 
-        self.set_subarray_mode()
+    @binning.setter
+    def binning(self, exp_val):
+        self._binning = exp_val
+        self.set_property_value("binning", exp_val)
 
-    def apply_parameters(self, parameters, *args, **kwargs):
-        super().apply_parameters(*args, **kwargs)
-        subarray = parameters.subarray
-        # quantizing the ROI dims in multiples of 4
-        subarray = [min((i * parameters.binning // 4) * 4, 2048) for i in subarray]
-        # this can be simplified by making the API nice
-        self.set_property_value("binning", parameters.binning)
-        self.set_property_value(
-            "exposure_time", 0.001 * parameters.exposure_time
-        )
-        self.set_property_value("subarray_vpos", subarray[1])
-        self.set_property_value("subarray_hpos", subarray[0])
-        self.set_property_value("subarray_vsize", subarray[3])
-        self.set_property_value("subarray_hsize", subarray[2])
-        self.set_property_value(
-            "trigger_source", parameters.trigger_mode.value
-        )
+    @property
+    def exposure_time(self):
+        return self._exposure_time
+
+    @exposure_time.setter
+    def exposure_time(self, exp_val):
+        self._exposure_time = exp_val
+        self.set_property_value("exposure_time", 0.001 * exp_val)
+
+    @property
+    def subarray(self):
+        return self._subarray
+
+    @subarray.setter
+    def subarray(self, exp_val: tuple):
+        self._subarray = [min((i * self._binning // 4) * 4, 2048) for i in exp_val]
+        self.set_property_value("subarray_vpos", self._subarray[1])
+        self.set_property_value("subarray_hpos", self._subarray[0])
+        self.set_property_value("subarray_vsize", self._subarray[3])
+        self.set_property_value("subarray_hsize", self._subarray[2])
+
+    @property
+    def trigger_mode(self):
+        return self._trigger_mode
+
+    @trigger_mode.setter
+    def trigger_mode(self, exp_val: TriggerMode):
+        self._trigger_mode = exp_val
+        self.set_property_value("trigger_source", exp_val.value)
+
+    @property
+    def frame_bytes(self):
+        return self._frame_bytes
 
     @staticmethod
     def check_status(fn_return, fn_name="unknown"):
@@ -83,7 +118,10 @@ class HamamatsuCamera(AbstractCamera):
         return p_name.lower().replace(" ", "_")
 
     def get_camera_properties(self):
-        super().get_camera_properties()
+        """
+        Return the ids & names of all the properties that the camera supports. This
+        is used at initialization to populate the self.properties attribute.
+        """
         c_buf_len = 64
         c_buf = ctypes.create_string_buffer(c_buf_len)
         properties = {}
@@ -118,7 +156,7 @@ class HamamatsuCamera(AbstractCamera):
         while prop_id.value != last:
             last = prop_id.value
             properties[
-                self.convert_property_name(c_buf.value.decode(self.encoding))
+                self.convert_property_name(c_buf.value.decode("utf-8"))
             ] = prop_id.value
             ret = self.dcam.dcamprop_getnextid(
                 self.camera_handle,
@@ -197,20 +235,6 @@ class HamamatsuCamera(AbstractCamera):
 
         return frames
 
-    def get_internal_parameters(self, parameters, *args, **kwargs):
-        super().get_internal_parameters(*args, **kwargs)
-        # subarray has to be updated with camera info directly because it must be a multiple of 4
-        frame_shape = (
-            self.get_property_value("subarray_vsize")[0]
-            // parameters.binning,
-            self.get_property_value("subarray_hsize")[0]
-            // parameters.binning,
-        )
-
-        internal_frame_rate = self.get_property_value("internal_frame_rate")[0]
-
-        return tuple([frame_shape, internal_frame_rate])
-
     def get_property_attribute(self, property_name):
         """
         Return the attribute structure of a particular property.
@@ -271,7 +295,7 @@ class HamamatsuCamera(AbstractCamera):
                     ),
                     "dcamprop_getvaluetext",
                 )
-                text_options[prop_text.text.decode(self.encoding)] = int(v.value)
+                text_options[prop_text.text.decode("utf-8")] = int(v.value)
 
                 # Get next value.
                 ret = self.dcam.dcamprop_queryvalue(
@@ -323,26 +347,7 @@ class HamamatsuCamera(AbstractCamera):
             prop_type = "NONE"
             prop_value = False
 
-        return [prop_value, prop_type]
-
-    def set_acquisition_mode(self, mode, number_frames=None):
-        """
-        Set the acquisition mode to either run until aborted or to
-        stop after acquiring a set number of frames.
-
-        mode should be either "fixed_length" or "run_till_abort"
-
-        if mode is "fixed_length", then property number_frames indicates the number
-        of frames to be acquired.
-        """
-
-        self.stop_acquistion()
-
-        if mode == ("fixed_length" or "run_till_abort"):
-            self.acquisition_mode = mode
-            self.number_frames = number_frames
-        else:
-            raise Exception("Unrecognized acquisition mode: " + mode)
+        return prop_value
 
     def set_property_value(self, property_name, property_value, *args, **kwargs):
         super().set_property_value(*args, **kwargs)
@@ -403,94 +408,52 @@ class HamamatsuCamera(AbstractCamera):
         )
         return p_value.value
 
-    def set_subarray_mode(self):
-        """
-        This sets the sub-array mode as appropriate based on the current ROI.
-        """
-
-        # Check ROI properties.
-        roi_w = self.get_property_value("subarray_hsize")[0]
-        roi_h = self.get_property_value("subarray_vsize")[0]
-
-        # If the ROI is smaller than the entire frame tu
-        # rn on subarray mode
-        if (roi_w == self.max_width) and (roi_h == self.max_height):
-            self.set_property_value("subarray_mode", "OFF")
-        else:
-            self.set_property_value("subarray_mode", "ON")
-
     def start_acquisition(self):
         super().start_acquisition()
         self.buffer_index = -1
         self.last_frame_number = 0
 
         # Set sub array mode.
-        self.set_subarray_mode()
+        if self._subarray == (0, 0, self._sensor_resolution, self._sensor_resolution):
+            self.set_property_value("subarray_mode", "OFF")
+        else:
+            self.set_property_value("subarray_mode", "ON")
 
-        # Get frame properties.
-        self.frame_x = self.get_property_value("image_width")[0]
-        self.frame_y = self.get_property_value("image_height")[0]
-        self.frame_bytes = self.get_property_value("image_framebytes")[0]
+        # Get size of frame
+        self._frame_bytes = self.get_property_value("image_framebytes")
 
-        # Allocate new image buffers if necessary. This will allocate
-        # as many frames as can fit in 2GB of memory, or 2000 frames,
-        # which ever is smaller. The problem is that if the frame size
-        # is small than a lot of buffers can fit in 2GB. Assuming that
-        # the camera maximum speed is something like 1KHz 2000 frames
-        # should be enough for 2 seconds of storage, which will hopefully
-        # be long enough.
-        #
-        if (self.old_frame_bytes != self.frame_bytes) or (
-                self.acquisition_mode == "fixed_length"
-        ):
-
-            n_buffers = min(int((2.0 * 1024 * 1024 * 1024) / self.frame_bytes), 2000)
-            if self.acquisition_mode == "fixed_length":
-                self.number_image_buffers = self.number_frames
-            else:
-                self.number_image_buffers = n_buffers
+        if self.old_frame_bytes != self._frame_bytes:
+            # The larger of either 2000 frames or some weird calculation for number of buffers for 2 seconds of data
+            self.number_image_buffers = min(int((2.0 * 1024 * 1024 * 1024) / self._frame_bytes), 2000)
 
             # Allocate new image buffers.
             ptr_array = ctypes.c_void_p * self.number_image_buffers
             self.hcam_ptr = ptr_array()
             self.hcam_data = []
             for i in range(self.number_image_buffers):
-                hc_data = SpeedyArrayBuffer(self.frame_bytes)
+                hc_data = SpeedyArrayBuffer(self._frame_bytes)
                 self.hcam_ptr[i] = hc_data.get_data_pr()
                 self.hcam_data.append(hc_data)
 
-            self.old_frame_bytes = self.frame_bytes
+            self.old_frame_bytes = self._frame_bytes
 
         # Attach image buffers and start acquisition.
-        #
         # We need to attach & release for each acquisition otherwise
-        # we'll get an error if we try to change the ROI in any way
+        # we will get an error if we try to change the ROI in any way
         # between acquisitions.
 
         paramattach = DCAMBUF_ATTACH(
             0, DCAMBUF_ATTACHKIND_FRAME, self.hcam_ptr, self.number_image_buffers,
         )
         paramattach.size = ctypes.sizeof(paramattach)
-
-        if self.acquisition_mode == "run_till_abort":
-            self.check_status(
-                self.dcam.dcambuf_attach(self.camera_handle, paramattach),
-                "dcam_attachbuffer",
-            )
-            self.check_status(
-                self.dcam.dcamcap_start(self.camera_handle, DCAMCAP_START_SEQUENCE),
-                "dcamcap_start",
-            )
-        if self.acquisition_mode == "fixed_length":
-            paramattach.buffercount = self.number_frames
-            self.check_status(
-                self.dcam.dcambuf_attach(self.camera_handle, paramattach),
-                "dcambuf_attach",
-            )
-            self.check_status(
-                self.dcam.dcamcap_start(self.camera_handle, DCAMCAP_START_SNAP),
-                "dcamcap_start",
-            )
+        self.check_status(
+            self.dcam.dcambuf_attach(self.camera_handle, paramattach),
+            "dcam_attachbuffer",
+        )
+        self.check_status(
+            self.dcam.dcamcap_start(self.camera_handle, DCAMCAP_START_SEQUENCE),
+            "dcamcap_start",
+        )
 
     def stop_acquistion(self):
         super().stop_acquistion()
