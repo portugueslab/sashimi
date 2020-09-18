@@ -7,7 +7,7 @@ from copy import copy
 from queue import Empty
 import time
 from datetime import datetime
-from sashimi.hardware.cameras.camera_list import camera_class_dict
+from sashimi.hardware.cameras import camera_class_dict
 from sashimi.config import read_config
 
 conf = read_config()
@@ -135,9 +135,7 @@ class CameraProcess(Process):
             frames = self.camera.get_frames()
             if frames:
                 for frame in frames:
-                    self.image_queue.put(
-                        np.reshape(frame, self.parameters.frame_shape)
-                    )
+                    self.image_queue.put(frame)
                     self.update_framerate()
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
@@ -151,13 +149,10 @@ class CameraProcess(Process):
 
     def update_parameters(self):
         self.parameters = self.new_parameters
-        self.camera.exposure_time = self.parameters.exposure_time
-        self.camera.binning = self.parameters.binning
-        self.camera.subarray = self.parameters.subarray
-        self.camera.trigger_mode = self.parameters.trigger_mode
-        # this is done to match internals of the camera for if only some values are valid (e.g. multiples of 4)
+        for attribute in ["exposure_time", "binning", "subarray", "trigger_mode"]:
+            setattr(self.camera, attribute, getattr(self.parameters, attribute))
+        # the following is to match internals of the camera as some cameras are restricted (e.g. only multiples of 4)
         self.parameters.frame_shape = self.camera.frame_shape
-        self.parameters.subarray = self.camera.subarray
 
     def update_framerate(self):
         self.framerate_rec.update_framerate()

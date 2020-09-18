@@ -2,6 +2,7 @@ from sashimi.utilities import SpeedyArrayBuffer
 from sashimi.hardware.cameras import AbstractCamera
 from sashimi.hardware.cameras.SDK.hamamatsu_sdk import *
 from enum import Enum
+import numpy as np
 
 
 # TODO: Adapt to new structure of camera.py
@@ -231,7 +232,7 @@ class HamamatsuCamera(AbstractCamera):
         self.buffer_index = cur_buffer_index
 
         for n in new_frames:
-            frames.append(self.hcam_data[n].get_data())
+            frames.append(np.reshape(self.hcam_data[n].get_data(), self._frame_shape))
 
         return frames
 

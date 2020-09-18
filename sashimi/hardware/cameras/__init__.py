@@ -3,7 +3,16 @@ import time
 import numpy as np
 from skimage.measure import block_reduce
 
+from sashimi.hardware.cameras.hamamatsu_wrapper import HamamatsuCamera
+from sashimi.hardware.cameras import MockCamera
+
 conf = read_config()
+
+# Update this dictionary and add the import above when adding a new camera
+camera_class_dict = dict(
+    hamamatsu=HamamatsuCamera,
+    test=MockCamera,
+)
 
 
 class AbstractCamera:
