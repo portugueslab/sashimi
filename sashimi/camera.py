@@ -107,7 +107,10 @@ class CameraProcess(Process):
         if conf["scopeless"]:
             self.camera = camera_class_dict["test"]()
         else:
-            self.camera = camera_class_dict[conf["camera"]["name"]]()
+            self.camera = camera_class_dict[conf["camera"]["name"]](
+                camera_id=conf["camera"]["id"],
+                sensor_resolution=conf["camera"]["sensor_resolution"]
+            )
 
     def pause_loop(self):
         while not self.stop_event.is_set():

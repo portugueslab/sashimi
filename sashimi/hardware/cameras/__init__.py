@@ -2,15 +2,28 @@ from sashimi.config import read_config
 import time
 import numpy as np
 from skimage.measure import block_reduce
+from enum import Enum
 
 conf = read_config()
 
 
+class CameraException(Exception):
+    pass
+
+
+class CameraWarning(Warning):
+    pass
+
+
+class TriggerMode(Enum):
+    FREE = 1
+    EXTERNAL_TRIGGER = 2
+
+
 class AbstractCamera:
-    def __init__(self):
-        super().__init__()
-        self.camera_id = conf["camera"]["id"]
-        self._sensor_resolution = conf["camera"]["sensor_resolution"]
+    def __init__(self, camera_id, sensor_resolution=None):
+        self.camera_id = camera_id
+        self._sensor_resolution = sensor_resolution
 
     def get_frames(self):
         """
@@ -95,8 +108,8 @@ class AbstractCamera:
 
 
 class MockCamera(AbstractCamera):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, camera_id=None, sensor_resolution=None):
+        super().__init__(camera_id, sensor_resolution)
         self._exposure_time = 60
         self._sensor_resolution: tuple = (2048, 2048)
         self._frame_shape = self._sensor_resolution

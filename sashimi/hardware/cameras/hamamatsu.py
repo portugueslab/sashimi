@@ -1,27 +1,13 @@
 from sashimi.utilities import SpeedyArrayBuffer
-from sashimi.hardware.cameras import AbstractCamera
+from sashimi.hardware.cameras import AbstractCamera, TriggerMode, CameraException, CameraWarning
 from sashimi.hardware.cameras.SDK.hamamatsu_sdk import *
-from enum import Enum
 import numpy as np
 from warnings import warn
 
 
-class CameraException(Exception):
-    pass
-
-
-class CameraWarning(Warning):
-    pass
-
-
-class TriggerMode(Enum):
-    FREE = 1
-    EXTERNAL_TRIGGER = 2
-
-
 class HamamatsuCamera(AbstractCamera):
-    def __init__(self, *args, **kwargs):
-        super().__init__()
+    def __init__(self, camera_id, sensor_resolution):
+        super().__init__(camera_id, sensor_resolution)
         self.dcam = ctypes.windll.dcamapi
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
         paraminit.size = ctypes.sizeof(paraminit)
