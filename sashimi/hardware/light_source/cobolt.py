@@ -20,7 +20,7 @@ class CoboltLaser(AbstractLightSource):
             },
         )
         self._current = 0
-        self._intensity_units = "mA"
+        self.intensity_units = "mA"
 
     def set_current(self):
         try:
@@ -63,11 +63,3 @@ class CoboltLaser(AbstractLightSource):
     @status.setter
     def status(self, exp_val):
         self._status = exp_val
-
-    @property
-    def intensity_units(self):
-        return self._intensity_units
-
-    @intensity_units.setter
-    def intensity_units(self, exp_val):
-        pass

@@ -18,6 +18,7 @@ class AbstractLightSource:
     def __init__(self, port):
         self.port = port
         self._status = LaserState.OFF
+        self.intensity_units = None
 
     def start(self):
         pass
@@ -35,14 +36,6 @@ class AbstractLightSource:
 
     @intensity.setter
     def intensity(self, exp_val):
-        pass
-
-    @property
-    def intensity_units(self):
-        return None
-
-    @intensity_units.setter
-    def intensity_units(self, exp_val):
         pass
 
     @property
