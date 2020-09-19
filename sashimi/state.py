@@ -3,7 +3,7 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from sashimi.hardware.laser import CoboltLaser, MockCoboltLaser
+from sashimi.hardware.lasers.laser import CoboltLaser, MockCoboltLaser
 from sashimi.processes.scanning import Scanner
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
@@ -351,7 +351,7 @@ class State:
         )
 
         if self.conf["scopeless"]:
-            self.laser = MockCoboltLaser()
+            self.laser = MockCoboltLaser(port=conf["laser"]["port"])
             self.camera = MockCameraProcess(
                 stop_event=self.stop_event.event,
                 wait_event=self.scanner.wait_signal,
