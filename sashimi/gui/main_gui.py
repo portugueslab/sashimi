@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.wid_status = StatusWidget(st, self.timer)
         self.wid_display = ViewingWidget(st, self.timer)
         self.wid_save_options = SaveWidget(st, self.timer)
-        self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
+        self.wid_laser = LaserControlWidget(st, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsContainerWidget(
             st, self.wid_display.roi, self.timer

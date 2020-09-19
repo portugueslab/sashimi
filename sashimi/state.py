@@ -557,7 +557,7 @@ class State:
         self.noise_subtraction_active.clear()
 
         current_laser = self.laser_settings.laser_power
-        self.laser.set_current(0)
+        self.laser.current = 0
         n_image = 0
         while n_image < n_images:
             current_volume = self.get_volume()
@@ -571,7 +571,7 @@ class State:
                 n_image += 1
         self.noise_subtraction_active.set()
         self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
-        self.laser.set_current(current_laser)
+        self.laser.current = current_laser
 
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
