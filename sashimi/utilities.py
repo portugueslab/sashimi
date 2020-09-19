@@ -1,5 +1,7 @@
 from math import gcd
 from queue import Empty
+from dataclasses import asdict, is_dataclass
+from enum import Enum
 
 from numba import vectorize, uint16
 
@@ -33,3 +35,17 @@ def get_last_parameters(parameter_queue, timeout=0.0001):
         except Empty:
             break
     return params
+
+
+def clean_json(d):
+    if isinstance(d, dict):
+        cleaned = dict()
+        for key, value in d.items():
+            cleaned[key] = clean_json(value)
+        return cleaned
+    elif isinstance(d, Enum):
+        return d.name
+    elif is_dataclass(d):
+        return clean_json(asdict(d))
+    else:
+        return d

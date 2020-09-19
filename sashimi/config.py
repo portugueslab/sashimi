@@ -50,6 +50,7 @@ TEMPLATE_CONF_DICT = {
         }
     },
     "light_source": {"name": "cobolt", "port": "COM4"},
+    "external_communication": {"name": "stytra", "address": "tcp://O1-589:5555"},
     "notifier": "none",
     "notifier_options": {},
     "array_ram_MB": 450,

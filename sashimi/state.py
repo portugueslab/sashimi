@@ -16,7 +16,7 @@ from sashimi.hardware.scanning.scanloops import (
     TriggeringParameters,
     ScanParameters,
 )
-from sashimi.processes.stytra_comm import ExternalComm
+from sashimi.processes.external_communication import ExternalComm
 from sashimi.processes.dispatcher import VolumeDispatcher
 from sashimi.processes.logging import ConcurrenceLogger
 from multiprocessing import Event
@@ -329,7 +329,7 @@ class State:
         self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
         self.restart_event = LoggedEvent(self.logger, SashimiEvents.RESTART_SCANNING)
         self.experiment_start_event = LoggedEvent(
-            self.logger, SashimiEvents.TRIGGER_STYTRA
+            self.logger, SashimiEvents.SEND_EXT_TRIGGER
         )
         self.noise_subtraction_active = LoggedEvent(
             self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, Event()
@@ -370,7 +370,7 @@ class State:
                 exp_trigger_event=self.experiment_start_event,
             )
 
-        self.stytra_comm = ExternalComm(
+        self.external_comm = ExternalComm(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
             is_saving_event=self.is_saving_event,
@@ -380,7 +380,7 @@ class State:
         self.saver = StackSaver(
             stop_event=self.stop_event,
             is_saving_event=self.is_saving_event,
-            duration_queue=self.stytra_comm.duration_queue,
+            duration_queue=self.external_comm.duration_queue,
         )
 
         self.dispatcher = VolumeDispatcher(
@@ -440,7 +440,7 @@ class State:
 
         self.camera.start()
         self.scanner.start()
-        self.stytra_comm.start()
+        self.external_comm.start()
         self.saver.start()
         self.dispatcher.start()
 
@@ -517,7 +517,7 @@ class State:
         self.all_settings["scanning"] = params
 
         self.scanner.parameter_queue.put(params)
-        self.stytra_comm.current_settings_queue.put(self.all_settings)
+        self.external_comm.current_settings_queue.put(self.all_settings)
 
         save_params = convert_save_params(
             self.save_settings,
@@ -625,6 +625,6 @@ class State:
         self.scanner.join(timeout=10)
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
-        self.stytra_comm.join(timeout=10)
+        self.external_comm.join(timeout=10)
         self.dispatcher.join(timeout=10)
         self.logger.close()

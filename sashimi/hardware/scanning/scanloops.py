@@ -13,7 +13,7 @@ from sashimi.config import read_config
 from sashimi.processes.logging import ConcurrenceLogger
 from sashimi.utilities import lcm, get_last_parameters
 from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
-from sashimi.hardware.scanning.interface import AbstractScanInterface
+from sashimi.hardware.scanning.__init__ import AbstractScanInterface
 
 conf = read_config()
 
