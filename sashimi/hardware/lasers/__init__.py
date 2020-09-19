@@ -30,11 +30,11 @@ class AbstractLaser:
         pass
 
     @property
-    def drive_current(self):
+    def current(self):
         return None
 
-    @drive_current.setter
-    def drive_current(self, exp_val):
+    @current.setter
+    def current(self, exp_val):
         pass
 
     @property

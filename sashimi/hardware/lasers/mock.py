@@ -1,18 +1,18 @@
 from sashimi.hardware.lasers import AbstractLaser
 
 
-class MockCoboltLaser(AbstractLaser):
-    def __init__(self, port):
+class MockLaser(AbstractLaser):
+    def __init__(self, port=None):
         super().__init__(port)
-        self._drive_current = 0
+        self._current = 0
 
     @property
-    def drive_current(self):
-        return self._drive_current
+    def current(self):
+        return self._current
 
-    @drive_current.setter
-    def drive_current(self, exp_val):
-        self._drive_current = exp_val
+    @current.setter
+    def current(self, exp_val):
+        self._current = exp_val
 
     @property
     def status(self):
@@ -20,4 +20,4 @@ class MockCoboltLaser(AbstractLaser):
 
     @status.setter
     def status(self, exp_val):
-        pass
+        self._status = exp_val

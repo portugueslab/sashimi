@@ -1,17 +1,14 @@
 from warnings import warn
+from sashimi.hardware.lasers import AbstractLaser, LaserWarning, LaserException
+import visa
 
-try:
-    import visa
-
-    rm = visa.ResourceManager()
-except (ImportError, ValueError):
-    warn("PyVisa not installed, no laser control available")
+manager = visa.ResourceManager()
 
 
-class CoboltLaser:
-    def __init__(self, port="COM4"):
-        self.port = port
-        self.cobolt = rm.open_resource(
+class CoboltLaser(AbstractLaser):
+    def __init__(self, port):
+        super().__init__(port)
+        self.socket = manager.open_resource(
             self.port,
             **{
                 "write_termination": "\r",
@@ -22,28 +19,46 @@ class CoboltLaser:
                 "encoding": "ascii",
             },
         )
+        self._current = 0
 
-    def set_current(self, current):
+    def set_current(self):
         try:
-            if current > 0:
-                self.cobolt.query("ci")
-                self.cobolt.query("slc {:.1f}".format(current))
+            if self._current > 0:
+                self.socket.query("ci")
+                self.socket.query("slc {:.1f}".format(self._current))
             else:
-                self.cobolt.query("em")
+                self.socket.query("em")
         except visa.VisaIOError:
-            pass
+            warn("Current not set. Laser was unreachable", LaserWarning)
 
-    def get_status(self):
+    def get_info(self):
         status_string = "\n".join(
             [
                 "laser is {status}".format(
-                    status="OFF" if self.cobolt.query("l?") == "\n0" else "ON"
+                    status="OFF" if self.socket.query("l?") == "\n0" else "ON"
                 ),
-                "drive current: {} mA".format(self.cobolt.query("i?")),
-                "output power: {} W".format(self.cobolt.query("pa?")),
+                "drive current: {} mA".format(self.socket.query("i?")),
+                "output power: {} W".format(self.socket.query("pa?")),
             ]
         )
         return status_string
 
     def close(self):
-        self.cobolt.close()
+        self.socket.close()
+
+    @property
+    def current(self):
+        return self._current
+
+    @current.setter
+    def current(self, exp_val):
+        self._current = exp_val
+        self.set_current()
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, exp_val):
+        self._status = exp_val
