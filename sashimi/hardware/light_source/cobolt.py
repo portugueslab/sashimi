@@ -1,8 +1,11 @@
 from warnings import warn
-from sashimi.hardware.light_source import AbstractLightSource, LaserWarning, LaserException
-import visa
+from sashimi.hardware.light_source import AbstractLightSource, LaserWarning
+try:
+    import visa
 
-manager = visa.ResourceManager()
+    manager = visa.ResourceManager()
+except (ImportError, ValueError):
+    warn("PyVisa not installed, no laser control available", LaserWarning)
 
 
 class CoboltLaser(AbstractLightSource):
