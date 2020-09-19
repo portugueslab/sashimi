@@ -3,16 +3,7 @@ import time
 import numpy as np
 from skimage.measure import block_reduce
 
-from sashimi.hardware.cameras.hamamatsu_wrapper import HamamatsuCamera
-from sashimi.hardware.cameras import MockCamera
-
 conf = read_config()
-
-# Update this dictionary and add the import above when adding a new camera
-camera_class_dict = dict(
-    hamamatsu=HamamatsuCamera,
-    test=MockCamera,
-)
 
 
 class AbstractCamera:
@@ -46,7 +37,7 @@ class AbstractCamera:
         """
         pass
 
-    def stop_acquistion(self):
+    def stop_acquisition(self):
         """
         Stop data acquisition and release the memory allocated for frames.
         """
@@ -56,7 +47,7 @@ class AbstractCamera:
         """
         Close down the connection to the camera.
         """
-        self.stop_acquistion()
+        self.stop_acquisition()
 
     @property
     def exposure_time(self):
@@ -75,11 +66,11 @@ class AbstractCamera:
         pass
 
     @property
-    def subarray(self):
+    def roi(self):
         return None
 
-    @subarray.setter
-    def subarray(self, exp_val: tuple):
+    @roi.setter
+    def roi(self, exp_val: tuple):
         pass
 
     @property
@@ -103,24 +94,13 @@ class AbstractCamera:
         return tuple([None, None])
 
 
-class AbstractCameraConfigurator:
-    def __init__(self):
-        pass
-
-    def __enter__(self):
-        return AbstractCamera()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-
 class MockCamera(AbstractCamera):
     def __init__(self):
         super().__init__()
         self._exposure_time = 60
         self._sensor_resolution: tuple = (2048, 2048)
         self._frame_shape = self._sensor_resolution
-        self._subarray = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
+        self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
         self._frame_rate = 1 / self._exposure_time
         self._binning = 1
         self.full_mock_image = np.random.randint(0, 65534, size=self._frame_shape, dtype=np.uint16)
@@ -136,7 +116,7 @@ class MockCamera(AbstractCamera):
     @exposure_time.setter
     def exposure_time(self, exp_val):
         self._exposure_time = exp_val
-        self._frame_rate = 1 / exp_val
+        self._frame_rate = 1 / (exp_val * 1e-3)
 
     @property
     def frame_shape(self):
@@ -160,20 +140,20 @@ class MockCamera(AbstractCamera):
         self.prepare_mock_image()
 
     @property
-    def subarray(self):
-        return self._subarray
+    def roi(self):
+        return self._roi
 
-    @subarray.setter
-    def subarray(self, exp_val: tuple):
-        self._subarray = exp_val
+    @roi.setter
+    def roi(self, exp_val: tuple):
+        self._roi = exp_val
         self.prepare_mock_image()
 
     def prepare_mock_image(self):
         self.current_mock_image = block_reduce(
             self.full_mock_image[
-                self._subarray[0]:self._subarray[2],
-                self._subarray[1]:self._subarray[3]
-                ],
+            self._roi[0]:self._roi[2],
+            self._roi[1]:self._roi[3]
+            ],
             (self._binning, self._binning),
             func=np.max
         )
@@ -185,7 +165,7 @@ class MockCamera(AbstractCamera):
         if self.previous_frame_time is not None:
             time.sleep(0.0001)
             self.elapsed = (self.current_time - self.previous_frame_time) * 1e-9
-            if self.elapsed >= 1 / self._frame_rate:
+            if self.elapsed >= self._exposure_time * 1e-3:
                 multiplier = np.random.randint(1, 5, 1)
                 frames.append(self.current_mock_image * multiplier)
                 self.previous_frame_time = self.current_time

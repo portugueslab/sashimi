@@ -123,7 +123,7 @@ class CameraSettings(ParametrizedQt):
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
         self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
-        self.subarray = Param(
+        self.roi = Param(
             [0, 0, 2048, 2048], gui=False
         )  # order of params here is [hpos, vpos, hsize, vsize,]
 
@@ -151,7 +151,7 @@ def convert_planar_params(planar: PlanarScanningSettings):
 
 
 def convert_calibration_params(
-    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
+        planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
         state=ScanningState.PLANAR,
@@ -220,14 +220,14 @@ def convert_camera_params(camera_settings: CameraSettings):
     return CamParameters(
         exposure_time=camera_settings.exposure,
         binning=binning,
-        subarray=tuple(camera_settings.subarray),
+        roi=tuple(camera_settings.roi),
     )
 
 
 def get_voxel_size(
-    scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
-    scope_alignment: ScopeAlignmentInfo,
+        scanning_settings: ZRecordingSettings,
+        camera_settings: CameraSettings,
+        scope_alignment: ScopeAlignmentInfo,
 ):
     scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
 
@@ -251,13 +251,13 @@ def get_voxel_size(
 
 
 def convert_save_params(
-    save_settings: SaveSettings,
-    scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
-    scope_alignment: ScopeAlignmentInfo,
+        save_settings: SaveSettings,
+        scanning_settings: ZRecordingSettings,
+        camera_settings: CameraSettings,
+        scope_alignment: ScopeAlignmentInfo,
 ):
     n_planes = scanning_settings.n_planes - (
-        scanning_settings.n_skip_start + scanning_settings.n_skip_end
+            scanning_settings.n_skip_start + scanning_settings.n_skip_end
     )
 
     return SavingParameters(
@@ -270,9 +270,9 @@ def convert_save_params(
 
 
 def convert_single_plane_params(
-    planar: PlanarScanningSettings,
-    single_plane_setting: SinglePlaneSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        single_plane_setting: SinglePlaneSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -287,9 +287,9 @@ def convert_single_plane_params(
 
 
 def convert_volume_params(
-    planar: PlanarScanningSettings,
-    z_setting: ZRecordingSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        z_setting: ZRecordingSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
@@ -321,19 +321,15 @@ class State:
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
+        # TODO: Abstract laser, call read_config().["scopeless"] in laser.py
         if self.conf["scopeless"]:
             self.laser = MockCoboltLaser()
-            self.camera = MockCameraProcess(
-                experiment_start_event=self.experiment_start_event,
-                stop_event=self.stop_event,
-            )
         else:
             self.laser = CoboltLaser()
-            self.camera = CameraProcess(
-                experiment_start_event=self.experiment_start_event,
-                stop_event=self.stop_event,
-            )
-
+        self.camera = CameraProcess(
+            experiment_start_event=self.experiment_start_event,
+            stop_event=self.stop_event
+        )
         self.scanner = Scanner(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
@@ -461,9 +457,9 @@ class State:
                 self.planar_setting, self.volume_setting, self.calibration
             )
             n_planes = (
-                self.volume_setting.n_planes
-                - self.volume_setting.n_skip_start
-                - self.volume_setting.n_skip_end
+                    self.volume_setting.n_planes
+                    - self.volume_setting.n_skip_start
+                    - self.volume_setting.n_skip_end
             )
             if self.waveform is not None:
                 pulses = self.calculate_pulse_times() * self.sample_rate

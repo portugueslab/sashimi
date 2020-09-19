@@ -49,7 +49,7 @@ class SpeedyArrayBuffer:
         """
         super().__init__(**kwargs)
         self.np_array = np.ascontiguousarray(
-            np.empty(int(size / 2), dtype=np.uint16)
+            np.empty(size // 2)
         )
         self.size = size
 

@@ -7,7 +7,7 @@ from copy import copy
 from queue import Empty
 import time
 from datetime import datetime
-from sashimi.hardware.cameras import camera_class_dict
+from sashimi.hardware import camera_class_dict
 from sashimi.config import read_config
 
 conf = read_config()
@@ -30,7 +30,7 @@ class TriggerMode(Enum):
 class CamParameters:
     exposure_time: float = 60
     binning: int = 2
-    subarray: tuple = (
+    roi: tuple = (
         0,
         0,
         1024,
@@ -99,12 +99,15 @@ class CameraProcess(Process):
 
     def cast_parameters(self):
         params = self.parameters
-        params.subarray = list(params.subarray)
+        params.roi = list(params.roi)
         return params
 
     def initialize_camera(self):
         self.camera_status_queue.put(self.cast_parameters())
-        self.camera = camera_class_dict[conf["camera"]["name"]]
+        if conf["scopeless"]:
+            self.camera = camera_class_dict["test"]()
+        else:
+            self.camera = camera_class_dict[conf["camera"]["name"]]()
 
     def pause_loop(self):
         while not self.stop_event.is_set():
@@ -149,7 +152,7 @@ class CameraProcess(Process):
 
     def update_parameters(self):
         self.parameters = self.new_parameters
-        for attribute in ["exposure_time", "binning", "subarray", "trigger_mode"]:
+        for attribute in ["exposure_time", "binning", "roi", "trigger_mode"]:
             setattr(self.camera, attribute, getattr(self.parameters, attribute))
         # the following is to match internals of the camera as some cameras are restricted (e.g. only multiples of 4)
         self.parameters.frame_shape = self.camera.frame_shape

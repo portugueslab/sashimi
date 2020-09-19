@@ -3,9 +3,15 @@ from sashimi.hardware.cameras import AbstractCamera
 from sashimi.hardware.cameras.SDK.hamamatsu_sdk import *
 from enum import Enum
 import numpy as np
+from warnings import warn
 
 
-# TODO: Adapt to new structure of camera.py
+class CameraException(Exception):
+    pass
+
+
+class CameraWarning(Warning):
+    pass
 
 
 class TriggerMode(Enum):
@@ -28,7 +34,7 @@ class HamamatsuCamera(AbstractCamera):
             self.get_property_value("image_height")
         )
         self._frame_shape = self._sensor_resolution
-        self._subarray = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
+        self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
         self._frame_rate = 1 / self._exposure_time
         self._binning = 1
         self._trigger_mode = TriggerMode.FREE
@@ -78,16 +84,16 @@ class HamamatsuCamera(AbstractCamera):
         self.set_property_value("exposure_time", 0.001 * exp_val)
 
     @property
-    def subarray(self):
-        return self._subarray
+    def roi(self):
+        return self._roi
 
-    @subarray.setter
-    def subarray(self, exp_val: tuple):
-        self._subarray = [min((i * self._binning // 4) * 4, 2048) for i in exp_val]
-        self.set_property_value("subarray_vpos", self._subarray[1])
-        self.set_property_value("subarray_hpos", self._subarray[0])
-        self.set_property_value("subarray_vsize", self._subarray[3])
-        self.set_property_value("subarray_hsize", self._subarray[2])
+    @roi.setter
+    def roi(self, exp_val: tuple):
+        self._roi = [min((i * self._binning // 4) * 4, 2048) for i in exp_val]
+        self.set_property_value("subarray_vpos", self._roi[1])
+        self.set_property_value("subarray_hpos", self._roi[0])
+        self.set_property_value("subarray_vsize", self._roi[3])
+        self.set_property_value("subarray_hsize", self._roi[2])
 
     @property
     def trigger_mode(self):
@@ -214,7 +220,7 @@ class HamamatsuCamera(AbstractCamera):
         # Keep track of the maximum backlog.
         backlog = cur_frame_number - self.last_frame_number
         if backlog > self.number_image_buffers:
-            print(">> Warning! hamamatsu camera frame buffer overrun detected!")
+            warn("Camera buffer overrun detected. Some frames might have been lost", CameraWarning)
         if backlog > self.max_backlog:
             self.max_backlog = backlog
         self.last_frame_number = cur_frame_number
@@ -317,8 +323,7 @@ class HamamatsuCamera(AbstractCamera):
 
         # Check if the property exists.
         if not (property_name in self.properties):
-            print(" unknown property name:", property_name)
-            return False
+            raise CameraException(f"Unknown property name{property_name}")
         prop_id = self.properties[property_name]
 
         # Get the property attributes.
@@ -354,8 +359,7 @@ class HamamatsuCamera(AbstractCamera):
         super().set_property_value(*args, **kwargs)
         # Check if the property exists.
         if not (property_name in self.properties):
-            print(" unknown property name:", property_name)
-            return False
+            raise CameraException(f"Unknown property name {property_name}")
 
         # If the value is text, figure out what the
         # corresponding numerical property value is.
@@ -364,34 +368,20 @@ class HamamatsuCamera(AbstractCamera):
             if property_value in text_values:
                 property_value = float(text_values[property_value])
             else:
-                print(
-                    " unknown property text value:",
-                    property_value,
-                    "for",
-                    property_name,
-                )
-                return False
+                raise CameraException(f"Invalid property value {property_value} for {property_name}")
 
         # Check that the property is within range.
         [pv_min, pv_max] = self.get_property_range(property_name)
         if property_value < pv_min:
-            print(
-                " set property value",
-                property_value,
-                "is less than minimum of",
-                pv_min,
-                property_name,
-                "setting to minimum",
+            warn(
+                f"Value {property_value} for {property_name} is less than minimum {pv_min}. Setting to minimum.",
+                CameraWarning
             )
             property_value = pv_min
         if property_value > pv_max:
-            print(
-                " set property value",
-                property_value,
-                "is greater than maximum of",
-                pv_max,
-                property_name,
-                "setting to maximum",
+            warn(
+                f"Value {property_value} for {property_name} is greater than maximum {pv_max}. Setting to maximum.",
+                CameraWarning
             )
             property_value = pv_max
 
@@ -415,7 +405,7 @@ class HamamatsuCamera(AbstractCamera):
         self.last_frame_number = 0
 
         # Set sub array mode.
-        if self._subarray == (0, 0, self._sensor_resolution, self._sensor_resolution):
+        if self._roi == (0, 0, self._sensor_resolution, self._sensor_resolution):
             self.set_property_value("subarray_mode", "OFF")
         else:
             self.set_property_value("subarray_mode", "ON")
