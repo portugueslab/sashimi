@@ -358,8 +358,12 @@ class State:
                 exp_trigger_event=self.experiment_start_event,
             )
         else:
-            self.light_source = light_source_class_dict[conf["light_source"]["name"]](port=conf["light_source"]["port"])
-            self.light_source_settings.intensity.unit = self.light_source.intensity_units
+            self.light_source = light_source_class_dict[conf["light_source"]["name"]](
+                port=conf["light_source"]["port"]
+            )
+            self.light_source_settings.intensity.unit = (
+                self.light_source.intensity_units
+            )
             self.camera = CameraProcess(
                 stop_event=self.stop_event,
                 wait_event=self.scanner.wait_signal,

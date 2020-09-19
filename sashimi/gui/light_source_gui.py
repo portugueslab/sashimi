@@ -34,8 +34,13 @@ class LightSourceWidget(QWidget):
         timer.timeout.connect(self.update_current)
 
     def update_current(self):
-        if self.laser_on and self.previous_current != self.state.light_source_settings.intensity:
-            self.state.light_source.intensity = self.state.light_source_settings.intensity
+        if (
+            self.laser_on
+            and self.previous_current != self.state.light_source_settings.intensity
+        ):
+            self.state.light_source.intensity = (
+                self.state.light_source_settings.intensity
+            )
         self.previous_current = self.state.light_source_settings.intensity
 
     def toggle(self):
