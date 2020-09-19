@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   sashimi.hardware.light_source
    sashimi.hardware.scanning
 
 Submodules
@@ -16,14 +17,6 @@ sashimi.hardware.hamamatsu\_camera module
 -----------------------------------------
 
 .. automodule:: sashimi.hardware.hamamatsu_camera
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-sashimi.hardware.laser module
------------------------------
-
-.. automodule:: sashimi.hardware.laser
    :members:
    :undoc-members:
    :show-inheritance:

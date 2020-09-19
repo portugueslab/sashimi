@@ -36,6 +36,13 @@
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="sashimi.hardware.light_source.html">sashimi.hardware.light_source package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.light_source.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.cobolt">sashimi.hardware.light_source.cobolt module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.mock">sashimi.hardware.light_source.mock module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="sashimi.hardware.scanning.html">sashimi.hardware.scanning package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.scanning.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.scanning.html#module-sashimi.hardware.scanning.interface">sashimi.hardware.scanning.interface module</a></li>
@@ -760,51 +767,6 @@ available when it is called.</p>
 <code class="sig-prename descclassname">sashimi.hardware.hamamatsu_camera.</code><code class="sig-name descname">convertPropertyName</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">p_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.hamamatsu_camera.convertPropertyName" title="Permalink to this definition">¶</a></dt>
 <dd><p>“Regularizes” a property name. We are using all lowercase names with
 the spaces replaced by underscores.</p>
-</dd></dl>
-
-</div>
-<div class="section" id="module-sashimi.hardware.laser">
-<span id="sashimi-hardware-laser-module"></span><h2>sashimi.hardware.laser module<a class="headerlink" href="#module-sashimi.hardware.laser" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="sashimi.hardware.laser.CoboltLaser">
-<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.laser.</code><code class="sig-name descname">CoboltLaser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span><span class="o">=</span><span class="default_value">'COM4'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.laser.CoboltLaser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt id="sashimi.hardware.laser.CoboltLaser.close">
-<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.laser.CoboltLaser.close" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="sashimi.hardware.laser.CoboltLaser.get_status">
-<code class="sig-name descname">get_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.laser.CoboltLaser.get_status" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="sashimi.hardware.laser.CoboltLaser.set_current">
-<code class="sig-name descname">set_current</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.laser.CoboltLaser.set_current" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="sashimi.hardware.laser.MockCoboltLaser">
-<em class="property">class </em><code class="sig-prename descclassname">sashimi.hardware.laser.</code><code class="sig-name descname">MockCoboltLaser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span><span class="o">=</span><span class="default_value">'COM4'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.laser.MockCoboltLaser" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt id="sashimi.hardware.laser.MockCoboltLaser.close">
-<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.laser.MockCoboltLaser.close" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="sashimi.hardware.laser.MockCoboltLaser.get_status">
-<code class="sig-name descname">get_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.laser.MockCoboltLaser.get_status" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="sashimi.hardware.laser.MockCoboltLaser.set_current">
-<code class="sig-name descname">set_current</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">current</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.hardware.laser.MockCoboltLaser.set_current" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 </div>

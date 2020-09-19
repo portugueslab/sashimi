@@ -70,12 +70,14 @@
       </ul></li>
       <li><a href="sashimi.processes.html#sashimi.processes.stytra_comm.AbstractComm">AbstractComm (class in sashimi.processes.stytra_comm)</a>
 </li>
-      <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.interface.AbstractScanInterface">AbstractScanInterface (class in sashimi.hardware.scanning.interface)</a>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.AbstractLightSource">AbstractLightSource (class in sashimi.hardware.light_source)</a>
 </li>
-      <li><a href="sashimi.html#sashimi.state.Calibration.add_calibration_point">add_calibration_point() (sashimi.state.Calibration method)</a>
+      <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.interface.AbstractScanInterface">AbstractScanInterface (class in sashimi.hardware.scanning.interface)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="sashimi.html#sashimi.state.Calibration.add_calibration_point">add_calibration_point() (sashimi.state.Calibration method)</a>
+</li>
       <li><a href="sashimi.html#sashimi.camera.CameraProcess.apply_parameters">apply_parameters() (sashimi.camera.CameraProcess method)</a>
 
       <ul>
@@ -190,10 +192,10 @@
 </li>
       <li><a href="sashimi.html#sashimi.config.cli_edit_config">cli_edit_config() (in module sashimi.config)</a>
 </li>
-      <li><a href="sashimi.hardware.html#sashimi.hardware.laser.CoboltLaser.close">close() (sashimi.hardware.laser.CoboltLaser method)</a>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.AbstractLightSource.close">close() (sashimi.hardware.light_source.AbstractLightSource method)</a>
 
       <ul>
-        <li><a href="sashimi.hardware.html#sashimi.hardware.laser.MockCoboltLaser.close">(sashimi.hardware.laser.MockCoboltLaser method)</a>
+        <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.cobolt.CoboltLaser.close">(sashimi.hardware.light_source.cobolt.CoboltLaser method)</a>
 </li>
         <li><a href="sashimi.processes.html#sashimi.processes.logging.ConcurrenceLogger.close">(sashimi.processes.logging.ConcurrenceLogger method)</a>
 </li>
@@ -210,7 +212,7 @@
 </li>
       <li><a href="sashimi.gui.html#sashimi.gui.main_gui.MainWindow.closeEvent">closeEvent() (sashimi.gui.main_gui.MainWindow method)</a>
 </li>
-      <li><a href="sashimi.hardware.html#sashimi.hardware.laser.CoboltLaser">CoboltLaser (class in sashimi.hardware.laser)</a>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.cobolt.CoboltLaser">CoboltLaser (class in sashimi.hardware.light_source.cobolt)</a>
 </li>
       <li><a href="sashimi.processes.html#sashimi.processes.logging.ConcurrenceLogger">ConcurrenceLogger (class in sashimi.processes.logging)</a>
 </li>
@@ -366,16 +368,12 @@
 </li>
       <li><a href="sashimi.processes.html#sashimi.processes.dispatcher.VolumeDispatcher.get_frame">get_frame() (sashimi.processes.dispatcher.VolumeDispatcher method)</a>
 </li>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.cobolt.CoboltLaser.get_info">get_info() (sashimi.hardware.light_source.cobolt.CoboltLaser method)</a>
+</li>
       <li><a href="sashimi.html#sashimi.utilities.get_last_parameters">get_last_parameters() (in module sashimi.utilities)</a>
 </li>
       <li><a href="sashimi.html#sashimi.state.State.get_save_status">get_save_status() (sashimi.state.State method)</a>
 </li>
-      <li><a href="sashimi.hardware.html#sashimi.hardware.laser.CoboltLaser.get_status">get_status() (sashimi.hardware.laser.CoboltLaser method)</a>
-
-      <ul>
-        <li><a href="sashimi.hardware.html#sashimi.hardware.laser.MockCoboltLaser.get_status">(sashimi.hardware.laser.MockCoboltLaser method)</a>
-</li>
-      </ul></li>
       <li><a href="sashimi.html#sashimi.state.State.get_triggered_frame_rate">get_triggered_frame_rate() (sashimi.state.State method)</a>
 </li>
       <li><a href="sashimi.html#sashimi.state.State.get_volume">get_volume() (sashimi.state.State method)</a>
@@ -484,12 +482,20 @@
         <li><a href="sashimi.html#sashimi.camera.MockCameraProcess.initialize_camera">(sashimi.camera.MockCameraProcess method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sashimi.hardware.html#sashimi.hardware.hamamatsu_camera.DCAMAPI_INIT.initoption">initoption (sashimi.hardware.hamamatsu_camera.DCAMAPI_INIT attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sashimi.hardware.html#sashimi.hardware.hamamatsu_camera.DCAMAPI_INIT.initoptionbytes">initoptionbytes (sashimi.hardware.hamamatsu_camera.DCAMAPI_INIT attribute)</a>
 </li>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.AbstractLightSource.intensity">intensity() (sashimi.hardware.light_source.AbstractLightSource property)</a>
+
+      <ul>
+        <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.cobolt.CoboltLaser.intensity">(sashimi.hardware.light_source.cobolt.CoboltLaser property)</a>
+</li>
+        <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.mock.MockLaser.intensity">(sashimi.hardware.light_source.mock.MockLaser property)</a>
+</li>
+      </ul></li>
       <li><a href="sashimi.html#sashimi.camera.CamParameters.internal_frame_rate">internal_frame_rate (sashimi.camera.CamParameters attribute)</a>
 </li>
       <li><a href="sashimi.hardware.html#sashimi.hardware.hamamatsu_camera.DCAMPROP_ATTR.iProp">iProp (sashimi.hardware.hamamatsu_camera.DCAMPROP_ATTR attribute)</a>
@@ -526,9 +532,11 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="sashimi.gui.html#sashimi.gui.laser_gui.LaserControlWidget">LaserControlWidget (class in sashimi.gui.laser_gui)</a>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.LaserException">LaserException</a>
 </li>
-      <li><a href="sashimi.html#sashimi.state.LaserSettings">LaserSettings (class in sashimi.state)</a>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.LaserState">LaserState (class in sashimi.hardware.light_source)</a>
+</li>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.LaserWarning">LaserWarning</a>
 </li>
       <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.scanloops.PlanarScanning.lateral">lateral (sashimi.hardware.scanning.scanloops.PlanarScanning attribute)</a>
 
@@ -546,10 +554,14 @@
 </li>
       <li><a href="sashimi.hardware.html#sashimi.hardware.hamamatsu_camera.DCAMBUF_FRAME.left">left (sashimi.hardware.hamamatsu_camera.DCAMBUF_FRAME attribute)</a>
 </li>
-      <li><a href="sashimi.gui.html#sashimi.gui.save_settings_gui.SavingSettingsWidget.load">load() (sashimi.gui.save_settings_gui.SavingSettingsWidget method)</a>
+      <li><a href="sashimi.html#sashimi.state.LightSourceSettings">LightSourceSettings (class in sashimi.state)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="sashimi.gui.html#sashimi.gui.light_source_gui.LightSourceWidget">LightSourceWidget (class in sashimi.gui.light_source_gui)</a>
+</li>
+      <li><a href="sashimi.gui.html#sashimi.gui.save_settings_gui.SavingSettingsWidget.load">load() (sashimi.gui.save_settings_gui.SavingSettingsWidget method)</a>
+</li>
       <li><a href="sashimi.processes.html#sashimi.processes.logging.ConcurrenceLogger.log_event">log_event() (sashimi.processes.logging.ConcurrenceLogger method)</a>
 </li>
       <li><a href="sashimi.processes.html#sashimi.processes.logging.ConcurrenceLogger.log_message">log_message() (sashimi.processes.logging.ConcurrenceLogger method)</a>
@@ -582,7 +594,7 @@
 </li>
       <li><a href="sashimi.html#sashimi.camera.MockCameraProcess">MockCameraProcess (class in sashimi.camera)</a>
 </li>
-      <li><a href="sashimi.hardware.html#sashimi.hardware.laser.MockCoboltLaser">MockCoboltLaser (class in sashimi.hardware.laser)</a>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.mock.MockLaser">MockLaser (class in sashimi.hardware.light_source.mock)</a>
 </li>
       <li>
     module
@@ -602,7 +614,7 @@
 </li>
         <li><a href="sashimi.gui.html#module-sashimi.gui.camera_gui">sashimi.gui.camera_gui</a>
 </li>
-        <li><a href="sashimi.gui.html#module-sashimi.gui.laser_gui">sashimi.gui.laser_gui</a>
+        <li><a href="sashimi.gui.html#module-sashimi.gui.light_source_gui">sashimi.gui.light_source_gui</a>
 </li>
         <li><a href="sashimi.gui.html#module-sashimi.gui.main_gui">sashimi.gui.main_gui</a>
 </li>
@@ -618,7 +630,11 @@
 </li>
         <li><a href="sashimi.hardware.html#module-sashimi.hardware.hamamatsu_camera">sashimi.hardware.hamamatsu_camera</a>
 </li>
-        <li><a href="sashimi.hardware.html#module-sashimi.hardware.laser">sashimi.hardware.laser</a>
+        <li><a href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source">sashimi.hardware.light_source</a>
+</li>
+        <li><a href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.cobolt">sashimi.hardware.light_source.cobolt</a>
+</li>
+        <li><a href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.mock">sashimi.hardware.light_source.mock</a>
 </li>
         <li><a href="sashimi.hardware.scanning.html#module-sashimi.hardware.scanning">sashimi.hardware.scanning</a>
 </li>
@@ -711,14 +727,18 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="sashimi.html#sashimi.state.State.obtain_noise_average">obtain_noise_average() (sashimi.state.State method)</a>
 </li>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.LaserState.OFF">OFF (sashimi.hardware.light_source.LaserState attribute)</a>
+</li>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.LaserState.ON">ON (sashimi.hardware.light_source.LaserState attribute)</a>
+</li>
       <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.interface.open_abstract_interface">open_abstract_interface() (in module sashimi.hardware.scanning.interface)</a>
 </li>
       <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.mock.open_mockboard">open_mockboard() (in module sashimi.hardware.scanning.mock)</a>
 </li>
-      <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.ni.open_niboard">open_niboard() (in module sashimi.hardware.scanning.ni)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.ni.open_niboard">open_niboard() (in module sashimi.hardware.scanning.ni)</a>
+</li>
       <li><a href="sashimi.processes.html#sashimi.processes.streaming_save.SavingParameters.optimal_chunk_MB_RAM">optimal_chunk_MB_RAM (sashimi.processes.streaming_save.SavingParameters attribute)</a>
 </li>
       <li><a href="sashimi.hardware.html#sashimi.hardware.hamamatsu_camera.DCAMBUF_FRAME.option">option (sashimi.hardware.hamamatsu_camera.DCAMBUF_FRAME attribute)</a>
@@ -925,10 +945,10 @@
 </li>
       </ul></li>
       <li>
-    sashimi.gui.laser_gui
+    sashimi.gui.light_source_gui
 
       <ul>
-        <li><a href="sashimi.gui.html#module-sashimi.gui.laser_gui">module</a>
+        <li><a href="sashimi.gui.html#module-sashimi.gui.light_source_gui">module</a>
 </li>
       </ul></li>
       <li>
@@ -981,10 +1001,24 @@
 </li>
       </ul></li>
       <li>
-    sashimi.hardware.laser
+    sashimi.hardware.light_source
 
       <ul>
-        <li><a href="sashimi.hardware.html#module-sashimi.hardware.laser">module</a>
+        <li><a href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source">module</a>
+</li>
+      </ul></li>
+      <li>
+    sashimi.hardware.light_source.cobolt
+
+      <ul>
+        <li><a href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.cobolt">module</a>
+</li>
+      </ul></li>
+      <li>
+    sashimi.hardware.light_source.mock
+
+      <ul>
+        <li><a href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.mock">module</a>
 </li>
       </ul></li>
       <li>
@@ -1149,12 +1183,8 @@
 </li>
       <li><a href="sashimi.html#sashimi.events.LoggedEvent.set">set() (sashimi.events.LoggedEvent method)</a>
 </li>
-      <li><a href="sashimi.hardware.html#sashimi.hardware.laser.CoboltLaser.set_current">set_current() (sashimi.hardware.laser.CoboltLaser method)</a>
-
-      <ul>
-        <li><a href="sashimi.hardware.html#sashimi.hardware.laser.MockCoboltLaser.set_current">(sashimi.hardware.laser.MockCoboltLaser method)</a>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.cobolt.CoboltLaser.set_current">set_current() (sashimi.hardware.light_source.cobolt.CoboltLaser method)</a>
 </li>
-      </ul></li>
       <li><a href="sashimi.gui.html#sashimi.gui.camera_gui.CameraSettingsContainerWidget.set_full_size_frame">set_full_size_frame() (sashimi.gui.camera_gui.CameraSettingsContainerWidget method)</a>
 </li>
       <li><a href="sashimi.html#sashimi.waveforms.set_impulses">set_impulses() (in module sashimi.waveforms)</a>
@@ -1162,6 +1192,8 @@
       <li><a href="sashimi.gui.html#sashimi.gui.save_gui.SaveWidget.set_locationbutton">set_locationbutton() (sashimi.gui.save_gui.SaveWidget method)</a>
 </li>
       <li><a href="sashimi.gui.html#sashimi.gui.calibration_gui.CalibrationWidget.set_noise_subtraction_mode">set_noise_subtraction_mode() (sashimi.gui.calibration_gui.CalibrationWidget method)</a>
+</li>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.AbstractLightSource.set_power">set_power() (sashimi.hardware.light_source.AbstractLightSource method)</a>
 </li>
       <li><a href="sashimi.gui.html#sashimi.gui.camera_gui.CameraSettingsContainerWidget.set_roi">set_roi() (sashimi.gui.camera_gui.CameraSettingsContainerWidget method)</a>
 </li>
@@ -1207,9 +1239,11 @@
 </li>
       <li><a href="sashimi.processes.html#sashimi.processes.streaming_save.StackSaver">StackSaver (class in sashimi.processes.streaming_save)</a>
 </li>
-      <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.interface.AbstractScanInterface.start">start() (sashimi.hardware.scanning.interface.AbstractScanInterface method)</a>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.AbstractLightSource.start">start() (sashimi.hardware.light_source.AbstractLightSource method)</a>
 
       <ul>
+        <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.interface.AbstractScanInterface.start">(sashimi.hardware.scanning.interface.AbstractScanInterface method)</a>
+</li>
         <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.ni.NIBoards.start">(sashimi.hardware.scanning.ni.NIBoards method)</a>
 </li>
       </ul></li>
@@ -1225,6 +1259,14 @@
 </li>
       <li><a href="sashimi.hardware.scanning.html#sashimi.hardware.scanning.scanloops.ScanParameters.state">state (sashimi.hardware.scanning.scanloops.ScanParameters attribute)</a>
 </li>
+      <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.AbstractLightSource.status">status() (sashimi.hardware.light_source.AbstractLightSource property)</a>
+
+      <ul>
+        <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.cobolt.CoboltLaser.status">(sashimi.hardware.light_source.cobolt.CoboltLaser property)</a>
+</li>
+        <li><a href="sashimi.hardware.light_source.html#sashimi.hardware.light_source.mock.MockLaser.status">(sashimi.hardware.light_source.mock.MockLaser property)</a>
+</li>
+      </ul></li>
       <li><a href="sashimi.gui.html#sashimi.gui.main_gui.StatusWidget">StatusWidget (class in sashimi.gui.main_gui)</a>
 </li>
       <li><a href="sashimi.hardware.html#sashimi.hardware.hamamatsu_camera.HamamatsuCamera.stopAcquisition">stopAcquisition() (sashimi.hardware.hamamatsu_camera.HamamatsuCamera method)</a>
@@ -1263,7 +1305,7 @@
 </li>
       <li><a href="sashimi.hardware.html#sashimi.hardware.hamamatsu_camera.DCAMBUF_FRAME.timestamp">timestamp (sashimi.hardware.hamamatsu_camera.DCAMBUF_FRAME attribute)</a>
 </li>
-      <li><a href="sashimi.gui.html#sashimi.gui.laser_gui.LaserControlWidget.toggle">toggle() (sashimi.gui.laser_gui.LaserControlWidget method)</a>
+      <li><a href="sashimi.gui.html#sashimi.gui.light_source_gui.LightSourceWidget.toggle">toggle() (sashimi.gui.light_source_gui.LightSourceWidget method)</a>
 </li>
       <li><a href="sashimi.gui.html#sashimi.gui.camera_gui.ViewingWidget.toggle_roi_display">toggle_roi_display() (sashimi.gui.camera_gui.ViewingWidget method)</a>
 </li>
@@ -1309,7 +1351,7 @@
 </li>
       <li><a href="sashimi.gui.html#sashimi.gui.camera_gui.ViewingWidget.update_contrast_limits">update_contrast_limits() (sashimi.gui.camera_gui.ViewingWidget method)</a>
 </li>
-      <li><a href="sashimi.gui.html#sashimi.gui.laser_gui.LaserControlWidget.update_current">update_current() (sashimi.gui.laser_gui.LaserControlWidget method)</a>
+      <li><a href="sashimi.gui.html#sashimi.gui.light_source_gui.LightSourceWidget.update_current">update_current() (sashimi.gui.light_source_gui.LightSourceWidget method)</a>
 </li>
       <li><a href="sashimi.html#sashimi.camera.CameraProcess.update_framerate">update_framerate() (sashimi.camera.CameraProcess method)</a>
 

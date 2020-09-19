@@ -1,0 +1,30 @@
+sashimi.hardware.light\_source package
+======================================
+
+Submodules
+----------
+
+sashimi.hardware.light\_source.cobolt module
+--------------------------------------------
+
+.. automodule:: sashimi.hardware.light_source.cobolt
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+sashimi.hardware.light\_source.mock module
+------------------------------------------
+
+.. automodule:: sashimi.hardware.light_source.mock
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: sashimi.hardware.light_source
+   :members:
+   :undoc-members:
+   :show-inheritance:

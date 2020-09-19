@@ -20,10 +20,10 @@ sashimi.gui.camera\_gui module
    :undoc-members:
    :show-inheritance:
 
-sashimi.gui.laser\_gui module
------------------------------
+sashimi.gui.light\_source\_gui module
+-------------------------------------
 
-.. automodule:: sashimi.gui.laser_gui
+.. automodule:: sashimi.gui.light_source_gui
    :members:
    :undoc-members:
    :show-inheritance:

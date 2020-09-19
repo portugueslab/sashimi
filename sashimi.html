@@ -40,7 +40,7 @@
 <li class="toctree-l2"><a class="reference internal" href="sashimi.gui.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.gui.html#module-sashimi.gui.calibration_gui">sashimi.gui.calibration_gui module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.gui.html#module-sashimi.gui.camera_gui">sashimi.gui.camera_gui module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sashimi.gui.html#module-sashimi.gui.laser_gui">sashimi.gui.laser_gui module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sashimi.gui.html#module-sashimi.gui.light_source_gui">sashimi.gui.light_source_gui module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.gui.html#module-sashimi.gui.main_gui">sashimi.gui.main_gui module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.gui.html#sashimi-gui-open-napari-module">sashimi.gui.open_napari module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.gui.html#module-sashimi.gui.save_gui">sashimi.gui.save_gui module</a></li>
@@ -52,6 +52,13 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="sashimi.hardware.html">sashimi.hardware package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.light_source.html">sashimi.hardware.light_source package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.light_source.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.cobolt">sashimi.hardware.light_source.cobolt module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.mock">sashimi.hardware.light_source.mock module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.html">sashimi.hardware.scanning package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.scanning.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.scanning.html#module-sashimi.hardware.scanning.interface">sashimi.hardware.scanning.interface module</a></li>
@@ -65,7 +72,6 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.html#module-sashimi.hardware.hamamatsu_camera">sashimi.hardware.hamamatsu_camera module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.html#module-sashimi.hardware.laser">sashimi.hardware.laser module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.html#module-sashimi.hardware">Module contents</a></li>
 </ul>
 </li>
@@ -347,7 +353,7 @@ sections and look directly for matching parameters names.</p>
 
 <dl class="py function">
 <dt id="sashimi.config.write_default_config">
-<code class="sig-prename descclassname">sashimi.config.</code><code class="sig-name descname">write_default_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span><span class="o">=</span><span class="default_value">PosixPath('/home/travis/.sashimi/hardware_config.toml')</span></em>, <em class="sig-param"><span class="n">template</span><span class="o">=</span><span class="default_value">{'array_ram_MB': 450, 'default_paths': {'data': '/home/travis', 'log': '/home/travis/logs', 'presets': '/home/travis/presets', 'scope_instructions': '.'}, 'notifier': 'none', 'notifier_options': {}, 'piezo': {'scale': 0.025}, 'sample_rate': 40000, 'scanning': 'mock', 'scopeless': False, 'xy_board': {'write': {'channel': 'Dev2/ao0:1', 'max_val': 10, 'min_val': - 5}}, 'z_board': {'read': {'channel': 'Dev1/ai0:0', 'max_val': 10, 'min_val': 0}, 'sync': {'channel': '/Dev1/ao/StartTrigger'}, 'write': {'channel': 'Dev1/ao0:3', 'max_val': 10, 'min_val': - 5}}}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.config.write_default_config" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">sashimi.config.</code><code class="sig-name descname">write_default_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span><span class="o">=</span><span class="default_value">PosixPath('/home/travis/.sashimi/hardware_config.toml')</span></em>, <em class="sig-param"><span class="n">template</span><span class="o">=</span><span class="default_value">{'array_ram_MB': 450, 'default_paths': {'data': '/home/travis', 'log': '/home/travis/logs', 'presets': '/home/travis/presets', 'scope_instructions': '.'}, 'light_source': {'name': 'cobolt', 'port': 'COM4'}, 'notifier': 'none', 'notifier_options': {}, 'piezo': {'scale': 0.025}, 'sample_rate': 40000, 'scanning': 'mock', 'scopeless': False, 'xy_board': {'write': {'channel': 'Dev2/ao0:1', 'max_val': 10, 'min_val': - 5}}, 'z_board': {'read': {'channel': 'Dev1/ai0:0', 'max_val': 10, 'min_val': 0}, 'sync': {'channel': '/Dev1/ao/StartTrigger'}, 'write': {'channel': 'Dev1/ao0:3', 'max_val': 10, 'min_val': - 5}}}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.config.write_default_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write configuration file at first repo usage. In this way,
 we don’t need to keep a confusing template config file in the repo.</p>
 <dl class="field-list simple">
@@ -601,8 +607,8 @@ we don’t need to keep a confusing template config file in the repo.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="sashimi.state.LaserSettings">
-<em class="property">class </em><code class="sig-prename descclassname">sashimi.state.</code><code class="sig-name descname">LaserSettings</code><a class="headerlink" href="#sashimi.state.LaserSettings" title="Permalink to this definition">¶</a></dt>
+<dt id="sashimi.state.LightSourceSettings">
+<em class="property">class </em><code class="sig-prename descclassname">sashimi.state.</code><code class="sig-name descname">LightSourceSettings</code><a class="headerlink" href="#sashimi.state.LightSourceSettings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">lightparam.param_qt.ParametrizedQt</span></code></p>
 </dd></dl>
 
