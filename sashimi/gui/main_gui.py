@@ -6,7 +6,7 @@ from sashimi.gui.scanning_gui import (
     VolumeScanningWidget,
     SinglePlaneScanningWidget,
 )
-from sashimi.gui.laser_gui import LaserControlWidget
+from sashimi.gui.light_source_gui import LightSourceWidget
 from sashimi.gui.save_settings_gui import SavingSettingsWidget
 from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
 from sashimi.gui.save_gui import SaveWidget
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.wid_status = StatusWidget(st, self.timer)
         self.wid_display = ViewingWidget(st, self.timer)
         self.wid_save_options = SaveWidget(st, self.timer)
-        self.wid_laser = LaserControlWidget(st, self.timer)
+        self.wid_laser = LightSourceWidget(st, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsContainerWidget(
             st, self.wid_display.roi, self.timer
@@ -58,7 +58,7 @@ class MainWindow(QMainWindow):
 
         self.addDockWidget(
             Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_laser, title="Laser control"),
+            DockedWidget(widget=self.wid_laser, title="Light source"),
         )
 
         self.addDockWidget(

@@ -1,8 +1,8 @@
-from sashimi.hardware.lasers.mock import MockLaser
-from sashimi.hardware.lasers.cobolt import CoboltLaser
+from sashimi.hardware.light_source.mock import MockLaser
+from sashimi.hardware.light_source.cobolt import CoboltLaser
 
 # Update this dictionary and add the import above when adding a new laser
-laser_class_dict = dict(
+light_source_class_dict = dict(
     cobolt=CoboltLaser,
     test=MockLaser,
 )

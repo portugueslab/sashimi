@@ -1,11 +1,11 @@
 from warnings import warn
-from sashimi.hardware.lasers import AbstractLaser, LaserWarning, LaserException
+from sashimi.hardware.light_source import AbstractLightSource, LaserWarning, LaserException
 import visa
 
 manager = visa.ResourceManager()
 
 
-class CoboltLaser(AbstractLaser):
+class CoboltLaser(AbstractLightSource):
     def __init__(self, port):
         super().__init__(port)
         self.socket = manager.open_resource(
@@ -20,6 +20,7 @@ class CoboltLaser(AbstractLaser):
             },
         )
         self._current = 0
+        self._intensity_units = "mA"
 
     def set_current(self):
         try:
@@ -47,11 +48,11 @@ class CoboltLaser(AbstractLaser):
         self.socket.close()
 
     @property
-    def current(self):
+    def intensity(self):
         return self._current
 
-    @current.setter
-    def current(self, exp_val):
+    @intensity.setter
+    def intensity(self, exp_val):
         self._current = exp_val
         self.set_current()
 
@@ -62,3 +63,11 @@ class CoboltLaser(AbstractLaser):
     @status.setter
     def status(self, exp_val):
         self._status = exp_val
+
+    @property
+    def intensity_units(self):
+        return self._intensity_units
+
+    @intensity_units.setter
+    def intensity_units(self, exp_val):
+        pass

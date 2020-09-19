@@ -14,7 +14,7 @@ class LaserWarning(Warning):
     pass
 
 
-class AbstractLaser:
+class AbstractLightSource:
     def __init__(self, port):
         self.port = port
         self._status = LaserState.OFF
@@ -23,26 +23,26 @@ class AbstractLaser:
         pass
 
     def set_power(self, current):
-        """Sets power of laser based on either output power, applied current or power on sample"""
+        """Sets power of laser based on self.intensity and self.intensity_units"""
         pass
 
     def close(self):
         pass
 
     @property
-    def current(self):
+    def intensity(self):
         return None
 
-    @current.setter
-    def current(self, exp_val):
+    @intensity.setter
+    def intensity(self, exp_val):
         pass
 
     @property
-    def output_power(self):
+    def intensity_units(self):
         return None
 
-    @output_power.setter
-    def output_power(self, exp_val):
+    @intensity_units.setter
+    def intensity_units(self, exp_val):
         pass
 
     @property
