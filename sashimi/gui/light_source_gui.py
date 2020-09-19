@@ -1,5 +1,3 @@
-from sashimi.hardware.light_source import AbstractLightSource
-from sashimi.state import LightSourceSettings
 from PyQt5.QtWidgets import (
     QHBoxLayout,
     QPushButton,
