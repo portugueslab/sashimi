@@ -49,7 +49,7 @@ TEMPLATE_CONF_DICT = {
             "max_val": 10,
         }
     },
-    "laser": {"port": "COM4"},
+    "laser": {"name": "cobolt", "port": "COM4"},
     "notifier": "none",
     "notifier_options": {},
     "array_ram_MB": 450,
