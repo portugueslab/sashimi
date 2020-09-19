@@ -3,7 +3,7 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from sashimi.hardware.lasers.laser import CoboltLaser, MockCoboltLaser
+from sashimi.hardware.lasers.cobolt import CoboltLaser, MockCoboltLaser
 from sashimi.processes.scanning import Scanner
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,

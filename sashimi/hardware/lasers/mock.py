@@ -1,14 +1,10 @@
-from sashimi.config import read_config
-from sashimi.hardware.lasers import AbstractLaser, LaserState
-
-conf = read_config()
+from sashimi.hardware.lasers import AbstractLaser
 
 
 class MockCoboltLaser(AbstractLaser):
     def __init__(self, port):
         super().__init__(port)
         self._drive_current = 0
-        self._status =
 
     @property
     def drive_current(self):

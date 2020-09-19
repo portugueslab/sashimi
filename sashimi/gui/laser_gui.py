@@ -1,4 +1,4 @@
-from sashimi.hardware.lasers.laser import CoboltLaser
+from sashimi.hardware.lasers.cobolt import CoboltLaser
 from PyQt5.QtWidgets import (
     QHBoxLayout,
     QPushButton,

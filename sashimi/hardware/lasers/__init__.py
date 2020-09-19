@@ -6,6 +6,14 @@ class LaserState(Enum):
     OFF = 2
 
 
+class LaserException(Exception):
+    pass
+
+
+class LaserWarning(Warning):
+    pass
+
+
 class AbstractLaser:
     def __init__(self, port):
         self.port = port
