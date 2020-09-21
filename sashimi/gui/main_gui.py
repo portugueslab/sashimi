@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
         self.wid_settings_tree = SavingSettingsWidget(st)
         self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
 
-        self.wid_status = StatusWidget(st, self.timer)
+        self.wid_status = ScanningModeWidget(st, self.timer)
         self.wid_display = ViewingWidget(st, self.timer)
         self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LaserControlWidget(st.laser, st.laser_settings, self.timer)
@@ -113,7 +113,7 @@ class MainWindow(QMainWindow):
             self.st.saver.saver_stopped_signal.clear()
 
 
-class StatusWidget(QTabWidget):
+class ScanningModeWidget(QTabWidget):
     def __init__(self, st: State, timer):
         super().__init__()
 

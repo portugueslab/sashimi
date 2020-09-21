@@ -318,14 +318,14 @@ def convert_volume_params(
 
 
 class State:
-    def __init__(self, sample_rate):
+    def __init__(self):
         self.conf = read_config()
-        self.sample_rate = sample_rate
-
+        self.settings_tree = ParameterTree()
         self.logger = ConcurrenceLogger("main")
 
         self.calibration_ref = None
         self.waveform = None
+        self.scanner_triggering = False
         self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
         self.restart_event = LoggedEvent(self.logger, SashimiEvents.RESTART_SCANNING)
         self.experiment_start_event = LoggedEvent(
@@ -340,12 +340,29 @@ class State:
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
 
-        self.scanner = Scanner(
-            stop_event=self.stop_event,
-            restart_event=self.restart_event,
-            experiment_start_event=self.experiment_start_event,
-            sample_rate=self.sample_rate,
-        )
+        if conf["scanning"] == "none":
+            self.scanner = None
+        else:
+            self.scanner = Scanner(
+                stop_event=self.stop_event,
+                restart_event=self.restart_event,
+                experiment_start_event=self.experiment_start_event,
+            )
+            self.scanner_triggering = True
+
+            self.planar_setting = PlanarScanningSettings()
+            self.single_plane_settings = SinglePlaneSettings()
+            self.volume_setting = ZRecordingSettings()
+            self.calibration = Calibration()
+            for setting in [
+                self.planar_setting,
+                self.single_plane_settings,
+                self.volume_setting,
+                self.calibration,
+                self.calibration.z_settings,
+            ]:
+                self.settings_tree.add(setting)
+                setting.sig_param_changed.connect(self.send_scan_settings)
 
         if self.conf["scopeless"]:
             self.laser = MockCoboltLaser()
@@ -386,27 +403,15 @@ class State:
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
 
-        self.settings_tree = ParameterTree()
-
         self.global_state = GlobalState.PAUSED
         self.pause_after = False
 
-        self.planar_setting = PlanarScanningSettings()
         self.laser_settings = LaserSettings()
 
         self.save_status: Optional[SavingStatus] = None
 
-        self.single_plane_settings = SinglePlaneSettings()
-        self.volume_setting = ZRecordingSettings()
-        self.calibration = Calibration()
-
         for setting in [
-            self.planar_setting,
             self.laser_settings,
-            self.single_plane_settings,
-            self.volume_setting,
-            self.calibration,
-            self.calibration.z_settings,
             self.camera_settings,
             self.save_settings,
             self.scope_alignment_info,
@@ -415,22 +420,12 @@ class State:
 
         self.status.sig_param_changed.connect(self.change_global_state)
 
-        self.planar_setting.sig_param_changed.connect(self.send_scan_settings)
-        self.calibration.z_settings.sig_param_changed.connect(self.send_scan_settings)
-        self.single_plane_settings.sig_param_changed.connect(self.send_scan_settings)
-        self.volume_setting.sig_param_changed.connect(self.send_scan_settings)
-
         self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
         self.save_settings.sig_param_changed.connect(self.send_scan_settings)
 
-        self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
-        self.single_plane_settings.sig_param_changed.connect(
-            self.send_dispatcher_settings
-        )
-        self.status.sig_param_changed.connect(self.send_dispatcher_settings)
-
         self.camera.start()
-        self.scanner.start()
+        if self.scanner is not None:
+            self.scanner.start()
         self.stytra_comm.start()
         self.saver.start()
         self.dispatcher.start()
@@ -471,43 +466,45 @@ class State:
         self.all_settings["camera"] = camera_params
 
     def send_scan_settings(self):
-        n_planes = 1
-        if self.global_state == GlobalState.PAUSED:
-            params = ScanParameters(state=ScanningState.PAUSED)
+        if self.scanner is not None:
+            n_planes = 1
+            if self.global_state == GlobalState.PAUSED:
+                params = ScanParameters(state=ScanningState.PAUSED)
 
-        elif self.global_state == GlobalState.PREVIEW:
-            params = convert_calibration_params(
-                self.planar_setting, self.calibration.z_settings
-            )
+            elif self.global_state == GlobalState.PREVIEW:
+                params = convert_calibration_params(
+                    self.planar_setting, self.calibration.z_settings
+                )
 
-        elif self.global_state == GlobalState.PLANAR_PREVIEW:
-            params = convert_single_plane_params(
-                self.planar_setting,
-                self.single_plane_settings,
-                self.calibration,
-            )
+            elif self.global_state == GlobalState.PLANAR_PREVIEW:
+                params = convert_single_plane_params(
+                    self.planar_setting,
+                    self.single_plane_settings,
+                    self.calibration,
+                )
 
-        elif self.global_state == GlobalState.VOLUME_PREVIEW:
-            params = convert_volume_params(
-                self.planar_setting, self.volume_setting, self.calibration
-            )
-            n_planes = (
-                self.volume_setting.n_planes
-                - self.volume_setting.n_skip_start
-                - self.volume_setting.n_skip_end
-            )
-            if self.waveform is not None:
-                pulses = self.calculate_pulse_times() * self.sample_rate
-                try:
-                    pulse_log = self.waveform[pulses.astype(int)]
-                    self.all_settings["piezo_log"] = {"trigger": pulse_log.tolist()}
-                except IndexError:
-                    pass
+            elif self.global_state == GlobalState.VOLUME_PREVIEW:
+                params = convert_volume_params(
+                    self.planar_setting, self.volume_setting, self.calibration
+                )
+                n_planes = (
+                    self.volume_setting.n_planes
+                    - self.volume_setting.n_skip_start
+                    - self.volume_setting.n_skip_end
+                )
+                if self.waveform is not None:
+                    pulses = self.calculate_pulse_times() * self.sample_rate
+                    try:
+                        pulse_log = self.waveform[pulses.astype(int)]
+                        self.all_settings["piezo_log"] = {"trigger": pulse_log.tolist()}
+                    except IndexError:
+                        pass
 
         params.experiment_state = self.experiment_state
         self.all_settings["scanning"] = params
 
-        self.scanner.parameter_queue.put(params)
+        if self.scanner is not None:
+            self.scanner.parameter_queue.put(params)
         self.stytra_comm.current_settings_queue.put(self.all_settings)
 
         save_params = convert_save_params(
@@ -518,9 +515,7 @@ class State:
         )
         self.saver.saving_parameter_queue.put(save_params)
         self.dispatcher.n_planes_queue.put(n_planes)
-
-    def send_dispatcher_settings(self):
-        pass
+        return True
 
     def get_camera_status(self):
         try:
@@ -533,10 +528,13 @@ class State:
         # TODO disable the GUI except the abort button
         self.logger.log_message("started experiment")
         self.send_scan_settings()
-        self.scanner.wait_signal.set()
-        self.restart_event.set()
+        if self.scanner_triggering:
+            self.scanner.wait_signal.set()
+            self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
+        if not self.scanner_triggering:
+            self.experiment_start_event.set()
         self.is_saving_event.set()
 
     def end_experiment(self):
@@ -614,7 +612,9 @@ class State:
         self.logger.close()
         self.laser.close()
 
-        self.scanner.join(timeout=10)
+        if self.scanner is not None:
+            self.scanner.join(timeout=10)
+
         self.saver.join(timeout=10)
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
