@@ -95,7 +95,6 @@ class ScanLoop:
         n_samples,
         sample_rate,
         waveform_queue: ArrayQueue,
-        experiment_start_signal,
         wait_signal,
         logger: ConcurrenceLogger,
         trigger_exp_from_scanner,
@@ -112,7 +111,6 @@ class ScanLoop:
 
         self.parameter_queue = parameter_queue
         self.waveform_queue = waveform_queue
-        self.experiment_start_event = experiment_start_signal
 
         self.parameters = initial_parameters
         self.old_parameters = initial_parameters
@@ -183,7 +181,7 @@ class ScanLoop:
         self.logger.log_message("read")
         self.n_samples_read += self.board.n_samples
 
-    def loop(self):
+    def loop(self, first_run=False):
         while True:
             self.update_settings()
             self.old_parameters = deepcopy(self.parameters)
@@ -195,6 +193,8 @@ class ScanLoop:
             self.read()
             self.i_sample = (self.i_sample + self.n_samples) % self.n_samples_period()
             self.n_acquired += 1
+            if first_run:
+                break
 
 
 class PlanarScanLoop(ScanLoop):
@@ -257,11 +257,6 @@ class VolumetricScanLoop(ScanLoop):
 
     def check_start(self):
         super().check_start()
-        if self.trigger_exp_start:
-            if self.trigger_exp_from_scanner:
-                self.experiment_start_event.set()
-            self.trigger_exp_start = False
-
         if (
             self.parameters.experiment_state
             == ExperimentPrepareState.EXPERIMENT_STARTED
@@ -270,7 +265,7 @@ class VolumetricScanLoop(ScanLoop):
 
     def n_samples_period(self):
         n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
-        return lcm(n_samples_trigger, super().n_samples_period())
+        return max(n_samples_trigger, super().n_samples_period())
 
     def update_settings(self):
         updated = super().update_settings()
@@ -300,7 +295,7 @@ class VolumetricScanLoop(ScanLoop):
             vmax=self.parameters.z.piezo_max,
         )
 
-        if not self.camera_on and self.n_samples_read > self.n_samples_period() * 2:
+        if not self.camera_on and self.n_samples_read > self.n_samples_period():
             self.camera_on = True
             self.wait_signal.clear()
             self.trigger_exp_start = True
@@ -344,6 +339,7 @@ class VolumetricScanLoop(ScanLoop):
         camera_pulses = 0
         if self.camera_on:
             if self.camera_was_off:
+                self.logger.log_message("Camera was off")
                 # calculate how many samples are remaining until we are in a new period
                 if i_sample == 0:
                     camera_pulses = self.camera_pulses.read(i_sample, self.n_samples)

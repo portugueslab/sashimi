@@ -7,6 +7,7 @@ height="190"
 width="270"></a>
 
 [![Build Status](https://travis-ci.com/portugueslab/sashimi.svg?branch=master)](https://travis-ci.com/portugueslab/sashimi)
+[![Docs](https://img.shields.io/badge/docs-dev-brightgreen)](https://portugueslab.github.io/sashimi/)
 
 Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
 It is developed by members of the [PortuguesLab](http://www.portugueslab.com/)
@@ -18,7 +19,7 @@ hardware by other vendors (we will help with and welcome contributions for suppo
  
 
  
-# Installation
+## Installation
 
 [Install the latest Anaconda](https://www.anaconda.com/) distribution of Python 3.
 
@@ -46,7 +47,7 @@ Otherwise, if you want to contribute to the project as a developer, for editable
 
 Now you are ready to go!
 
-# Starting the software from command line
+## Starting the software from command line
 
 Open a new anaconda prompt and activate your environment like above. Then run:
 
@@ -54,7 +55,7 @@ Open a new anaconda prompt and activate your environment like above. Then run:
     
 Press __User guide__ to pop-up instructions that will drive you through the whole experiment preparation, acquisition and termination.
 
-# Configuring sashimi
+## Configuring sashimi
 
 You can ask sashimi for help:
    

@@ -3,7 +3,7 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from sashimi.hardware.laser import CoboltLaser, MockCoboltLaser
+from sashimi.hardware import light_source_class_dict
 from sashimi.processes.scanning import Scanner
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
@@ -16,7 +16,7 @@ from sashimi.hardware.scanning.scanloops import (
     TriggeringParameters,
     ScanParameters,
 )
-from sashimi.processes.stytra_comm import StytraCom
+from sashimi.processes.stytra_comm import ExternalComm
 from sashimi.processes.dispatcher import VolumeDispatcher
 from sashimi.processes.logging import ConcurrenceLogger
 from multiprocessing import Event
@@ -131,11 +131,11 @@ class CameraSettings(ParametrizedQt):
         )  # order of params here is [hpos, vpos, hsize, vsize,]
 
 
-class LaserSettings(ParametrizedQt):
+class LightSourceSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
-        self.name = "general/laser"
-        self.laser_power = Param(0, (0, 40), unit="mA")
+        self.name = "general/light_source"
+        self.intensity = Param(0, (0, 40), unit="mA")
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -335,6 +335,9 @@ class State:
             self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, Event()
         )
         self.is_saving_event = LoggedEvent(self.logger, SashimiEvents.IS_SAVING)
+        self.is_waiting_event = LoggedEvent(
+            self.logger, SashimiEvents.WAITING_FOR_TRIGGER
+        )
 
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
@@ -346,7 +349,7 @@ class State:
             self.scanner = Scanner(
                 stop_event=self.stop_event,
                 restart_event=self.restart_event,
-                experiment_start_event=self.experiment_start_event,
+                waiting_event=self.is_waiting_event,
             )
             self.scanner_triggering = True
 
@@ -365,24 +368,30 @@ class State:
                 setting.sig_param_changed.connect(self.send_scan_settings)
 
         if self.conf["scopeless"]:
-            self.laser = MockCoboltLaser()
+            self.light_source = light_source_class_dict["test"]()
             self.camera = MockCameraProcess(
                 stop_event=self.stop_event.event,
                 wait_event=self.scanner.wait_signal,
                 exp_trigger_event=self.experiment_start_event,
             )
         else:
-            self.laser = CoboltLaser()
+            self.light_source = light_source_class_dict[conf["light_source"]["name"]](
+                port=conf["light_source"]["port"]
+            )
+            self.light_source_settings.intensity.unit = (
+                self.light_source.intensity_units
+            )
             self.camera = CameraProcess(
                 stop_event=self.stop_event,
                 wait_event=self.scanner.wait_signal,
                 exp_trigger_event=self.experiment_start_event,
             )
 
-        self.stytra_comm = StytraCom(
+        self.stytra_comm = ExternalComm(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
             is_saving_event=self.is_saving_event,
+            is_waiting_event=self.is_waiting_event,
         )
 
         self.saver = StackSaver(
@@ -406,12 +415,12 @@ class State:
         self.global_state = GlobalState.PAUSED
         self.pause_after = False
 
-        self.laser_settings = LaserSettings()
+        self.light_source_settings = LightSourceSettings()
 
         self.save_status: Optional[SavingStatus] = None
 
         for setting in [
-            self.laser_settings,
+            self.light_source_settings,
             self.camera_settings,
             self.save_settings,
             self.scope_alignment_info,
@@ -550,8 +559,8 @@ class State:
         """
         self.noise_subtraction_active.clear()
 
-        current_laser = self.laser_settings.laser_power
-        self.laser.set_current(0)
+        light_intensity = self.light_source_settings.intensity
+        self.light_source.intensity = 0
         n_image = 0
         while n_image < n_images:
             current_volume = self.get_volume()
@@ -565,7 +574,7 @@ class State:
                 n_image += 1
         self.noise_subtraction_active.set()
         self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
-        self.laser.set_current(current_laser)
+        self.light_source.intensity = light_intensity
 
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
@@ -609,8 +618,7 @@ class State:
 
     def wrap_up(self):
         self.stop_event.set()
-        self.logger.close()
-        self.laser.close()
+        self.light_source.close()
 
         if self.scanner is not None:
             self.scanner.join(timeout=10)
@@ -619,3 +627,4 @@ class State:
         self.camera.join(timeout=10)
         self.stytra_comm.join(timeout=10)
         self.dispatcher.join(timeout=10)
+        self.logger.close()

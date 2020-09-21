@@ -1,4 +1,4 @@
-from multiprocessing import Queue, Event
+from multiprocessing import Queue
 from copy import deepcopy
 
 from sashimi.hardware.scanning.scanloops import (
@@ -23,7 +23,7 @@ from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.utilities import get_last_parameters
 from sashimi.config import read_config
 from sashimi.processes.logging import LoggingProcess
-from sashimi.events import LoggedEvent, SashimiEvents
+from sashimi.events import LoggedEvent
 
 
 conf = read_config()
@@ -38,7 +38,7 @@ class Scanner(LoggingProcess):
     def __init__(
         self,
         stop_event: LoggedEvent,
-        experiment_start_event: LoggedEvent,
+        waiting_event: LoggedEvent,
         restart_event: LoggedEvent,
         start_experiment_from_scanner=False,
         n_samples_waveform=10000,
@@ -48,10 +48,7 @@ class Scanner(LoggingProcess):
 
         self.stop_event = stop_event.new_reference(self.logger)
         self.restart_event = restart_event.new_reference(self.logger)
-        self.experiment_start_event = experiment_start_event.new_reference(self.logger)
-        self.wait_signal = LoggedEvent(
-            self.logger, SashimiEvents.WAITING_FOR_TRIGGER, Event()
-        )
+        self.wait_signal = waiting_event.new_reference(self.logger)
 
         self.parameter_queue = Queue()
 
@@ -70,6 +67,7 @@ class Scanner(LoggingProcess):
     def run(self):
         self.logger.log_message("started")
         configurator = scan_conf_dict[conf["scanning"]]
+        first_volume_run = True
         while not self.stop_event.is_set():
             if self.parameters.state == ScanningState.PAUSED:
                 self.retrieve_parameters()
@@ -89,13 +87,19 @@ class Scanner(LoggingProcess):
                     self.n_samples,
                     self.sample_rate,
                     self.waveform_queue,
-                    self.experiment_start_event,
                     self.wait_signal,
                     self.logger,
                     self.start_experiment_from_scanner,
                 )
                 try:
-                    scanloop.loop()
+                    # A hack to skip the first time the volumetric scan loop is run
+                    scanloop.loop(
+                        first_volume_run
+                        if issubclass(loop, VolumetricScanLoop)
+                        else False
+                    )
+                    if issubclass(loop, VolumetricScanLoop):
+                        first_volume_run = False
                 except ScanningError as e:
                     warn("NI error " + e.__repr__())
                     scanloop.initialize()
