@@ -1,4 +1,4 @@
-from sashimi.hardware.external_trigger import AbstractComm
+from sashimi.hardware.external_trigger.interface import AbstractComm
 
 
 class MockComm(AbstractComm):

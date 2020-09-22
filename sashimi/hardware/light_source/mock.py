@@ -1,4 +1,4 @@
-from sashimi.hardware.light_source import AbstractLightSource
+from sashimi.hardware.light_source.interface import AbstractLightSource
 
 
 class MockLaser(AbstractLightSource):
