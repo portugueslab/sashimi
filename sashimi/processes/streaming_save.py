@@ -1,4 +1,4 @@
-from multiprocessing import Process, Event, Queue
+from multiprocessing import Queue
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -8,8 +8,10 @@ import numpy as np
 import shutil
 import json
 from arrayqueues.shared_arrays import ArrayQueue
-import yagmail
+from scopecuisine.notifiers import notifiers
 from sashimi.config import read_config
+from sashimi.processes.logging import LoggingProcess
+from sashimi.events import LoggedEvent, SashimiEvents
 
 conf = read_config()
 
@@ -36,13 +38,21 @@ class SavingStatus:
     i_chunk: int = 0
 
 
-class StackSaver(Process):
-    def __init__(self, stop_event, duration_queue, max_queue_size=2000):
-        super().__init__()
-        self.stop_event = stop_event
+class StackSaver(LoggingProcess):
+    def __init__(
+        self,
+        stop_event: LoggedEvent,
+        is_saving_event: LoggedEvent,
+        duration_queue: Queue,
+        max_queue_size=2000,
+    ):
+        super().__init__(name="saver")
+        self.stop_event = stop_event.new_reference(self.logger)
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
-        self.saving_signal = Event()
-        self.saver_stopped_signal = Event()
+        self.saving_signal = is_saving_event
+        self.saver_stopped_signal = LoggedEvent(
+            self.logger, SashimiEvents.SAVING_STOPPED
+        )
         self.saving = False
         self.saving_parameter_queue = Queue()
         self.save_parameters: Optional[SavingParameters] = SavingParameters()
@@ -55,15 +65,19 @@ class StackSaver(Process):
         self.frame_shape = None
         self.dtype = np.uint16
         self.duration_queue = duration_queue
+        self.notifier = notifiers[conf["notifier"]]
 
     def run(self):
+        self.logger.log_message("started")
         while not self.stop_event.is_set():
             if self.saving_signal.is_set() and self.save_parameters is not None:
                 self.save_loop()
             else:
                 self.receive_save_parameters()
+        self.close_log()
 
     def save_loop(self):
+        notifier = self.notifier("lightsheet", **conf["notifier_options"])
         # remove files if some are found at the save location
         Path(self.save_parameters.output_dir).mkdir(parents=True, exist_ok=True)
         if (
@@ -85,9 +99,9 @@ class StackSaver(Process):
             and not self.stop_event.is_set()
         ):
             self.receive_save_parameters()
-
             try:
                 frame = self.save_queue.get(timeout=0.01)
+                self.logger.log_message("received volume")
                 self.fill_dataset(frame)
             except Empty:
                 pass
@@ -99,43 +113,18 @@ class StackSaver(Process):
             self.finalize_dataset()
             self.current_data = None
             if self.saving_signal.is_set():
-                self.send_email_end()
+                notifier.notify()
 
         self.saving_signal.clear()
         self.save_parameters = None
         self.saver_stopped_signal.set()
 
-    def send_email_end(self):
-        sender_email = conf["email"]["user"]  # TODO this should go to thecolonel
-        # TODO: Send email every x minutes with image like in 2P
-        receiver_email = self.save_parameters.notification_email
-        subject = "Your lightsheet experiment is complete"
-        sender_password = conf["email"]["password"]
-
-        yag = yagmail.SMTP(user=sender_email, password=sender_password)
-
-        body = [
-            "Hey!",
-            "\n",
-            "Your lightsheet experiment has finished and was a success! Come pick up your little fish",
-            "\n" "fishgitbot",
-        ]
-        try:
-            yag.send(
-                to=receiver_email, subject=subject, contents=body,
-            )
-        except (
-            yagmail.error.YagAddressError,
-            yagmail.error.YagConnectionClosed,
-            yagmail.error.YagInvalidEmailAddress,
-        ):
-            pass
-
     def fill_dataset(self, volume):
         if self.current_data is None:
             self.calculate_optimal_size(volume)
             self.current_data = np.empty(
-                (self.save_parameters.chunk_size, *volume.shape), dtype=self.dtype,
+                (self.save_parameters.chunk_size, *volume.shape),
+                dtype=self.dtype,
             )
 
         self.current_data[self.i_in_chunk, :, :, :] = volume
@@ -158,6 +147,7 @@ class StackSaver(Process):
         )
 
     def finalize_dataset(self):
+        self.logger.log_message("finished saving")
         with open(
             (
                 Path(self.save_parameters.output_dir)
@@ -185,6 +175,7 @@ class StackSaver(Process):
             )
 
     def save_chunk(self):
+        self.logger.log_message("saved chunk")
         fl.save(
             Path(self.save_parameters.output_dir)
             / "original/{:04d}.h5".format(self.i_chunk),

@@ -10,7 +10,7 @@ from PyQt5.QtCore import QTimer
 from lightparam.gui import ParameterGui
 from lightparam.gui.collapsible_widget import CollapsibleWidget
 from sashimi.gui.waveform_gui import WaveformWidget
-from sashimi.scanning import ExperimentPrepareState
+from sashimi.hardware.scanning.scanloops import ExperimentPrepareState
 
 
 class PlanarScanningWidget(QWidget):
@@ -62,10 +62,13 @@ class VolumeScanningWidget(QWidget):
         )
         self.wid_collapsible_wave.toggle_collapse()
 
-        self.dialog_box = QMessageBox()
-        self.dialog_ok_button = self.dialog_box.addButton(self.dialog_box.Ok)
-        self.dialog_abort_button = self.dialog_box.addButton(self.dialog_box.Abort)
-        self.override_overwrite = False
+        self.overwrite_dialog = QMessageBox()
+        self.btn_overwrite_ok = self.overwrite_dialog.addButton(
+            self.overwrite_dialog.Ok
+        )
+        self.btn_overwrite_abort = self.overwrite_dialog.addButton(
+            self.overwrite_dialog.Abort
+        )
 
         self.layout().addWidget(self.wid_volume)
         self.layout().addWidget(self.btn_start)
@@ -81,7 +84,7 @@ class VolumeScanningWidget(QWidget):
 
         self.timer_scope_info.timeout.connect(self.update_alignment)
         self.chk_pause.clicked.connect(self.change_pause_status)
-        self.dialog_ok_button.clicked.connect(self.overwrite_anyway)
+        self.btn_overwrite_ok.clicked.connect(self.state.start_experiment)
 
         self.chk_pause.click()
 
@@ -125,27 +128,20 @@ class VolumeScanningWidget(QWidget):
         self.state.pause_after = self.chk_pause.isChecked()
 
     def change_experiment_state(self):
-        if self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED:
+        if self.state.is_saving_event.is_set():
             # Here what happens if experiment is aborted
-            self.state.saver.saving_signal.clear()
-        elif (
-            self.state.save_settings.overwrite_save_folder == 1
-            and not self.override_overwrite
-        ):
-            self.overwrite_alert_popup()
-            self.override_overwrite = False
+            self.state.end_experiment()
         else:
-            self.state.toggle_experiment_state()
+            if self.state.save_settings.overwrite_save_folder == 1:
+                self.overwrite_alert_popup()
+            else:
+                self.state.start_experiment()
 
     def overwrite_alert_popup(self):
-        self.dialog_box.setIcon(QMessageBox.Warning)
-        self.dialog_box.setWindowTitle("Overwrite alert!")
-        self.dialog_box.setText(
+        self.overwrite_dialog.setIcon(QMessageBox.Warning)
+        self.overwrite_dialog.setWindowTitle("Overwrite alert!")
+        self.overwrite_dialog.setText(
             "You are overwriting an existing folder with data. \n\n "
             "Press ok to start the experiment anyway or abort to change saving folder."
         )
-        self.dialog_box.show()
-
-    def overwrite_anyway(self):
-        self.override_overwrite = True
-        self.change_experiment_state()
+        self.overwrite_dialog.show()
