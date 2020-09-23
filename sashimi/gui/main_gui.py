@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget
 from sashimi.gui.calibration_gui import CalibrationWidget
+from sashimi.gui.scanless_gui import ScanlessWidget
 from sashimi.gui.scanning_gui import (
     PlanarScanningWidget,
     VolumeScanningWidget,
@@ -135,7 +136,7 @@ class ScanningModeWidget(QTabWidget):
         self.wid_calibration = CalibrationWidget(st, st.calibration, self.timer)
         self.wid_single_plane = SinglePlaneScanningWidget(st)
         self.wid_volume = VolumeScanningWidget(st, self.timer)
-        self.wid_scanless = ScanlessWidget()
+        self.wid_scanless = ScanlessWidget(st, self.timer)
 
         self.addTab(self.wid_paused, self.option_dict[0])
         self.addTab(self.wid_calibration, self.option_dict[1])
@@ -146,7 +147,6 @@ class ScanningModeWidget(QTabWidget):
         self.currentChanged.connect(self.update_status)
 
         if conf["scanless"]:
-            print("hello world")
             self.setTabEnabled(1, False)
             self.setTabEnabled(2, False)
             self.setTabEnabled(3, False)
@@ -163,6 +163,3 @@ class PausedWidget(QWidget):
         super().__init__()
 
 
-class ScanlessWidget(QWidget):
-    def __init__(self):
-        super().__init__()
