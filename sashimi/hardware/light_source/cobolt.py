@@ -1,5 +1,6 @@
 from warnings import warn
 from sashimi.hardware.light_source.interface import AbstractLightSource, LaserWarning
+from sashimi.config import read_config
 
 try:
     import visa
@@ -7,6 +8,9 @@ try:
     manager = visa.ResourceManager()
 except (ImportError, ValueError):
     warn("PyVisa not installed, no laser control available", LaserWarning)
+
+
+conf = read_config()
 
 
 class CoboltLaser(AbstractLightSource):
@@ -24,7 +28,7 @@ class CoboltLaser(AbstractLightSource):
             },
         )
         self._current = 0
-        self.intensity_units = "mA"
+        self.intensity_units = conf["light_source"]["intensity_units"]
 
     def set_current(self):
         try:

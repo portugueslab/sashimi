@@ -110,7 +110,7 @@ class CameraProcess(LoggingProcess):
     def initialize_camera(self):
         self.camera_status_queue.put(self.cast_parameters())
         if conf["scopeless"]:
-            self.camera = camera_class_dict["test"]()
+            self.camera = camera_class_dict["mock"]()
         else:
             self.camera = camera_class_dict[conf["camera"]["name"]](
                 camera_id=conf["camera"]["id"],
@@ -146,7 +146,7 @@ class CameraProcess(LoggingProcess):
     def camera_loop(self):
         while not self.stop_event.is_set():
             is_waiting = self.wait_event.is_set()
-            frames = self.camera.getFrames()
+            frames = self.camera.get_frames()
             if frames:
                 for frame in frames:
                     self.logger.log_message("received frames")

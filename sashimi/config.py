@@ -55,8 +55,15 @@ TEMPLATE_CONF_DICT = {
         "name": "hamamatsu",
         "sensor_resolution": (2048, 2048)
     },
-    "light_source": {"name": "cobolt", "port": "COM4"},
-    "external_communication": {"name": "stytra", "address": "tcp://O1-589:5555"},
+    "light_source": {
+        "name": "cobolt",
+        "port": "COM4",
+        "intensity_units": "mA"
+    },
+    "external_communication": {
+        "name": "stytra",
+        "address": "tcp://O1-589:5555"
+    },
     "notifier": "none",
     "notifier_options": {},
     "array_ram_MB": 450,

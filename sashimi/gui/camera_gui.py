@@ -218,7 +218,7 @@ class CameraSettingsContainerWidget(QWidget):
 
     def set_roi(self):
         """Set ROI size from loaded params."""
-        self.state.camera_settings.subarray = tuple(
+        self.state.camera_settings.roi = tuple(
             [self.roi_pos[0], self.roi_pos[1], self.roi_size[0], self.roi_size[1]]
         )
         self.update_roi_info()
@@ -234,7 +234,7 @@ class CameraSettingsContainerWidget(QWidget):
         self.update_roi_info()
 
     def update_roi_info(self):
-        dims = self.state.camera_settings.subarray
+        dims = self.state.camera_settings.roi
         binning = convert_camera_params(self.state.camera_settings).binning
         self.lbl_roi.setText(
             f"Current frame dimensions are:\nHeight: {int(dims[0] /binning)}\nWidth: {int(dims[1]/binning)}"

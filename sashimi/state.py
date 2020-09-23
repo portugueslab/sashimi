@@ -3,7 +3,7 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from sashimi.hardware import light_source_class_dict
+from sashimi.hardware import light_source_class_dict, camera_class_dict
 from sashimi.processes.scanning import Scanner
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
@@ -134,7 +134,7 @@ class LightSourceSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "general/light_source"
-        self.intensity = Param(0, (0, 40), unit="mA")
+        self.intensity = Param(0, (0, 40), unit=conf["light_source"]["intensity_units"])
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -317,9 +317,9 @@ def convert_volume_params(
 
 
 class State:
-    def __init__(self, sample_rate):
+    def __init__(self):
         self.conf = read_config()
-        self.sample_rate = sample_rate
+        self.sample_rate = conf["sample_rate"]
 
         self.logger = ConcurrenceLogger("main")
 
@@ -341,21 +341,9 @@ class State:
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
-        
-        # TODO: Abstract laser, call read_config().["scopeless"] in laser.py
-        if self.conf["scopeless"]:
-            self.laser = MockCoboltLaser()
-        else:
-            self.laser = CoboltLaser()
-        self.camera = CameraProcess(
-            experiment_start_event=self.experiment_start_event,
-            stop_event=self.stop_event
-        )
-        self.scanner = Scanner(
 
         self.scanner = Scanner(
             stop_event=self.stop_event,
-            experiment_start_event=self.experiment_start_event,
             restart_event=self.restart_event,
             waiting_event=self.is_waiting_event,
             sample_rate=self.sample_rate,
@@ -368,28 +356,17 @@ class State:
         self.global_state = GlobalState.PAUSED
         self.pause_after = False
         if self.conf["scopeless"]:
-            self.light_source = light_source_class_dict["test"]()
-            self.camera = MockCameraProcess(
-                stop_event=self.stop_event.event,
-                wait_event=self.scanner.wait_signal,
-                exp_trigger_event=self.experiment_start_event,
-            )
+            self.light_source = light_source_class_dict["mock"]()
         else:
             self.light_source = light_source_class_dict[conf["light_source"]["name"]](
                 port=conf["light_source"]["port"]
             )
-            self.light_source_settings.intensity.unit = (
-                self.light_source.intensity_units
-            )
-            self.camera = CameraProcess(
-                stop_event=self.stop_event,
-                wait_event=self.scanner.wait_signal,
-                exp_trigger_event=self.experiment_start_event,
-            )
-
+        self.camera = CameraProcess(
+            stop_event=self.stop_event,
+            wait_event=self.scanner.wait_signal,
+            exp_trigger_event=self.experiment_start_event,
+        )
         self.planar_setting = PlanarScanningSettings()
-        self.laser_settings = LaserSettings()
-        self.stytra_comm = StytraCom(
         self.external_comm = ExternalComm(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,

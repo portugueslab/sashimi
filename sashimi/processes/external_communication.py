@@ -28,7 +28,7 @@ class ExternalComm(LoggingProcess):
         self.saving_event = is_saving_event.new_reference(self.logger)
         self.duration_queue = Queue()
         if conf["scopeless"]:
-            self.comm = external_comm_class_dict["test"]()
+            self.comm = external_comm_class_dict["mock"]()
         else:
             self.comm = external_comm_class_dict[
                 conf["external_communication"]["name"]
