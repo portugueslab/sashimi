@@ -12,6 +12,14 @@ sashimi.hardware.light\_source.cobolt module
    :undoc-members:
    :show-inheritance:
 
+sashimi.hardware.light\_source.interface module
+-----------------------------------------------
+
+.. automodule:: sashimi.hardware.light_source.interface
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 sashimi.hardware.light\_source.mock module
 ------------------------------------------
 

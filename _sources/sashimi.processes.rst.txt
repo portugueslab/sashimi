@@ -12,6 +12,14 @@ sashimi.processes.dispatcher module
    :undoc-members:
    :show-inheritance:
 
+sashimi.processes.external\_communication module
+------------------------------------------------
+
+.. automodule:: sashimi.processes.external_communication
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 sashimi.processes.logging module
 --------------------------------
 
@@ -32,14 +40,6 @@ sashimi.processes.streaming\_save module
 ----------------------------------------
 
 .. automodule:: sashimi.processes.streaming_save
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-sashimi.processes.stytra\_comm module
--------------------------------------
-
-.. automodule:: sashimi.processes.stytra_comm
    :members:
    :undoc-members:
    :show-inheritance:

@@ -4,14 +4,6 @@ sashimi.hardware.scanning package
 Submodules
 ----------
 
-sashimi.hardware.scanning.interface module
-------------------------------------------
-
-.. automodule:: sashimi.hardware.scanning.interface
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 sashimi.hardware.scanning.mock module
 -------------------------------------
 

@@ -52,16 +52,24 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="sashimi.hardware.html">sashimi.hardware package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.external_trigger.html">sashimi.hardware.external_trigger package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.external_trigger.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.external_trigger.html#module-sashimi.hardware.external_trigger.interface">sashimi.hardware.external_trigger.interface module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.external_trigger.html#module-sashimi.hardware.external_trigger.mock">sashimi.hardware.external_trigger.mock module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.external_trigger.html#module-sashimi.hardware.external_trigger.stytra">sashimi.hardware.external_trigger.stytra module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.external_trigger.html#module-sashimi.hardware.external_trigger">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.light_source.html">sashimi.hardware.light_source package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.light_source.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.cobolt">sashimi.hardware.light_source.cobolt module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.interface">sashimi.hardware.light_source.interface module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source.mock">sashimi.hardware.light_source.mock module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.light_source.html#module-sashimi.hardware.light_source">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.html">sashimi.hardware.scanning package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.scanning.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.scanning.html#module-sashimi.hardware.scanning.interface">sashimi.hardware.scanning.interface module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.scanning.html#module-sashimi.hardware.scanning.mock">sashimi.hardware.scanning.mock module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.scanning.html#module-sashimi.hardware.scanning.ni">sashimi.hardware.scanning.ni module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="sashimi.hardware.scanning.html#module-sashimi.hardware.scanning.scanloops">sashimi.hardware.scanning.scanloops module</a></li>
@@ -78,10 +86,10 @@
 <li class="toctree-l1"><a class="reference internal" href="sashimi.processes.html">sashimi.processes package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html#module-sashimi.processes.dispatcher">sashimi.processes.dispatcher module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html#module-sashimi.processes.external_communication">sashimi.processes.external_communication module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html#module-sashimi.processes.logging">sashimi.processes.logging module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html#module-sashimi.processes.scanning">sashimi.processes.scanning module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html#module-sashimi.processes.streaming_save">sashimi.processes.streaming_save module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html#module-sashimi.processes.stytra_comm">sashimi.processes.stytra_comm module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html#module-sashimi.processes">Module contents</a></li>
 </ul>
 </li>
@@ -353,7 +361,7 @@ sections and look directly for matching parameters names.</p>
 
 <dl class="py function">
 <dt id="sashimi.config.write_default_config">
-<code class="sig-prename descclassname">sashimi.config.</code><code class="sig-name descname">write_default_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span><span class="o">=</span><span class="default_value">PosixPath('/home/travis/.sashimi/hardware_config.toml')</span></em>, <em class="sig-param"><span class="n">template</span><span class="o">=</span><span class="default_value">{'array_ram_MB': 450, 'default_paths': {'data': '/home/travis', 'log': '/home/travis/logs', 'presets': '/home/travis/presets', 'scope_instructions': '.'}, 'light_source': {'name': 'cobolt', 'port': 'COM4'}, 'notifier': 'none', 'notifier_options': {}, 'piezo': {'scale': 0.025}, 'sample_rate': 40000, 'scanning': 'mock', 'scopeless': False, 'xy_board': {'write': {'channel': 'Dev2/ao0:1', 'max_val': 10, 'min_val': - 5}}, 'z_board': {'read': {'channel': 'Dev1/ai0:0', 'max_val': 10, 'min_val': 0}, 'sync': {'channel': '/Dev1/ao/StartTrigger'}, 'write': {'channel': 'Dev1/ao0:3', 'max_val': 10, 'min_val': - 5}}}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.config.write_default_config" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">sashimi.config.</code><code class="sig-name descname">write_default_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span><span class="o">=</span><span class="default_value">PosixPath('/home/travis/.sashimi/hardware_config.toml')</span></em>, <em class="sig-param"><span class="n">template</span><span class="o">=</span><span class="default_value">{'array_ram_MB': 450, 'default_paths': {'data': '/home/travis', 'log': '/home/travis/logs', 'presets': '/home/travis/presets', 'scope_instructions': '.'}, 'external_communication': {'address': 'tcp://O1-589:5555', 'name': 'stytra'}, 'light_source': {'name': 'cobolt', 'port': 'COM4'}, 'notifier': 'none', 'notifier_options': {}, 'piezo': {'scale': 0.025}, 'sample_rate': 40000, 'scanning': 'mock', 'scopeless': False, 'xy_board': {'write': {'channel': 'Dev2/ao0:1', 'max_val': 10, 'min_val': - 5}}, 'z_board': {'read': {'channel': 'Dev1/ai0:0', 'max_val': 10, 'min_val': 0}, 'sync': {'channel': '/Dev1/ao/StartTrigger'}, 'write': {'channel': 'Dev1/ao0:3', 'max_val': 10, 'min_val': - 5}}}</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.config.write_default_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write configuration file at first repo usage. In this way,
 we don’t need to keep a confusing template config file in the repo.</p>
 <dl class="field-list simple">
@@ -433,8 +441,8 @@ we don’t need to keep a confusing template config file in the repo.</p>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt id="sashimi.events.SashimiEvents.TRIGGER_STYTRA">
-<code class="sig-name descname">TRIGGER_STYTRA</code><em class="property"> = 'TRIGGER_STYTRA'</em><a class="headerlink" href="#sashimi.events.SashimiEvents.TRIGGER_STYTRA" title="Permalink to this definition">¶</a></dt>
+<dt id="sashimi.events.SashimiEvents.SEND_EXT_TRIGGER">
+<code class="sig-name descname">SEND_EXT_TRIGGER</code><em class="property"> = 'SEND_EXT_TRIGGER'</em><a class="headerlink" href="#sashimi.events.SashimiEvents.SEND_EXT_TRIGGER" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -778,6 +786,11 @@ we don’t need to keep a confusing template config file in the repo.</p>
 </div>
 <div class="section" id="module-sashimi.utilities">
 <span id="sashimi-utilities-module"></span><h2>sashimi.utilities module<a class="headerlink" href="#module-sashimi.utilities" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="sashimi.utilities.clean_json">
+<code class="sig-prename descclassname">sashimi.utilities.</code><code class="sig-name descname">clean_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.utilities.clean_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
 <dt id="sashimi.utilities.get_last_parameters">
 <code class="sig-prename descclassname">sashimi.utilities.</code><code class="sig-name descname">get_last_parameters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parameter_queue</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">0.0001</span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.utilities.get_last_parameters" title="Permalink to this definition">¶</a></dt>
