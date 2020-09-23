@@ -207,5 +207,5 @@ class CameraFields(ctypes.Structure):
         ("reserved", ctypes.c_int32),
         ("initoptionbytes", ctypes.c_int32),
         ("initoption", ctypes.POINTER(ctypes.c_int32)),
-        ("guid", ctypes.POINTER(ctypes.c_int32))
+        ("guid", ctypes.POINTER(ctypes.c_int32)),
     ]

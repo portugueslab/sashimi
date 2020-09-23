@@ -50,20 +50,9 @@ TEMPLATE_CONF_DICT = {
             "max_val": 10,
         }
     },
-    "camera": {
-        "id": 0,
-        "name": "hamamatsu",
-        "sensor_resolution": (2048, 2048)
-    },
-    "light_source": {
-        "name": "cobolt",
-        "port": "COM4",
-        "intensity_units": "mA"
-    },
-    "external_communication": {
-        "name": "stytra",
-        "address": "tcp://O1-589:5555"
-    },
+    "camera": {"id": 0, "name": "hamamatsu", "sensor_resolution": (2048, 2048)},
+    "light_source": {"name": "cobolt", "port": "COM4", "intensity_units": "mA"},
+    "external_communication": {"name": "stytra", "address": "tcp://O1-589:5555"},
     "notifier": "none",
     "notifier_options": {},
     "array_ram_MB": 450,

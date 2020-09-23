@@ -3,7 +3,7 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from sashimi.hardware import light_source_class_dict, camera_class_dict
+from sashimi.hardware.light_source import light_source_class_dict
 from sashimi.processes.scanning import Scanner
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
@@ -21,7 +21,7 @@ from sashimi.processes.dispatcher import VolumeDispatcher
 from sashimi.processes.logging import ConcurrenceLogger
 from multiprocessing import Event
 import json
-from sashimi.camera import (
+from sashimi.processes.camera import (
     CameraProcess,
     CamParameters,
     CameraMode,
@@ -153,7 +153,7 @@ def convert_planar_params(planar: PlanarScanningSettings):
 
 
 def convert_calibration_params(
-        planar: PlanarScanningSettings, zsettings: CalibrationZSettings
+    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
         state=ScanningState.PLANAR,
@@ -231,9 +231,9 @@ def convert_camera_params(camera_settings: CameraSettings):
 
 
 def get_voxel_size(
-        scanning_settings: ZRecordingSettings,
-        camera_settings: CameraSettings,
-        scope_alignment: ScopeAlignmentInfo,
+    scanning_settings: ZRecordingSettings,
+    camera_settings: CameraSettings,
+    scope_alignment: ScopeAlignmentInfo,
 ):
     scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
 
@@ -257,13 +257,13 @@ def get_voxel_size(
 
 
 def convert_save_params(
-        save_settings: SaveSettings,
-        scanning_settings: ZRecordingSettings,
-        camera_settings: CameraSettings,
-        scope_alignment: ScopeAlignmentInfo,
+    save_settings: SaveSettings,
+    scanning_settings: ZRecordingSettings,
+    camera_settings: CameraSettings,
+    scope_alignment: ScopeAlignmentInfo,
 ):
     n_planes = scanning_settings.n_planes - (
-            scanning_settings.n_skip_start + scanning_settings.n_skip_end
+        scanning_settings.n_skip_start + scanning_settings.n_skip_end
     )
 
     return SavingParameters(
@@ -276,9 +276,9 @@ def convert_save_params(
 
 
 def convert_single_plane_params(
-        planar: PlanarScanningSettings,
-        single_plane_setting: SinglePlaneSettings,
-        calibration: Calibration,
+    planar: PlanarScanningSettings,
+    single_plane_setting: SinglePlaneSettings,
+    calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -293,9 +293,9 @@ def convert_single_plane_params(
 
 
 def convert_volume_params(
-        planar: PlanarScanningSettings,
-        z_setting: ZRecordingSettings,
-        calibration: Calibration,
+    planar: PlanarScanningSettings,
+    z_setting: ZRecordingSettings,
+    calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
@@ -498,9 +498,9 @@ class State:
                 self.planar_setting, self.volume_setting, self.calibration
             )
             n_planes = (
-                    self.volume_setting.n_planes
-                    - self.volume_setting.n_skip_start
-                    - self.volume_setting.n_skip_end
+                self.volume_setting.n_planes
+                - self.volume_setting.n_skip_start
+                - self.volume_setting.n_skip_end
             )
             if self.waveform is not None:
                 pulses = self.calculate_pulse_times() * self.sample_rate

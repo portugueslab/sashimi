@@ -52,6 +52,8 @@ def clean_json(d):
         return clean_json(asdict(d))
     else:
         return d
+
+
 # TODO: Consider this for ScopeCuisine
 class SpeedyArrayBuffer:
     """
@@ -63,9 +65,7 @@ class SpeedyArrayBuffer:
         Create a data object of the appropriate size.
         """
         super().__init__(**kwargs)
-        self.np_array = np.ascontiguousarray(
-            np.empty(size // 2)
-        )
+        self.np_array = np.ascontiguousarray(np.empty(size // 2))
         self.size = size
 
     def __getitem__(self, slice):

@@ -9,7 +9,7 @@ from copy import copy
 from queue import Empty
 import time
 from datetime import datetime
-from sashimi.hardware import camera_class_dict
+from sashimi.hardware.cameras import camera_class_dict
 from sashimi.config import read_config
 
 conf = read_config()
@@ -114,7 +114,7 @@ class CameraProcess(LoggingProcess):
         else:
             self.camera = camera_class_dict[conf["camera"]["name"]](
                 camera_id=conf["camera"]["id"],
-                sensor_resolution=conf["camera"]["sensor_resolution"]
+                sensor_resolution=conf["camera"]["sensor_resolution"],
             )
 
     def pause_loop(self):

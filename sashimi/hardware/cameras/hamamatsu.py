@@ -1,5 +1,10 @@
 from sashimi.utilities import SpeedyArrayBuffer
-from sashimi.hardware.cameras import AbstractCamera, TriggerMode, CameraException, CameraWarning
+from sashimi.hardware.cameras.interface import (
+    AbstractCamera,
+    TriggerMode,
+    CameraException,
+    CameraWarning,
+)
 from sashimi.hardware.cameras.SDK.hamamatsu_sdk import *
 import numpy as np
 from warnings import warn
@@ -17,7 +22,7 @@ class HamamatsuCamera(AbstractCamera):
         self._exposure_time = 60
         self._sensor_resolution: tuple = (
             self.get_property_value("image_width"),
-            self.get_property_value("image_height")
+            self.get_property_value("image_height"),
         )
         self._frame_shape = self._sensor_resolution
         self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
@@ -39,13 +44,17 @@ class HamamatsuCamera(AbstractCamera):
         # Open the camera.
         paramopen = DCAMDEV_OPEN(0, self.camera_id, None)
         paramopen.size = ctypes.sizeof(paramopen)
-        self.check_status(self.dcam.dcamdev_open(ctypes.byref(paramopen)), "dcamdev_open")
+        self.check_status(
+            self.dcam.dcamdev_open(ctypes.byref(paramopen)), "dcamdev_open"
+        )
         self.camera_handle = ctypes.c_void_p(paramopen.hdcam)
 
         # Set up wait handle
         paramwait = DCAMWAIT_OPEN(0, 0, None, self.camera_handle)
         paramwait.size = ctypes.sizeof(paramwait)
-        self.check_status(self.dcam.dcamwait_open(ctypes.byref(paramwait)), "dcamwait_open")
+        self.check_status(
+            self.dcam.dcamwait_open(ctypes.byref(paramwait)), "dcamwait_open"
+        )
         self.wait_handle = ctypes.c_void_p(paramwait.hwait)
 
         # Get camera properties.
@@ -160,7 +169,10 @@ class HamamatsuCamera(AbstractCamera):
                 self.check_status(ret, "dcamprop_getnextid")
             self.check_status(
                 self.dcam.dcamprop_getname(
-                    self.camera_handle, prop_id, c_buf, ctypes.c_int32(c_buf_len),
+                    self.camera_handle,
+                    prop_id,
+                    c_buf,
+                    ctypes.c_int32(c_buf_len),
                 ),
                 "dcamprop_getname",
             )
@@ -182,7 +194,10 @@ class HamamatsuCamera(AbstractCamera):
         # Wait for a new frame if the camera is acquiring.
         if capture_status.value == DCAMCAP_STATUS_BUSY:
             param_start = DCAMWAIT_START(
-                0, 0, DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED, 100,
+                0,
+                0,
+                DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED,
+                100,
             )
             param_start.size = ctypes.sizeof(param_start)
             self.check_status(
@@ -206,7 +221,10 @@ class HamamatsuCamera(AbstractCamera):
         # Keep track of the maximum backlog.
         backlog = cur_frame_number - self.last_frame_number
         if backlog > self.number_image_buffers:
-            warn("Camera buffer overrun detected. Some frames might have been lost", CameraWarning)
+            warn(
+                "Camera buffer overrun detected. Some frames might have been lost",
+                CameraWarning,
+            )
         if backlog > self.max_backlog:
             self.max_backlog = backlog
         self.last_frame_number = cur_frame_number
@@ -319,7 +337,9 @@ class HamamatsuCamera(AbstractCamera):
         c_value = ctypes.c_double(0)
         self.check_status(
             self.dcam.dcamprop_getvalue(
-                self.camera_handle, ctypes.c_int32(prop_id), ctypes.byref(c_value),
+                self.camera_handle,
+                ctypes.c_int32(prop_id),
+                ctypes.byref(c_value),
             ),
             "dcamprop_getvalue",
         )
@@ -354,20 +374,22 @@ class HamamatsuCamera(AbstractCamera):
             if property_value in text_values:
                 property_value = float(text_values[property_value])
             else:
-                raise CameraException(f"Invalid property value {property_value} for {property_name}")
+                raise CameraException(
+                    f"Invalid property value {property_value} for {property_name}"
+                )
 
         # Check that the property is within range.
         [pv_min, pv_max] = self.get_property_range(property_name)
         if property_value < pv_min:
             warn(
                 f"Value {property_value} for {property_name} is less than minimum {pv_min}. Setting to minimum.",
-                CameraWarning
+                CameraWarning,
             )
             property_value = pv_min
         if property_value > pv_max:
             warn(
                 f"Value {property_value} for {property_name} is greater than maximum {pv_max}. Setting to maximum.",
-                CameraWarning
+                CameraWarning,
             )
             property_value = pv_max
 
@@ -401,7 +423,9 @@ class HamamatsuCamera(AbstractCamera):
 
         if self.old_frame_bytes != self._frame_bytes:
             # The larger of either 2000 frames or some weird calculation for number of buffers for 2 seconds of data
-            self.number_image_buffers = min(int((2.0 * 1024 * 1024 * 1024) / self._frame_bytes), 2000)
+            self.number_image_buffers = min(
+                int((2.0 * 1024 * 1024 * 1024) / self._frame_bytes), 2000
+            )
 
             # Allocate new image buffers.
             ptr_array = ctypes.c_void_p * self.number_image_buffers
@@ -420,7 +444,10 @@ class HamamatsuCamera(AbstractCamera):
         # between acquisitions.
 
         paramattach = DCAMBUF_ATTACH(
-            0, DCAMBUF_ATTACHKIND_FRAME, self.hcam_ptr, self.number_image_buffers,
+            0,
+            DCAMBUF_ATTACHKIND_FRAME,
+            self.hcam_ptr,
+            self.number_image_buffers,
         )
         paramattach.size = ctypes.sizeof(paramattach)
         self.check_status(

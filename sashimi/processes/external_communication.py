@@ -3,7 +3,7 @@ from sashimi.processes.logging import LoggingProcess
 from sashimi.utilities import clean_json
 from sashimi.events import LoggedEvent
 from sashimi.config import read_config
-from sashimi.hardware import external_comm_class_dict
+from sashimi.hardware.external_trigger import external_comm_class_dict
 from queue import Empty
 
 
