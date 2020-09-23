@@ -114,7 +114,7 @@ class CameraProcess(LoggingProcess):
         else:
             self.camera = camera_class_dict[conf["camera"]["name"]](
                 camera_id=conf["camera"]["id"],
-                sensor_resolution=conf["camera"]["sensor_resolution"],
+                sensor_resolution=tuple(conf["camera"]["sensor_resolution"]),
             )
 
     def pause_loop(self):
