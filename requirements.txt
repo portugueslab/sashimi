@@ -14,4 +14,4 @@ pyqtgraph
 napari
 numba
 numba
-skimage
+scikit-image
