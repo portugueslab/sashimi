@@ -19,6 +19,7 @@ CONFIG_PATH = CONFIG_DIR_PATH / CONFIG_FILENAME
 TEMPLATE_CONF_DICT = {
     "scanning": "mock",
     "scopeless": False,
+    "scanless": False,
     "sample_rate": 40000,
     "default_paths": {
         "data": str(Path.home()),
