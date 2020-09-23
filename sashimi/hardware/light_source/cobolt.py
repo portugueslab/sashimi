@@ -1,5 +1,5 @@
 from warnings import warn
-from sashimi.hardware.light_source import AbstractLightSource, LaserWarning
+from sashimi.hardware.light_source.interface import AbstractLightSource, LaserWarning
 
 try:
     import visa
