@@ -49,7 +49,12 @@ TEMPLATE_CONF_DICT = {
             "max_val": 10,
         }
     },
-    "light_source": {"name": "cobolt", "port": "COM4"},
+    "light_source": {
+        "name": "mock",
+        "port": "COM4",
+        "intensity_units": "mA"
+
+    },
     "notifier": "none",
     "notifier_options": {},
     "array_ram_MB": 450,

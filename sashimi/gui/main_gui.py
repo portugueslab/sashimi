@@ -125,24 +125,33 @@ class ScanningModeWidget(QTabWidget):
             1: "Calibration",
             2: "Planar",
             3: "Volume",
+            4: "Scanless"
         }
 
         self.wid_paused = PausedWidget()
         self.wid_calibration = CalibrationWidget(st, st.calibration, self.timer)
         self.wid_single_plane = SinglePlaneScanningWidget(st)
         self.wid_volume = VolumeScanningWidget(st, self.timer)
+        self.wid_scanless = ScanlessWidget()
 
         self.addTab(self.wid_paused, self.option_dict[0])
         self.addTab(self.wid_calibration, self.option_dict[1])
         self.addTab(self.wid_single_plane, self.option_dict[2])
         self.addTab(self.wid_volume, self.option_dict[3])
+        self.addTab(self.wid_scanless, self.option_dict[4])
 
         self.currentChanged.connect(self.update_status)
+        self.setTabEnabled(4, False)
 
     def update_status(self):
         self.state.status.scanning_state = self.option_dict[self.currentIndex()]
 
 
 class PausedWidget(QWidget):
+    def __init__(self):
+        super().__init__()
+
+
+class ScanlessWidget(QWidget):
     def __init__(self):
         super().__init__()

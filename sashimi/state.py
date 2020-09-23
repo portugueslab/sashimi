@@ -135,7 +135,7 @@ class LightSourceSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "general/light_source"
-        self.intensity = Param(0, (0, 40), unit="mA")
+        self.intensity = Param(0, (0, 40), unit=conf["light_source"]["intensity_units"])
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -320,6 +320,7 @@ def convert_volume_params(
 class State:
     def __init__(self):
         self.conf = read_config()
+        self.sample_rate = conf["sample_rate"]
         self.settings_tree = ParameterTree()
         self.logger = ConcurrenceLogger("main")
 
@@ -343,6 +344,8 @@ class State:
         self.status = ScanningSettings()
         self.scope_alignment_info = ScopeAlignmentInfo()
 
+        self.light_source_settings = LightSourceSettings()
+
         if conf["scanning"] == "none":
             self.scanner = None
         else:
@@ -350,6 +353,7 @@ class State:
                 stop_event=self.stop_event,
                 restart_event=self.restart_event,
                 waiting_event=self.is_waiting_event,
+                sample_rate=self.sample_rate
             )
             self.scanner_triggering = True
 
@@ -377,9 +381,6 @@ class State:
         else:
             self.light_source = light_source_class_dict[conf["light_source"]["name"]](
                 port=conf["light_source"]["port"]
-            )
-            self.light_source_settings.intensity.unit = (
-                self.light_source.intensity_units
             )
             self.camera = CameraProcess(
                 stop_event=self.stop_event,
@@ -414,8 +415,6 @@ class State:
 
         self.global_state = GlobalState.PAUSED
         self.pause_after = False
-
-        self.light_source_settings = LightSourceSettings()
 
         self.save_status: Optional[SavingStatus] = None
 
@@ -502,7 +501,7 @@ class State:
                     - self.volume_setting.n_skip_end
                 )
                 if self.waveform is not None:
-                    pulses = self.calculate_pulse_times() * self.sample_rate
+                    pulses = self.calculate_pulse_times() * conf["sample_rate"]
                     try:
                         pulse_log = self.waveform[pulses.astype(int)]
                         self.all_settings["piezo_log"] = {"trigger": pulse_log.tolist()}
