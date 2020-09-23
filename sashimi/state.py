@@ -353,7 +353,7 @@ class State:
                 stop_event=self.stop_event,
                 restart_event=self.restart_event,
                 waiting_event=self.is_waiting_event,
-                sample_rate=self.sample_rate
+                sample_rate=self.sample_rate,
             )
             self.scanner_triggering = True
 

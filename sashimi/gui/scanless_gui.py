@@ -1,4 +1,11 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QCheckBox, QMessageBox, QLabel
+from PyQt5.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QPushButton,
+    QCheckBox,
+    QMessageBox,
+    QLabel,
+)
 from sashimi.hardware.scanning.scanloops import ExperimentPrepareState
 from sashimi.gui.scanning_gui import STATE_TEXTS
 from sashimi.gui.calibration_gui import NoiseSubtractionSettings
@@ -49,8 +56,8 @@ class ScanlessWidget(QWidget):
         if self.state.experiment_state == ExperimentPrepareState.PREVIEW:
             self.btn_start.setChecked(False)
         if (
-                self.state.experiment_state == ExperimentPrepareState.NO_TRIGGER
-                or self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
+            self.state.experiment_state == ExperimentPrepareState.NO_TRIGGER
+            or self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
         ):
             self.btn_start.setChecked(True)
 

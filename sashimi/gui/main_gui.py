@@ -129,7 +129,7 @@ class ScanningModeWidget(QTabWidget):
             1: "Calibration",
             2: "Planar",
             3: "Volume",
-            4: "Scanless"
+            4: "Scanless",
         }
 
         self.wid_paused = PausedWidget()
@@ -161,5 +161,3 @@ class ScanningModeWidget(QTabWidget):
 class PausedWidget(QWidget):
     def __init__(self):
         super().__init__()
-
-
