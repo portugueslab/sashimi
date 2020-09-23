@@ -11,6 +11,9 @@ from sashimi.gui.save_settings_gui import SavingSettingsWidget
 from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
 from sashimi.gui.save_gui import SaveWidget
 from sashimi.state import State
+from sashimi.config import read_config
+
+conf = read_config()
 
 
 class DockedWidget(QDockWidget):
@@ -141,7 +144,15 @@ class ScanningModeWidget(QTabWidget):
         self.addTab(self.wid_scanless, self.option_dict[4])
 
         self.currentChanged.connect(self.update_status)
-        self.setTabEnabled(4, False)
+
+        if conf["scanless"]:
+            print("hello world")
+            self.setTabEnabled(1, False)
+            self.setTabEnabled(2, False)
+            self.setTabEnabled(3, False)
+            self.setTabEnabled(4, True)
+        else:
+            self.setTabEnabled(4, False)
 
     def update_status(self):
         self.state.status.scanning_state = self.option_dict[self.currentIndex()]

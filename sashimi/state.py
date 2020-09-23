@@ -372,7 +372,7 @@ class State:
                 setting.sig_param_changed.connect(self.send_scan_settings)
 
         if self.conf["scopeless"]:
-            self.light_source = light_source_class_dict["test"]()
+            self.light_source = light_source_class_dict["mock"]()
             self.camera = MockCameraProcess(
                 stop_event=self.stop_event.event,
                 wait_event=self.scanner.wait_signal,

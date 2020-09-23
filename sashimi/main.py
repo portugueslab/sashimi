@@ -8,9 +8,17 @@ from sashimi.state import State
 
 
 @click.command()
-@click.option("--scanning", default="mock", help="The scanning interface")
-def main(scanning, **kwargs):
-    cli_edit_config("scanning", scanning)
+@click.option("--scanless", is_flag=True, help="Scanless mode")
+@click.option("--scopeless", is_flag=True, help="Scopeless mode for simulated hardware")
+def main(scanless, scopeless, **kwargs):
+
+    cli_edit_config("scopeless", False)
+    cli_edit_config("scanless", False)
+
+    if scanless:
+        cli_edit_config("scanless", True)
+    if scopeless:
+        cli_edit_config("scopeless", True)
 
     # TODO configure logging with CLI
 
