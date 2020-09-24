@@ -5,9 +5,17 @@ from sashimi.hardware.cameras.interface import (
     CameraException,
     CameraWarning,
 )
-from sashimi.hardware.cameras.sdk.hamamatsu_sdk import *
+from sashimi.hardware.cameras.sdk.hamamatsu_sdk import (
+    DCAMAPI_INIT, DCAMDEV_OPEN, DCAMWAIT_OPEN, DCAMCAP_TRANSFERKIND_FRAME, DCAMBUF_ATTACHKIND_FRAME,
+    DCAMCAP_START_SEQUENCE, DCAMWAIT_CAPEVENT_FRAMEREADY, DCAMPROP_OPTION_NEXT, DCAMPROP_TYPE_MODE, DCAMPROP_TYPE_REAL,
+    DCAMPROP_TYPE_LONG, DCAMPROP_OPTION_NEAREST, DCAMERR_ERROR, DCAMCAP_STATUS_BUSY, DCAMERR_NOERROR,
+    DCAMPROP_ATTR_HASVALUETEXT, DCAMPROP_ATTR, DCAMPROP_TYPE_MASK, DCAMBUF_ATTACH, DCAM_DEFAULT_ARG, DCAMWAIT_START,
+    DCAMWAIT_CAPEVENT_STOPPED, DCAMCAP_TRANSFERINFO, DCAMPROP_VALUETEXT
+)
+
 import numpy as np
 from warnings import warn
+import ctypes
 
 
 class HamamatsuCamera(AbstractCamera):
@@ -16,8 +24,8 @@ class HamamatsuCamera(AbstractCamera):
         self.dcam = ctypes.windll.dcamapi
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
         paraminit.size = ctypes.sizeof(paraminit)
-        error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
-        n_cameras = paraminit.iDeviceCount
+        # error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
+        # n_cameras = paraminit.iDeviceCount
 
         self._exposure_time = 60
         self._sensor_resolution: tuple = (
@@ -347,16 +355,12 @@ class HamamatsuCamera(AbstractCamera):
         # Convert type based on attribute type.
         temp = prop_attr.attribute & DCAMPROP_TYPE_MASK
         if temp == DCAMPROP_TYPE_MODE:
-            prop_type = "MODE"
             prop_value = int(c_value.value)
         elif temp == DCAMPROP_TYPE_LONG:
-            prop_type = "LONG"
             prop_value = int(c_value.value)
         elif temp == DCAMPROP_TYPE_REAL:
-            prop_type = "REAL"
             prop_value = c_value.value
         else:
-            prop_type = "NONE"
             prop_value = False
 
         return prop_value
@@ -460,7 +464,7 @@ class HamamatsuCamera(AbstractCamera):
         )
 
     def stop_acquistion(self):
-        super().stop_acquistion()
+        super().stop_acquisition()
         self.check_status(self.dcam.dcamcap_stop(self.camera_handle), "dcamcap_stop")
 
         # Free image buffers.
