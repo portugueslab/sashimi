@@ -5,7 +5,7 @@ from sashimi.hardware.cameras.interface import (
     CameraException,
     CameraWarning,
 )
-from sashimi.hardware.cameras.SDK.hamamatsu_sdk import *
+from sashimi.hardware.cameras.sdk.hamamatsu_sdk import *
 import numpy as np
 from warnings import warn
 

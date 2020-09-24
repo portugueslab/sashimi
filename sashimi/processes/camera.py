@@ -1,13 +1,11 @@
-from multiprocessing import Process, Queue
+from multiprocessing import Queue
 from enum import Enum
 from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.processes.logging import LoggingProcess
 from sashimi.events import LoggedEvent
 from dataclasses import dataclass
-import numpy as np
 from copy import copy
 from queue import Empty
-import time
 from datetime import datetime
 from sashimi.hardware.cameras import camera_class_dict
 from sashimi.config import read_config
