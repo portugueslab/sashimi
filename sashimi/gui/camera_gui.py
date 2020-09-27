@@ -45,10 +45,17 @@ class ViewingWidget(QWidget):
             name="frame_layer",
         )
 
-        roi_init_shape = np.array([
-                self.state.current_camera_status.sensor_resolution[0] // self.state.current_camera_status.binning,
-                self.state.current_camera_status.sensor_resolution[1] // self.state.current_camera_status.binning
-        ]) // 2
+        roi_init_shape = (
+            np.array(
+                [
+                    self.state.current_camera_status.sensor_resolution[0]
+                    // self.state.current_camera_status.binning,
+                    self.state.current_camera_status.sensor_resolution[1]
+                    // self.state.current_camera_status.binning,
+                ]
+            )
+            // 2
+        )
         self.roi = self.viewer.add_shapes(
             [
                 np.array(
@@ -209,8 +216,10 @@ class CameraSettingsContainerWidget(QWidget):
         self.state.camera_settings.roi = [
             0,
             0,
-            self.state.current_camera_status.sensor_resolution[0] // self.state.current_camera_status.binning,
-            self.state.current_camera_status.sensor_resolution[1] // self.state.current_camera_status.binning,
+            self.state.current_camera_status.sensor_resolution[0]
+            // self.state.current_camera_status.binning,
+            self.state.current_camera_status.sensor_resolution[1]
+            // self.state.current_camera_status.binning,
         ]
 
         self.update_roi_info()

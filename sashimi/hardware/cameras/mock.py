@@ -50,7 +50,9 @@ class MockCamera(AbstractCamera):
 
     @roi.setter
     def roi(self, exp_val: tuple):
-        coords = tuple((exp_val[0], exp_val[1], exp_val[2] + exp_val[0], exp_val[3] + exp_val[1]))
+        coords = tuple(
+            (exp_val[0], exp_val[1], exp_val[2] + exp_val[0], exp_val[3] + exp_val[1])
+        )
         cropped_coords = [max(min(i, self._sensor_resolution[0]), 0) for i in coords]
         if cropped_coords[2] == 0 or cropped_coords[3] == 0:
             warn("Trying to set ROI outside FOV", CameraWarning)
@@ -60,13 +62,11 @@ class MockCamera(AbstractCamera):
 
     def prepare_mock_image(self):
         self.current_mock_image = block_reduce(
-            self.full_mock_image,
-            (self._binning, self._binning),
-            func=np.max
+            self.full_mock_image, (self._binning, self._binning), func=np.max
         )
         self.current_mock_image = self.current_mock_image[
-                self._roi[1]: self._roi[3], self._roi[0]: self._roi[2]
-            ]
+            self._roi[1] : self._roi[3], self._roi[0] : self._roi[2]
+        ]
 
     def get_frames(self):
         super().get_frames()

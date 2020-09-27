@@ -54,7 +54,7 @@ class HamamatsuCamera(AbstractCamera):
         self._binning = 1
         self._frame_shape = (
             self._sensor_resolution[0] // self._binning,
-            self._sensor_resolution[1] // self._binning
+            self._sensor_resolution[1] // self._binning,
         )
         self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
         self._frame_rate = 1 / self._exposure_time
@@ -136,7 +136,10 @@ class HamamatsuCamera(AbstractCamera):
         return self._frame_bytes
 
     def query_frame_shape(self):
-        self._frame_shape = (self.get_property_value("image_width"), self.get_property_value("image_height"))
+        self._frame_shape = (
+            self.get_property_value("image_width"),
+            self.get_property_value("image_height"),
+        )
 
     @staticmethod
     def check_status(fn_return, fn_name="unknown"):
