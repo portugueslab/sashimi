@@ -29,7 +29,7 @@ class TriggerMode(Enum):
 @dataclass
 class CamParameters:
     exposure_time: float = 60
-    binning: int = 2
+    binning: int = 1
     roi: tuple = (
         0,
         0,
@@ -40,6 +40,7 @@ class CamParameters:
     image_width: int = 2048
     frame_shape: tuple = (1024, 1024)
     internal_frame_rate: float = 60
+    sensor_resolution: float = (1024, 1024)
     trigger_mode: TriggerMode = TriggerMode.FREE
     camera_mode: CameraMode = CameraMode.PAUSED
 
@@ -114,6 +115,7 @@ class CameraProcess(LoggingProcess):
                 camera_id=conf["camera"]["id"],
                 sensor_resolution=tuple(conf["camera"]["sensor_resolution"]),
             )
+        self.parameters.sensor_resolution = self.camera.sensor_resolution
 
     def pause_loop(self):
         while not self.stop_event.is_set():
@@ -167,8 +169,6 @@ class CameraProcess(LoggingProcess):
         self.parameters = self.new_parameters
         for attribute in ["exposure_time", "binning", "roi", "trigger_mode"]:
             setattr(self.camera, attribute, getattr(self.parameters, attribute))
-        # the following is to match internals of the camera as some cameras are restricted (e.g. only multiples of 4)
-        self.parameters.frame_shape = self.camera.frame_shape
 
     def update_framerate(self):
         self.framerate_rec.update_framerate()

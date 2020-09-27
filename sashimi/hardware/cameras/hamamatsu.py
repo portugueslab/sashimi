@@ -51,10 +51,13 @@ class HamamatsuCamera(AbstractCamera):
             self.get_property_value("image_width"),
             self.get_property_value("image_height"),
         )
-        self._frame_shape = self._sensor_resolution
+        self._binning = 1
+        self._frame_shape = (
+            self._sensor_resolution[0] // self._binning,
+            self._sensor_resolution[1] // self._binning
+        )
         self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
         self._frame_rate = 1 / self._exposure_time
-        self._binning = 1
         self._trigger_mode = TriggerMode.FREE
         self._frame_bytes = 0
 
@@ -95,6 +98,7 @@ class HamamatsuCamera(AbstractCamera):
     def binning(self, exp_val):
         self._binning = exp_val
         self.set_property_value("binning", exp_val)
+        self.query_frame_shape()
 
     @property
     def exposure_time(self):
@@ -116,6 +120,7 @@ class HamamatsuCamera(AbstractCamera):
         self.set_property_value("subarray_hpos", self._roi[0])
         self.set_property_value("subarray_vsize", self._roi[3])
         self.set_property_value("subarray_hsize", self._roi[2])
+        self.query_frame_shape()
 
     @property
     def trigger_mode(self):
@@ -129,6 +134,9 @@ class HamamatsuCamera(AbstractCamera):
     @property
     def frame_bytes(self):
         return self._frame_bytes
+
+    def query_frame_shape(self):
+        self._frame_shape = (self.get_property_value("image_width"), self.get_property_value("image_height"))
 
     @staticmethod
     def check_status(fn_return, fn_name="unknown"):

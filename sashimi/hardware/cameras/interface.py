@@ -95,7 +95,3 @@ class AbstractCamera:
     @property
     def sensor_resolution(self):
         return self._sensor_resolution
-
-    @property
-    def frame_shape(self):
-        return tuple([None, None])

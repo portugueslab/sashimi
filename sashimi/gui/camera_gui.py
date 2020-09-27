@@ -8,28 +8,14 @@ from PyQt5.QtWidgets import (
     QProgressBar,
 )
 from lightparam.gui import ParameterGui
-from lightparam.param_qt import ParametrizedQt
-from lightparam import Param
 from sashimi.state import (
     convert_camera_params,
     GlobalState,
     State,
     get_voxel_size,
 )
-
-from time import time_ns
 import napari
 import numpy as np
-
-
-IMAGE_SIZE = (1024, 1024)  # TODO this should probably be configurable
-
-
-class DisplaySettings(ParametrizedQt):
-    def __init__(self):
-        super().__init__()
-        self.name = "display_settings"
-        self.display_framerate = Param(30, (1, 100))
 
 
 class ViewingWidget(QWidget):
@@ -52,9 +38,6 @@ class ViewingWidget(QWidget):
 
         self.main_layout = QVBoxLayout()
 
-        self.display_settings = DisplaySettings()
-        self.wid_display_settings = ParameterGui(self.display_settings)
-
         self.viewer = napari.Viewer(show=False)
         self.frame_layer = self.viewer.add_image(
             np.zeros([1, 1024, 1024]),
@@ -62,19 +45,23 @@ class ViewingWidget(QWidget):
             name="frame_layer",
         )
 
+        roi_init_shape = np.array([
+                self.state.current_camera_status.sensor_resolution[0] // self.state.current_camera_status.binning,
+                self.state.current_camera_status.sensor_resolution[1] // self.state.current_camera_status.binning
+        ]) // 2
         self.roi = self.viewer.add_shapes(
             [
                 np.array(
                     [
                         [0, 0],
-                        [IMAGE_SIZE[0], 0],
-                        [IMAGE_SIZE[0], IMAGE_SIZE[1]],
-                        [0, IMAGE_SIZE[1]],
+                        [roi_init_shape[0], 0],
+                        [roi_init_shape[0], roi_init_shape[1]],
+                        [0, roi_init_shape[1]],
                     ]
                 )
             ],
             blending="translucent",
-            opacity=0.1,
+            opacity=0.2,
             face_color="yellow",
         )
         self.toggle_roi_display()
@@ -86,7 +73,6 @@ class ViewingWidget(QWidget):
         self.lbl_experiment_progress = QLabel()
 
         self.bottom_layout = QHBoxLayout()
-        self.bottom_layout.addWidget(self.wid_display_settings)
         self.bottom_layout.addWidget(self.btn_display_roi)
         self.bottom_layout.addWidget(self.btn_reset_contrast)
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
@@ -127,15 +113,11 @@ class ViewingWidget(QWidget):
         if current_image is None:
             return
 
-        delta_t = (time_ns() - self.last_time_updated) / 1e9
-
-        if delta_t > 1 / self.display_settings.display_framerate:
-            # If not volumetric or out of range, reset indexes:
-            if current_image.shape[0] == 1:
-                self.frame_layer.dims.reset()
-            self.frame_layer.data = current_image
-            self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
-            self.last_time_updated = time_ns()
+        # If not volumetric or out of range, reset indexes:
+        if current_image.shape[0] == 1:
+            self.frame_layer.dims.reset()
+        self.frame_layer.data = current_image
+        self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
 
     def refresh_progress_bar(self):
         sstatus = self.state.get_save_status()
@@ -227,8 +209,8 @@ class CameraSettingsContainerWidget(QWidget):
         self.state.camera_settings.roi = [
             0,
             0,
-            self.state.current_camera_status.image_width,
-            self.state.current_camera_status.image_height,
+            self.state.current_camera_status.sensor_resolution[0] // self.state.current_camera_status.binning,
+            self.state.current_camera_status.sensor_resolution[1] // self.state.current_camera_status.binning,
         ]
 
         self.update_roi_info()
