@@ -68,7 +68,8 @@ class ScanningSettings(ParametrizedQt):
         super().__init__()
         self.name = "general/scanning_state"
         self.scanning_state = Param(
-            "Paused", ["Paused", "Calibration", "Planar", "Volume"],
+            "Paused",
+            ["Paused", "Calibration", "Planar", "Volume"],
         )
 
 
@@ -172,7 +173,11 @@ class Calibration(ParametrizedQt):
 
     def add_calibration_point(self):
         self.calibrations_points.append(
-            (self.z_settings.piezo, self.z_settings.lateral, self.z_settings.frontal,)
+            (
+                self.z_settings.piezo,
+                self.z_settings.lateral,
+                self.z_settings.frontal,
+            )
         )
         self.calculate_calibration()
 
@@ -483,7 +488,9 @@ class State:
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
-                self.planar_setting, self.single_plane_settings, self.calibration,
+                self.planar_setting,
+                self.single_plane_settings,
+                self.calibration,
             )
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
@@ -600,10 +607,13 @@ class State:
             return None
 
     def calculate_pulse_times(self):
-        return np.arange(
-            self.volume_setting.n_skip_start,
-            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
+        return (
+            np.arange(
+                self.volume_setting.n_skip_start,
+                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+            )
+            / (self.volume_setting.frequency * self.volume_setting.n_planes)
+        )
 
     def wrap_up(self):
         self.stop_event.set()

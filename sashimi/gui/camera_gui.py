@@ -59,7 +59,10 @@ class ViewingWidget(QWidget):
 
         roi_init_shape = (
             np.array(
-                [self.sensor_resolution // binning, self.sensor_resolution // binning,]
+                [
+                    self.sensor_resolution // binning,
+                    self.sensor_resolution // binning,
+                ]
             )
             // 2
         )
@@ -151,9 +154,6 @@ class ViewingWidget(QWidget):
         else:
             self.roi.visible = True
             self.viewer.press_key("s")
-
-    def select_layer(self):
-        pass
 
 
 class CameraSettingsContainerWidget(QWidget):
