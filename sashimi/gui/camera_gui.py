@@ -16,6 +16,12 @@ from sashimi.state import (
 )
 import napari
 import numpy as np
+from warnings import warn
+from sashimi.hardware.cameras.interface import CameraWarning
+from sashimi.config import read_config
+
+
+conf = read_config()
 
 
 class ViewingWidget(QWidget):
@@ -38,21 +44,22 @@ class ViewingWidget(QWidget):
 
         self.main_layout = QVBoxLayout()
 
+        if conf["scopeless"]:
+            self.sensor_resolution = 256
+        else:
+            self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
+
         self.viewer = napari.Viewer(show=False)
         self.frame_layer = self.viewer.add_image(
-            np.zeros([1, 1024, 1024]),
+            np.zeros([1, self.sensor_resolution, self.sensor_resolution]),
             blending="translucent",
             name="frame_layer",
         )
+        binning = convert_camera_params(self.state.camera_settings).binning
 
         roi_init_shape = (
             np.array(
-                [
-                    self.state.current_camera_status.sensor_resolution[0]
-                    // self.state.current_camera_status.binning,
-                    self.state.current_camera_status.sensor_resolution[1]
-                    // self.state.current_camera_status.binning,
-                ]
+                [self.sensor_resolution // binning, self.sensor_resolution // binning,]
             )
             // 2
         )
@@ -68,11 +75,10 @@ class ViewingWidget(QWidget):
                 )
             ],
             blending="translucent",
-            opacity=0.2,
             face_color="yellow",
+            opacity=0.7,
         )
-        self.toggle_roi_display()
-        self.btn_display_roi = QPushButton("Show/Hide ROI")
+        self._toggle_roi_display()
         self.btn_reset_contrast = QPushButton("Reset contrast limits")
 
         self.experiment_progress = QProgressBar()
@@ -80,7 +86,6 @@ class ViewingWidget(QWidget):
         self.lbl_experiment_progress = QLabel()
 
         self.bottom_layout = QHBoxLayout()
-        self.bottom_layout.addWidget(self.btn_display_roi)
         self.bottom_layout.addWidget(self.btn_reset_contrast)
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
         self.bottom_layout.addStretch()
@@ -99,7 +104,6 @@ class ViewingWidget(QWidget):
 
         self.setLayout(self.main_layout)
 
-        self.btn_display_roi.clicked.connect(self.toggle_roi_display)
         self.btn_reset_contrast.clicked.connect(self.update_contrast_limits)
 
     @property
@@ -140,17 +144,15 @@ class ViewingWidget(QWidget):
     def update_contrast_limits(self):
         self.frame_layer.reset_contrast_limits()
 
-    def toggle_roi_display(self):
+    def _toggle_roi_display(self):
         if self.roi.visible:
             # TODO: Block rotating roi
             self.roi.visible = False
         else:
             self.roi.visible = True
-            self.viewer.press_key(
-                "s"
-            )  # this allows moving the whole roi and scaling but no individual handles
+            self.viewer.press_key("s")
 
-    def update_roi(self):
+    def select_layer(self):
         pass
 
 
@@ -160,16 +162,22 @@ class CameraSettingsContainerWidget(QWidget):
     Parameters
     ----------
     state : State object
-    roi : default ROI size
+    wid_display : ViewingWidget
     timer : QTimer
     """
 
-    def __init__(self, state, roi, timer):
+    def __init__(self, state, wid_display, timer):
 
         super().__init__()
-        self.roi = roi
+        self.wid_display = wid_display
+        self.roi = wid_display.roi
         self.state = state
         timer.timeout.connect(self.update_camera_info)
+
+        if conf["scopeless"]:
+            self.sensor_resolution = 256
+        else:
+            self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
 
         self.full_size = True
 
@@ -196,39 +204,50 @@ class CameraSettingsContainerWidget(QWidget):
         self.set_full_size_frame_button.clicked.connect(self.set_full_size_frame)
 
     @property
-    def roi_pos(self):
-        return int(self.roi.data[0][0][1]), int(self.roi.data[0][0][0])
-
-    @property
-    def roi_size(self):
-        return int(self.roi.data[0][3][1] - self.roi.data[0][0][1]), int(
-            self.roi.data[0][1][0] - self.roi.data[0][0][0]
+    def roi_coords(self):
+        return tuple(
+            (
+                int(self.roi.data[0][0][1]),
+                int(self.roi.data[0][0][0]),
+                int(self.roi.data[0][3][1]),
+                int(self.roi.data[0][1][0]),
+            )
         )
 
     def set_roi(self):
         """Set ROI size from loaded params."""
-        self.state.camera_settings.roi = tuple(
-            [self.roi_pos[0], self.roi_pos[1], self.roi_size[0], self.roi_size[1]]
-        )
-        self.update_roi_info()
+        binning = convert_camera_params(self.state.camera_settings).binning
+        max_res = self.sensor_resolution // binning
+        cropped_coords = [max(min(i, max_res), 0) for i in self.roi_coords]
+        dx = cropped_coords[2] - cropped_coords[0]
+        dy = cropped_coords[3] - cropped_coords[1]
+
+        if dx == 0 or dy == 0:
+            warn("Trying to set ROI outside FOV", CameraWarning)
+        else:
+            self.state.camera_settings.roi = tuple(
+                [cropped_coords[0], cropped_coords[1], dx, dy]
+            )
+            self.update_roi_info()
+            self.wid_display._toggle_roi_display()
 
     def set_full_size_frame(self):
+        binning = convert_camera_params(self.state.camera_settings).binning
         self.state.camera_settings.roi = [
             0,
             0,
-            self.state.current_camera_status.sensor_resolution[0]
-            // self.state.current_camera_status.binning,
-            self.state.current_camera_status.sensor_resolution[1]
-            // self.state.current_camera_status.binning,
+            self.sensor_resolution // binning,
+            self.sensor_resolution // binning,
         ]
 
         self.update_roi_info()
+        self.wid_display._toggle_roi_display()
 
     def update_roi_info(self):
         dims = self.state.camera_settings.roi
         binning = convert_camera_params(self.state.camera_settings).binning
         self.lbl_roi.setText(
-            f"Current frame dimensions are:\nHeight: {int(dims[0] /binning)}\nWidth: {int(dims[1]/binning)}"
+            f"Current frame dimensions are:\nHeight: {int(dims[0] / binning)}\nWidth: {int(dims[1] / binning)}"
         )
 
     def update_camera_info(self):

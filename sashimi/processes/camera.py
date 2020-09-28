@@ -40,7 +40,6 @@ class CamParameters:
     image_width: int = 2048
     frame_shape: tuple = (1024, 1024)
     internal_frame_rate: float = 60
-    sensor_resolution: float = (1024, 1024)
     trigger_mode: TriggerMode = TriggerMode.FREE
     camera_mode: CameraMode = CameraMode.PAUSED
 
@@ -115,7 +114,6 @@ class CameraProcess(LoggingProcess):
                 camera_id=conf["camera"]["id"],
                 sensor_resolution=tuple(conf["camera"]["sensor_resolution"]),
             )
-        self.parameters.sensor_resolution = self.camera.sensor_resolution
 
     def pause_loop(self):
         while not self.stop_event.is_set():

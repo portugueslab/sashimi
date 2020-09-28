@@ -41,14 +41,13 @@ class MainWindow(QMainWindow):
         self.wid_laser = LightSourceWidget(st, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsContainerWidget(
-            st, self.wid_display.roi, self.timer
+            st, self.wid_display, self.timer
         )
 
         self.setCentralWidget(self.wid_display)
 
         self.addDockWidget(
-            Qt.LeftDockWidgetArea,
-            DockedWidget(widget=self.wid_status, title="Mode"),
+            Qt.LeftDockWidgetArea, DockedWidget(widget=self.wid_status, title="Mode"),
         )
 
         self.addDockWidget(

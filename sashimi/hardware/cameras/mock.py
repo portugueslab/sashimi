@@ -1,8 +1,7 @@
-from sashimi.hardware.cameras.interface import AbstractCamera, CameraWarning
+from sashimi.hardware.cameras.interface import AbstractCamera
 import numpy as np
 import time
 from skimage.measure import block_reduce
-from warnings import warn
 
 
 class MockCamera(AbstractCamera):
@@ -45,27 +44,21 @@ class MockCamera(AbstractCamera):
 
     @property
     def roi(self):
-        """roi coordinates as a tuple: (x_min, y_min, x_max, y_max)"""
+        """roi attributes as a tuple: (x_min, y_min, x_size, y_size)"""
         return self._roi
 
     @roi.setter
     def roi(self, exp_val: tuple):
-        coords = tuple(
-            (exp_val[0], exp_val[1], exp_val[2] + exp_val[0], exp_val[3] + exp_val[1])
-        )
-        cropped_coords = [max(min(i, self._sensor_resolution[0]), 0) for i in coords]
-        if cropped_coords[2] == 0 or cropped_coords[3] == 0:
-            warn("Trying to set ROI outside FOV", CameraWarning)
-        else:
-            self._roi = cropped_coords
-            self.prepare_mock_image()
+        self._roi = exp_val
+        self.prepare_mock_image()
 
     def prepare_mock_image(self):
         self.current_mock_image = block_reduce(
             self.full_mock_image, (self._binning, self._binning), func=np.max
         )
         self.current_mock_image = self.current_mock_image[
-            self._roi[1] : self._roi[3], self._roi[0] : self._roi[2]
+            self._roi[1] : (self._roi[1] + self._roi[3]),
+            self._roi[0] : (self._roi[0] + self._roi[2]),
         ]
 
     def get_frames(self):
