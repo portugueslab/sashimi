@@ -5,7 +5,7 @@ from sashimi.hardware.cameras.interface import (
     CameraException,
     CameraWarning,
 )
-from sashimi.hardware.cameras.sdk.hamamatsu_sdk import (
+from sashimi.hardware.cameras.hamamatsu.sdk import (
     DCAMAPI_INIT,
     DCAMDEV_OPEN,
     DCAMWAIT_OPEN,
@@ -43,8 +43,7 @@ class HamamatsuCamera(AbstractCamera):
         self.dcam = ctypes.windll.dcamapi
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
         paraminit.size = ctypes.sizeof(paraminit)
-        # error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
-        # n_cameras = paraminit.iDeviceCount
+        self.error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
 
         self._exposure_time = 60
         self._sensor_resolution: tuple = (

@@ -1,6 +1,6 @@
 import ctypes
 
-# DCAM4 SDK.
+# DCAM4 hamamatsu.
 DCAMERR_ERROR = 0
 DCAMERR_NOERROR = 1
 
