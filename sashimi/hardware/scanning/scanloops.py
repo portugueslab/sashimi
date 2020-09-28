@@ -297,7 +297,6 @@ class VolumetricScanLoop(ScanLoop):
 
         if not self.camera_on and self.n_samples_read > self.n_samples_period():
             self.camera_on = True
-            self.wait_signal.clear()
             self.trigger_exp_start = True
         elif not self.camera_on:
             self.wait_signal.set()
@@ -344,6 +343,7 @@ class VolumetricScanLoop(ScanLoop):
                 if i_sample == 0:
                     camera_pulses = self.camera_pulses.read(i_sample, self.n_samples)
                     self.camera_was_off = False
+                    self.wait_signal.clear()
                 else:
                     n_to_next_start = self.n_samples_period() - i_sample
                     if n_to_next_start < self.n_samples:
@@ -352,6 +352,7 @@ class VolumetricScanLoop(ScanLoop):
                         ).copy()
                         camera_pulses[:n_to_next_start] = 0
                         self.camera_was_off = False
+                        self.wait_signal.clear()
             else:
                 camera_pulses = self.camera_pulses.read(i_sample, self.n_samples)
 

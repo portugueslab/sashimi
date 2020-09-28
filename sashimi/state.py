@@ -33,6 +33,7 @@ from sashimi.events import LoggedEvent, SashimiEvents
 from pathlib import Path
 from enum import Enum
 from sashimi.config import read_config
+from datetime import time
 
 conf = read_config()
 
@@ -361,9 +362,6 @@ class State:
             self.light_source = light_source_class_dict[conf["light_source"]["name"]](
                 port=conf["light_source"]["port"]
             )
-            self.light_source_settings.intensity.unit = (
-                self.light_source.intensity_units
-            )
             self.camera = CameraProcess(
                 stop_event=self.stop_event,
                 wait_event=self.scanner.wait_signal,
@@ -402,6 +400,9 @@ class State:
 
         self.planar_setting = PlanarScanningSettings()
         self.light_source_settings = LightSourceSettings()
+        self.light_source_settings.params.intensity.unit = (
+            self.light_source.intensity_units
+        )
 
         self.save_status: Optional[SavingStatus] = None
 
@@ -541,11 +542,12 @@ class State:
     def start_experiment(self):
         # TODO disable the GUI except the abort button
         self.logger.log_message("started experiment")
-        self.send_scan_settings()
         self.scanner.wait_signal.set()
+        self.send_scan_settings()
         self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
+        time.sleep(0.01)
         self.is_saving_event.set()
 
     def end_experiment(self):
