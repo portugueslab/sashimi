@@ -10,10 +10,10 @@ from pathlib import Path
 
 @click.command()
 @click.option("--scopeless", is_flag=True, help="Scopeless mode for simulated hardware")
-def main(scopeless, **kwargs):
-    cli_edit_config("scopeless", False)
-    if scopeless:
-        cli_edit_config("scopeless", True)
+@click.option("--scanning", default="mock", help="The scanning interface")
+def main(scopeless, scanning, **kwargs):
+    cli_edit_config("scopeless", scopeless)
+    cli_edit_config("scanning", scanning)
 
     # TODO configure logging with CLI
 

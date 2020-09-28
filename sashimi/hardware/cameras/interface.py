@@ -26,18 +26,6 @@ class AbstractCamera:
         """
         pass
 
-    def get_property_value(self, property_name):
-        """
-        Returns the current value of a particular property from internal memory of the hardware.
-        """
-        pass
-
-    def set_property_value(self, property_name, property_value):
-        """
-        Configures the value of a particular property in the hardware.
-        """
-        pass
-
     def start_acquisition(self):
         """
         Allocate as many frames as will fit in 2GB of memory and start data acquisition.

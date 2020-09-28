@@ -45,6 +45,24 @@ class HamamatsuCamera(AbstractCamera):
         paraminit.size = ctypes.sizeof(paraminit)
         self.error_code = self.dcam.dcamapi_init(ctypes.byref(paraminit))
 
+        # Open the camera.
+        paramopen = DCAMDEV_OPEN(0, self.camera_id, None)
+        paramopen.size = ctypes.sizeof(paramopen)
+        self.check_status(
+            self.dcam.dcamdev_open(ctypes.byref(paramopen)), "dcamdev_open"
+        )
+        self.camera_handle = ctypes.c_void_p(paramopen.hdcam)
+
+        # Set up wait handle
+        paramwait = DCAMWAIT_OPEN(0, 0, None, self.camera_handle)
+        paramwait.size = ctypes.sizeof(paramwait)
+        self.check_status(
+            self.dcam.dcamwait_open(ctypes.byref(paramwait)), "dcamwait_open"
+        )
+        self.wait_handle = ctypes.c_void_p(paramwait.hwait)
+
+        self.properties = self.get_camera_properties()
+
         self._exposure_time = 60
         self._sensor_resolution: tuple = (
             self.get_property_value("image_width"),
@@ -69,25 +87,6 @@ class HamamatsuCamera(AbstractCamera):
         self.old_frame_bytes = -1
 
         self.number_frames = 0
-
-        # Open the camera.
-        paramopen = DCAMDEV_OPEN(0, self.camera_id, None)
-        paramopen.size = ctypes.sizeof(paramopen)
-        self.check_status(
-            self.dcam.dcamdev_open(ctypes.byref(paramopen)), "dcamdev_open"
-        )
-        self.camera_handle = ctypes.c_void_p(paramopen.hdcam)
-
-        # Set up wait handle
-        paramwait = DCAMWAIT_OPEN(0, 0, None, self.camera_handle)
-        paramwait.size = ctypes.sizeof(paramwait)
-        self.check_status(
-            self.dcam.dcamwait_open(ctypes.byref(paramwait)), "dcamwait_open"
-        )
-        self.wait_handle = ctypes.c_void_p(paramwait.hwait)
-
-        # Get camera properties.
-        self.properties = self.get_camera_properties()
 
     @property
     def binning(self):
@@ -216,7 +215,6 @@ class HamamatsuCamera(AbstractCamera):
         return properties
 
     def get_frames(self):
-        super().get_frames()
         frames = []
 
         # Return a list of the ids of all the new frames since the last check.
@@ -278,8 +276,9 @@ class HamamatsuCamera(AbstractCamera):
                 new_frames.append(i + 1)
         self.buffer_index = cur_buffer_index
 
-        for n in new_frames:
-            frames.append(np.reshape(self.hcam_data[n].get_data(), self._frame_shape))
+        for i_frame in new_frames:
+            frame_data = self.hcam_data[i_frame].get_data()
+            frames.append(np.reshape(frame_data, self._frame_shape))
 
         return frames
 
@@ -359,16 +358,11 @@ class HamamatsuCamera(AbstractCamera):
 
             return text_options
 
-    def get_property_value(self, property_name, *args, **kwargs):
-        super().get_property_value(*args, **kwargs)
-
+    def get_property_value(self, property_name):
         # Check if the property exists.
         if not (property_name in self.properties):
             raise CameraException(f"Unknown property name{property_name}")
         prop_id = self.properties[property_name]
-
-        # Get the property attributes.
-        prop_attr = self.get_property_value(property_name)
 
         # Get the property value.
         c_value = ctypes.c_double(0)
@@ -380,6 +374,8 @@ class HamamatsuCamera(AbstractCamera):
             ),
             "dcamprop_getvalue",
         )
+
+        prop_attr = self.get_property_attribute(property_name)
 
         # Convert type based on attribute type.
         temp = prop_attr.attribute & DCAMPROP_TYPE_MASK
@@ -395,7 +391,6 @@ class HamamatsuCamera(AbstractCamera):
         return prop_value
 
     def set_property_value(self, property_name, property_value, *args, **kwargs):
-        super().set_property_value(*args, **kwargs)
         # Check if the property exists.
         if not (property_name in self.properties):
             raise CameraException(f"Unknown property name {property_name}")
@@ -441,7 +436,6 @@ class HamamatsuCamera(AbstractCamera):
         return p_value.value
 
     def start_acquisition(self):
-        super().start_acquisition()
         self.buffer_index = -1
         self.last_frame_number = 0
 
