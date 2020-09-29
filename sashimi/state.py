@@ -462,6 +462,9 @@ class State:
 
     def send_camera_settings(self):
         camera_params = convert_camera_params(self.camera_settings)
+        camera_params.roi = tuple(
+            ([i // camera_params.binning for i in camera_params.roi])
+        )
         camera_params.trigger_mode = (
             TriggerMode.FREE
             if self.global_state == GlobalState.PREVIEW

@@ -73,7 +73,10 @@ class ViewingWidget(QWidget):
 
         roi_init_shape = (
             np.array(
-                [self.sensor_resolution // binning, self.sensor_resolution // binning,]
+                [
+                    self.sensor_resolution // binning,
+                    self.sensor_resolution // binning,
+                ]
             )
             // 2
         )
@@ -90,17 +93,16 @@ class ViewingWidget(QWidget):
             ],
             blending="translucent",
             face_color="yellow",
+            face_contrast_limits=(0, 0),
             opacity=0.7,
             visible=False,
         )
-        self.btn_reset_contrast = QPushButton("Reset contrast limits")
 
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
         self.lbl_experiment_progress = QLabel()
 
         self.bottom_layout = QHBoxLayout()
-        self.bottom_layout.addWidget(self.btn_reset_contrast)
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
         self.bottom_layout.addStretch()
 
@@ -114,11 +116,11 @@ class ViewingWidget(QWidget):
 
         self.refresh_display = True
 
-        self.last_time_updated = 0
+        self.is_first_frame = True
 
         self.setLayout(self.main_layout)
 
-        self.btn_reset_contrast.clicked.connect(self.update_contrast_limits)
+        self.state.camera_settings.sig_param_changed.connect(self.reset_contrast)
 
     @property
     def voxel_size(self):
@@ -143,6 +145,12 @@ class ViewingWidget(QWidget):
             self.frame_layer.dims.reset()
         self.frame_layer.data = current_image
         self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
+        if self.is_first_frame:
+            self.reset_contrast()
+            self.is_first_frame = False
+
+    def reset_contrast(self):
+        self.frame_layer.reset_contrast_limits()
 
     def refresh_progress_bar(self):
         sstatus = self.state.get_save_status()
@@ -154,9 +162,6 @@ class ViewingWidget(QWidget):
             self.lbl_experiment_progress.setText(
                 "Saved chunks: {}".format(sstatus.i_chunk)
             )
-
-    def update_contrast_limits(self):
-        self.frame_layer.reset_contrast_limits()
 
 
 class CameraSettingsContainerWidget(QWidget):
@@ -257,29 +262,28 @@ class CameraSettingsContainerWidget(QWidget):
         """Set ROI size from loaded params."""
         binning = convert_camera_params(self.state.camera_settings).binning
         max_res = self.sensor_resolution // binning
-        cropped_coords = [max(min(i, max_res), 0) for i in self.roi_coords]
+        cropped_coords = [max(min(i // binning, max_res), 0) for i in self.roi_coords]
         dx = cropped_coords[2] - cropped_coords[0]
         dy = cropped_coords[3] - cropped_coords[1]
-
         if dx == 0 or dy == 0:
             warn("Trying to set ROI outside FOV", CameraWarning)
             self.cancel_roi_selection()
         else:
-            self.state.camera_settings.roi = [
+            binned_roi = [
                 cropped_coords[0],
                 cropped_coords[1],
                 dx,
                 dy,
             ]
+            self.state.camera_settings.roi = [i * binning for i in binned_roi]
             self.update_roi_info()
 
     def set_full_frame(self):
-        binning = convert_camera_params(self.state.camera_settings).binning
         self.state.camera_settings.roi = [
             0,
             0,
-            self.sensor_resolution // binning,
-            self.sensor_resolution // binning,
+            self.sensor_resolution,
+            self.sensor_resolution,
         ]
 
         self.update_roi_info()

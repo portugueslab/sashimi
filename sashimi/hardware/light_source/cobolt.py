@@ -3,7 +3,7 @@ from sashimi.hardware.light_source.interface import AbstractLightSource, LaserWa
 from sashimi.config import read_config
 
 try:
-    import visa
+    import pyvisa as visa
 
     manager = visa.ResourceManager()
 except (ImportError, ValueError):

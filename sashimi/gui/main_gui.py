@@ -100,6 +100,8 @@ class MainWindow(QMainWindow):
             self.wid_camera.set_roi()
         self.wid_save_options.wid_save_options.refresh_widgets()
         self.wid_save_options.set_locationbutton()
+        # TODO: delete this line when single-plane scanning mode is implemented
+        self.setTabEnabled(3, False)
 
     def check_end_experiment(self):
         if self.st.saver.saver_stopped_signal.is_set():
