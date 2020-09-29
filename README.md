@@ -36,6 +36,10 @@ You can activate the environment by running:
 
     conda activate sashimi
     
+You will have to also install `pyvisa` within the new environment (which does not come with it):
+
+    pip install pyvisa
+    
 ### Install with pip
 
 For a non-editable installation run:
