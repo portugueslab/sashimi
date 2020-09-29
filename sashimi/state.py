@@ -34,6 +34,8 @@ from pathlib import Path
 from enum import Enum
 from sashimi.config import read_config
 from datetime import time
+import time
+
 
 conf = read_config()
 
