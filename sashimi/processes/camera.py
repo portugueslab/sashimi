@@ -139,6 +139,7 @@ class CameraProcess(LoggingProcess):
                 self.pause_loop()
             else:
                 self.camera.start_acquisition()
+                self.logger.log_message("Started acquisition")
                 self.camera_loop()
 
     def camera_loop(self):
@@ -147,7 +148,7 @@ class CameraProcess(LoggingProcess):
             frames = self.camera.get_frames()
             if frames:
                 for frame in frames:
-                    self.logger.log_message("received frames")
+                    self.logger.log_message("received frame of shape "+str(frame.shape))
                     if self.was_waiting and not is_waiting:
                         self.experiment_trigger_event.set()
                     self.image_queue.put(frame)
@@ -159,12 +160,14 @@ class CameraProcess(LoggingProcess):
                     self.new_parameters != self.parameters
                 ):
                     self.camera.stop_acquisition()
+                    self.logger.log_message("Interrupting for new params")
                     break
             except Empty:
                 pass
 
     def update_parameters(self):
         self.parameters = self.new_parameters
+        self.logger.log_message("Updated parameters "+str(self.new_parameters))
         for attribute in ["exposure_time", "binning", "roi", "trigger_mode"]:
             setattr(self.camera, attribute, getattr(self.parameters, attribute))
 

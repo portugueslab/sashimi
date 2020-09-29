@@ -121,6 +121,7 @@ class ViewingWidget(QWidget):
         self.setLayout(self.main_layout)
 
         self.state.camera_settings.sig_param_changed.connect(self.reset_contrast)
+        self.state.light_source_settings.sig_param_changed.connect(self.reset_contrast)
 
     @property
     def voxel_size(self):
