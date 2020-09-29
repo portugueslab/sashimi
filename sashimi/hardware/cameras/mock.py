@@ -40,7 +40,6 @@ class MockCamera(AbstractCamera):
     @binning.setter
     def binning(self, exp_val):
         self._binning = exp_val
-        self.prepare_mock_image()
 
     @property
     def roi(self):

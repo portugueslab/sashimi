@@ -19,9 +19,23 @@ import numpy as np
 from warnings import warn
 from sashimi.hardware.cameras.interface import CameraWarning
 from sashimi.config import read_config
+from enum import Enum
 
 
 conf = read_config()
+
+
+class RoiState(Enum):
+    FULL = 1
+    DISPLAYED = 2
+    SET = 3
+
+
+ROI_TEXTS = {
+    RoiState.FULL: "Select ROI",
+    RoiState.DISPLAYED: "Set ROI",
+    RoiState.SET: "Reset full frame",
+}
 
 
 class ViewingWidget(QWidget):
@@ -59,10 +73,7 @@ class ViewingWidget(QWidget):
 
         roi_init_shape = (
             np.array(
-                [
-                    self.sensor_resolution // binning,
-                    self.sensor_resolution // binning,
-                ]
+                [self.sensor_resolution // binning, self.sensor_resolution // binning,]
             )
             // 2
         )
@@ -80,8 +91,8 @@ class ViewingWidget(QWidget):
             blending="translucent",
             face_color="yellow",
             opacity=0.7,
+            visible=False,
         )
-        self._toggle_roi_display()
         self.btn_reset_contrast = QPushButton("Reset contrast limits")
 
         self.experiment_progress = QProgressBar()
@@ -147,14 +158,6 @@ class ViewingWidget(QWidget):
     def update_contrast_limits(self):
         self.frame_layer.reset_contrast_limits()
 
-    def _toggle_roi_display(self):
-        if self.roi.visible:
-            # TODO: Block rotating roi
-            self.roi.visible = False
-        else:
-            self.roi.visible = True
-            self.viewer.press_key("s")
-
 
 class CameraSettingsContainerWidget(QWidget):
     """Widget to modify parameters for the camera.
@@ -171,6 +174,7 @@ class CameraSettingsContainerWidget(QWidget):
         super().__init__()
         self.wid_display = wid_display
         self.roi = wid_display.roi
+        self.roi_state = RoiState.FULL
         self.state = state
         timer.timeout.connect(self.update_camera_info)
 
@@ -188,20 +192,55 @@ class CameraSettingsContainerWidget(QWidget):
         self.lbl_camera_info = QLabel()
         self.lbl_roi = QLabel()
 
-        self.set_roi_button = QPushButton("set ROI")
-        self.set_full_size_frame_button = QPushButton("set full size frame")
+        self.btn_roi = QPushButton(ROI_TEXTS[self.roi_state])
+        self.btn_cancel_roi = QPushButton("Cancel")
+        self.btn_cancel_roi.hide()
 
         self.layout().addWidget(self.wid_camera_settings)
         self.layout().addWidget(self.lbl_camera_info)
-        self.layout().addWidget(self.set_roi_button)
-        self.layout().addWidget(self.set_full_size_frame_button)
+        self.layout().addWidget(self.btn_roi)
+        self.layout().addWidget(self.btn_cancel_roi)
         self.layout().addWidget(self.lbl_roi)
 
         self.update_camera_info()
-        self.set_full_size_frame()
 
-        self.set_roi_button.clicked.connect(self.set_roi)
-        self.set_full_size_frame_button.clicked.connect(self.set_full_size_frame)
+        self.btn_roi.clicked.connect(self.roi_action)
+        self.btn_cancel_roi.clicked.connect(self.cancel_roi_selection)
+
+    def roi_action(self):
+        try:
+            self.roi_state = RoiState(self.roi_state.value + 1)
+        except ValueError:
+            self.roi_state = RoiState(1)
+
+        if self.roi_state == RoiState.FULL:
+            self.set_full_frame()
+            self._hide_roi()
+            self.btn_cancel_roi.hide()
+        elif self.roi_state == RoiState.DISPLAYED:
+            self._show_roi()
+            self.btn_cancel_roi.show()
+            # TODO: Select shape layer without napari key bindings
+            self.wid_display.viewer.press_key("s")
+        elif self.roi_state == RoiState.SET:
+            self._hide_roi()
+            self.set_roi()
+            self.btn_cancel_roi.hide()
+
+        self.update_roi_txt()
+
+    def update_roi_txt(self):
+        self.btn_roi.setText(ROI_TEXTS[self.roi_state])
+
+    def _hide_roi(self):
+        self.wid_display.roi.visible = False
+
+    def _show_roi(self):
+        self.wid_display.roi.visible = True
+
+    def cancel_roi_selection(self):
+        self.roi_state = RoiState(3)
+        self.roi_action()
 
     @property
     def roi_coords(self):
@@ -224,14 +263,17 @@ class CameraSettingsContainerWidget(QWidget):
 
         if dx == 0 or dy == 0:
             warn("Trying to set ROI outside FOV", CameraWarning)
+            self.cancel_roi_selection()
         else:
-            self.state.camera_settings.roi = tuple(
-                [cropped_coords[0], cropped_coords[1], dx, dy]
-            )
+            self.state.camera_settings.roi = [
+                cropped_coords[0],
+                cropped_coords[1],
+                dx,
+                dy,
+            ]
             self.update_roi_info()
-            self.wid_display._toggle_roi_display()
 
-    def set_full_size_frame(self):
+    def set_full_frame(self):
         binning = convert_camera_params(self.state.camera_settings).binning
         self.state.camera_settings.roi = [
             0,
@@ -241,7 +283,6 @@ class CameraSettingsContainerWidget(QWidget):
         ]
 
         self.update_roi_info()
-        self.wid_display._toggle_roi_display()
 
     def update_roi_info(self):
         dims = self.state.camera_settings.roi
