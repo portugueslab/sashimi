@@ -145,11 +145,14 @@ class HamamatsuCamera(AbstractCamera):
             self.get_property_value("image_height"),
         )
 
-    @staticmethod
-    def check_status(fn_return, fn_name="unknown"):
+    def check_status(self, fn_return, fn_name="unknown"):
         if fn_return == DCAMERR_ERROR:
             c_buf_len = 80
             c_buf = ctypes.create_string_buffer(c_buf_len)
+            # Not sure if this serves any purpose at all
+            c_error = self.dcam.dcam_getlasterror(
+                self.camera_handle, c_buf, ctypes.c_int32(c_buf_len)
+            )
             raise Exception("dcam error " + str(fn_name) + " " + str(c_buf.value))
         return fn_return
 
@@ -445,10 +448,12 @@ class HamamatsuCamera(AbstractCamera):
         self.buffer_index = -1
         self.last_frame_number = 0
 
-        # Get size of frame
-        self._frame_bytes = self.get_property_value("image_framebytes")
+        # set subarray mode
+        self.set_property_value("subarray_mode", "ON")
 
+        # Get size of frame
         self.query_frame_shape()
+        self._frame_bytes = self.get_property_value("image_framebytes")
 
         if self.old_frame_bytes != self._frame_bytes:
             # The larger of either 2000 frames or some weird calculation for number of buffers for 2 seconds of data
