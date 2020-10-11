@@ -24,9 +24,6 @@ class SavingSettingsWidget(QWidget):
         super().__init__()
         self.state = st
         self.setLayout(QVBoxLayout())
-        self.btn_load = QPushButton("Load settings")
-        self.btn_save = QPushButton("Save settings")
-        self.btn_instructions = QPushButton("User guide")
         parent_dir = (Path(__file__).parents[2]).resolve()
         with open(parent_dir / "lightsheet_procedure.md") as f:
             instructions = f.read()
@@ -37,14 +34,12 @@ class SavingSettingsWidget(QWidget):
             None,
             Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint,
         )
-        self.layout().addWidget(self.btn_load)
-        self.layout().addWidget(self.btn_save)
-        self.layout().addWidget(self.btn_instructions)
         self.popup_window.setLayout(QVBoxLayout())
         self.popup_window.layout().addWidget(self.instructions)
-        self.btn_load.clicked.connect(self.load)
-        self.btn_save.clicked.connect(self.save)
-        self.btn_instructions.clicked.connect(self.popup_window.show)
+
+    def show_instructions(self):
+        self.popup_window.resize(1200, 800)
+        self.popup_window.show()
 
     def load(self):
         file, _ = QFileDialog.getOpenFileName(
@@ -55,6 +50,7 @@ class SavingSettingsWidget(QWidget):
             self.sig_params_loaded.emit()
 
     def save(self):
-        pth = Path(PRESETS_PATH)
-        filename = datetime.now().strftime("%y%m%d %H%M%S.json")
-        self.state.save_tree(pth / filename)
+        file, _ = QFileDialog.getSaveFileName(
+            None, "Open settings file", PRESETS_PATH, "*.json"
+        )
+        self.state.save_tree(file)

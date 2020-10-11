@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget
+from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget, qApp
+from PyQt5.QtGui import QIcon
 from sashimi.gui.calibration_gui import CalibrationWidget
 from sashimi.gui.scanning_gui import (
     PlanarScanningWidget,
@@ -30,7 +31,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.st = st
         self.timer = QTimer()
-        self.resize(1800, 900)
+        self.showMaximized()
 
         self.wid_settings_tree = SavingSettingsWidget(st)
         self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
@@ -82,6 +83,30 @@ class MainWindow(QMainWindow):
 
         self.timer.start()
         self.timer.timeout.connect(self.check_end_experiment)
+        self.setup_menu_bar()
+
+    def setup_menu_bar(self):
+        menubar = self.menuBar()
+
+        file_menu = menubar.addMenu("File")
+
+        load = file_menu.addAction("Load settings")
+        load.triggered.connect(self.wid_settings_tree.load)
+
+        load = file_menu.addAction("Save current settings")
+        load.triggered.connect(self.wid_settings_tree.save)
+
+        exit = file_menu.addAction("Exit")
+        exit.triggered.connect(self.close)
+
+        help_menu = menubar.addMenu("Help")
+
+        instructions = help_menu.addAction("User guide")
+        instructions.triggered.connect(self.wid_settings_tree.show_instructions)
+
+    def setup_status_bar(self):
+        # self.statusBar().showMessage('Ready')
+        pass
 
     def closeEvent(self, a0) -> None:
         self.st.wrap_up()
