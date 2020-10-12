@@ -71,10 +71,6 @@ class MainWindow(QMainWindow):
             Qt.RightDockWidgetArea,
             DockedWidget(widget=self.wid_save_options, title="Saving"),
         )
-        self.addDockWidget(
-            Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_settings_tree, title="Metadata"),
-        )
 
         self.st.camera_settings.sig_param_changed.connect(
             self.st.reset_noise_subtraction
@@ -89,20 +85,20 @@ class MainWindow(QMainWindow):
         menubar = self.menuBar()
 
         file_menu = menubar.addMenu("File")
-
-        load = file_menu.addAction("Load settings")
-        load.triggered.connect(self.wid_settings_tree.load)
-
-        load = file_menu.addAction("Save current settings")
-        load.triggered.connect(self.wid_settings_tree.save)
-
+        load = file_menu.addAction("Load presets")
+        save_settings = file_menu.addAction("Save presets")
+        save_dir = file_menu.addAction("Save in...")
         exit = file_menu.addAction("Exit")
+        load.triggered.connect(self.wid_settings_tree.load)
+        save_settings.triggered.connect(self.wid_settings_tree.save)
+        save_dir.triggered.connect(self.wid_save_options.set_save_location)
         exit.triggered.connect(self.close)
 
         help_menu = menubar.addMenu("Help")
-
         instructions = help_menu.addAction("User guide")
+        docs = help_menu.addAction("About")
         instructions.triggered.connect(self.wid_settings_tree.show_instructions)
+        docs.triggered.connect(self.wid_settings_tree.open_docs)
 
     def setup_status_bar(self):
         # self.statusBar().showMessage('Ready')

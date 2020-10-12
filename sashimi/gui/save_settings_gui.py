@@ -12,6 +12,7 @@ from pathlib import Path
 from datetime import datetime
 import markdown
 from sashimi.config import read_config
+from webbrowser import open_new_tab
 
 conf = read_config()
 PRESETS_PATH = conf["default_paths"]["presets"]
@@ -54,3 +55,7 @@ class SavingSettingsWidget(QWidget):
             None, "Open settings file", PRESETS_PATH, "*.json"
         )
         self.state.save_tree(file)
+
+    def open_docs(self):
+        open_new_tab("https://portugueslab.github.io/sashimi/")
+
