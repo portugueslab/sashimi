@@ -94,6 +94,12 @@ class MainWindow(QMainWindow):
         save_dir.triggered.connect(self.wid_save_options.set_save_location)
         exit.triggered.connect(self.close)
 
+        edit_menu = menubar.addMenu("Edit")
+        edit_config = edit_menu.addAction("Configure")
+        edit_guide = edit_menu.addAction("Edit user guide")
+        edit_guide.triggered.connect(self.wid_settings_tree.edit_guide)
+        edit_config.triggered.connect(self.wid_settings_tree.edit_config)
+
         help_menu = menubar.addMenu("Help")
         instructions = help_menu.addAction("User guide")
         docs = help_menu.addAction("About")

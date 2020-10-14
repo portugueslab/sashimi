@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import (
     QVBoxLayout,
     QWidget,
-    QPushButton,
     QFileDialog,
     QDialog,
     QTextEdit,
@@ -9,13 +8,13 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import pyqtSignal, Qt
 from sashimi.state import State
 from pathlib import Path
-from datetime import datetime
 import markdown
 from sashimi.config import read_config
 from webbrowser import open_new_tab
 
 conf = read_config()
 PRESETS_PATH = conf["default_paths"]["presets"]
+docs_url = "https://portugueslab.github.io/sashimi/"
 
 
 class SavingSettingsWidget(QWidget):
@@ -35,6 +34,7 @@ class SavingSettingsWidget(QWidget):
             None,
             Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint,
         )
+        self.popup_window.setWindowTitle("User guide")
         self.popup_window.setLayout(QVBoxLayout())
         self.popup_window.layout().addWidget(self.instructions)
 
@@ -56,6 +56,14 @@ class SavingSettingsWidget(QWidget):
         )
         self.state.save_tree(file)
 
-    def open_docs(self):
-        open_new_tab("https://portugueslab.github.io/sashimi/")
+    @staticmethod
+    def open_docs():
+        open_new_tab(docs_url)
 
+    # TODO: Text editor for markdown
+    def edit_guide(self):
+        pass
+
+    # TODO: Editor for JSON
+    def edit_config(self):
+        pass
