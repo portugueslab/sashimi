@@ -111,6 +111,8 @@ class MainWindow(QMainWindow):
         pass
 
     def closeEvent(self, a0) -> None:
+        self.wid_settings_tree.conf_window.close()
+        self.wid_settings_tree.guide_window.close()
         self.st.wrap_up()
         a0.accept()
 

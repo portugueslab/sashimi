@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QFileDialog,
     QDialog,
     QTextEdit,
-    QLineEdit,
+    QPushButton,
     QLabel,
     QComboBox
 )
@@ -12,10 +12,11 @@ from PyQt5.QtCore import pyqtSignal, Qt
 from sashimi.state import State
 from pathlib import Path
 import markdown
-from sashimi.config import read_config
+from sashimi.config import read_config, write_config_value
 from webbrowser import open_new_tab
 from typing import Optional
 from warnings import warn
+import re
 
 conf = read_config()
 PRESETS_PATH = conf["default_paths"]["presets"]
@@ -36,15 +37,15 @@ class SavingSettingsWidget(QWidget):
         self.html_markdown = markdown.markdown(instructions)
         self.instructions = QTextEdit(self.html_markdown)
         self.instructions.setReadOnly(True)
-        self.popup_window = QDialog(
+        self.guide_window = QDialog(
             None,
             Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint,
         )
-        self.popup_window.setWindowTitle("User guide")
-        self.popup_window.setLayout(QVBoxLayout())
-        self.popup_window.layout().addWidget(self.instructions)
+        self.guide_window.setWindowTitle("User guide")
+        self.guide_window.setLayout(QVBoxLayout())
+        self.guide_window.layout().addWidget(self.instructions)
 
-        self.keys_list, self.inverse_key_dict = self._get_nested_keys(conf)
+        self.keys_list = self.nest_keys(conf)
         self.config_combo = QComboBox()
         self.config_combo.addItems(self.keys_list)
         self.config_key_value = QTextEdit(conf[self.config_combo.currentText()])
@@ -54,14 +55,21 @@ class SavingSettingsWidget(QWidget):
         )
         self.conf_window.setWindowTitle("Configure")
         self.conf_window.setLayout(QVBoxLayout())
+        self.update_conf_btn = QPushButton("Apply changes to configuration file")
+        self.restart_lbl = QLabel("Restart sashimi to apply changes")
         self.conf_window.layout().addWidget(self.config_combo)
         self.conf_window.layout().addWidget(self.config_key_value)
+        self.conf_window.layout().addWidget(self.update_conf_btn)
+        self.conf_window.layout().addWidget(self.restart_lbl)
+
+        self.restart_lbl.hide()
 
         self.config_combo.currentTextChanged.connect(self._update_config_key_value)
+        self.update_conf_btn.pressed.connect(self._apply_config)
 
     def show_instructions(self):
-        self.popup_window.resize(1200, 800)
-        self.popup_window.show()
+        self.guide_window.resize(1200, 800)
+        self.guide_window.show()
 
     def load(self):
         file, _ = QFileDialog.getOpenFileName(
@@ -86,44 +94,68 @@ class SavingSettingsWidget(QWidget):
     def edit_guide(self):
         pass
 
-    def _get_nested_keys(self, this_dict: dict, nesting_level: Optional[list] = None) -> {list, dict}:
+    def nest_keys(self, this_dict: dict, nesting_level: Optional[list] = None, parent: Optional[dict] = None) -> list:
         keys = []
-        inverse_keys = {}
         if not nesting_level:
             nesting_level = []
+        if not parent:
+            parent = this_dict
         for key, value in this_dict.items():
             if type(value) is not dict:
-                if len(nesting_level) == 0:
-                    keys.append(key)
-                    inverse_keys[key] = key
+                if len(nesting_level) > 0:
+                    nesting_string = "-".join(nesting_level) + "-" + key
                 else:
-                    nesting_string = " / ".join(nesting_level) + " / " + key
-                    keys.append(nesting_string)
-                    inverse_keys[nesting_string] = key
+                    nesting_string = key
+                keys.append(nesting_string)
             else:
                 nesting_level.append(key)
-                nested_keys, nested_inverse_keys = self._get_nested_keys(this_dict[key], nesting_level)
+                nested_keys = self.nest_keys(this_dict[key], nesting_level, parent)
                 keys.extend(nested_keys)
-                nested_inverse_keys = {**inverse_keys,**nested_inverse_keys}
-                nesting_level = nesting_level[:-1]
+                nesting_level.pop()
 
-        return keys, inverse_keys
+        return keys
 
     def edit_config(self):
         self.conf_window.resize(250, 100)
         self.conf_window.show()
 
+    @staticmethod
+    def retrieve_keys_from_nested(nested_string: str, separator: str):
+        """
+        separator is a symbol that delimits individual fields or levels within a string
+        """
+        keys = re.split("[" + separator + "]", nested_string)
+        return keys
+
+    @staticmethod
+    def _search_nested_dict(query: list, target: dict):
+        """
+        Supports up to 3-level nesting. Returns None if nested key is not found in query
+        """
+        try:
+            if len(query) == 1:
+                value = target[query[0]]
+            elif len(query) == 2:
+                value = target[query[0]][query[1]]
+            elif len(query) == 3:
+                value = target[query[0]][query[1]][query[2]]
+            else:
+                warn("Dictionary nesting level equal or greater than 3 not supported", Warning)
+                return
+        except KeyError:
+            return None
+
+        return value
+
     def _update_config_key_value(self):
-        """
-        Supports up to 2-level nesting
-        """
-        address = self.inverse_key_dict[self.config_combo.currentText()]
-        print(address)
-        if len(address) == 1:
-            self.config_key_value.setText(conf[address][0])
-        elif len(address) == 2:
-            self.config_key_value.setText(conf[address][0][1][2])
-        elif len(address) == 3:
-            self.config_key_value.setText(conf[address][0][1][2][3])
-        else:
-            warn("Dictionary nesting level equal or greater than 3 not supported", Warning)
+        config_key = self.retrieve_keys_from_nested(self.config_combo.currentText(), "-")
+        value = self._search_nested_dict(config_key, conf)
+        self.config_key_value.setText(str(value))
+
+    def _apply_config(self):
+        config_key = self.retrieve_keys_from_nested(self.config_combo.currentText(), "-")
+        new_value = self.config_key_value.toPlainText()
+        write_config_value(config_key, new_value)
+        global conf
+        conf = read_config()
+        self.restart_lbl.show()
