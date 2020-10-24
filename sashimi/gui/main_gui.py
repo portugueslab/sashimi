@@ -11,6 +11,7 @@ from sashimi.gui.light_source_gui import LightSourceWidget
 from sashimi.gui.save_settings_gui import SavingSettingsWidget
 from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
 from sashimi.gui.save_gui import SaveWidget
+from sashimi.gui.status_display import StatusMessageDisplay
 from sashimi.state import State
 
 
@@ -72,6 +73,11 @@ class MainWindow(QMainWindow):
             DockedWidget(widget=self.wid_save_options, title="Saving"),
         )
 
+        # TODO: Add messages and message queues to status bar
+        self.status_display = StatusMessageDisplay()
+        self.statusBar().addWidget(self.status_display)
+        self.status_display.addMessageQueue(self.wid_camera.camera_msg_queue)
+
         self.st.camera_settings.sig_param_changed.connect(
             self.st.reset_noise_subtraction
         )
@@ -79,6 +85,7 @@ class MainWindow(QMainWindow):
 
         self.timer.start()
         self.timer.timeout.connect(self.check_end_experiment)
+        self.timer.timeout.connect(self.status_display.refresh)
         self.setup_menu_bar()
 
     def setup_menu_bar(self):
@@ -105,11 +112,6 @@ class MainWindow(QMainWindow):
         docs = help_menu.addAction("About")
         instructions.triggered.connect(self.wid_settings_tree.show_instructions)
         docs.triggered.connect(self.wid_settings_tree.open_docs)
-
-    # TODO: Create a status bar
-    def setup_status_bar(self):
-        # self.statusBar().showMessage('Ready')
-        pass
 
     def closeEvent(self, a0) -> None:
         self.wid_settings_tree.conf_window.close()

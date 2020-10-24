@@ -20,6 +20,7 @@ from warnings import warn
 from sashimi.hardware.cameras.interface import CameraWarning
 from sashimi.config import read_config
 from enum import Enum
+from multiprocessing import Queue
 
 
 conf = read_config()
@@ -182,6 +183,9 @@ class CameraSettingsContainerWidget(QWidget):
         self.roi = wid_display.roi
         self.roi_state = RoiState.FULL
         self.state = state
+
+        self.camera_msg_queue = Queue()
+
         timer.timeout.connect(self.update_camera_info)
 
         if conf["scopeless"]:
@@ -296,6 +300,7 @@ class CameraSettingsContainerWidget(QWidget):
             f"Current frame dimensions are:\nHeight: {int(dims[0] / binning)}\nWidth: {int(dims[1] / binning)}"
         )
 
+    # TODO: Move this to status bar, e.g. as a Queue()
     def update_camera_info(self):
         frame_rate = self.state.get_triggered_frame_rate()
         if frame_rate is not None:
