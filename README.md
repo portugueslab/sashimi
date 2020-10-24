@@ -9,6 +9,7 @@ width="270"></a>
 [![Build Status](https://travis-ci.com/portugueslab/sashimi.svg?branch=master)](https://travis-ci.com/portugueslab/sashimi)
 [![Docs](https://img.shields.io/badge/docs-dev-brightgreen)](https://portugueslab.github.io/sashimi/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4122062.svg)](https://doi.org/10.5281/zenodo.4122062)
 
 Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
 It is developed by members of the [PortuguesLab](http://www.portugueslab.com/)
