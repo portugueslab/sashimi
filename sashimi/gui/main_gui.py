@@ -106,6 +106,7 @@ class MainWindow(QMainWindow):
         instructions.triggered.connect(self.wid_settings_tree.show_instructions)
         docs.triggered.connect(self.wid_settings_tree.open_docs)
 
+    # TODO: Create a status bar
     def setup_status_bar(self):
         # self.statusBar().showMessage('Ready')
         pass

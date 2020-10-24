@@ -37,6 +37,8 @@ class SavingSettingsWidget(QWidget):
         self.html_markdown = markdown.markdown(instructions)
         self.instructions = QTextEdit(self.html_markdown)
         self.instructions.setReadOnly(True)
+        self.plain_instructions = QTextEdit(instructions)
+        self.plain_instructions.hide()
         self.guide_window = QDialog(
             None,
             Qt.WindowSystemMenuHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint,
@@ -44,6 +46,7 @@ class SavingSettingsWidget(QWidget):
         self.guide_window.setWindowTitle("User guide")
         self.guide_window.setLayout(QVBoxLayout())
         self.guide_window.layout().addWidget(self.instructions)
+        self.guide_window.layout().addWidget(self.plain_instructions)
 
         self.keys_list = self.nest_keys(conf)
         self.config_combo = QComboBox()
@@ -66,9 +69,11 @@ class SavingSettingsWidget(QWidget):
 
         self.config_combo.currentTextChanged.connect(self._update_config_key_value)
         self.update_conf_btn.pressed.connect(self._apply_config)
+        self.plain_instructions.textChanged.connect(self._render_markdown)
 
     def show_instructions(self):
         self.guide_window.resize(1200, 800)
+        self.plain_instructions.hide()
         self.guide_window.show()
 
     def load(self):
@@ -89,10 +94,16 @@ class SavingSettingsWidget(QWidget):
     def open_docs():
         open_new_tab(docs_url)
 
-    # TODO: Text editor for markdown
-    # TODO: Should be a 2-column structure w/ raw modifiable text left and markdown live display right
     def edit_guide(self):
-        pass
+        self.guide_window.resize(1200, 800)
+        self.plain_instructions.show()
+        self.guide_window.show()
+
+    # TODO: Figure out why it fails to render markdown not as plain text
+    def _render_markdown(self):
+        instructions = self.plain_instructions.toMarkdown()
+        self.html_markdown = markdown.markdown(instructions)
+        self.instructions.setText(self.html_markdown)
 
     def nest_keys(self, this_dict: dict, nesting_level: Optional[list] = None, parent: Optional[dict] = None) -> list:
         keys = []
