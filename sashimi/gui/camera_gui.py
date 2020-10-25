@@ -166,7 +166,7 @@ class ViewingWidget(QWidget):
             )
 
 
-class CameraSettingsContainerWidget(QWidget):
+class CameraSettingsWidget(QWidget):
     """Widget to modify parameters for the camera.
 
     Parameters
@@ -176,17 +176,18 @@ class CameraSettingsContainerWidget(QWidget):
     timer : QTimer
     """
 
-    def __init__(self, state, wid_display, timer):
+    def __init__(self, state, wid_display, timer, status_bar):
 
         super().__init__()
         self.wid_display = wid_display
         self.roi = wid_display.roi
         self.roi_state = RoiState.FULL
         self.state = state
+        self.status_bar = status_bar
 
         self.camera_msg_queue = Queue()
 
-        timer.timeout.connect(self.update_camera_info)
+        #timer.timeout.connect(self.update_camera_info)
 
         if conf["scopeless"]:
             self.sensor_resolution = 256
@@ -199,20 +200,13 @@ class CameraSettingsContainerWidget(QWidget):
 
         self.setLayout(QVBoxLayout())
 
-        self.lbl_camera_info = QLabel()
-        self.lbl_roi = QLabel()
-
         self.btn_roi = QPushButton(ROI_TEXTS[self.roi_state])
         self.btn_cancel_roi = QPushButton("Cancel")
         self.btn_cancel_roi.hide()
 
         self.layout().addWidget(self.wid_camera_settings)
-        self.layout().addWidget(self.lbl_camera_info)
         self.layout().addWidget(self.btn_roi)
         self.layout().addWidget(self.btn_cancel_roi)
-        self.layout().addWidget(self.lbl_roi)
-
-        self.update_camera_info()
 
         self.btn_roi.clicked.connect(self.roi_action)
         self.btn_cancel_roi.clicked.connect(self.cancel_roi_selection)
@@ -236,11 +230,6 @@ class CameraSettingsContainerWidget(QWidget):
             self._hide_roi()
             self.set_roi()
             self.btn_cancel_roi.hide()
-
-        self.update_roi_txt()
-
-    def update_roi_txt(self):
-        self.btn_roi.setText(ROI_TEXTS[self.roi_state])
 
     def _hide_roi(self):
         self.wid_display.roi.visible = False
@@ -296,8 +285,9 @@ class CameraSettingsContainerWidget(QWidget):
     def update_roi_info(self):
         dims = self.state.camera_settings.roi
         binning = convert_camera_params(self.state.camera_settings).binning
-        self.lbl_roi.setText(
-            f"Current frame dimensions are:\nHeight: {int(dims[0] / binning)}\nWidth: {int(dims[1] / binning)}"
+
+        self.status_bar.addMessage(
+            f"Height: {int(dims[0] / binning)} Width: {int(dims[1] / binning)}"
         )
 
     # TODO: Move this to status bar, e.g. as a Queue()
@@ -323,6 +313,7 @@ class CameraSettingsContainerWidget(QWidget):
                 if self.state.global_state == GlobalState.PLANAR_PREVIEW:
                     expected_frame_rate = self.state.single_plane_settings.frequency
                 if expected_frame_rate:
+                    self.status_bar.addMessage(message="Camera is lagging")
                     self.lbl_camera_info.setText(
                         "\n".join(
                             ["Camera frame rate: {} Hz".format(round(frame_rate, 2))]

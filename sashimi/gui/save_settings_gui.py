@@ -164,9 +164,12 @@ class SavingSettingsWidget(QWidget):
         self.config_key_value.setText(str(value))
 
     def _apply_config(self):
-        config_key = self.retrieve_keys_from_nested(self.config_combo.currentText(), "-")
-        new_value = self.config_key_value.toPlainText()
-        write_config_value(config_key, new_value)
         global conf
+        config_key = self.retrieve_keys_from_nested(self.config_combo.currentText(), "-")
+        value = self._search_nested_dict(config_key, conf)
+        new_value = int(self.config_key_value.toPlainText())
+        new_value = type(value)(new_value)  # Convert to keep the same type
+
+        write_config_value(config_key, new_value)
         conf = read_config()
         self.restart_lbl.show()

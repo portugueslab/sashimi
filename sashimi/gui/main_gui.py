@@ -9,7 +9,7 @@ from sashimi.gui.scanning_gui import (
 )
 from sashimi.gui.light_source_gui import LightSourceWidget
 from sashimi.gui.save_settings_gui import SavingSettingsWidget
-from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
+from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsWidget
 from sashimi.gui.save_gui import SaveWidget
 from sashimi.gui.status_display import StatusMessageDisplay
 from sashimi.state import State
@@ -34,6 +34,10 @@ class MainWindow(QMainWindow):
         self.timer = QTimer()
         self.showMaximized()
 
+        # TODO: Add messages and message queues to status bar
+        self.status_display = StatusMessageDisplay()
+        self.statusBar().addWidget(self.status_display)
+
         self.wid_settings_tree = SavingSettingsWidget(st)
         self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
 
@@ -42,8 +46,8 @@ class MainWindow(QMainWindow):
         self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LightSourceWidget(st, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
-        self.wid_camera = CameraSettingsContainerWidget(
-            st, self.wid_display, self.timer
+        self.wid_camera = CameraSettingsWidget(
+            st, self.wid_display, self.timer, self.status_display
         )
 
         self.setCentralWidget(self.wid_display)
@@ -72,11 +76,6 @@ class MainWindow(QMainWindow):
             Qt.RightDockWidgetArea,
             DockedWidget(widget=self.wid_save_options, title="Saving"),
         )
-
-        # TODO: Add messages and message queues to status bar
-        self.status_display = StatusMessageDisplay()
-        self.statusBar().addWidget(self.status_display)
-        self.status_display.addMessageQueue(self.wid_camera.camera_msg_queue)
 
         self.st.camera_settings.sig_param_changed.connect(
             self.st.reset_noise_subtraction
@@ -132,8 +131,6 @@ class MainWindow(QMainWindow):
             self.wid_camera.set_roi()
         self.wid_save_options.wid_save_options.refresh_widgets()
         self.wid_save_options.set_locationbutton()
-        # TODO: delete this line when single-plane scanning mode is implemented
-        self.setTabEnabled(3, False)
 
     def check_end_experiment(self):
         if self.st.saver.saver_stopped_signal.is_set():
@@ -170,6 +167,9 @@ class StatusWidget(QTabWidget):
         self.addTab(self.wid_calibration, self.option_dict[1])
         self.addTab(self.wid_single_plane, self.option_dict[2])
         self.addTab(self.wid_volume, self.option_dict[3])
+
+        # TODO: delete this line when single-plane scanning mode is implemented
+        self.setTabEnabled(2, False)
 
         self.currentChanged.connect(self.update_status)
 

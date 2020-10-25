@@ -174,7 +174,7 @@ class CameraProcess(LoggingProcess):
     def update_framerate(self):
         self.framerate_rec.update_framerate()
         if self.framerate_rec.i_fps == 0:
-            self.triggered_frame_rate_queue.put(self.framerate_rec.current_framerate)
+            self.triggered_frame_rate_queue.put("Framerate: " + str(self.framerate_rec.current_framerate) + " Hz")
 
     def close_camera(self):
         self.camera.shutdown()
