@@ -176,18 +176,16 @@ class CameraSettingsWidget(QWidget):
     timer : QTimer
     """
 
-    def __init__(self, state, wid_display, timer, status_bar):
+    def __init__(self, state, wid_display, timer):
 
         super().__init__()
         self.wid_display = wid_display
         self.roi = wid_display.roi
         self.roi_state = RoiState.FULL
         self.state = state
-        self.status_bar = status_bar
+        self.timer = timer
 
         self.camera_msg_queue = Queue()
-
-        #timer.timeout.connect(self.update_camera_info)
 
         if conf["scopeless"]:
             self.sensor_resolution = 256
@@ -270,7 +268,6 @@ class CameraSettingsWidget(QWidget):
                 dy,
             ]
             self.state.camera_settings.roi = [i * binning for i in binned_roi]
-            self.update_roi_info()
 
     def set_full_frame(self):
         self.state.camera_settings.roi = [
@@ -279,57 +276,3 @@ class CameraSettingsWidget(QWidget):
             self.sensor_resolution,
             self.sensor_resolution,
         ]
-
-        self.update_roi_info()
-
-    def update_roi_info(self):
-        dims = self.state.camera_settings.roi
-        binning = convert_camera_params(self.state.camera_settings).binning
-
-        self.status_bar.addMessage(
-            f"Height: {int(dims[0] / binning)} Width: {int(dims[1] / binning)}"
-        )
-
-    # TODO: Move this to status bar, e.g. as a Queue()
-    def update_camera_info(self):
-        frame_rate = self.state.get_triggered_frame_rate()
-        if frame_rate is not None:
-            if self.state.global_state == GlobalState.PAUSED:
-                self.lbl_camera_info.hide()
-            else:
-                self.lbl_camera_info.setStyleSheet("color: white")
-                expected_frame_rate = None
-                if self.state.global_state == GlobalState.PREVIEW:
-                    self.lbl_camera_info.setText(
-                        "Camera frame rate: {} Hz".format(round(frame_rate, 2))
-                    )
-                if self.state.global_state == GlobalState.VOLUME_PREVIEW:
-                    planes = (
-                        self.state.volume_setting.n_planes
-                        - self.state.volume_setting.n_skip_start
-                        - self.state.volume_setting.n_skip_end
-                    )
-                    expected_frame_rate = self.state.volume_setting.frequency * planes
-                if self.state.global_state == GlobalState.PLANAR_PREVIEW:
-                    expected_frame_rate = self.state.single_plane_settings.frequency
-                if expected_frame_rate:
-                    self.status_bar.addMessage(message="Camera is lagging")
-                    self.lbl_camera_info.setText(
-                        "\n".join(
-                            ["Camera frame rate: {} Hz".format(round(frame_rate, 2))]
-                            + (
-                                [
-                                    "Camera is lagging behind. Decrease exposure, number of planes or frequency"
-                                ]
-                                if expected_frame_rate > (frame_rate * 1.1)
-                                else ["Seems to follow well current speed"]
-                            )
-                        )
-                    )
-
-                    if expected_frame_rate > (frame_rate * 1.1):
-                        self.lbl_camera_info.setStyleSheet("color: red")
-                    else:
-                        self.lbl_camera_info.setStyleSheet("color: green")
-
-                self.lbl_camera_info.show()

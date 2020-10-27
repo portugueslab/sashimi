@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget, qApp
+from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget, QLabel
 from PyQt5.QtGui import QIcon
 from sashimi.gui.calibration_gui import CalibrationWidget
 from sashimi.gui.scanning_gui import (
@@ -11,7 +11,7 @@ from sashimi.gui.light_source_gui import LightSourceWidget
 from sashimi.gui.save_settings_gui import SavingSettingsWidget
 from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsWidget
 from sashimi.gui.save_gui import SaveWidget
-from sashimi.gui.status_display import StatusMessageDisplay
+from sashimi.gui.status_bar import StatusBarWidget
 from sashimi.state import State
 
 
@@ -34,10 +34,6 @@ class MainWindow(QMainWindow):
         self.timer = QTimer()
         self.showMaximized()
 
-        # TODO: Add messages and message queues to status bar
-        self.status_display = StatusMessageDisplay()
-        self.statusBar().addWidget(self.status_display)
-
         self.wid_settings_tree = SavingSettingsWidget(st)
         self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
 
@@ -46,9 +42,8 @@ class MainWindow(QMainWindow):
         self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LightSourceWidget(st, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
-        self.wid_camera = CameraSettingsWidget(
-            st, self.wid_display, self.timer, self.status_display
-        )
+        self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
+        self.status_bar = StatusBarWidget(st, self.timer)
 
         self.setCentralWidget(self.wid_display)
 
@@ -77,6 +72,8 @@ class MainWindow(QMainWindow):
             DockedWidget(widget=self.wid_save_options, title="Saving"),
         )
 
+        self.setStatusBar(self.status_bar)
+
         self.st.camera_settings.sig_param_changed.connect(
             self.st.reset_noise_subtraction
         )
@@ -84,7 +81,6 @@ class MainWindow(QMainWindow):
 
         self.timer.start()
         self.timer.timeout.connect(self.check_end_experiment)
-        self.timer.timeout.connect(self.status_display.refresh)
         self.setup_menu_bar()
 
     def setup_menu_bar(self):

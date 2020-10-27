@@ -20,6 +20,11 @@ TEMPLATE_CONF_DICT = {
     "scanning": "mock",
     "scopeless": False,
     "sample_rate": 40000,
+    "voxel_size" : {
+        "x": 0.3,
+        "y": 0.3,
+        "z": 6.5
+    },
     "default_paths": {
         "data": str(Path.home()),
         "presets": str(PRESETS_DIR_PATH),
