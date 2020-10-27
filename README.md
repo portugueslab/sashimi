@@ -53,25 +53,17 @@ Otherwise, if you want to contribute to the project as a developer, for editable
 
 Now you are ready to go!
 
-## Starting the software from command line
-
-Open a new anaconda prompt and activate your environment like above. Then run:
-
-    sashimi
-    
-Press __User guide__ to pop-up instructions that will drive you through the whole experiment preparation, acquisition and termination.
-
 ## Configuring sashimi
-
-You can ask sashimi for help:
-   
-    sashimi --help
     
 Running `sashimi --debug` lets you start the software without any hardware connected to the machine. Sashimi includes the
 `sashimi-config` module that lets you interact with the hardware and software settings from command line. You can display the
- current configuration of the system by running:
+ current configuration of the system. **You must run this command before launching sashimi for the first time**:
  
     sashimi-config show
+    
+You can ask sashimi for help:
+   
+    sashimi --help
  
 More information on its usage can be found by asking `sashimi-config` for help:
 
@@ -85,3 +77,16 @@ Or to modify the minimum and maximum voltage (in Volts) of the channel:
     
     sashimi-config edit -n piezo.position_write.min_val -v 0
     sashimi-config edit -n piezo.position_write.max_val -v 10
+    
+
+## Starting the software from command line
+
+Open a new anaconda prompt and activate your environment like above. Then run:
+
+    sashimi
+    
+Add the option `--scopeless`:
+
+    sashimi --scopeless
+    
+If you want to run the software with mock hardware, such as for debugging or developing.
