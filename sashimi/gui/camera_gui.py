@@ -10,7 +10,6 @@ from PyQt5.QtWidgets import (
 from lightparam.gui import ParameterGui
 from sashimi.state import (
     convert_camera_params,
-    GlobalState,
     State,
     get_voxel_size,
 )
