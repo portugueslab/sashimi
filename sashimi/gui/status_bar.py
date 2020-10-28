@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import (
     QLabel,
-    QStatusBar
+    QStatusBar,
+    QProgressBar
 )
 
 from sashimi.state import GlobalState, convert_camera_params, State, get_voxel_size
@@ -18,10 +19,21 @@ class StatusBarWidget(QStatusBar):
         self.framerate_lbl = QLabel("0 Hz")
         self.frame_size_lbl = QLabel()
         self.voxel_size_lbl = QLabel()
+        self.interplane_lbl = QLabel()
+        self.experiment_progress = QProgressBar()
+        self.experiment_progress.setFormat("Volume %v of %m")
+        self.lbl_experiment_progress = QLabel()
+        self.experiment_progress.hide()
+        self.lbl_experiment_progress.hide()
 
         self.addPermanentWidget(self.framerate_lbl)
         self.addPermanentWidget(self.frame_size_lbl)
         self.addPermanentWidget(self.voxel_size_lbl)
+        self.addPermanentWidget(self.interplane_lbl)
+        self.addPermanentWidget(self.experiment_progress)
+        self.addPermanentWidget(self.lbl_experiment_progress)
+
+        self.voxel_size = None
 
         self.timer.timeout.connect(self.update_all_labels)
 
@@ -29,6 +41,7 @@ class StatusBarWidget(QStatusBar):
         self.update_framerate()
         self.update_frame_size()
         self.update_voxel_size()
+        self.refresh_progress_bar()
 
     def update_framerate(self):
         frame_rate = self.state.get_triggered_frame_rate()
@@ -64,39 +77,23 @@ class StatusBarWidget(QStatusBar):
         )
 
     def update_voxel_size(self):
-        voxel_size = get_voxel_size(self.state.volume_setting, self.state.camera_settings)
+        self.voxel_size = get_voxel_size(self.state.volume_setting, self.state.camera_settings)
         if self.state.voxel_size and self.state.global_state == GlobalState.VOLUME_PREVIEW:
             self.voxel_size_lbl.setText(
-                f"Voxel size: {voxel_size[0]} x {voxel_size[1]} x {voxel_size[2]} um"
+                f"Voxel size: {self.voxel_size[0]} x {self.voxel_size[1]} x {self.voxel_size[2]} um"
             )
         else:
             self.voxel_size_lbl.setText(
-                f"Voxel size: {voxel_size[1]} x {voxel_size[2]} um"
+                f"Voxel size: {self.voxel_size[1]} x {self.voxel_size[2]} um"
             )
 
-    # TODO: Fix this function copy-pasted from original place, add self.update_alignment() to self.update_all_labels()
-    def update_alignment(self):
-        scan_width = (
-            self.state.volume_setting.scan_range[1]
-            - self.state.volume_setting.scan_range[0]
-        )
-        num_planes = (
-            self.state.volume_setting.n_planes
-            - self.state.volume_setting.n_skip_start
-            - self.state.volume_setting.n_skip_end
-        )
-        plane_distance = (
-            scan_width / num_planes - self.state.scope_alignment_info.waist_width
-        )
-        if plane_distance > 0:
-            self.lbl_interplane_distance.setText(
-                "With the current configuration, distance between planes is {:0.2f} um".format(
-                    plane_distance
-                )
-            )
-        if plane_distance <= 0:
-            self.lbl_interplane_distance.setText(
-                "The current configuration covers the whole volume. Plane overlap is {:0.2f} um".format(
-                    -plane_distance
-                )
+    def refresh_progress_bar(self):
+        sstatus = self.state.get_save_status()
+        if sstatus is not None:
+            self.experiment_progress.show()
+            self.lbl_experiment_progress.show()
+            self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
+            self.experiment_progress.setValue(sstatus.i_volume)
+            self.lbl_experiment_progress.setText(
+                "Saved files: {}".format(sstatus.i_chunk)
             )

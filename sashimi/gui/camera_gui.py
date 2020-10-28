@@ -98,21 +98,12 @@ class ViewingWidget(QWidget):
             visible=False,
         )
 
-        self.experiment_progress = QProgressBar()
-        self.experiment_progress.setFormat("Volume %v of %m")
-        self.lbl_experiment_progress = QLabel()
-
         self.bottom_layout = QHBoxLayout()
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
         self.bottom_layout.addStretch()
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
         self.main_layout.addLayout(self.bottom_layout)
-        self.main_layout.addWidget(self.experiment_progress)
-        self.main_layout.addWidget(self.lbl_experiment_progress)
-
-        self.experiment_progress.hide()
-        self.lbl_experiment_progress.hide()
 
         self.refresh_display = True
 
@@ -128,13 +119,11 @@ class ViewingWidget(QWidget):
         return get_voxel_size(
             self.state.volume_setting,
             self.state.camera_settings,
-            self.state.scope_alignment_info,
         )
 
     def refresh(self) -> None:
         """Main refresh loop called by timeout of the main timer."""
         self.refresh_image()
-        self.refresh_progress_bar()
 
     def refresh_image(self):
         current_image = self.state.get_volume()
@@ -152,17 +141,6 @@ class ViewingWidget(QWidget):
 
     def reset_contrast(self):
         self.frame_layer.reset_contrast_limits()
-
-    def refresh_progress_bar(self):
-        sstatus = self.state.get_save_status()
-        if sstatus is not None:
-            self.experiment_progress.show()
-            self.lbl_experiment_progress.show()
-            self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
-            self.experiment_progress.setValue(sstatus.i_volume)
-            self.lbl_experiment_progress.setText(
-                "Saved chunks: {}".format(sstatus.i_chunk)
-            )
 
 
 class CameraSettingsWidget(QWidget):

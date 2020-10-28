@@ -43,7 +43,7 @@ class MainWindow(QMainWindow):
         self.wid_laser = LightSourceWidget(st, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
-        self.status_bar = StatusBarWidget(st, self.timer)
+        self.wid_status_bar = StatusBarWidget(st, self.timer)
 
         self.setCentralWidget(self.wid_display)
 
@@ -72,7 +72,7 @@ class MainWindow(QMainWindow):
             DockedWidget(widget=self.wid_save_options, title="Saving"),
         )
 
-        self.setStatusBar(self.status_bar)
+        self.setStatusBar(self.wid_status_bar)
 
         self.st.camera_settings.sig_param_changed.connect(
             self.st.reset_noise_subtraction
@@ -121,7 +121,6 @@ class MainWindow(QMainWindow):
         self.wid_status.wid_volume.wid_volume.refresh_widgets()
         self.wid_status.wid_calibration.refresh_widgets()
         self.wid_status.wid_single_plane.wid_singleplane.refresh_widgets()
-        self.wid_display.wid_display_settings.refresh_widgets()
         if not omit_wid_camera:
             self.wid_camera.wid_camera_settings.refresh_widgets()
             self.wid_camera.set_roi()
@@ -135,8 +134,8 @@ class MainWindow(QMainWindow):
                 self.wid_status.setCurrentIndex(0)
                 self.wid_laser.btn_off.click()
             self.refresh_param_values(omit_wid_camera=True)
-            self.wid_display.experiment_progress.hide()
-            self.wid_display.lbl_experiment_progress.hide()
+            self.wid_status_bar.experiment_progress.hide()
+            self.wid_status_bar.lbl_experiment_progress.hide()
             self.st.saver.saver_stopped_signal.clear()
 
 
