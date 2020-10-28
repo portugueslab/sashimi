@@ -4,8 +4,6 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
-    QLabel,
-    QProgressBar,
 )
 from lightparam.gui import ParameterGui
 from sashimi.state import (
@@ -20,7 +18,6 @@ from sashimi.hardware.cameras.interface import CameraWarning
 from sashimi.config import read_config
 from enum import Enum
 from multiprocessing import Queue
-
 
 conf = read_config()
 
@@ -64,6 +61,8 @@ class ViewingWidget(QWidget):
             self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
 
         self.viewer = napari.Viewer(show=False)
+        self.viewer.theme = "dark_sashimi"
+
         self.frame_layer = self.viewer.add_image(
             np.zeros([1, self.sensor_resolution, self.sensor_resolution]),
             blending="translucent",
@@ -72,13 +71,13 @@ class ViewingWidget(QWidget):
         binning = convert_camera_params(self.state.camera_settings).binning
 
         roi_init_shape = (
-            np.array(
-                [
-                    self.sensor_resolution // binning,
-                    self.sensor_resolution // binning,
-                ]
-            )
-            // 2
+                np.array(
+                    [
+                        self.sensor_resolution // binning,
+                        self.sensor_resolution // binning,
+                    ]
+                )
+                // 2
         )
         self.roi = self.viewer.add_shapes(
             [
@@ -99,6 +98,14 @@ class ViewingWidget(QWidget):
         )
 
         self.bottom_layout = QHBoxLayout()
+
+        self.viewer.window.qt_viewer.viewerButtons.consoleButton.hide()
+        self.viewer.window.qt_viewer.viewerButtons.rollDimsButton.hide()
+        self.viewer.window.qt_viewer.viewerButtons.transposeDimsButton.setText("Rotate view")
+        self.viewer.window.qt_viewer.viewerButtons.resetViewButton.setText("Reset view")
+        self.viewer.window.qt_viewer.viewerButtons.gridViewButton.setText("Grid mode")
+        self.viewer.window.qt_viewer.viewerButtons.ndisplayButton.setText("3D mode")
+
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
         self.bottom_layout.addStretch()
 
