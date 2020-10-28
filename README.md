@@ -29,7 +29,7 @@ Clone this repository and navigate to the main folder `../sashimi`
 
 ### Recommended: Create a new environment
 
-It is a good practice to create an environment for every project. The provided `environment.yml` sets up all required dependencies.
+It is a good practice to create an environment for every project. The provided `environment.yml` sets up almost all required dependencies (see below).
 
     conda env create -f {path to environment.yml}
 
@@ -37,9 +37,10 @@ You can activate the environment by running:
 
     conda activate sashimi
     
-You will have to also install `pyvisa` within the new environment (which does not come with it):
+After this you have to install two extra dependencies: `pyvisa` and our forked version of `napari`:
 
     pip install pyvisa
+    pip install git+https://github.com/portugueslab/napari.git#egg=napari
     
 ### Install with pip
 
