@@ -11,7 +11,7 @@ from arrayqueues.shared_arrays import ArrayQueue
 import yagmail
 from sashimi.config import read_config
 conf = read_config()
-
+import datetime
 
 @dataclass
 class SavingParameters:
@@ -80,6 +80,7 @@ class StackSaver(Process):
         self.i_chunk = 0
         self.i_volume = 0
         self.current_data = None
+        start = datetime.datetime.now()
 
         while (
                 self.i_volume < self.save_parameters.n_volumes
@@ -101,7 +102,7 @@ class StackSaver(Process):
             self.finalize_dataset()
             self.current_data = None
             if self.saving_signal.is_set():
-                print("Done")
+                print("Done: ", datetime.datetime.now() - start)
                     # self.send_email_end()
 
         self.saving_signal.clear()
@@ -220,12 +221,12 @@ class StackSaver(Process):
             pass
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
-            if self.conf["chirashi"]:
-                self.save_parameters.n_volumes = int(round(
-                    np.ceil(int(self.frame_rate) * new_duration)))
-            else:
-                self.save_parameters.n_volumes = int(
-                    np.ceil(self.save_parameters.volumerate * new_duration)
-                )
+            # if self.conf["chirashi"]:
+            #     self.save_parameters.n_volumes = int(round(
+            #         np.ceil(int(self.frame_rate) * new_duration)))
+            # else:
+            self.save_parameters.n_volumes = int(
+                np.ceil(self.save_parameters.volumerate * new_duration)
+            )
         except Empty:
             pass
