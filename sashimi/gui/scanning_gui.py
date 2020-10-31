@@ -52,7 +52,6 @@ class VolumeScanningWidget(QWidget):
         self.btn_start.clicked.connect(self.change_experiment_state)
         self.chk_pause = QCheckBox("Pause after experiment")
 
-        self.wid_alignment = ParameterGui(self.state.scope_alignment_info)
         self.lbl_interplane_distance = QLabel()
         self.lbl_interplane_distance.setStyleSheet("color: yellow")
 
@@ -73,7 +72,6 @@ class VolumeScanningWidget(QWidget):
         self.layout().addWidget(self.wid_volume)
         self.layout().addWidget(self.btn_start)
         self.layout().addWidget(self.chk_pause)
-        self.layout().addWidget(self.wid_alignment)
         self.layout().addWidget(self.lbl_interplane_distance)
         self.layout().addWidget(self.wid_collapsible_wave)
 
@@ -82,7 +80,6 @@ class VolumeScanningWidget(QWidget):
         self.updateBtnText()
         self.timer.timeout.connect(self.updateBtnText)
 
-        self.timer_scope_info.timeout.connect(self.update_alignment)
         self.chk_pause.clicked.connect(self.change_pause_status)
         self.btn_overwrite_ok.clicked.connect(self.state.start_experiment)
 
@@ -97,32 +94,6 @@ class VolumeScanningWidget(QWidget):
             or self.state.experiment_state == ExperimentPrepareState.EXPERIMENT_STARTED
         ):
             self.btn_start.setChecked(True)
-
-    def update_alignment(self):
-        scan_width = (
-            self.state.volume_setting.scan_range[1]
-            - self.state.volume_setting.scan_range[0]
-        )
-        num_planes = (
-            self.state.volume_setting.n_planes
-            - self.state.volume_setting.n_skip_start
-            - self.state.volume_setting.n_skip_end
-        )
-        plane_distance = (
-            scan_width / num_planes - self.state.scope_alignment_info.waist_width
-        )
-        if plane_distance > 0:
-            self.lbl_interplane_distance.setText(
-                "With the current configuration, distance between planes is {:0.2f} um".format(
-                    plane_distance
-                )
-            )
-        if plane_distance <= 0:
-            self.lbl_interplane_distance.setText(
-                "The current configuration covers the whole volume. Plane overlap is {:0.2f} um".format(
-                    -plane_distance
-                )
-            )
 
     def change_pause_status(self):
         self.state.pause_after = self.chk_pause.isChecked()

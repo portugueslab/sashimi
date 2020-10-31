@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget
+from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget, QLabel
+from PyQt5.QtGui import QIcon
 from sashimi.gui.calibration_gui import CalibrationWidget
 from sashimi.gui.scanning_gui import (
     PlanarScanningWidget,
@@ -8,8 +9,9 @@ from sashimi.gui.scanning_gui import (
 )
 from sashimi.gui.light_source_gui import LightSourceWidget
 from sashimi.gui.save_settings_gui import SavingSettingsWidget
-from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsContainerWidget
+from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsWidget
 from sashimi.gui.save_gui import SaveWidget
+from sashimi.gui.status_bar import StatusBarWidget
 from sashimi.state import State
 
 
@@ -30,7 +32,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.st = st
         self.timer = QTimer()
-        self.resize(1800, 900)
+        self.showMaximized()
 
         self.wid_settings_tree = SavingSettingsWidget(st)
         self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
@@ -40,9 +42,8 @@ class MainWindow(QMainWindow):
         self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LightSourceWidget(st, self.timer)
         self.wid_scan = PlanarScanningWidget(st)
-        self.wid_camera = CameraSettingsContainerWidget(
-            st, self.wid_display, self.timer
-        )
+        self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
+        self.wid_status_bar = StatusBarWidget(st, self.timer)
 
         self.setCentralWidget(self.wid_display)
 
@@ -70,10 +71,8 @@ class MainWindow(QMainWindow):
             Qt.RightDockWidgetArea,
             DockedWidget(widget=self.wid_save_options, title="Saving"),
         )
-        self.addDockWidget(
-            Qt.RightDockWidgetArea,
-            DockedWidget(widget=self.wid_settings_tree, title="Metadata"),
-        )
+
+        self.setStatusBar(self.wid_status_bar)
 
         self.st.camera_settings.sig_param_changed.connect(
             self.st.reset_noise_subtraction
@@ -82,8 +81,36 @@ class MainWindow(QMainWindow):
 
         self.timer.start()
         self.timer.timeout.connect(self.check_end_experiment)
+        self.setup_menu_bar()
+
+    def setup_menu_bar(self):
+        menubar = self.menuBar()
+
+        file_menu = menubar.addMenu("File")
+        load = file_menu.addAction("Load presets")
+        save_settings = file_menu.addAction("Save presets")
+        save_dir = file_menu.addAction("Save in...")
+        exit = file_menu.addAction("Exit")
+        load.triggered.connect(self.wid_settings_tree.load)
+        save_settings.triggered.connect(self.wid_settings_tree.save)
+        save_dir.triggered.connect(self.wid_save_options.set_save_location)
+        exit.triggered.connect(self.close)
+
+        edit_menu = menubar.addMenu("Edit")
+        edit_config = edit_menu.addAction("Configure")
+        edit_guide = edit_menu.addAction("Edit user guide")
+        edit_guide.triggered.connect(self.wid_settings_tree.edit_guide)
+        edit_config.triggered.connect(self.wid_settings_tree.edit_config)
+
+        help_menu = menubar.addMenu("Help")
+        instructions = help_menu.addAction("User guide")
+        docs = help_menu.addAction("About")
+        instructions.triggered.connect(self.wid_settings_tree.show_instructions)
+        docs.triggered.connect(self.wid_settings_tree.open_docs)
 
     def closeEvent(self, a0) -> None:
+        self.wid_settings_tree.conf_window.close()
+        self.wid_settings_tree.guide_window.close()
         self.st.wrap_up()
         a0.accept()
 
@@ -94,14 +121,11 @@ class MainWindow(QMainWindow):
         self.wid_status.wid_volume.wid_volume.refresh_widgets()
         self.wid_status.wid_calibration.refresh_widgets()
         self.wid_status.wid_single_plane.wid_singleplane.refresh_widgets()
-        self.wid_display.wid_display_settings.refresh_widgets()
         if not omit_wid_camera:
             self.wid_camera.wid_camera_settings.refresh_widgets()
             self.wid_camera.set_roi()
         self.wid_save_options.wid_save_options.refresh_widgets()
         self.wid_save_options.set_locationbutton()
-        # TODO: delete this line when single-plane scanning mode is implemented
-        self.setTabEnabled(3, False)
 
     def check_end_experiment(self):
         if self.st.saver.saver_stopped_signal.is_set():
@@ -110,8 +134,8 @@ class MainWindow(QMainWindow):
                 self.wid_status.setCurrentIndex(0)
                 self.wid_laser.btn_off.click()
             self.refresh_param_values(omit_wid_camera=True)
-            self.wid_display.experiment_progress.hide()
-            self.wid_display.lbl_experiment_progress.hide()
+            self.wid_status_bar.experiment_progress.hide()
+            self.wid_status_bar.lbl_experiment_progress.hide()
             self.st.saver.saver_stopped_signal.clear()
 
 
@@ -138,6 +162,9 @@ class StatusWidget(QTabWidget):
         self.addTab(self.wid_calibration, self.option_dict[1])
         self.addTab(self.wid_single_plane, self.option_dict[2])
         self.addTab(self.wid_volume, self.option_dict[3])
+
+        # TODO: delete this line when single-plane scanning mode is implemented
+        self.setTabEnabled(2, False)
 
         self.currentChanged.connect(self.update_status)
 

@@ -4,13 +4,10 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
-    QLabel,
-    QProgressBar,
 )
 from lightparam.gui import ParameterGui
 from sashimi.state import (
     convert_camera_params,
-    GlobalState,
     State,
     get_voxel_size,
 )
@@ -20,7 +17,7 @@ from warnings import warn
 from sashimi.hardware.cameras.interface import CameraWarning
 from sashimi.config import read_config
 from enum import Enum
-
+from multiprocessing import Queue
 
 conf = read_config()
 
@@ -66,6 +63,8 @@ class ViewingWidget(QWidget):
             self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
 
         self.viewer = napari.Viewer(show=False)
+        self.viewer.theme = "dark_sashimi"
+
         self.frame_layer = self.viewer.add_image(
             np.zeros([1, self.sensor_resolution, self.sensor_resolution]),
             blending="translucent",
@@ -74,13 +73,13 @@ class ViewingWidget(QWidget):
         binning = convert_camera_params(self.state.camera_settings).binning
 
         roi_init_shape = (
-            np.array(
-                [
-                    self.sensor_resolution // binning,
-                    self.sensor_resolution // binning,
-                ]
-            )
-            // 2
+                np.array(
+                    [
+                        self.sensor_resolution // binning,
+                        self.sensor_resolution // binning,
+                    ]
+                )
+                // 2
         )
         self.roi = self.viewer.add_shapes(
             [
@@ -100,21 +99,20 @@ class ViewingWidget(QWidget):
             visible=False,
         )
 
-        self.experiment_progress = QProgressBar()
-        self.experiment_progress.setFormat("Volume %v of %m")
-        self.lbl_experiment_progress = QLabel()
-
         self.bottom_layout = QHBoxLayout()
+
+        self.viewer.window.qt_viewer.viewerButtons.consoleButton.hide()
+        self.viewer.window.qt_viewer.viewerButtons.rollDimsButton.hide()
+        self.viewer.window.qt_viewer.viewerButtons.transposeDimsButton.setText("Rotate view")
+        self.viewer.window.qt_viewer.viewerButtons.resetViewButton.setText("Reset view")
+        self.viewer.window.qt_viewer.viewerButtons.gridViewButton.setText("Grid mode")
+        self.viewer.window.qt_viewer.viewerButtons.ndisplayButton.setText("3D mode")
+
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
         self.bottom_layout.addStretch()
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
         self.main_layout.addLayout(self.bottom_layout)
-        self.main_layout.addWidget(self.experiment_progress)
-        self.main_layout.addWidget(self.lbl_experiment_progress)
-
-        self.experiment_progress.hide()
-        self.lbl_experiment_progress.hide()
 
         self.refresh_display = True
 
@@ -130,13 +128,11 @@ class ViewingWidget(QWidget):
         return get_voxel_size(
             self.state.volume_setting,
             self.state.camera_settings,
-            self.state.scope_alignment_info,
         )
 
     def refresh(self) -> None:
         """Main refresh loop called by timeout of the main timer."""
         self.refresh_image()
-        self.refresh_progress_bar()
 
     def refresh_image(self):
         current_image = self.state.get_volume()
@@ -155,19 +151,8 @@ class ViewingWidget(QWidget):
     def reset_contrast(self):
         self.frame_layer.reset_contrast_limits()
 
-    def refresh_progress_bar(self):
-        sstatus = self.state.get_save_status()
-        if sstatus is not None:
-            self.experiment_progress.show()
-            self.lbl_experiment_progress.show()
-            self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
-            self.experiment_progress.setValue(sstatus.i_volume)
-            self.lbl_experiment_progress.setText(
-                "Saved chunks: {}".format(sstatus.i_chunk)
-            )
 
-
-class CameraSettingsContainerWidget(QWidget):
+class CameraSettingsWidget(QWidget):
     """Widget to modify parameters for the camera.
 
     Parameters
@@ -184,7 +169,9 @@ class CameraSettingsContainerWidget(QWidget):
         self.roi = wid_display.roi
         self.roi_state = RoiState.FULL
         self.state = state
-        timer.timeout.connect(self.update_camera_info)
+        self.timer = timer
+
+        self.camera_msg_queue = Queue()
 
         if conf["scopeless"]:
             self.sensor_resolution = 256
@@ -197,20 +184,13 @@ class CameraSettingsContainerWidget(QWidget):
 
         self.setLayout(QVBoxLayout())
 
-        self.lbl_camera_info = QLabel()
-        self.lbl_roi = QLabel()
-
         self.btn_roi = QPushButton(ROI_TEXTS[self.roi_state])
         self.btn_cancel_roi = QPushButton("Cancel")
         self.btn_cancel_roi.hide()
 
         self.layout().addWidget(self.wid_camera_settings)
-        self.layout().addWidget(self.lbl_camera_info)
         self.layout().addWidget(self.btn_roi)
         self.layout().addWidget(self.btn_cancel_roi)
-        self.layout().addWidget(self.lbl_roi)
-
-        self.update_camera_info()
 
         self.btn_roi.clicked.connect(self.roi_action)
         self.btn_cancel_roi.clicked.connect(self.cancel_roi_selection)
@@ -239,11 +219,6 @@ class CameraSettingsContainerWidget(QWidget):
             self._hide_roi()
             self.set_roi()
             self.btn_cancel_roi.hide()
-
-        self.update_roi_txt()
-
-    def update_roi_txt(self):
-        self.btn_roi.setText(ROI_TEXTS[self.roi_state])
 
     def _hide_roi(self):
         self.wid_display.roi.visible = False
@@ -294,7 +269,6 @@ class CameraSettingsContainerWidget(QWidget):
                 dy,
             ]
             self.state.camera_settings.roi = [i * binning for i in binned_roi]
-            self.update_roi_info()
 
     def set_full_frame(self):
         self.state.camera_settings.roi = [
@@ -303,54 +277,3 @@ class CameraSettingsContainerWidget(QWidget):
             self.sensor_resolution,
             self.sensor_resolution,
         ]
-
-        self.update_roi_info()
-
-    def update_roi_info(self):
-        dims = self.state.camera_settings.roi
-        binning = convert_camera_params(self.state.camera_settings).binning
-        self.lbl_roi.setText(
-            f"Current frame dimensions are:\nHeight: {int(dims[0] / binning)}\nWidth: {int(dims[1] / binning)}"
-        )
-
-    def update_camera_info(self):
-        frame_rate = self.state.get_triggered_frame_rate()
-        if frame_rate is not None:
-            if self.state.global_state == GlobalState.PAUSED:
-                self.lbl_camera_info.hide()
-            else:
-                self.lbl_camera_info.setStyleSheet("color: white")
-                expected_frame_rate = None
-                if self.state.global_state == GlobalState.PREVIEW:
-                    self.lbl_camera_info.setText(
-                        "Camera frame rate: {} Hz".format(round(frame_rate, 2))
-                    )
-                if self.state.global_state == GlobalState.VOLUME_PREVIEW:
-                    planes = (
-                        self.state.volume_setting.n_planes
-                        - self.state.volume_setting.n_skip_start
-                        - self.state.volume_setting.n_skip_end
-                    )
-                    expected_frame_rate = self.state.volume_setting.frequency * planes
-                if self.state.global_state == GlobalState.PLANAR_PREVIEW:
-                    expected_frame_rate = self.state.single_plane_settings.frequency
-                if expected_frame_rate:
-                    self.lbl_camera_info.setText(
-                        "\n".join(
-                            ["Camera frame rate: {} Hz".format(round(frame_rate, 2))]
-                            + (
-                                [
-                                    "Camera is lagging behind. Decrease exposure, number of planes or frequency"
-                                ]
-                                if expected_frame_rate > (frame_rate * 1.1)
-                                else ["Seems to follow well current speed"]
-                            )
-                        )
-                    )
-
-                    if expected_frame_rate > (frame_rate * 1.1):
-                        self.lbl_camera_info.setStyleSheet("color: red")
-                    else:
-                        self.lbl_camera_info.setStyleSheet("color: green")
-
-                self.lbl_camera_info.show()

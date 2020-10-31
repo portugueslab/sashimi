@@ -43,16 +43,6 @@ class GlobalState(Enum):
     VOLUME_PREVIEW = 3
     EXPERIMENT_RUNNING = 4
 
-
-class ScopeAlignmentInfo(ParametrizedQt):
-    def __init__(self):
-        super().__init__()
-        self.name = "scope_alignment_info"
-        self.waist_width = Param(6.5, (0.1, 100), unit="um")
-        self.pixel_size_x = Param(0.3, (0.1, 10), unit="um (at binning 1x1)")
-        self.pixel_size_y = Param(0.3, (0.1, 10), unit="um (at binning 1x1)")
-
-
 class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
@@ -234,7 +224,6 @@ def convert_camera_params(camera_settings: CameraSettings):
 def get_voxel_size(
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
-    scope_alignment: ScopeAlignmentInfo,
 ):
     scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
 
@@ -252,8 +241,8 @@ def get_voxel_size(
 
     return (
         inter_plane,
-        scope_alignment.pixel_size_y * binning,
-        scope_alignment.pixel_size_x * binning,
+        conf["voxel_size"]["y"] * binning,
+        conf["voxel_size"]["x"] * binning,
     )
 
 
@@ -261,7 +250,6 @@ def convert_save_params(
     save_settings: SaveSettings,
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
-    scope_alignment: ScopeAlignmentInfo,
 ):
     n_planes = scanning_settings.n_planes - (
         scanning_settings.n_skip_start + scanning_settings.n_skip_end
@@ -272,7 +260,7 @@ def convert_save_params(
         n_planes=n_planes,
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
-        voxel_size=get_voxel_size(scanning_settings, camera_settings, scope_alignment),
+        voxel_size=get_voxel_size(scanning_settings, camera_settings),
     )
 
 
@@ -341,7 +329,6 @@ class State:
 
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
-        self.scope_alignment_info = ScopeAlignmentInfo()
 
         self.scanner = Scanner(
             stop_event=self.stop_event,
@@ -416,7 +403,6 @@ class State:
             self.calibration.z_settings,
             self.camera_settings,
             self.save_settings,
-            self.scope_alignment_info,
         ]:
             self.settings_tree.add(setting)
 
@@ -447,6 +433,8 @@ class State:
         self.current_camera_status = CamParameters()
         self.send_scan_settings()
         self.logger.log_message("initialized")
+
+        self.voxel_size = None
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -524,8 +512,8 @@ class State:
             self.save_settings,
             self.volume_setting,
             self.camera_settings,
-            self.scope_alignment_info,
         )
+        self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(save_params)
         self.dispatcher.n_planes_queue.put(n_planes)
 
@@ -577,6 +565,12 @@ class State:
     def reset_noise_subtraction(self):
         self.calibration_ref = None
         self.noise_subtraction_active.clear()
+
+    def get_frame_size(self):
+        return [
+            self.camera_settings.roi[2] - self.camera_settings.roi[0],
+            self.camera_settings.roi[3] - self.camera_settings.roi[1]
+        ]
 
     def get_volume(self):
         try:
