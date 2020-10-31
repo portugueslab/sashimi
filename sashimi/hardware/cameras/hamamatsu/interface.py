@@ -74,6 +74,7 @@ class HamamatsuCamera(AbstractCamera):
             self._sensor_resolution[1] // self._binning,
         )
         self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
+        print(self._roi)
         self._frame_rate = 1 / self._exposure_time
         self._trigger_mode = TriggerMode.FREE
         self._frame_bytes = 0
@@ -115,7 +116,7 @@ class HamamatsuCamera(AbstractCamera):
     def roi(self, exp_val: tuple):
         self._roi = [min((i * self._binning // 4) * 4, 2048) for i in exp_val]
         # Set sub array mode.
-        if self._roi == (0, 0, self._sensor_resolution, self._sensor_resolution):
+        if self._roi == [0, 0, self._sensor_resolution[0] // self.binning, self._sensor_resolution[1] // self.binning]:
             self.set_property_value("subarray_mode", "OFF")
         else:
             self.set_property_value("subarray_mode", "ON")
@@ -504,8 +505,6 @@ class HamamatsuCamera(AbstractCamera):
                 self.dcam.dcambuf_release(self.camera_handle, DCAMBUF_ATTACHKIND_FRAME),
                 "dcambuf_release",
             )
-
-
 
     def shutdown(self):
         super().shutdown()
