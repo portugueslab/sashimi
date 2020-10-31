@@ -95,7 +95,7 @@ class HamamatsuCamera(AbstractCamera):
     @binning.setter
     def binning(self, n_bin):
         self._binning = n_bin
-        self.set_property_value("binning", f"{n_bin}x{n_bin}")
+        self.set_property_value("binning", n_bin)
         self.query_frame_shape()
 
     @property
@@ -147,6 +147,9 @@ class HamamatsuCamera(AbstractCamera):
 
     @staticmethod
     def check_status(fn_return, fn_name="unknown"):
+        """Check return value of the dcam function call.
+        Throw an error if not as expected?
+        """
         if fn_return == DCAMERR_ERROR:
             c_buf_len = 80
             c_buf = ctypes.create_string_buffer(c_buf_len)
@@ -257,6 +260,7 @@ class HamamatsuCamera(AbstractCamera):
         )
         cur_buffer_index = paramtransfer.nNewestFrameIndex
         cur_frame_number = paramtransfer.nFrameCount
+
 
         # Check that we have not acquired more frames than we can store in our buffer.
         # Keep track of the maximum backlog.
@@ -455,7 +459,6 @@ class HamamatsuCamera(AbstractCamera):
             self.number_image_buffers = min(
                 int((2.0 * 1024 * 1024 * 1024) / self._frame_bytes), 2000
             )
-
             # Allocate new image buffers.
             ptr_array = ctypes.c_void_p * self.number_image_buffers
             self.hcam_ptr = ptr_array()
@@ -492,13 +495,14 @@ class HamamatsuCamera(AbstractCamera):
         self.check_status(self.dcam.dcamcap_stop(self.camera_handle), "dcamcap_stop")
 
         # Free image buffers.
+        self.max_backlog = 0
         if self.hcam_ptr:
             self.check_status(
                 self.dcam.dcambuf_release(self.camera_handle, DCAMBUF_ATTACHKIND_FRAME),
                 "dcambuf_release",
             )
 
-        self.max_backlog = 0
+
 
     def shutdown(self):
         super().shutdown()

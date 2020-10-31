@@ -130,6 +130,7 @@ class CameraSettings(ParametrizedQt):
         )  # order of params here is [hpos, vpos, hsize, vsize,]; h: horizontal, v: vertical
 
 
+
 class LightSourceSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
@@ -530,13 +531,6 @@ class State:
 
     def send_dispatcher_settings(self):
         pass
-
-    def get_camera_status(self):
-        try:
-            current_camera_status = self.camera.camera_status_queue.get(timeout=0.001)
-            return current_camera_status
-        except Empty:
-            return None
 
     def start_experiment(self):
         # TODO disable the GUI except the abort button

@@ -58,6 +58,8 @@ class ViewingWidget(QWidget):
 
         self.main_layout = QVBoxLayout()
 
+        # Here we are assuming that the camera has a square sensor, and resolution is
+        # described by only one number (most scientific camera are)
         if conf["scopeless"]:
             self.sensor_resolution = 256
         else:
@@ -214,6 +216,11 @@ class CameraSettingsContainerWidget(QWidget):
         self.btn_cancel_roi.clicked.connect(self.cancel_roi_selection)
 
     def roi_action(self):
+        """Roi action is called whenever we press the set ROI button.
+        The napari ROI has three states, each of them with buttons and properties etc.
+        The code is exectuted depending on the status the ROI is,
+        and change the status for the next button press call.
+        """
         try:
             self.roi_state = RoiState(self.roi_state.value + 1)
         except ValueError:
@@ -250,6 +257,10 @@ class CameraSettingsContainerWidget(QWidget):
 
     @property
     def roi_coords(self):
+        """ROI coordinates are expressed with respect to the displayed napari image.
+        Therefore, an ROI in the same position of the camera image will have different
+        coordinates depending on the binning.
+        """
         return tuple(
             (
                 int(self.roi.data[0][0][1]),
@@ -260,10 +271,16 @@ class CameraSettingsContainerWidget(QWidget):
         )
 
     def set_roi(self):
-        """Set ROI size from loaded params."""
+        """Set ROI size from loaded params.
+        A bunch of controls need to happen before we can actually send the ROI to the camera.
+        """
         binning = convert_camera_params(self.state.camera_settings).binning
-        max_res = self.sensor_resolution // binning
-        cropped_coords = [max(min(i // binning, max_res), 0) for i in self.roi_coords]
+        max_image_dimension = self.sensor_resolution // binning
+        # Make sure that the coordinates of the cropped ROI are within the image by cropping at o and max size
+        cropped_coords = [max(min(i // binning, max_image_dimension), 0) for i in self.roi_coords]
+
+
+        # Calculate dimensions of the image:
         dx = cropped_coords[2] - cropped_coords[0]
         dy = cropped_coords[3] - cropped_coords[1]
         if dx == 0 or dy == 0:

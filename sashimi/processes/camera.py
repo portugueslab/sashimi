@@ -76,27 +76,34 @@ class FramerateRecorder:
 
 
 class CameraProcess(LoggingProcess):
+    """
+    """
     def __init__(
         self,
         stop_event: LoggedEvent,
         wait_event: LoggedEvent,
         exp_trigger_event: LoggedEvent,
         camera_id=0,
-        max_queue_size=1200,
+        max_queue_size=3000,
         n_fps_frames=20,
     ):
+        """
+        We allocate 3 GB of memory for the queue, as lower numbers seem to produce instabilities when changing the
+        parameters #TODO look into this
+        """
         super().__init__(name="camera")
+        # Queue to communicate
+        self.triggered_frame_rate_queue = Queue()
+        self.parameter_queue = Queue()
+
         self.stop_event = stop_event.new_reference(self.logger)
         self.wait_event = wait_event.new_reference(self.logger)
         self.experiment_trigger_event = exp_trigger_event.new_reference(self.logger)
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
-        self.parameter_queue = Queue()
         self.camera_id = camera_id
         self.camera = None
         self.parameters = CamParameters()
         self.new_parameters = copy(self.parameters)
-        self.camera_status_queue = Queue()
-        self.triggered_frame_rate_queue = Queue()
         self.framerate_rec = FramerateRecorder(n_fps_frames=n_fps_frames)
         self.was_waiting = False
 
@@ -106,7 +113,6 @@ class CameraProcess(LoggingProcess):
         return params
 
     def initialize_camera(self):
-        self.camera_status_queue.put(self.cast_parameters())
         if conf["scopeless"]:
             self.camera = camera_class_dict["mock"]()
         else:
@@ -114,15 +120,6 @@ class CameraProcess(LoggingProcess):
                 camera_id=conf["camera"]["id"],
                 sensor_resolution=tuple(conf["camera"]["sensor_resolution"]),
             )
-
-    def pause_loop(self):
-        while not self.stop_event.is_set():
-            try:
-                self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.new_parameters != self.parameters:
-                    break
-            except Empty:
-                pass
 
     def run(self):
         self.logger.log_message("started")
@@ -132,9 +129,12 @@ class CameraProcess(LoggingProcess):
         self.logger.close()
 
     def run_camera(self):
+        """Main run for the camera. Depending on whether the camera mode is PAUSED or not,
+        either the self.pause_loop or self.camera_loop are executed.
+        """
+
         while not self.stop_event.is_set():
             self.update_parameters()
-            self.camera_status_queue.put(self.cast_parameters())
             if self.parameters.camera_mode == CameraMode.PAUSED:
                 self.pause_loop()
             else:
@@ -142,7 +142,21 @@ class CameraProcess(LoggingProcess):
                 self.logger.log_message("Started acquisition")
                 self.camera_loop()
 
+    def pause_loop(self):
+        """Camera idle loop, just wait until parameters are updated. Check them, and if
+        CameraMode.PAUSED is still set, return here.
+        """
+        while not self.stop_event.is_set():
+            try:
+                self.new_parameters = self.parameter_queue.get(timeout=0.001)
+                if self.new_parameters != self.parameters:
+                    break
+            except Empty:
+                pass
+
     def camera_loop(self):
+        """Camera running loop, grab frames and set new parameters if available.
+        """
         while not self.stop_event.is_set():
             is_waiting = self.wait_event.is_set()
             frames = self.camera.get_frames()
@@ -156,7 +170,7 @@ class CameraProcess(LoggingProcess):
                     self.update_framerate()
             try:
                 self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.parameters.camera_mode == CameraMode.ABORT or (
+                if self.new_parameters.camera_mode == CameraMode.ABORT or (
                     self.new_parameters != self.parameters
                 ):
                     self.camera.stop_acquisition()
@@ -167,7 +181,7 @@ class CameraProcess(LoggingProcess):
 
     def update_parameters(self):
         self.parameters = self.new_parameters
-        self.logger.log_message("Updated parameters "+str(self.new_parameters))
+        self.logger.log_message("Updated parameters "+str(self.parameters))
         for attribute in ["exposure_time", "binning", "roi", "trigger_mode"]:
             setattr(self.camera, attribute, getattr(self.parameters, attribute))
 
