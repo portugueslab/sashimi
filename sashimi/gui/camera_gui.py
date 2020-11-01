@@ -103,6 +103,7 @@ class ViewingWidget(QWidget):
         # Connect changes of camera and laser to contrast reset:
         self.state.camera_settings.sig_param_changed.connect(self.reset_contrast)
         self.state.light_source_settings.sig_param_changed.connect(self.reset_contrast)
+        self.viewer.window.qt_viewer.viewerButtons.resetViewButton(self.reset_contrast)
 
         self.refresh_display = True
         self.is_first_frame = True
