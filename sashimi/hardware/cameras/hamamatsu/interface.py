@@ -62,19 +62,14 @@ class HamamatsuCamera(AbstractCamera):
         self.wait_handle = ctypes.c_void_p(paramwait.hwait)
 
         self.properties = self.get_camera_properties()
+        self.exposure_time = 60
 
-        self._exposure_time = 60
         self._sensor_resolution: tuple = (
             self.get_property_value("image_width"),
             self.get_property_value("image_height"),
         )
-        self._binning = 1
-        # self.frame_shape = (
-        #     self._sensor_resolution[0] // self._binning,
-        #     self._sensor_resolution[1] // self._binning,
-        # )
+
         self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
-        self._frame_rate = 1 / self._exposure_time
         self._trigger_mode = TriggerMode.FREE
         self._frame_bytes = 0
 
@@ -100,15 +95,17 @@ class HamamatsuCamera(AbstractCamera):
               self.get_property_value("subarray_vsize"))
         # self.query_frame_shape()
 
-
     @property
     def exposure_time(self):
-        return self._exposure_time
+        return self.get_property_value("exposure_time") * 1000
 
     @exposure_time.setter
     def exposure_time(self, exp_val):
-        self._exposure_time = exp_val
         self.set_property_value("exposure_time", 0.001 * exp_val)
+
+    @property
+    def frame_rate(self):
+        return 1 / self.exposure_time
 
     @property
     def roi(self):
