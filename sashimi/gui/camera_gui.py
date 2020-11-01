@@ -199,9 +199,8 @@ class CameraSettingsWidget(QWidget):
 
     def roi_action(self):
         """Roi action is called whenever we press the set ROI button.
-        The napari ROI has three states, each of them with buttons and properties etc.
-        The code is exectuted depending on the status the ROI is,
-        and change the status for the next button press call.
+        The napari ROI has three states, each of them with buttons and properties etc. The code is executed depending
+        on the status the ROI is, and changes the status for the next button press call.
         """
         try:
             self.roi_state = RoiState(self.roi_state.value + 1)
@@ -212,6 +211,7 @@ class CameraSettingsWidget(QWidget):
             self.set_full_frame()
             self._hide_roi()
             self.btn_cancel_roi.hide()
+            self.wid_camera_settings.param_widgets["binning"].setEnabled(True)
         elif self.roi_state == RoiState.DISPLAYED:
             self._show_roi()
             self.btn_cancel_roi.show()
@@ -221,6 +221,8 @@ class CameraSettingsWidget(QWidget):
             self._hide_roi()
             self.set_roi()
             self.btn_cancel_roi.hide()
+            # Disable binning option if an ROI is set:
+            self.wid_camera_settings.param_widgets["binning"].setEnabled(False)
 
     def _hide_roi(self):
         self.wid_display.roi.visible = False
@@ -251,13 +253,11 @@ class CameraSettingsWidget(QWidget):
         coords = self.roi.data[0].astype(int)
         return coords[0, 0], coords[0, 1], coords[1, 0], coords[3, 1]
 
-
     def set_roi(self):
         """Set the ROI by passing ROI coordinates to the camera settings.
         A bunch of controls need to happen before we can safely send the ROI to the camera.
         """
-        binning = convert_camera_params(self.state.camera_settings).binning
-        max_image_dimension = self.sensor_resolution // binning
+        max_image_dimension = self.sensor_resolution // self.current_binning
         # Make sure that the coordinates of the cropped ROI are within the image by cropping at o and max size
         cropped_coords = [max(min(i, max_image_dimension), 0) for i in self.roi_coords]
 
@@ -272,10 +272,9 @@ class CameraSettingsWidget(QWidget):
         self.state.camera_settings.roi = [cropped_coords[0], cropped_coords[1], height, width]
 
     def set_full_frame(self):
-        binning = convert_camera_params(self.state.camera_settings).binning
         self.state.camera_settings.roi = [
             0,
             0,
-            self.sensor_resolution // binning,
-            self.sensor_resolution // binning,
+            self.sensor_resolution // self.current_binning,
+            self.sensor_resolution // self.current_binning,
         ]

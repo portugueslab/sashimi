@@ -182,6 +182,8 @@ class CameraProcess(LoggingProcess):
         if stop_start:
             self.camera.stop_acquistion()
 
+        # Attention: here setting ROI before the binning seems to be essential to avoid funny behavior.
+        # In general, ROI and binning are a bit funny in their interactions, and need to be handled carefully.
         for attribute in ["roi", "exposure_time", "binning", "trigger_mode"]:
             setattr(self.camera, attribute, getattr(self.parameters, attribute))
 

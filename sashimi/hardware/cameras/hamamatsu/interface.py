@@ -93,11 +93,7 @@ class HamamatsuCamera(AbstractCamera):
 
     @binning.setter
     def binning(self, n_bin):
-        # self._binning = n_bin
         self.set_property_value("binning", f"{n_bin}x{n_bin}")
-        print(self.get_property_value("subarray_hsize"),
-              self.get_property_value("subarray_vsize"))
-        # self.query_frame_shape()
 
     @property
     def exposure_time(self):
@@ -300,7 +296,7 @@ class HamamatsuCamera(AbstractCamera):
         This sets the sub-array mode as appropriate based on the current ROI.
         """
 
-        print("Image width", self.get_property_value("image_width"))
+        print("Image size", self.sensor_resolution)
         # Check ROI properties.
         roi_w = self.get_property_value("subarray_hsize")
         roi_h = self.get_property_value("subarray_vsize")
