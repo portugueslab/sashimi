@@ -88,8 +88,6 @@ class CameraProcess(LoggingProcess):
         n_fps_frames=20,
     ):
         """
-        We allocate 3 GB of memory for the queue, as lower numbers seem to produce instabilities when changing the
-        parameters #TODO look into this
         """
         super().__init__(name="camera")
         # Queue to communicate
@@ -167,15 +165,21 @@ class CameraProcess(LoggingProcess):
                     self.image_queue.put(frame)
                     self.was_waiting = is_waiting
                     self.update_framerate()
-            try:
-                new_parameters = self.parameter_queue.get(timeout=0.001)
+
+            # Empty parameters queue and set new parameters with the most recent value
+            new_parameters = None
+            while True:
+                try:
+                    new_parameters = self.parameter_queue.get(timeout=0.001)
+                except Empty:
+                    break
+
+            if new_parameters is not None:
                 if new_parameters.camera_mode == CameraMode.ABORT or (
                     new_parameters != self.parameters
                 ):
                     self.update_parameters(new_parameters)
 
-            except Empty:
-                pass
 
     def update_parameters(self, new_parameters, stop_start=True):
         self.parameters = new_parameters
