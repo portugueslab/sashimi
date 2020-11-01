@@ -84,7 +84,7 @@ class CameraProcess(LoggingProcess):
         wait_event: LoggedEvent,
         exp_trigger_event: LoggedEvent,
         camera_id=0,
-        max_queue_size=3000,
+        max_queue_size=1200,
         n_fps_frames=20,
     ):
         """
@@ -103,7 +103,6 @@ class CameraProcess(LoggingProcess):
         self.camera_id = camera_id
         self.camera = None
         self.parameters = CamParameters()
-        self.new_parameters = copy(self.parameters)
         self.framerate_rec = FramerateRecorder(n_fps_frames=n_fps_frames)
         self.was_waiting = False
 
@@ -133,7 +132,6 @@ class CameraProcess(LoggingProcess):
         either the self.pause_loop or self.camera_loop are executed.
         """
         while not self.stop_event.is_set():
-            self.update_parameters()
             if self.parameters.camera_mode == CameraMode.PAUSED:
                 self.pause_loop()
             else:
@@ -148,8 +146,9 @@ class CameraProcess(LoggingProcess):
         """
         while not self.stop_event.is_set():
             try:
-                self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.new_parameters != self.parameters:
+                new_parameters = self.parameter_queue.get(timeout=0.001)
+                if new_parameters != self.parameters:
+                    self.update_parameters(new_parameters, stop_start=False)
                     break
             except Empty:
                 pass
@@ -169,24 +168,28 @@ class CameraProcess(LoggingProcess):
                     self.was_waiting = is_waiting
                     self.update_framerate()
             try:
-                self.new_parameters = self.parameter_queue.get(timeout=0.001)
-                if self.new_parameters.camera_mode == CameraMode.ABORT or (
-                    self.new_parameters != self.parameters
+                new_parameters = self.parameter_queue.get(timeout=0.001)
+                if new_parameters.camera_mode == CameraMode.ABORT or (
+                    new_parameters != self.parameters
                 ):
-                    self.update_parameters()
+                    self.update_parameters(new_parameters)
 
             except Empty:
                 pass
 
-    def update_parameters(self):
-        self.parameters = self.new_parameters
-        self.logger.log_message("Updated parameters "+str(self.parameters))
+    def update_parameters(self, new_parameters, stop_start=True):
+        self.parameters = new_parameters
 
-        self.camera.stop_acquistion()
+        if stop_start:
+            self.camera.stop_acquistion()
+
         for attribute in ["exposure_time", "binning", "trigger_mode"]:
             setattr(self.camera, attribute, getattr(self.parameters, attribute))
-        self.camera.start_acquisition()
 
+        if stop_start:
+            self.camera.start_acquisition()
+
+        self.logger.log_message("Updated parameters "+str(self.parameters))
 
     def update_framerate(self):
         self.framerate_rec.update_framerate()
