@@ -69,12 +69,11 @@ class HamamatsuCamera(AbstractCamera):
             self.get_property_value("image_height"),
         )
         self._binning = 1
-        self._frame_shape = (
-            self._sensor_resolution[0] // self._binning,
-            self._sensor_resolution[1] // self._binning,
-        )
+        # self.frame_shape = (
+        #     self._sensor_resolution[0] // self._binning,
+        #     self._sensor_resolution[1] // self._binning,
+        # )
         self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
-        print(self._roi)
         self._frame_rate = 1 / self._exposure_time
         self._trigger_mode = TriggerMode.FREE
         self._frame_bytes = 0
@@ -91,13 +90,16 @@ class HamamatsuCamera(AbstractCamera):
 
     @property
     def binning(self):
-        return self._binning
+        return self.get_property_value("binning")
 
     @binning.setter
     def binning(self, n_bin):
-        self._binning = n_bin
-        self.set_property_value("binning", n_bin)
-        self.query_frame_shape()
+        # self._binning = n_bin
+        self.set_property_value("binning", f"{n_bin}x{n_bin}")
+        print(self.get_property_value("subarray_hsize"),
+              self.get_property_value("subarray_vsize"))
+        # self.query_frame_shape()
+
 
     @property
     def exposure_time(self):
@@ -114,7 +116,7 @@ class HamamatsuCamera(AbstractCamera):
 
     @roi.setter
     def roi(self, exp_val: tuple):
-        self._roi = [min((i * self._binning // 4) * 4, 2048) for i in exp_val]
+        self._roi = [min((i * self.binning // 4) * 4, 2048) for i in exp_val]
         # Set sub array mode.
         if self._roi == [0, 0, self._sensor_resolution[0] // self.binning, self._sensor_resolution[1] // self.binning]:
             self.set_property_value("subarray_mode", "OFF")
@@ -125,7 +127,7 @@ class HamamatsuCamera(AbstractCamera):
             self.set_property_value("subarray_hpos", self._roi[0])
             self.set_property_value("subarray_vsize", self._roi[3])
             self.set_property_value("subarray_hsize", self._roi[2])
-        self.query_frame_shape()
+        # self.query_frame_shape()
 
     @property
     def trigger_mode(self):
@@ -140,11 +142,17 @@ class HamamatsuCamera(AbstractCamera):
     def frame_bytes(self):
         return self._frame_bytes
 
-    def query_frame_shape(self):
-        self._frame_shape = (
-            self.get_property_value("image_width"),
-            self.get_property_value("image_height"),
-        )
+    @property
+    def frame_shape(self):
+        #TODO these get_property value can get cleaned up in another property
+        return tuple(self.get_property_value(v) // self.binning for v in ["subarray_hsize",
+                                                                          "subarray_vsize"])
+    # def query_frame_shape(self):
+    #     self.frame_shape = (
+    #         self.get_property_value("subarray_hsize"),
+    #         self.get_property_value("subarray_vsize"),
+    #     )
+    #     print("queried shape:", self.frame_shape)
 
     def check_status(self, fn_return, fn_name="unknown"):
         if fn_return == DCAMERR_ERROR:
@@ -289,7 +297,7 @@ class HamamatsuCamera(AbstractCamera):
 
         for i_frame in new_frames:
             frame_data = self.hcam_data[i_frame].get_data()
-            frames.append(np.reshape(frame_data, self._frame_shape).copy())
+            frames.append(np.reshape(frame_data, self.frame_shape).copy())
 
         return frames
 
@@ -451,11 +459,9 @@ class HamamatsuCamera(AbstractCamera):
         self.last_frame_number = 0
 
         # set subarray mode
-        self.set_property_value("subarray_mode", "ON")
         self._frame_bytes = self.get_property_value("image_framebytes")
 
         # Get size of frame
-        self.query_frame_shape()
         self._frame_bytes = self.get_property_value("image_framebytes")
 
         if self.old_frame_bytes != self._frame_bytes:

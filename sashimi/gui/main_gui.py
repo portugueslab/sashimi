@@ -53,7 +53,7 @@ class MainWindow(QMainWindow):
         )
 
         self.addDockWidget(
-            Qt.LeftDockWidgetArea,
+            Qt.RightDockWidgetArea,
             DockedWidget(widget=self.wid_scan, title="Scanning settings"),
         )
 

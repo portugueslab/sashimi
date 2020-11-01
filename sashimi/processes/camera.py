@@ -132,13 +132,13 @@ class CameraProcess(LoggingProcess):
         """Main run for the camera. Depending on whether the camera mode is PAUSED or not,
         either the self.pause_loop or self.camera_loop are executed.
         """
-
         while not self.stop_event.is_set():
             self.update_parameters()
             if self.parameters.camera_mode == CameraMode.PAUSED:
                 self.pause_loop()
             else:
                 self.camera.start_acquisition()
+                print("camera started")
                 self.logger.log_message("Started acquisition")
                 self.camera_loop()
 
@@ -173,17 +173,20 @@ class CameraProcess(LoggingProcess):
                 if self.new_parameters.camera_mode == CameraMode.ABORT or (
                     self.new_parameters != self.parameters
                 ):
-                    self.camera.stop_acquisition()
-                    self.logger.log_message("Interrupting for new params")
-                    break
+                    self.update_parameters()
+
             except Empty:
                 pass
 
     def update_parameters(self):
         self.parameters = self.new_parameters
         self.logger.log_message("Updated parameters "+str(self.parameters))
-        for attribute in ["exposure_time", "binning", "roi", "trigger_mode"]:
+
+        self.camera.stop_acquistion()
+        for attribute in ["exposure_time", "binning", "trigger_mode"]:
             setattr(self.camera, attribute, getattr(self.parameters, attribute))
+        self.camera.start_acquisition()
+
 
     def update_framerate(self):
         self.framerate_rec.update_framerate()
