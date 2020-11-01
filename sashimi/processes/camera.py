@@ -104,11 +104,6 @@ class CameraProcess(LoggingProcess):
         self.framerate_rec = FramerateRecorder(n_fps_frames=n_fps_frames)
         self.was_waiting = False
 
-    def cast_parameters(self):
-        params = self.parameters
-        params.roi = list(params.roi)
-        return params
-
     def initialize_camera(self):
         if conf["scopeless"]:
             self.camera = camera_class_dict["mock"]()
@@ -134,7 +129,6 @@ class CameraProcess(LoggingProcess):
                 self.pause_loop()
             else:
                 self.camera.start_acquisition()
-                print("camera started")
                 self.logger.log_message("Started acquisition")
                 self.camera_loop()
 
@@ -180,8 +174,9 @@ class CameraProcess(LoggingProcess):
                 ):
                     self.update_parameters(new_parameters)
 
-
     def update_parameters(self, new_parameters, stop_start=True):
+        """"Set new parameters and stop and start the camera to make sure all changes take place.
+        """
         self.parameters = new_parameters
 
         if stop_start:

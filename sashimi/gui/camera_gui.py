@@ -38,6 +38,8 @@ ROI_TEXTS = {
 class ViewingWidget(QWidget):
     """Central widget that displays the images/volumes streamed from the camera, and progress bar.
     Internally, the display is powered via a Napari viewer.
+    The get_stuff methods replace properties, which seem to be an issue for children of QWidget when
+    used in the __init__.
 
     Parameters
     ----------
@@ -50,48 +52,31 @@ class ViewingWidget(QWidget):
     def __init__(self, state: State, timer: QTimer):
         super().__init__()
         self.state = state
-
         timer.timeout.connect(self.refresh)
 
-        self.main_layout = QVBoxLayout()
-
-        # Here we are assuming that the camera has a square sensor, and resolution is
+        # Note: here we are assuming that the camera has a square sensor, and resolution is
         # described by only one number (most scientific camera are)
         if conf["scopeless"]:
             self.sensor_resolution = 256
         else:
             self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
 
+        self.main_layout = QVBoxLayout()
+
         self.viewer = napari.Viewer(show=False)
         self.viewer.theme = "dark_sashimi"
 
+        # Add image layer that will be used to show frames/volumes:
         self.frame_layer = self.viewer.add_image(
             np.zeros([1, self.sensor_resolution, self.sensor_resolution]),
             blending="translucent",
             name="frame_layer",
         )
-        binning = convert_camera_params(self.state.camera_settings).binning
 
-        roi_init_shape = (
-                np.array(
-                    [
-                        self.sensor_resolution // binning,
-                        self.sensor_resolution // binning,
-                    ]
-                )
-                // 2
-        )
+        # Add square ROI of size max image size:
+        s = self.get_fullframe_size()
         self.roi = self.viewer.add_shapes(
-            [
-                np.array(
-                    [
-                        [0, 0],
-                        [roi_init_shape[0], 0],
-                        [roi_init_shape[0], roi_init_shape[1]],
-                        [0, roi_init_shape[1]],
-                    ]
-                )
-            ],
+            [np.array([[0, 0], [s, 0], [s, s], [0, s]])],
             blending="translucent",
             face_color="yellow",
             face_contrast_limits=(0, 0),
@@ -113,15 +98,25 @@ class ViewingWidget(QWidget):
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
         self.main_layout.addLayout(self.bottom_layout)
-
-        self.refresh_display = True
-
-        self.is_first_frame = True
-
         self.setLayout(self.main_layout)
 
+        # Connect changes of camera and laser to contrast reset:
         self.state.camera_settings.sig_param_changed.connect(self.reset_contrast)
         self.state.light_source_settings.sig_param_changed.connect(self.reset_contrast)
+
+        self.refresh_display = True
+        self.is_first_frame = True
+        self.image_shape = (1, s, s)
+
+    # @property
+    def get_camera_binning(self):
+        return convert_camera_params(self.state.camera_settings).binning
+
+    # @property
+    def get_fullframe_size(self):
+        """Maximum size of the image at current binning. As stated above, we assume square sensors.
+        """
+        return self.sensor_resolution // self.get_camera_binning()
 
     @property
     def voxel_size(self):
@@ -144,9 +139,14 @@ class ViewingWidget(QWidget):
             self.frame_layer.dims.reset()
         self.frame_layer.data = current_image
         self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
-        if self.is_first_frame:
+
+        # Check if anything changed in the image shape, which would mean that changes of the contrast
+        # are required (in case the parameter update was missed).
+        if self.is_first_frame or self.image_shape != current_image.shape:
             self.reset_contrast()
-            self.is_first_frame = False
+
+        self.image_shape = current_image.shape
+        self.is_first_frame = False
 
     def reset_contrast(self):
         self.frame_layer.reset_contrast_limits()
