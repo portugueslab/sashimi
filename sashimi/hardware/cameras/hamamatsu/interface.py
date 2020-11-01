@@ -114,18 +114,11 @@ class HamamatsuCamera(AbstractCamera):
     @roi.setter
     def roi(self, exp_val: tuple):
         self._roi = [min((i * self.binning // 4) * 4, 2048) for i in exp_val]
-        # Set sub array mode.
-        if self._roi == [0, 0, self._sensor_resolution[0] // self.binning, self._sensor_resolution[1] // self.binning]:
-            self.set_property_value("subarray_mode", "OFF")
-        else:
-            print(self._roi)
-            self.set_property_value("subarray_mode", "ON")
 
-            self.set_property_value("subarray_vpos", self._roi[1])
-            self.set_property_value("subarray_hpos", self._roi[0])
-            self.set_property_value("subarray_vsize", self._roi[3])
-            self.set_property_value("subarray_hsize", self._roi[2])
-        # self.query_frame_shape()
+        self.set_property_value("subarray_vpos", self._roi[1])
+        self.set_property_value("subarray_hpos", self._roi[0])
+        self.set_property_value("subarray_vsize", self._roi[3])
+        self.set_property_value("subarray_hsize", self._roi[2])
 
     @property
     def trigger_mode(self):
@@ -461,6 +454,25 @@ class HamamatsuCamera(AbstractCamera):
 
         # set subarray mode
         self._frame_bytes = self.get_property_value("image_framebytes")
+
+        """
+        This sets the sub-array mode as appropriate based on the current ROI.
+        """
+
+        # Check ROI properties.
+        roi_w = self.get_property_value("subarray_hsize")
+        roi_h = self.get_property_value("subarray_vsize")
+
+        # If the ROI is smaller than the entire frame turn on subarray mode
+        if (roi_w == 2048) and (roi_h == 2048):
+            self.set_property_value("subarray_mode", "OFF")
+        else:
+            self.set_property_value("subarray_mode", "ON")
+
+        # Get frame properties.
+        # self.frame_x = self.get_property_value("image_width")[0]
+        # self.frame_y = self.get_property_value("image_height")[0]
+        # self.frame_bytes = self.get_property_value("image_framebytes")[0]
 
         # Get size of frame
         self._frame_bytes = self.get_property_value("image_framebytes")
