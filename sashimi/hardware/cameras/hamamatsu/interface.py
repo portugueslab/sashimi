@@ -118,6 +118,7 @@ class HamamatsuCamera(AbstractCamera):
         if self._roi == [0, 0, self._sensor_resolution[0] // self.binning, self._sensor_resolution[1] // self.binning]:
             self.set_property_value("subarray_mode", "OFF")
         else:
+            print(self._roi)
             self.set_property_value("subarray_mode", "ON")
 
             self.set_property_value("subarray_vpos", self._roi[1])
@@ -142,8 +143,11 @@ class HamamatsuCamera(AbstractCamera):
     @property
     def frame_shape(self):
         #TODO these get_property value can get cleaned up in another property
-        return tuple(self.get_property_value(v) // self.binning for v in ["subarray_hsize",
-                                                                          "subarray_vsize"])
+
+        s = tuple(self.get_property_value(v) // self.binning for v in ["subarray_vsize",
+                                                                          "subarray_hsize"])
+        # print(s)
+        return s
     # def query_frame_shape(self):
     #     self.frame_shape = (
     #         self.get_property_value("subarray_hsize"),

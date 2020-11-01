@@ -182,7 +182,7 @@ class CameraProcess(LoggingProcess):
         if stop_start:
             self.camera.stop_acquistion()
 
-        for attribute in ["exposure_time", "binning", "trigger_mode"]:
+        for attribute in ["roi", "exposure_time", "binning", "trigger_mode"]:
             setattr(self.camera, attribute, getattr(self.parameters, attribute))
 
         if stop_start:
