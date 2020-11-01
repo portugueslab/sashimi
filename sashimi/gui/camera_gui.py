@@ -169,6 +169,7 @@ class CameraSettingsWidget(QWidget):
         self.roi = wid_display.roi
         self.roi_state = RoiState.FULL
         self.state = state
+        self.state.camera_settings.sig_param_changed.connect(self.update_on_bin_change)
         self.timer = timer
 
         self.camera_msg_queue = Queue()
@@ -179,6 +180,7 @@ class CameraSettingsWidget(QWidget):
             self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
 
         self.full_size = True
+        self.current_binning = 1  #TODO avoid hardcoding for first assignation
 
         self.wid_camera_settings = ParameterGui(self.state.camera_settings)
 
@@ -230,50 +232,50 @@ class CameraSettingsWidget(QWidget):
         self.roi_state = RoiState(3)
         self.roi_action()
 
+    def update_on_bin_change(self, changed_params):
+        """Update ROI coordinates when changing the binning.
+        #TODO check if possible to trigger only on change of the binning parameter instead of checking
+        """
+        if "binning" in changed_params.keys():
+            b = int(changed_params["binning"][0])
+            self.roi.data = self.roi.data[0] / (b / self.current_binning)
+            self.current_binning = b
+
     @property
     def roi_coords(self):
         """ROI coordinates are expressed with respect to the displayed napari image.
         Therefore, an ROI in the same position of the camera image will have different
         coordinates depending on the binning.
+        Returns tuple (vpos_orig, hpos_orig, vpos_max, hpos_max)
         """
-        return tuple(
-            (
-                int(self.roi.data[0][0][1]),
-                int(self.roi.data[0][0][0]),
-                int(self.roi.data[0][3][1]),
-                int(self.roi.data[0][1][0]),
-            )
-        )
+        coords = self.roi.data[0].astype(int)
+        return coords[0, 0], coords[0, 1], coords[1, 0], coords[3, 1]
+
 
     def set_roi(self):
-        """Set ROI size from loaded params.
-        A bunch of controls need to happen before we can actually send the ROI to the camera.
+        """Set the ROI by passing ROI coordinates to the camera settings.
+        A bunch of controls need to happen before we can safely send the ROI to the camera.
         """
         binning = convert_camera_params(self.state.camera_settings).binning
         max_image_dimension = self.sensor_resolution // binning
         # Make sure that the coordinates of the cropped ROI are within the image by cropping at o and max size
-        cropped_coords = [max(min(i // binning, max_image_dimension), 0) for i in self.roi_coords]
-
+        cropped_coords = [max(min(i, max_image_dimension), 0) for i in self.roi_coords]
 
         # Calculate dimensions of the image:
-        dx = cropped_coords[2] - cropped_coords[0]
-        dy = cropped_coords[3] - cropped_coords[1]
-        if dx == 0 or dy == 0:
+        height = cropped_coords[2] - cropped_coords[0]
+        width = cropped_coords[3] - cropped_coords[1]
+        if height == 0 or width == 0:
             warn("Trying to set ROI outside FOV", CameraWarning)
             self.cancel_roi_selection()
-        else:
-            binned_roi = [
-                cropped_coords[0],
-                cropped_coords[1],
-                dx,
-                dy,
-            ]
-            self.state.camera_settings.roi = [i * binning for i in binned_roi]
+            return
+
+        self.state.camera_settings.roi = [cropped_coords[0], cropped_coords[1], height, width]
 
     def set_full_frame(self):
+        binning = convert_camera_params(self.state.camera_settings).binning
         self.state.camera_settings.roi = [
             0,
             0,
-            self.sensor_resolution,
-            self.sensor_resolution,
+            self.sensor_resolution // binning,
+            self.sensor_resolution // binning,
         ]

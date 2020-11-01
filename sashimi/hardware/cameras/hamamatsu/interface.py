@@ -39,6 +39,7 @@ import ctypes
 
 class HamamatsuCamera(AbstractCamera):
     def __init__(self, camera_id, sensor_resolution):
+        #TODO if we read image size from camera, we don't need the sensor resolution here
         super().__init__(camera_id, sensor_resolution)
         self.dcam = ctypes.windll.dcamapi
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
@@ -64,12 +65,8 @@ class HamamatsuCamera(AbstractCamera):
         self.properties = self.get_camera_properties()
         self.exposure_time = 60
 
-        self._sensor_resolution: tuple = (
-            self.get_property_value("image_width"),
-            self.get_property_value("image_height"),
-        )
 
-        self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
+        self._roi = (0, 0, self.sensor_resolution[0], self.sensor_resolution[1])
         self._trigger_mode = TriggerMode.FREE
         self._frame_bytes = 0
 
@@ -82,6 +79,13 @@ class HamamatsuCamera(AbstractCamera):
         self.old_frame_bytes = -1
 
         self.number_frames = 0
+
+    @property
+    def sensor_resolution(self):
+        """Max size of the image, **after binning** and **before** ROI cropping (setting binning will change it,
+        setting a ROI won't).
+        """
+        return tuple([self.get_property_value(s) for s in ("image_height", "image_width")])
 
     @property
     def binning(self):
@@ -114,11 +118,11 @@ class HamamatsuCamera(AbstractCamera):
     @roi.setter
     def roi(self, exp_val: tuple):
         self._roi = [min((i * self.binning // 4) * 4, 2048) for i in exp_val]
-
-        self.set_property_value("subarray_vpos", self._roi[1])
-        self.set_property_value("subarray_hpos", self._roi[0])
-        self.set_property_value("subarray_vsize", self._roi[3])
-        self.set_property_value("subarray_hsize", self._roi[2])
+        print("roi", self._roi)
+        self.set_property_value("subarray_vpos", self._roi[0])
+        self.set_property_value("subarray_hpos", self._roi[1])
+        self.set_property_value("subarray_vsize", self._roi[2])
+        self.set_property_value("subarray_hsize", self._roi[3])
 
     @property
     def trigger_mode(self):
@@ -136,95 +140,8 @@ class HamamatsuCamera(AbstractCamera):
     @property
     def frame_shape(self):
         #TODO these get_property value can get cleaned up in another property
-
-        s = tuple(self.get_property_value(v) // self.binning for v in ["subarray_vsize",
-                                                                          "subarray_hsize"])
-        # print(s)
-        return s
-    # def query_frame_shape(self):
-    #     self.frame_shape = (
-    #         self.get_property_value("subarray_hsize"),
-    #         self.get_property_value("subarray_vsize"),
-    #     )
-    #     print("queried shape:", self.frame_shape)
-
-    def check_status(self, fn_return, fn_name="unknown"):
-        if fn_return == DCAMERR_ERROR:
-            c_buf_len = 80
-            c_buf = ctypes.create_string_buffer(c_buf_len)
-            # Not sure if this serves any purpose at all
-            c_error = self.dcam.dcam_getlasterror(
-                self.camera_handle, c_buf, ctypes.c_int32(c_buf_len)
-            )
-            raise Exception("dcam error " + str(fn_name) + " " + str(c_buf.value))
-        return fn_return
-
-    @staticmethod
-    def convert_property_name(p_name):
-        """
-        Regularizes a property name to lowercase names with
-        the spaces replaced by underscores.
-        """
-        return p_name.lower().replace(" ", "_")
-
-    def get_camera_properties(self):
-        """
-        Return the ids & names of all the properties that the camera supports. This
-        is used at initialization to populate the self.properties attribute.
-        """
-        c_buf_len = 64
-        c_buf = ctypes.create_string_buffer(c_buf_len)
-        properties = {}
-        prop_id = ctypes.c_int32(0)
-
-        # Reset to the start.
-        ret = self.dcam.dcamprop_getnextid(
-            self.camera_handle,
-            ctypes.byref(prop_id),
-            ctypes.c_uint32(DCAMPROP_OPTION_NEAREST),
-        )
-        if (ret != 0) and (ret != DCAMERR_NOERROR):
-            self.check_status(ret, "dcamprop_getnextid")
-
-        # Get the first property.
-        ret = self.dcam.dcamprop_getnextid(
-            self.camera_handle,
-            ctypes.byref(prop_id),
-            ctypes.c_int32(DCAMPROP_OPTION_NEXT),
-        )
-        if (ret != 0) and (ret != DCAMERR_NOERROR):
-            self.check_status(ret, "dcamprop_getnextid")
-        self.check_status(
-            self.dcam.dcamprop_getname(
-                self.camera_handle, prop_id, c_buf, ctypes.c_int32(c_buf_len)
-            ),
-            "dcamprop_getname",
-        )
-
-        # Get the rest of the properties.
-        last = -1
-        while prop_id.value != last:
-            last = prop_id.value
-            properties[
-                self.convert_property_name(c_buf.value.decode("utf-8"))
-            ] = prop_id.value
-            ret = self.dcam.dcamprop_getnextid(
-                self.camera_handle,
-                ctypes.byref(prop_id),
-                ctypes.c_int32(DCAMPROP_OPTION_NEXT),
-            )
-            if (ret != 0) and (ret != DCAMERR_NOERROR):
-                self.check_status(ret, "dcamprop_getnextid")
-            self.check_status(
-                self.dcam.dcamprop_getname(
-                    self.camera_handle,
-                    prop_id,
-                    c_buf,
-                    ctypes.c_int32(c_buf_len),
-                ),
-                "dcamprop_getname",
-            )
-        return properties
+        return tuple(self.get_property_value(v) for v in ["subarray_vsize",
+                                                          "subarray_hsize"])
 
     def get_frames(self):
         frames = []
@@ -294,82 +211,6 @@ class HamamatsuCamera(AbstractCamera):
             frames.append(np.reshape(frame_data, self.frame_shape).copy())
 
         return frames
-
-    def get_property_attribute(self, property_name):
-        """
-        Return the attribute structure of a particular property.
-        """
-        p_attr = DCAMPROP_ATTR()
-        p_attr.cbSize = ctypes.sizeof(p_attr)
-        p_attr.iProp = self.properties[property_name]
-        ret = self.check_status(
-            self.dcam.dcamprop_getattr(self.camera_handle, ctypes.byref(p_attr)),
-            "dcamprop_getattr",
-        )
-        if ret == 0:
-            return False
-        else:
-            return p_attr
-
-    def get_property_range(self, property_name):
-        """
-        Return the range for an attribute.
-        """
-        prop_attr = self.get_property_attribute(property_name)
-        temp = prop_attr.attribute & DCAMPROP_TYPE_MASK
-        if temp == DCAMPROP_TYPE_REAL:
-            return [float(prop_attr.valuemin), float(prop_attr.valuemax)]
-        else:
-            return [int(prop_attr.valuemin), int(prop_attr.valuemax)]
-
-    def get_property_text(self, property_name):
-        """
-        Return the text options of a property (if any).
-        """
-        prop_attr = self.get_property_attribute(property_name)
-        if not (prop_attr.attribute & DCAMPROP_ATTR_HASVALUETEXT):
-            return {}
-        else:
-            # Create property text structure.
-            prop_id = self.properties[property_name]
-            v = ctypes.c_double(prop_attr.valuemin)
-
-            prop_text = DCAMPROP_VALUETEXT()
-            c_buf_len = 64
-            c_buf = ctypes.create_string_buffer(c_buf_len)
-            # prop_text.text = ctypes.c_char_p(ctypes.addressof(c_buf))
-            prop_text.cbSize = ctypes.c_int32(ctypes.sizeof(prop_text))
-            prop_text.iProp = ctypes.c_int32(prop_id)
-            prop_text.value = v
-            prop_text.text = ctypes.addressof(c_buf)
-            prop_text.textbytes = c_buf_len
-
-            # Collect text options.
-            done = False
-            text_options = {}
-            while not done:
-                # Get text of current value.
-                self.check_status(
-                    self.dcam.dcamprop_getvaluetext(
-                        self.camera_handle, ctypes.byref(prop_text)
-                    ),
-                    "dcamprop_getvaluetext",
-                )
-                text_options[prop_text.text.decode("utf-8")] = int(v.value)
-
-                # Get next value.
-                ret = self.dcam.dcamprop_queryvalue(
-                    self.camera_handle,
-                    ctypes.c_int32(prop_id),
-                    ctypes.byref(v),
-                    ctypes.c_int32(DCAMPROP_OPTION_NEXT),
-                )
-                prop_text.value = v
-
-                if ret != 1:
-                    done = True
-
-            return text_options
 
     def get_property_value(self, property_name):
         # Check if the property exists.
@@ -459,20 +300,19 @@ class HamamatsuCamera(AbstractCamera):
         This sets the sub-array mode as appropriate based on the current ROI.
         """
 
+        print("Image width", self.get_property_value("image_width"))
         # Check ROI properties.
         roi_w = self.get_property_value("subarray_hsize")
         roi_h = self.get_property_value("subarray_vsize")
 
+        print("roi size", roi_h, roi_w)
+
         # If the ROI is smaller than the entire frame turn on subarray mode
-        if (roi_w == 2048) and (roi_h == 2048):
+        if (roi_h == self.sensor_resolution[0]) and (roi_w == self.sensor_resolution[1]):
             self.set_property_value("subarray_mode", "OFF")
         else:
             self.set_property_value("subarray_mode", "ON")
 
-        # Get frame properties.
-        # self.frame_x = self.get_property_value("image_width")[0]
-        # self.frame_y = self.get_property_value("image_height")[0]
-        # self.frame_bytes = self.get_property_value("image_framebytes")[0]
 
         # Get size of frame
         self._frame_bytes = self.get_property_value("image_framebytes")
@@ -529,3 +369,157 @@ class HamamatsuCamera(AbstractCamera):
         super().shutdown()
         self.check_status(self.dcam.dcamwait_close(self.wait_handle), "dcamwait_close")
         self.check_status(self.dcam.dcamdev_close(self.camera_handle), "dcamdev_close")
+
+    def get_property_attribute(self, property_name):
+        """
+        Return the attribute structure of a particular property.
+        """
+        p_attr = DCAMPROP_ATTR()
+        p_attr.cbSize = ctypes.sizeof(p_attr)
+        p_attr.iProp = self.properties[property_name]
+        ret = self.check_status(
+            self.dcam.dcamprop_getattr(self.camera_handle, ctypes.byref(p_attr)),
+            "dcamprop_getattr",
+        )
+        if ret == 0:
+            return False
+        else:
+            return p_attr
+
+    def get_property_range(self, property_name):
+        """
+        Return the range for an attribute.
+        """
+        prop_attr = self.get_property_attribute(property_name)
+        temp = prop_attr.attribute & DCAMPROP_TYPE_MASK
+        if temp == DCAMPROP_TYPE_REAL:
+            return [float(prop_attr.valuemin), float(prop_attr.valuemax)]
+        else:
+            return [int(prop_attr.valuemin), int(prop_attr.valuemax)]
+
+    def get_property_text(self, property_name):
+        """
+        Return the text options of a property (if any).
+        """
+        prop_attr = self.get_property_attribute(property_name)
+        if not (prop_attr.attribute & DCAMPROP_ATTR_HASVALUETEXT):
+            return {}
+        else:
+            # Create property text structure.
+            prop_id = self.properties[property_name]
+            v = ctypes.c_double(prop_attr.valuemin)
+
+            prop_text = DCAMPROP_VALUETEXT()
+            c_buf_len = 64
+            c_buf = ctypes.create_string_buffer(c_buf_len)
+            # prop_text.text = ctypes.c_char_p(ctypes.addressof(c_buf))
+            prop_text.cbSize = ctypes.c_int32(ctypes.sizeof(prop_text))
+            prop_text.iProp = ctypes.c_int32(prop_id)
+            prop_text.value = v
+            prop_text.text = ctypes.addressof(c_buf)
+            prop_text.textbytes = c_buf_len
+
+            # Collect text options.
+            done = False
+            text_options = {}
+            while not done:
+                # Get text of current value.
+                self.check_status(
+                    self.dcam.dcamprop_getvaluetext(
+                        self.camera_handle, ctypes.byref(prop_text)
+                    ),
+                    "dcamprop_getvaluetext",
+                )
+                text_options[prop_text.text.decode("utf-8")] = int(v.value)
+
+                # Get next value.
+                ret = self.dcam.dcamprop_queryvalue(
+                    self.camera_handle,
+                    ctypes.c_int32(prop_id),
+                    ctypes.byref(v),
+                    ctypes.c_int32(DCAMPROP_OPTION_NEXT),
+                )
+                prop_text.value = v
+
+                if ret != 1:
+                    done = True
+
+            return text_options
+
+    def check_status(self, fn_return, fn_name="unknown"):
+        if fn_return == DCAMERR_ERROR:
+            c_buf_len = 80
+            c_buf = ctypes.create_string_buffer(c_buf_len)
+            # Not sure if this serves any purpose at all
+            c_error = self.dcam.dcam_getlasterror(
+                self.camera_handle, c_buf, ctypes.c_int32(c_buf_len)
+            )
+            raise Exception("dcam error " + str(fn_name) + " " + str(c_buf.value))
+        return fn_return
+
+    @staticmethod
+    def convert_property_name(p_name):
+        """
+        Regularizes a property name to lowercase names with
+        the spaces replaced by underscores.
+        """
+        return p_name.lower().replace(" ", "_")
+
+    def get_camera_properties(self):
+        """
+        Return the ids & names of all the properties that the camera supports. This
+        is used at initialization to populate the self.properties attribute.
+        """
+        c_buf_len = 64
+        c_buf = ctypes.create_string_buffer(c_buf_len)
+        properties = {}
+        prop_id = ctypes.c_int32(0)
+
+        # Reset to the start.
+        ret = self.dcam.dcamprop_getnextid(
+            self.camera_handle,
+            ctypes.byref(prop_id),
+            ctypes.c_uint32(DCAMPROP_OPTION_NEAREST),
+        )
+        if (ret != 0) and (ret != DCAMERR_NOERROR):
+            self.check_status(ret, "dcamprop_getnextid")
+
+        # Get the first property.
+        ret = self.dcam.dcamprop_getnextid(
+            self.camera_handle,
+            ctypes.byref(prop_id),
+            ctypes.c_int32(DCAMPROP_OPTION_NEXT),
+        )
+        if (ret != 0) and (ret != DCAMERR_NOERROR):
+            self.check_status(ret, "dcamprop_getnextid")
+        self.check_status(
+            self.dcam.dcamprop_getname(
+                self.camera_handle, prop_id, c_buf, ctypes.c_int32(c_buf_len)
+            ),
+            "dcamprop_getname",
+        )
+
+        # Get the rest of the properties.
+        last = -1
+        while prop_id.value != last:
+            last = prop_id.value
+            properties[
+                self.convert_property_name(c_buf.value.decode("utf-8"))
+            ] = prop_id.value
+            ret = self.dcam.dcamprop_getnextid(
+                self.camera_handle,
+                ctypes.byref(prop_id),
+                ctypes.c_int32(DCAMPROP_OPTION_NEXT),
+            )
+            if (ret != 0) and (ret != DCAMERR_NOERROR):
+                self.check_status(ret, "dcamprop_getnextid")
+            self.check_status(
+                self.dcam.dcamprop_getname(
+                    self.camera_handle,
+                    prop_id,
+                    c_buf,
+                    ctypes.c_int32(c_buf_len),
+                ),
+                "dcamprop_getname",
+            )
+        return properties
