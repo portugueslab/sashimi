@@ -48,7 +48,7 @@ class WaveformWidget(QWidget):
                 self.pulse_regions[i_pulse] = pg.LinearRegionItem(
                     values=(
                         pulse,
-                        pulse + self.state.camera_settings.exposure / 1000,
+                        pulse + self.state.camera_settings.exposure_time / 1000,
                     ),
                     movable=False,
                     brush=pg.mkBrush(*color_plane),

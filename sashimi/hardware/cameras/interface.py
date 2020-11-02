@@ -15,9 +15,9 @@ class TriggerMode(Enum):
 
 
 class AbstractCamera:
-    def __init__(self, camera_id, sensor_resolution=None):
+    def __init__(self, camera_id, max_sensor_resolution=None):
         self.camera_id = camera_id
-        self._sensor_resolution = sensor_resolution
+        self.max_sensor_resolution = max_sensor_resolution
 
     def get_frames(self):
         """
@@ -82,4 +82,7 @@ class AbstractCamera:
 
     @property
     def sensor_resolution(self):
-        return self._sensor_resolution
+        """Max size of the image, **after binning** and **before** ROI cropping
+        (setting binning will change it, setting a ROI won't).
+        """
+        return tuple([r / self.binning for r in self.max_sensor_resolution])

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QProgressBar
 )
 
-from sashimi.state import GlobalState, convert_camera_params, State, get_voxel_size
+from sashimi.state import GlobalState, State, get_voxel_size
 from sashimi.config import read_config
 
 conf = read_config()
@@ -70,8 +70,7 @@ class StatusBarWidget(QStatusBar):
 
     def update_frame_size(self):
         dims = self.state.get_frame_size()
-        binning = convert_camera_params(self.state.camera_settings).binning
-
+        binning = int(self.state.camera_settings.binning)
         self.frame_size_lbl.setText(
             f"Frame shape: {int(dims[0] / binning)} x {int(dims[1] / binning)} pixels"
         )

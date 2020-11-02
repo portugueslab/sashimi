@@ -109,14 +109,15 @@ class ZRecordingSettings(ParametrizedQt):
         self.n_skip_end = Param(0, (0, 20))
 
 
+roi_size = [0, 0] + [r // conf["camera"]["default_binning"]
+                     for r in conf["camera"]["max_sensor_resolution"]]
 class CameraSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "camera/parameters"
-        self.exposure = Param(60, (2, 1000), unit="ms")
-        self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
-        self.roi = Param(
-            [0, 0, 1024, 1024], gui=False
+        self.exposure_time = Param(conf["camera"]["default_exposure"], (0.5, 1000), unit="ms")
+        self.binning = Param(conf["camera"]["default_binning"], [1, 2, 4])
+        self.roi = Param(roi_size, gui=False
         )  # order of params here is [hpos, vpos, hsize, vsize,]; h: horizontal, v: vertical
 
 
@@ -203,39 +204,13 @@ class Calibration(ParametrizedQt):
         return True
 
 
-def convert_camera_params(camera_settings: CameraSettings):
-    if camera_settings.binning == "1x1":
-        binning = 1
-    elif camera_settings.binning == "2x2":
-        binning = 2
-    elif camera_settings.binning == "4x4":
-        binning = 4
-    # set binning 2x2 by default
-    else:
-        binning = 2
-
-    return CamParameters(
-        exposure_time=camera_settings.exposure,
-        binning=binning,
-        roi=tuple(camera_settings.roi),
-    )
-
-
 def get_voxel_size(
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
 ):
     scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
 
-    if camera_settings.binning == "1x1":
-        binning = 1
-    elif camera_settings.binning == "2x2":
-        binning = 2
-    elif camera_settings.binning == "4x4":
-        binning = 4
-        # set binning 2x2 by default
-    else:
-        binning = 2
+    binning = int(camera_settings.binning)
 
     inter_plane = scan_length / scanning_settings.n_planes
 
@@ -430,7 +405,7 @@ class State:
 
         self.all_settings = dict(camera=dict(), scanning=dict())
 
-        self.current_binning = 2  # TODO avoid hardcoding
+        self.current_binning = conf["camera"]["default_binning"]
         self.send_scan_settings()
         self.logger.log_message("initialized")
 
@@ -450,7 +425,10 @@ class State:
         self.send_scan_settings()
 
     def send_camera_settings(self):
-        camera_params = convert_camera_params(self.camera_settings)
+        print("sending", self.camera_settings.roi)
+        camera_params = CamParameters(exposure_time=self.camera_settings.exposure_time,
+                                      binning=int(self.camera_settings.binning),
+                                      roi=tuple(self.camera_settings.roi))
 
         camera_params.trigger_mode = (
             TriggerMode.FREE

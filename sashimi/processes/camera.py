@@ -4,7 +4,6 @@ from arrayqueues.shared_arrays import ArrayQueue
 from sashimi.processes.logging import LoggingProcess
 from sashimi.events import LoggedEvent
 from dataclasses import dataclass
-from copy import copy
 from queue import Empty
 from datetime import datetime
 from sashimi.hardware.cameras import camera_class_dict
@@ -12,7 +11,8 @@ from sashimi.config import read_config
 
 conf = read_config()
 
-FULL_SIZE = 2048 // 2  # TODO get this from config, too many numbers in this module
+FULL_SIZE = [r / conf["camera"]["default_binning"] for r in conf["camera"]["max_sensor_resolution"]]
+
 
 class CameraMode(Enum):
     PREVIEW = 1
@@ -29,17 +29,17 @@ class TriggerMode(Enum):
 
 @dataclass
 class CamParameters:
-    exposure_time: float = 60
+    exposure_time: float = conf["camera"]["default_exposure"]
     binning: int = 2
     roi: tuple = (
         0,
         0,
-        FULL_SIZE,
-        FULL_SIZE,
+        FULL_SIZE[0],
+        FULL_SIZE[1],
     )  # order of params here is [hpos, vpos, hsize, vsize,]
-    image_height: int = FULL_SIZE
-    image_width: int = FULL_SIZE
-    frame_shape: tuple = (FULL_SIZE, FULL_SIZE)
+    image_height: int = FULL_SIZE[0]
+    image_width: int = FULL_SIZE[1]
+    frame_shape: tuple = (FULL_SIZE[0], FULL_SIZE[1])
     internal_frame_rate: float = 60
     trigger_mode: TriggerMode = TriggerMode.FREE
     camera_mode: CameraMode = CameraMode.PAUSED
@@ -111,7 +111,7 @@ class CameraProcess(LoggingProcess):
         else:
             self.camera = camera_class_dict[conf["camera"]["name"]](
                 camera_id=conf["camera"]["id"],
-                sensor_resolution=tuple(conf["camera"]["sensor_resolution"]),
+                max_sensor_resolution=tuple(conf["camera"]["max_sensor_resolution"]),
             )
 
     def run(self):
