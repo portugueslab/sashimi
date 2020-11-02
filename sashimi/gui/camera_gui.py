@@ -94,6 +94,8 @@ class ViewingWidget(QWidget):
         self.viewer.window.qt_viewer.viewerButtons.ndisplayButton.setText("3D mode")
 
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
+        # TODO: Add option to manually adjust contrast (line below is a first attempt)
+        # self.bottom_layout.addWidget(self.viewer.window.qt_viewer.dockLayerControls)
         self.bottom_layout.addStretch()
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
@@ -103,7 +105,7 @@ class ViewingWidget(QWidget):
         # Connect changes of camera and laser to contrast reset:
         self.state.camera_settings.sig_param_changed.connect(self.reset_contrast)
         self.state.light_source_settings.sig_param_changed.connect(self.reset_contrast)
-        self.viewer.window.qt_viewer.viewerButtons.resetViewButton(self.reset_contrast)
+        self.viewer.window.qt_viewer.viewerButtons.resetViewButton.pressed.connect(self.reset_contrast)
 
         self.refresh_display = True
         self.is_first_frame = True
