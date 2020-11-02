@@ -38,34 +38,42 @@ class StatusBarWidget(QStatusBar):
         self.timer.timeout.connect(self.update_all_labels)
 
     def update_all_labels(self):
-        self.update_framerate()
+        self.update_framerate_view()
         self.update_frame_size()
         self.update_voxel_size()
         self.refresh_progress_bar()
+        if self.state.global_state == GlobalState.PAUSED:
+            self.hide()
+        else:
+            self.show()
 
-    def update_framerate(self):
+    def update_framerate_view(self):
+        """Update the framerate and check whether it is fast enough for the current
+        parameters configuration.
+        """
+
         frame_rate = self.state.get_triggered_frame_rate()
         if frame_rate is not None:
-            self.framerate_lbl.setStyleSheet("color: white")
-            expected_frame_rate = None
+            self.framerate_lbl.setText(
+                "Framerate: {} Hz".format(round(frame_rate, 2))
+            )
+
+            # Find the expected framerate depending on the global state
             if self.state.global_state == GlobalState.PREVIEW:
-                self.framerate_lbl.setText(
-                    "Framerate: {} Hz".format(round(frame_rate, 2))
-                )
+                expected_frame_rate = None
             if self.state.global_state == GlobalState.VOLUME_PREVIEW:
-                planes = (
-                        self.state.volume_setting.n_planes
-                        - self.state.volume_setting.n_skip_start
-                        - self.state.volume_setting.n_skip_end
-                )
-                expected_frame_rate = self.state.volume_setting.frequency * planes
+                vol_sets = self.state.volume_setting
+                n_planes = (vol_sets.n_planes - vol_sets.n_skip_start - vol_sets.n_skip_end)
+                expected_frame_rate = vol_sets.frequency * n_planes
             if self.state.global_state == GlobalState.PLANAR_PREVIEW:
                 expected_frame_rate = self.state.single_plane_settings.frequency
 
+            # Add warning if we are lagging:
             if expected_frame_rate and expected_frame_rate > (frame_rate * 1.1):
                 self.showMessage("Camera lagging behind")
                 self.framerate_lbl.setStyleSheet("color: red")
             else:
+                self.showMessage("")
                 self.framerate_lbl.setStyleSheet("color: white")
 
     def update_frame_size(self):

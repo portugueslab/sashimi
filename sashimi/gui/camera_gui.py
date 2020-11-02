@@ -134,15 +134,10 @@ class ViewingWidget(QWidget):
         self.auto_contrast = True
         self.image_shape = (1, s, s)
 
-    # @property
-    def get_camera_binning(self):
-        return int(self.state.camera_settings.binning)
-
-    # @property
     def get_fullframe_size(self):
         """Maximum size of the image at current binning. As stated above, we assume square sensors.
         """
-        return [r // self.get_camera_binning() for r in self.max_sensor_resolution]
+        return [r // int(self.state.camera_settings.binning) for r in self.max_sensor_resolution]
 
     @property
     def voxel_size(self):
@@ -171,7 +166,6 @@ class ViewingWidget(QWidget):
         if self.is_first_frame or self.image_shape != current_image.shape:
             self.reset_contrast()
             self.viewer.reset_view()
-            # self.viewer.window.qt_viewer.viewerButtons.resetViewButton.pressed.connect(self.reset_contrast)
 
         self.image_shape = current_image.shape
         self.is_first_frame = False

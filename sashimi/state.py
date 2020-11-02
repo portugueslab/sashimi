@@ -432,7 +432,6 @@ class State:
         self.send_scan_settings()
 
     def send_camera_settings(self):
-        print("sending", self.camera_settings.roi)
         camera_params = CamParameters(exposure_time=self.camera_settings.exposure_time,
                                       binning=int(self.camera_settings.binning),
                                       roi=tuple(self.camera_settings.roi))
@@ -563,10 +562,13 @@ class State:
             return None
 
     def get_triggered_frame_rate(self):
-        try:
-            return self.camera.triggered_frame_rate_queue.get(timeout=0.001)
-        except Empty:
-            return None
+        framerate = None
+        while True:
+            try:
+                framerate = self.camera.triggered_frame_rate_queue.get(timeout=0.001)
+            except Empty:
+                break
+        return framerate
 
     def get_waveform(self):
         try:

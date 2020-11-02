@@ -58,7 +58,8 @@ class FramerateRecorder:
         self.starting_time = datetime.now()
 
     def update_framerate(self):
-        """Calculate the framerate every n_fps_frames frames."""
+        """Calculate the framerate every n_fps_frames frames.
+        """
         # If number of frames for updating is reached:
         if self.i_fps == self.n_fps_frames - 1:
             self.current_time = datetime.now()
@@ -74,6 +75,9 @@ class FramerateRecorder:
             self.previous_time_fps = self.current_time
         # Reset i after every n frames
         self.i_fps = (self.i_fps + 1) % self.n_fps_frames
+
+    def restart(self):
+        self.current_framerate = None
 
 
 class CameraProcess(LoggingProcess):
@@ -149,10 +153,14 @@ class CameraProcess(LoggingProcess):
     def camera_loop(self):
         """Camera running loop, grab frames and set new parameters if available.
         """
+        # then = datetime.now()
         while not self.stop_event.is_set():
             is_waiting = self.wait_event.is_set()
             frames = self.camera.get_frames()
             if frames:
+                # print("frames", (datetime.now() - then).total_seconds())
+                then = datetime.now()
+
                 for frame in frames:
                     self.logger.log_message("received frame of shape "+str(frame.shape))
                     if self.was_waiting and not is_waiting:
@@ -183,8 +191,6 @@ class CameraProcess(LoggingProcess):
         if stop_start:
             self.camera.stop_acquistion()
 
-        # Attention: here setting binning before the ROI seems to be essential to avoid funny behavior
-        # in the Hamamatsu camera.
         # In general, ROI and binning are a bit funny in their interactions, and need to be handled
         # carefully in the specific camera interfaces.
         for attribute in ["binning", "roi", "exposure_time", "trigger_mode"]:
@@ -192,7 +198,7 @@ class CameraProcess(LoggingProcess):
 
         if stop_start:
             self.camera.start_acquisition()
-
+        self.framerate_rec.restart()
         self.logger.log_message("Updated parameters "+str(self.parameters))
 
     def update_framerate(self):

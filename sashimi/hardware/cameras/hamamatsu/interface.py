@@ -40,7 +40,6 @@ from sashimi.config import read_config
 conf = read_config()
 
 
-
 class HamamatsuCamera(AbstractCamera):
     def __init__(self, camera_id, max_sensor_resolution):
         super().__init__(camera_id, max_sensor_resolution)
@@ -71,7 +70,7 @@ class HamamatsuCamera(AbstractCamera):
         self.exposure_time = conf["camera"]["default_exposure"]
 
         self._roi = (0, 0) + self.max_sensor_resolution
-        self._trigger_mode = TriggerMode.FREE
+        self._trigger_mode = TriggerMode.EXTERNAL_TRIGGER
         self._frame_bytes = 0
 
         self.buffer_index = 0
