@@ -114,7 +114,7 @@ class HamamatsuCamera(AbstractCamera):
 
     @roi.setter
     def roi(self, exp_val: tuple):
-        self._roi = [min((i // 4) * 4, 2048) for i in exp_val]
+        self._roi = [min((i * self.binning // 4) * 4, 2048) for i in exp_val]
         # print("roi setting; received ", exp_val, ", setting ", self._roi, "because of binning ", self.binning)
         self.set_property_value("subarray_vpos", self._roi[0])
         self.set_property_value("subarray_hpos", self._roi[1])
@@ -137,8 +137,8 @@ class HamamatsuCamera(AbstractCamera):
     @property
     def frame_shape(self):
         #TODO these get_property value can get cleaned up in another property
-        return tuple(self.get_property_value(v) for v in ["subarray_vsize",
-                                                          "subarray_hsize"])
+        return tuple(self.get_property_value(v) for v in ["image_height",
+                                                          "image_width"])
 
     def get_frames(self):
         frames = []
