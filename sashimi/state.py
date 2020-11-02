@@ -550,12 +550,6 @@ class State:
         self.calibration_ref = None
         self.noise_subtraction_active.clear()
 
-    def get_frame_size(self):
-        return [
-            self.camera_settings.roi[2] - self.camera_settings.roi[0],
-            self.camera_settings.roi[3] - self.camera_settings.roi[1]
-        ]
-
     def get_volume(self):
         try:
             return self.dispatcher.viewer_queue.get(timeout=0.001)

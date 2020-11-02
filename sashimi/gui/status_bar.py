@@ -69,10 +69,8 @@ class StatusBarWidget(QStatusBar):
                 self.framerate_lbl.setStyleSheet("color: white")
 
     def update_frame_size(self):
-        dims = self.state.get_frame_size()
-        binning = int(self.state.camera_settings.binning)
         self.frame_size_lbl.setText(
-            f"Frame shape: {int(dims[0] / binning)} x {int(dims[1] / binning)} pixels"
+            f"Frame shape: {self.state.camera_settings.roi[2]} x {self.state.camera_settings.roi[3]} pixels"
         )
 
     def update_voxel_size(self):
