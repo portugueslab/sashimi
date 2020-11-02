@@ -92,7 +92,9 @@ class HamamatsuCamera(AbstractCamera):
 
     @binning.setter
     def binning(self, n_bin):
+        b = self.get_property_value("subarray_hsize")
         self.set_property_value("binning", f"{n_bin}x{n_bin}")
+        print(f"binning, roi size went from {b} to", self.get_property_value("subarray_hsize"))
 
     @property
     def exposure_time(self):
@@ -301,8 +303,6 @@ class HamamatsuCamera(AbstractCamera):
         roi_h = self.get_property_value("subarray_vsize")
 
         print("------------starting acquisition-----------")
-        print("roi size", roi_h, roi_w, "binning", self.get_property_value("binning"),
-              "size", self.sensor_resolution, "framebytes", self._frame_bytes)
 
         # If the ROI is smaller than the entire frame turn on subarray mode
         if (roi_h == self.sensor_resolution[0]) and (roi_w == self.sensor_resolution[1]):
@@ -310,12 +310,18 @@ class HamamatsuCamera(AbstractCamera):
         else:
             self.set_property_value("subarray_mode", "ON")
 
-
         # Get size of frame
         self._frame_bytes = self.get_property_value("image_framebytes")
+        print("roi size", roi_h, roi_w, "; binning", self.get_property_value("binning"),
+              "; image size", self.sensor_resolution,
+              "; subarray size",  self.frame_shape,
+              "; mode", self.get_property_value("subarray_mode"), "; framebytes", self._frame_bytes)
+
+
         # print("roi size", roi_h, roi_w, "; binning", self.get_property_value("binning"),
         #       "; size", self.sensor_resolution, "; mode", self.get_property_value("subarray_mode"),
         #       "; framebytes", self._frame_bytes)
+
 
         if self.old_frame_bytes != self._frame_bytes:
             # The larger of either 2000 frames or some weird calculation for number of buffers for 2 seconds of data
