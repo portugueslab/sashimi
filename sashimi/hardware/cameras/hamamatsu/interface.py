@@ -41,6 +41,9 @@ class HamamatsuCamera(AbstractCamera):
     def __init__(self, camera_id, sensor_resolution):
         # TODO if we read image size from camera, we don't need the sensor resolution here
         super().__init__(camera_id, sensor_resolution)
+
+        # This need to be specified at the beginning, not to change with the ROI that we set.
+        self._sensor_resolution = sensor_resolution
         self.dcam = ctypes.windll.dcamapi
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
         paraminit.size = ctypes.sizeof(paraminit)
@@ -84,7 +87,7 @@ class HamamatsuCamera(AbstractCamera):
         """Max size of the image, **after binning** and **before** ROI cropping (setting binning will change it,
         setting a ROI won't).
         """
-        return tuple([self.get_property_value(s) for s in ("image_height", "image_width")])
+        return tuple([r / self.binning for r in self._sensor_resolution])
 
     @property
     def binning(self):
@@ -305,7 +308,7 @@ class HamamatsuCamera(AbstractCamera):
         print("------------starting acquisition-----------")
 
         # If the ROI is smaller than the entire frame turn on subarray mode
-        if (roi_h == self.sensor_resolution[0]) and (roi_w == self.sensor_resolution[1]):
+        if (roi_h == self._sensor_resolution[0]) and (roi_w == self._sensor_resolution[1]):
             self.set_property_value("subarray_mode", "OFF")
         else:
             self.set_property_value("subarray_mode", "ON")
@@ -314,6 +317,7 @@ class HamamatsuCamera(AbstractCamera):
         self._frame_bytes = self.get_property_value("image_framebytes")
         print("roi size", roi_h, roi_w, "; binning", self.get_property_value("binning"),
               "; image size", self.sensor_resolution,
+              "; subarray pos",  [self.get_property_value(s) for s in ["subarray_hpos", "subarray_vpos"]],
               "; subarray size",  self.frame_shape,
               "; mode", self.get_property_value("subarray_mode"), "; framebytes", self._frame_bytes)
 
