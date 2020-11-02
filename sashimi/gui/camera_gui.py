@@ -170,6 +170,8 @@ class ViewingWidget(QWidget):
         # are required (in case the parameter update was missed).
         if self.is_first_frame or self.image_shape != current_image.shape:
             self.reset_contrast()
+            self.viewer.reset_view()
+            # self.viewer.window.qt_viewer.viewerButtons.resetViewButton.pressed.connect(self.reset_contrast)
 
         self.image_shape = current_image.shape
         self.is_first_frame = False
