@@ -85,6 +85,12 @@ class ScanParameters:
 
 
 class ScanLoop:
+    """General class for the control of the event loop of the scanning, taking
+    care of the synchronization between the galvo and piezo scanning and the camera triggering.
+    It has a loop method which is defined only here and not overwritten in sublasses, which controls
+    the main order of events. In this class we control only the lateral scanning, which is common to both
+    planar and volumetric acquisitions.
+    """
     def __init__(
         self,
         board: AbstractScanInterface,
@@ -143,6 +149,13 @@ class ScanLoop:
         return lcm(ns_lateral, ns_frontal)
 
     def update_settings(self):
+        """
+        Returns
+        -------
+        bool
+            True only if parameters got updated.
+
+        """
         new_params = get_last_parameters(self.parameter_queue)
         if new_params is not None:
             self.parameters = new_params
@@ -152,11 +165,18 @@ class ScanLoop:
             self.frontal_waveform = TriangleWaveform(
                 **asdict(self.parameters.xy.frontal)
             )
-            self.first_update = False
+            self.first_update = False  # To avoid multiple updates
             return True
         return False
 
     def loop_condition(self):
+        """
+        Returns
+        -------
+        bool
+            When False, main event loop is interrupted.
+
+        """
         if self.restart_event.is_set():
             self.restart_event.clear()
             return False
@@ -317,6 +337,7 @@ class VolumetricScanLoop(ScanLoop):
         super().fill_arrays()
         self.board.z_piezo = self.z_waveform.values(self.shifted_time)
         i_sample = self.i_sample % len(self.recorded_signal.buffer)
+
         if self.recorded_signal.is_complete():
             wave_part = self.recorded_signal.read(i_sample, self.n_samples)
             max_wave, min_wave = (np.max(wave_part), np.min(wave_part))

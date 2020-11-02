@@ -499,6 +499,9 @@ class State:
         self.saver.saving_parameter_queue.put(save_params)
         self.dispatcher.n_planes_queue.put(n_planes)
 
+        # Restart scanning loop:
+        self.restart_event.set()
+
     def send_dispatcher_settings(self):
         pass
 

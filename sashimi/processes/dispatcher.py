@@ -6,6 +6,9 @@ from sashimi.processes.logging import LoggingProcess
 from sashimi.events import LoggedEvent
 import numpy as np
 
+from sashimi.utilities import get_last_parameters
+
+TIMEOUT_S = 0.001
 
 class VolumeDispatcher(LoggingProcess):
     def __init__(
@@ -36,6 +39,8 @@ class VolumeDispatcher(LoggingProcess):
         self.n_planes = 1
         self.i_plane = 0
         self.first_volume = True
+
+        self.k = 0
 
     def run(self):
         self.logger.log_message("started")
@@ -69,6 +74,7 @@ class VolumeDispatcher(LoggingProcess):
     def fill_queues(self):
         if self.viewer_queue.queue.qsize() < 3:
             self.viewer_queue.put(self.volume_buffer)
+            self.k += 1
         else:
             pass  # volume has been dropped from the viewer
         if self.saving_signal.is_set():
@@ -80,25 +86,27 @@ class VolumeDispatcher(LoggingProcess):
             self.saver_queue.clear()
             while self.wait_signal.is_set():
                 try:
-                    _ = self.camera_queue.get(timeout=0.001)
+                    _ = self.camera_queue.get(timeout=TIMEOUT_S)
                 except Empty:
                     pass
             self.logger.log_message("wait over")
             self.i_plane = 0
         try:
-            current_frame = self.camera_queue.get(timeout=0.001)
+            current_frame = self.camera_queue.get(timeout=TIMEOUT_S)
             self.process_frame(current_frame)
         except Empty:
             pass
 
     def send_receive(self):
-        try:
-            self.n_planes = self.n_planes_queue.get(timeout=0.001)
+        # Get number of planes, emptying the queue first:
+        n_planes = get_last_parameters(self.n_planes_queue, timeout=TIMEOUT_S)
+
+        if n_planes is not None:
+            self.n_planes = n_planes
             self.reset()
-        except Empty:
-            pass
+
         try:
-            self.calibration_ref = self.calibration_ref_queue.get(timeout=0.001)
+            self.calibration_ref = self.calibration_ref_queue.get(timeout=TIMEOUT_S)
         except Empty:
             pass
 

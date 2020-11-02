@@ -1,13 +1,15 @@
 from multiprocessing import Queue
 from enum import Enum
-from arrayqueues.shared_arrays import ArrayQueue
-from sashimi.processes.logging import LoggingProcess
-from sashimi.events import LoggedEvent
 from dataclasses import dataclass
 from queue import Empty
 from datetime import datetime
+from arrayqueues.shared_arrays import ArrayQueue
+
+from sashimi.processes.logging import LoggingProcess
+from sashimi.events import LoggedEvent
 from sashimi.hardware.cameras import camera_class_dict
 from sashimi.config import read_config
+from sashimi.utilities import get_last_parameters
 
 conf = read_config()
 
@@ -153,13 +155,10 @@ class CameraProcess(LoggingProcess):
     def camera_loop(self):
         """Camera running loop, grab frames and set new parameters if available.
         """
-        # then = datetime.now()
         while not self.stop_event.is_set():
             is_waiting = self.wait_event.is_set()
             frames = self.camera.get_frames()
             if frames:
-                # print("frames", (datetime.now() - then).total_seconds())
-                then = datetime.now()
 
                 for frame in frames:
                     self.logger.log_message("received frame of shape "+str(frame.shape))
@@ -170,12 +169,7 @@ class CameraProcess(LoggingProcess):
                     self.update_framerate()
 
             # Empty parameters queue and set new parameters with the most recent value
-            new_parameters = None
-            while True:
-                try:
-                    new_parameters = self.parameter_queue.get(timeout=0.001)
-                except Empty:
-                    break
+            new_parameters = get_last_parameters(self.parameter_queue, timeout=0.001)
 
             if new_parameters is not None:
                 if new_parameters.camera_mode == CameraMode.ABORT or (
