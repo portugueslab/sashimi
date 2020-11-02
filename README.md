@@ -9,6 +9,8 @@ width="270"></a>
 [![Build Status](https://travis-ci.com/portugueslab/sashimi.svg?branch=master)](https://travis-ci.com/portugueslab/sashimi)
 [![Docs](https://img.shields.io/badge/docs-dev-brightgreen)](https://portugueslab.github.io/sashimi/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4122062.svg)](https://doi.org/10.5281/zenodo.4122062)
+[![Python 3.7-3.8](https://img.shields.io/badge/python-3.7%7C3.8-blue.svg)](https://www.python.org/)
 
 Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
 It is developed by members of the [PortuguesLab](http://www.portugueslab.com/)
@@ -28,13 +30,18 @@ Clone this repository and navigate to the main folder `../sashimi`
 
 ### Recommended: Create a new environment
 
-It is a good practice to create an environment for every project. The provided `environment.yml` sets up all required dependencies.
+It is a good practice to create an environment for every project. The provided `environment.yml` sets up almost all required dependencies (see below).
 
     conda env create -f {path to environment.yml}
 
 You can activate the environment by running:
 
     conda activate sashimi
+    
+After this you have to install two extra dependencies: `pyvisa` and our forked version of `napari`:
+
+    pip install pyvisa
+    pip install git+https://github.com/portugueslab/napari.git#egg=napari
     
 ### Install with pip
 
@@ -48,25 +55,17 @@ Otherwise, if you want to contribute to the project as a developer, for editable
 
 Now you are ready to go!
 
-## Starting the software from command line
-
-Open a new anaconda prompt and activate your environment like above. Then run:
-
-    sashimi
-    
-Press __User guide__ to pop-up instructions that will drive you through the whole experiment preparation, acquisition and termination.
-
 ## Configuring sashimi
-
-You can ask sashimi for help:
-   
-    sashimi --help
     
 Running `sashimi --debug` lets you start the software without any hardware connected to the machine. Sashimi includes the
 `sashimi-config` module that lets you interact with the hardware and software settings from command line. You can display the
- current configuration of the system by running:
+ current configuration of the system. **You must run this command before launching sashimi for the first time**:
  
     sashimi-config show
+    
+You can ask sashimi for help:
+   
+    sashimi --help
  
 More information on its usage can be found by asking `sashimi-config` for help:
 
@@ -80,3 +79,16 @@ Or to modify the minimum and maximum voltage (in Volts) of the channel:
     
     sashimi-config edit -n piezo.position_write.min_val -v 0
     sashimi-config edit -n piezo.position_write.max_val -v 10
+    
+
+## Starting the software from command line
+
+Open a new anaconda prompt and activate your environment like above. Then run:
+
+    sashimi
+    
+Add the option `--scopeless`:
+
+    sashimi --scopeless
+    
+If you want to run the software with mock hardware, such as for debugging or developing.

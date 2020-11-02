@@ -4,6 +4,7 @@ from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
 from sashimi.hardware.light_source import light_source_class_dict
+from sashimi.hardware import light_source_class_dict
 from sashimi.processes.scanning import Scanner
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
@@ -32,6 +33,9 @@ from sashimi.events import LoggedEvent, SashimiEvents
 from pathlib import Path
 from enum import Enum
 from sashimi.config import read_config
+from datetime import time
+import time
+
 
 conf = read_config()
 
@@ -324,12 +328,12 @@ class State:
             self.light_source = light_source_class_dict[conf["light_source"]["name"]](
                 port=conf["light_source"]["port"]
             )
-        self.camera = CameraProcess(
-            stop_event=self.stop_event,
-            wait_event=self.scanner.wait_signal,
-            exp_trigger_event=self.experiment_start_event,
-        )
-        self.planar_setting = PlanarScanningSettings()
+            self.camera = CameraProcess(
+                stop_event=self.stop_event,
+                wait_event=self.scanner.wait_signal,
+                exp_trigger_event=self.experiment_start_event,
+            )
+
         self.external_comm = ExternalComm(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
@@ -362,6 +366,9 @@ class State:
 
         self.planar_setting = PlanarScanningSettings()
         self.light_source_settings = LightSourceSettings()
+        self.light_source_settings.params.intensity.unit = (
+            self.light_source.intensity_units
+        )
 
         self.save_status: Optional[SavingStatus] = None
 
@@ -499,11 +506,12 @@ class State:
     def start_experiment(self):
         # TODO disable the GUI except the abort button
         self.logger.log_message("started experiment")
-        self.send_scan_settings()
         self.scanner.wait_signal.set()
+        self.send_scan_settings()
         self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
+        time.sleep(0.01)
         self.is_saving_event.set()
 
     def end_experiment(self):
