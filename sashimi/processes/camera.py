@@ -183,7 +183,7 @@ class CameraProcess(LoggingProcess):
         self.parameters = new_parameters
 
         if stop_start:
-            self.camera.stop_acquistion()
+            self.camera.stop_acquisition()
 
         # In general, ROI and binning are a bit funny in their interactions, and need to be handled
         # carefully in the specific camera interfaces.

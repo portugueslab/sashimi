@@ -343,7 +343,7 @@ class HamamatsuCamera(AbstractCamera):
             "dcamcap_start",
         )
 
-    def stop_acquistion(self):
+    def stop_acquisition(self):
         self.check_status(self.dcam.dcamcap_stop(self.camera_handle), "dcamcap_stop")
 
         # Free image buffers.
