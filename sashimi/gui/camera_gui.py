@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import (
 )
 from lightparam.gui import ParameterGui
 from sashimi.state import (
-    convert_camera_params,
     State,
     get_voxel_size,
 )
@@ -57,9 +56,9 @@ class ViewingWidget(QWidget):
         # Note: here we are assuming that the camera has a square sensor, and resolution is
         # described by only one number (most scientific camera are)
         if conf["scopeless"]:
-            self.sensor_resolution = 256
+            self.max_sensor_resolution = [256, 256]
         else:
-            self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
+            self.max_sensor_resolution = conf["camera"]["max_sensor_resolution"]
 
         self.main_layout = QVBoxLayout()
 
@@ -68,7 +67,7 @@ class ViewingWidget(QWidget):
 
         # Add image layer that will be used to show frames/volumes:
         self.frame_layer = self.viewer.add_image(
-            np.zeros([1, self.sensor_resolution, self.sensor_resolution]),
+            np.zeros([1,] + self.max_sensor_resolution),
             blending="translucent",
             name="frame_layer",
         )
@@ -76,7 +75,7 @@ class ViewingWidget(QWidget):
         # Add square ROI of size max image size:
         s = self.get_fullframe_size()
         self.roi = self.viewer.add_shapes(
-            [np.array([[0, 0], [s, 0], [s, s], [0, s]])],
+            [np.array([[0, 0], [s[0], 0], [s[0], s[1]], [0, s[1]]])],
             blending="translucent",
             face_color="yellow",
             face_contrast_limits=(0, 0),
@@ -113,13 +112,13 @@ class ViewingWidget(QWidget):
 
     # @property
     def get_camera_binning(self):
-        return convert_camera_params(self.state.camera_settings).binning
+        return int(self.state.camera_settings.binning)
 
     # @property
     def get_fullframe_size(self):
         """Maximum size of the image at current binning. As stated above, we assume square sensors.
         """
-        return self.sensor_resolution // self.get_camera_binning()
+        return [r // self.get_camera_binning() for r in self.max_sensor_resolution]
 
     @property
     def voxel_size(self):
@@ -177,13 +176,10 @@ class CameraSettingsWidget(QWidget):
 
         self.camera_msg_queue = Queue()
 
-        if conf["scopeless"]:
-            self.sensor_resolution = 256
-        else:
-            self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
+        self.sensor_resolution = self.wid_display.max_sensor_resolution
 
         self.full_size = True
-        self.current_binning = 2  #TODO avoid hardcoding for first assignation
+        self.current_binning = conf["camera"]["default_binning"]
 
         self.wid_camera_settings = ParameterGui(self.state.camera_settings)
 
@@ -269,9 +265,9 @@ class CameraSettingsWidget(QWidget):
         """Set the ROI by passing ROI coordinates to the camera settings.
         A bunch of controls need to happen before we can safely send the ROI to the camera.
         """
-        max_image_dimension = self.sensor_resolution // self.current_binning
+        max_image_dimension = self.wid_display.get_fullframe_size()
         # Make sure that the coordinates of the cropped ROI are within the image by cropping at o and max size
-        cropped_coords = [max(min(i, max_image_dimension), 0) for i in self.roi_coords]
+        cropped_coords = [max(min(i, max_image_dimension[n % 2]), 0) for n, i in enumerate(self.roi_coords)]
 
         # Calculate dimensions of the image:
         height = cropped_coords[2] - cropped_coords[0]
@@ -284,7 +280,7 @@ class CameraSettingsWidget(QWidget):
         self.state.camera_settings.roi = [cropped_coords[0], cropped_coords[1], height, width]
 
     def set_full_frame(self):
-        s = self.sensor_resolution // self.current_binning
+        s = self.wid_display.get_fullframe_size()
+        self.roi.data = [np.array([[0, 0], [s[0], 0], [s[0], s[1]], [0, s[1]]])]
 
-        self.roi.data = [np.array([[0, 0], [s, 0], [s, s], [0, s]])]
-        self.state.camera_settings.roi = [0, 0, s, s]
+        self.state.camera_settings.roi = [0, 0, s[0], s[1]]
