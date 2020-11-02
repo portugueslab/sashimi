@@ -4,7 +4,7 @@ from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
 from sashimi.hardware.light_source import light_source_class_dict
-from sashimi.hardware import light_source_class_dict
+# from sashimi.hardware import light_source_class_dict
 from sashimi.processes.scanning import Scanner
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
