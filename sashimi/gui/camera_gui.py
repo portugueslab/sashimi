@@ -5,9 +5,9 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QPushButton,
     QCheckBox,
-    QSlider
 )
-from lightparam.gui import ParameterGui, Param
+from lightparam.gui import ParameterGui
+from lightparam import Param
 from lightparam.param_qt import ParametrizedQt
 from sashimi.state import (
     State,
