@@ -4,8 +4,11 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
+    QCheckBox,
+    QSlider
 )
-from lightparam.gui import ParameterGui
+from lightparam.gui import ParameterGui, Param
+from lightparam.param_qt import ParametrizedQt
 from sashimi.state import (
     convert_camera_params,
     State,
@@ -33,6 +36,13 @@ ROI_TEXTS = {
     RoiState.DISPLAYED: "Set ROI",
     RoiState.SET: "Reset full frame",
 }
+
+
+class ContrastSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__(self)
+        self.name = "image_contrast"
+        self.contrast_range = Param((32, 65530), (0, 65535))
 
 
 class ViewingWidget(QWidget):
@@ -94,8 +104,15 @@ class ViewingWidget(QWidget):
         self.viewer.window.qt_viewer.viewerButtons.ndisplayButton.setText("3D mode")
 
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
-        # TODO: Add option to manually adjust contrast (line below is a first attempt)
-        # self.bottom_layout.addWidget(self.viewer.window.qt_viewer.dockLayerControls)
+
+        self.auto_contrast_chk = QCheckBox("Autoadjust contrast")
+
+        self.contrast_range = ContrastSettings()
+        self.wid_contrast_range = ParameterGui(self.contrast_range)
+
+        self.bottom_layout.addWidget(self.auto_contrast_chk)
+        self.bottom_layout.addWidget(self.wid_contrast_range)
+
         self.bottom_layout.addStretch()
 
         self.main_layout.addWidget(self.viewer.window.qt_viewer)
@@ -103,12 +120,19 @@ class ViewingWidget(QWidget):
         self.setLayout(self.main_layout)
 
         # Connect changes of camera and laser to contrast reset:
+
+        self.auto_contrast_chk.stateChanged.connect(self.auto_contrast)
+        self.contrast_range.sig_param_changed.connect(self.set_manual_contrast)
+
+        self.auto_contrast_chk.setChecked(True)
+
         self.state.camera_settings.sig_param_changed.connect(self.reset_contrast)
         self.state.light_source_settings.sig_param_changed.connect(self.reset_contrast)
         self.viewer.window.qt_viewer.viewerButtons.resetViewButton.pressed.connect(self.reset_contrast)
 
         self.refresh_display = True
         self.is_first_frame = True
+        self.auto_contrast = True
         self.image_shape = (1, s, s)
 
     # @property
@@ -152,7 +176,21 @@ class ViewingWidget(QWidget):
         self.is_first_frame = False
 
     def reset_contrast(self):
-        self.frame_layer.reset_contrast_limits()
+        if self.auto_contrast:
+            self.frame_layer.reset_contrast_limits()
+        else:
+            self.set_manual_contrast()
+
+    def auto_contrast(self):
+        if self.auto_contrast_chk.isChecked():
+            self.wid_contrast_range.hide()
+            self.auto_contrast = True
+        else:
+            self.wid_contrast_range.show()
+            self.auto_contrast = False
+
+    def set_manual_contrast(self):
+        self.frame_layer.contrast_limits = [i for i in self.contrast_range.contrast_range]
 
 
 class CameraSettingsWidget(QWidget):
@@ -183,7 +221,7 @@ class CameraSettingsWidget(QWidget):
             self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
 
         self.full_size = True
-        self.current_binning = 2  #TODO avoid hardcoding for first assignation
+        self.current_binning = 2  # TODO avoid hardcoding for first assignation
 
         self.wid_camera_settings = ParameterGui(self.state.camera_settings)
 
