@@ -114,9 +114,9 @@ class CameraSettings(ParametrizedQt):
         super().__init__()
         self.name = "camera/parameters"
         self.exposure = Param(60, (2, 1000), unit="ms")
-        self.binning = Param("1x1", ["1x1", "2x2", "4x4"])
+        self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
         self.roi = Param(
-            [0, 0, 2048, 2048], gui=False
+            [0, 0, 1024, 1024], gui=False
         )  # order of params here is [hpos, vpos, hsize, vsize,]; h: horizontal, v: vertical
 
 
@@ -413,7 +413,7 @@ class State:
         self.single_plane_settings.sig_param_changed.connect(self.send_scan_settings)
         self.volume_setting.sig_param_changed.connect(self.send_scan_settings)
 
-        self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
+        # self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
         self.save_settings.sig_param_changed.connect(self.send_scan_settings)
 
         self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
@@ -430,7 +430,7 @@ class State:
 
         self.all_settings = dict(camera=dict(), scanning=dict())
 
-        self.current_camera_status = CamParameters()
+        self.current_binning = 2  # TODO avoid hardcoding
         self.send_scan_settings()
         self.logger.log_message("initialized")
 
@@ -451,9 +451,7 @@ class State:
 
     def send_camera_settings(self):
         camera_params = convert_camera_params(self.camera_settings)
-        camera_params.roi = tuple(
-            ([i // camera_params.binning for i in camera_params.roi])
-        )
+
         camera_params.trigger_mode = (
             TriggerMode.FREE
             if self.global_state == GlobalState.PREVIEW

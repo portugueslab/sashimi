@@ -183,7 +183,7 @@ class CameraSettingsWidget(QWidget):
             self.sensor_resolution = conf["camera"]["sensor_resolution"][0]
 
         self.full_size = True
-        self.current_binning = 1  #TODO avoid hardcoding for first assignation
+        self.current_binning = 2  #TODO avoid hardcoding for first assignation
 
         self.wid_camera_settings = ParameterGui(self.state.camera_settings)
 
@@ -220,12 +220,14 @@ class CameraSettingsWidget(QWidget):
             self.btn_cancel_roi.show()
             # TODO: Select shape layer without napari key bindings
             self.wid_display.viewer.press_key("s")
+            self.wid_camera_settings.param_widgets["binning"].setEnabled(False)
         elif self.roi_state == RoiState.SET:
             self._hide_roi()
             self.set_roi()
             self.btn_cancel_roi.hide()
             # Disable binning option if an ROI is set:
-            self.wid_camera_settings.param_widgets["binning"].setEnabled(False)
+
+        self.btn_roi.setText(ROI_TEXTS[self.roi_state])
 
     def _hide_roi(self):
         self.wid_display.roi.visible = False
@@ -243,8 +245,15 @@ class CameraSettingsWidget(QWidget):
         """
         if "binning" in changed_params.keys():
             b = int(changed_params["binning"][0])
-            self.roi.data = self.roi.data[0] / (b / self.current_binning)
+            self.roi.data = [self.roi.data[0] / (b / self.current_binning)]
             self.current_binning = b
+            self.state.camera_settings.block_signal = True
+            self.set_roi()
+            self.state.camera_settings.block_signal = False
+
+        # Camera settings are sent through the state here to avoid out of synch call of this and
+        # the state.send_camera_setting() methods when updating and keep everything together.
+        self.state.send_camera_settings()
 
     @property
     def roi_coords(self):
@@ -275,9 +284,7 @@ class CameraSettingsWidget(QWidget):
         self.state.camera_settings.roi = [cropped_coords[0], cropped_coords[1], height, width]
 
     def set_full_frame(self):
-        self.state.camera_settings.roi = [
-            0,
-            0,
-            self.sensor_resolution // self.current_binning,
-            self.sensor_resolution // self.current_binning,
-        ]
+        s = self.sensor_resolution // self.current_binning
+
+        self.roi.data = [np.array([[0, 0], [s, 0], [s, s], [0, s]])]
+        self.state.camera_settings.roi = [0, 0, s, s]

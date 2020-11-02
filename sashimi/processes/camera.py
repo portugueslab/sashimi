@@ -12,6 +12,7 @@ from sashimi.config import read_config
 
 conf = read_config()
 
+FULL_SIZE = 2048 // 2  # TODO get this from config, too many numbers in this module
 
 class CameraMode(Enum):
     PREVIEW = 1
@@ -29,16 +30,16 @@ class TriggerMode(Enum):
 @dataclass
 class CamParameters:
     exposure_time: float = 60
-    binning: int = 1
+    binning: int = 2
     roi: tuple = (
         0,
         0,
-        1024,
-        1024,
+        FULL_SIZE,
+        FULL_SIZE,
     )  # order of params here is [hpos, vpos, hsize, vsize,]
-    image_height: int = 2048
-    image_width: int = 2048
-    frame_shape: tuple = (1024, 1024)
+    image_height: int = FULL_SIZE
+    image_width: int = FULL_SIZE
+    frame_shape: tuple = (FULL_SIZE, FULL_SIZE)
     internal_frame_rate: float = 60
     trigger_mode: TriggerMode = TriggerMode.FREE
     camera_mode: CameraMode = CameraMode.PAUSED

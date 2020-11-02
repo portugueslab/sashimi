@@ -39,7 +39,7 @@ import ctypes
 
 class HamamatsuCamera(AbstractCamera):
     def __init__(self, camera_id, sensor_resolution):
-        #TODO if we read image size from camera, we don't need the sensor resolution here
+        # TODO if we read image size from camera, we don't need the sensor resolution here
         super().__init__(camera_id, sensor_resolution)
         self.dcam = ctypes.windll.dcamapi
         paraminit = DCAMAPI_INIT(0, 0, 0, 0, None, None)
@@ -64,7 +64,6 @@ class HamamatsuCamera(AbstractCamera):
 
         self.properties = self.get_camera_properties()
         self.exposure_time = 60
-
 
         self._roi = (0, 0, self.sensor_resolution[0], self.sensor_resolution[1])
         self._trigger_mode = TriggerMode.FREE
@@ -113,8 +112,8 @@ class HamamatsuCamera(AbstractCamera):
 
     @roi.setter
     def roi(self, exp_val: tuple):
-        self._roi = [min((i * self.binning // 4) * 4, 2048) for i in exp_val]
-        print("roi", self._roi)
+        self._roi = [min((i // 4) * 4, 2048) for i in exp_val]
+        # print("roi setting; received ", exp_val, ", setting ", self._roi, "because of binning ", self.binning)
         self.set_property_value("subarray_vpos", self._roi[0])
         self.set_property_value("subarray_hpos", self._roi[1])
         self.set_property_value("subarray_vsize", self._roi[2])
@@ -290,18 +289,20 @@ class HamamatsuCamera(AbstractCamera):
         self.last_frame_number = 0
 
         # set subarray mode
-        self._frame_bytes = self.get_property_value("image_framebytes")
+        # self._frame_bytes = self.get_property_value("image_framebytes")
 
         """
         This sets the sub-array mode as appropriate based on the current ROI.
         """
 
-        print("Image size", self.sensor_resolution)
+        # print("Image size", self.sensor_resolution)
         # Check ROI properties.
         roi_w = self.get_property_value("subarray_hsize")
         roi_h = self.get_property_value("subarray_vsize")
 
-        print("roi size", roi_h, roi_w)
+        print("------------starting acquisition-----------")
+        print("roi size", roi_h, roi_w, "binning", self.get_property_value("binning"),
+              "size", self.sensor_resolution, "framebytes", self._frame_bytes)
 
         # If the ROI is smaller than the entire frame turn on subarray mode
         if (roi_h == self.sensor_resolution[0]) and (roi_w == self.sensor_resolution[1]):
@@ -312,6 +313,9 @@ class HamamatsuCamera(AbstractCamera):
 
         # Get size of frame
         self._frame_bytes = self.get_property_value("image_framebytes")
+        # print("roi size", roi_h, roi_w, "; binning", self.get_property_value("binning"),
+        #       "; size", self.sensor_resolution, "; mode", self.get_property_value("subarray_mode"),
+        #       "; framebytes", self._frame_bytes)
 
         if self.old_frame_bytes != self._frame_bytes:
             # The larger of either 2000 frames or some weird calculation for number of buffers for 2 seconds of data
