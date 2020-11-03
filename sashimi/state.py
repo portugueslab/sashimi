@@ -525,9 +525,14 @@ class State:
         self.saver.save_queue.clear()
         self.send_scansave_settings()
 
-    def obtain_noise_average(self, n_images=50, dtype=np.uint16):
-        """
-        Obtains average noise of n_images to subtract to acquired, both for display and saving
+    def obtain_noise_average(self, n_images=50):
+        """Obtains average noise of n_images to subtract to acquired, both for display and saving.
+
+        Parameters
+        ----------
+        n_images : int
+            Number of frames to average.
+
         """
         self.noise_subtraction_active.clear()
 
@@ -540,12 +545,13 @@ class State:
                 current_image = current_volume[0, :, :]
                 if n_image == 0:
                     calibration_set = np.empty(
-                        shape=(n_images, *current_image.shape), dtype=dtype
+                        shape=(n_images, *current_image.shape), dtype=current_volume.dtype
                     )
                 calibration_set[n_image, :, :] = current_image
                 n_image += 1
+
         self.noise_subtraction_active.set()
-        self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
+        self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=current_volume.dtype)
         self.light_source.intensity = light_intensity
 
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)

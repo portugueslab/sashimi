@@ -11,6 +11,19 @@ from sashimi.utilities import get_last_parameters
 TIMEOUT_S = 0.001
 
 class VolumeDispatcher(LoggingProcess):
+    """
+
+    Parameters
+    ----------
+    stop_event
+    saving_signal
+    wait_signal
+    noise_subtraction_on
+    camera_queue
+    saver_queue
+    max_queue_size
+
+    """
     def __init__(
         self,
         stop_event: LoggedEvent,
@@ -40,12 +53,10 @@ class VolumeDispatcher(LoggingProcess):
         self.i_plane = 0
         self.first_volume = True
 
-        self.k = 0
-
     def run(self):
         self.logger.log_message("started")
         while not self.stop_event.is_set():
-            self.send_receive()
+            self.receive_options()
             self.get_frame()
         self.close_log()
 
@@ -69,7 +80,6 @@ class VolumeDispatcher(LoggingProcess):
     def fill_queues(self):
         if self.viewer_queue.queue.qsize() < 3:
             self.viewer_queue.put(self.volume_buffer)
-            self.k += 1
         else:
             pass  # volume has been dropped from the viewer
         if self.saving_signal.is_set():
@@ -92,18 +102,18 @@ class VolumeDispatcher(LoggingProcess):
         except Empty:
             pass
 
-    def send_receive(self):
-        # Get number of planes, emptying the queue first:
+    def receive_options(self):
+        # Get number of planes:
         n_planes = get_last_parameters(self.n_planes_queue, timeout=TIMEOUT_S)
 
         if n_planes is not None:
             self.n_planes = n_planes
             self.reset()
 
-        try:
-            self.calibration_ref = self.calibration_ref_queue.get(timeout=TIMEOUT_S)
-        except Empty:
-            pass
+        # Get flat noise image to subtract:
+        calibration_ref = get_last_parameters(self.calibration_ref_queue, timeout=TIMEOUT_S)
+        if calibration_ref is not None:
+            self.calibration_ref = calibration_ref
 
     def reset(self):
         self.first_volume = True

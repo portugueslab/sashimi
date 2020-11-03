@@ -61,6 +61,8 @@ class ViewingWidget(QWidget):
         Timer from the main GUI.
     """
 
+    _DELAY_REFRESH_COUNT = 10
+
     def __init__(self, state: State, timer: QTimer):
         super().__init__()
         self.state = state
@@ -73,7 +75,14 @@ class ViewingWidget(QWidget):
         else:
             self.max_sensor_resolution = conf["camera"]["max_sensor_resolution"]
 
-        self.main_layout = QVBoxLayout()
+        self.noise_subtraction_set = False
+        self.count_from_change = None
+        self.refresh_display = True
+        self.is_first_frame = True
+        self.auto_contrast = True
+
+        s = self.get_fullframe_size()
+        self.image_shape = (1, s, s)
 
         self.viewer = napari.Viewer(show=False)
         self.viewer.theme = "dark_sashimi"
@@ -86,7 +95,6 @@ class ViewingWidget(QWidget):
         )
 
         # Add square ROI of size max image size:
-        s = self.get_fullframe_size()
         self.roi = self.viewer.add_shapes(
             [np.array([[0, 0], [s[0], 0], [s[0], s[1]], [0, s[1]]])],
             blending="translucent",
@@ -97,6 +105,7 @@ class ViewingWidget(QWidget):
             name="roi_layer"
         )
 
+        self.main_layout = QVBoxLayout()
         self.bottom_layout = QHBoxLayout()
 
         self.viewer.window.qt_viewer.viewerButtons.consoleButton.hide()
@@ -123,25 +132,20 @@ class ViewingWidget(QWidget):
         self.setLayout(self.main_layout)
 
         # Connect changes of camera and laser to contrast reset:
-
-        self.auto_contrast_chk.stateChanged.connect(self.auto_contrast)
+        self.auto_contrast_chk.stateChanged.connect(self.update_auto_contrast)
         self.contrast_range.sig_param_changed.connect(self.set_manual_contrast)
 
         self.auto_contrast_chk.setChecked(True)
 
-        self.state.camera_settings.sig_param_changed.connect(self.reset_contrast)
-        self.state.light_source_settings.sig_param_changed.connect(self.reset_contrast)
+        self.state.camera_settings.sig_param_changed.connect(self.launch_delayed_contrast_reset)
+        self.state.light_source_settings.sig_param_changed.connect(self.launch_delayed_contrast_reset)
         self.viewer.window.qt_viewer.viewerButtons.resetViewButton.pressed.connect(self.reset_contrast)
-
-        self.refresh_display = True
-        self.is_first_frame = True
-        self.auto_contrast = True
-        self.image_shape = (1, s, s)
 
     def get_fullframe_size(self):
         """Maximum size of the image at current binning. As stated above, we assume square sensors.
         """
-        return [r // int(self.state.camera_settings.binning) for r in self.max_sensor_resolution]
+        binning = int(self.state.camera_settings.binning)
+        return [r // binning for r in self.max_sensor_resolution]
 
     @property
     def voxel_size(self):
@@ -153,6 +157,32 @@ class ViewingWidget(QWidget):
     def refresh(self) -> None:
         """Main refresh loop called by timeout of the main timer."""
         self.refresh_image()
+
+        self.check_noise_subtraction_state()
+
+        # This pattern with the counting is required to update the image range with some delay,
+        # as the first received afterwards might still be the wrong one when changing exposure or noise subtraction
+        if self.count_from_change is not None:
+            self.count_from_change += 1
+            if self.count_from_change == self._DELAY_REFRESH_COUNT:
+                print("delayied resetting")
+                self.reset_contrast()
+                self.count_from_change = None
+
+    def check_noise_subtraction_state(self):
+        """If we toggled noise subtraction, reset contrast.
+        """
+        noise_subtraction_set = self.state.noise_subtraction_active.is_set()
+        if noise_subtraction_set != self.noise_subtraction_set:
+            self.noise_subtraction_set = noise_subtraction_set
+            self.launch_delayed_contrast_reset()
+
+    def launch_delayed_contrast_reset(self):
+        """By setting this from None to 0, we schedule a delayed contrast reset.
+        The actual counting happens in the main refresh, connected to the timer.
+        """
+        print("triggering delayied contrast")
+        self.count_from_change = 0
 
     def refresh_image(self):
         current_image = self.state.get_volume()
@@ -166,7 +196,7 @@ class ViewingWidget(QWidget):
         self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
 
         # Check if anything changed in the image shape, which would mean that changes of the contrast
-        # are required (in case the parameter update was missed).
+        # are required (in case a parameter update was missed).
         if self.is_first_frame or self.image_shape != current_image.shape:
             self.reset_contrast()
             self.viewer.reset_view()
@@ -180,13 +210,15 @@ class ViewingWidget(QWidget):
         else:
             self.set_manual_contrast()
 
-    def auto_contrast(self):
-        if self.auto_contrast_chk.isChecked():
-            self.wid_contrast_range.hide()
+    def update_auto_contrast(self, is_checked):
+        if is_checked:
+            self.wid_contrast_range.setEnabled(False)
             self.auto_contrast = True
+            self.reset_contrast()
         else:
-            self.wid_contrast_range.show()
+            self.wid_contrast_range.setEnabled(True)
             self.auto_contrast = False
+            self.set_manual_contrast()
 
     def set_manual_contrast(self):
         self.frame_layer.contrast_limits = self.contrast_range.contrast_range
