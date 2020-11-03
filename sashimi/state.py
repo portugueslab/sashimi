@@ -329,11 +329,11 @@ class State:
             self.light_source = light_source_class_dict[conf["light_source"]["name"]](
                 port=conf["light_source"]["port"]
             )
-            self.camera = CameraProcess(
-                stop_event=self.stop_event,
-                wait_event=self.scanner.wait_signal,
-                exp_trigger_event=self.experiment_start_event,
-            )
+        self.camera = CameraProcess(
+            stop_event=self.stop_event,
+            wait_event=self.scanner.wait_signal,
+            exp_trigger_event=self.experiment_start_event,
+        )
 
         self.external_comm = ExternalComm(
             stop_event=self.stop_event,
