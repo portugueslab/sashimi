@@ -83,12 +83,11 @@ class StatusBarWidget(QStatusBar):
         self.voxel_size = get_voxel_size(self.state.volume_setting, self.state.camera_settings)
         if self.state.voxel_size and self.state.global_state == GlobalState.VOLUME_PREVIEW:
             self.voxel_size_lbl.setText(
-                f"Voxel size: {self.voxel_size[0]} x {self.voxel_size[1]} x {self.voxel_size[2]} um"
+                f"Voxel size: {self.voxel_size[0]:.2f} x {self.voxel_size[1]:.2f} x {self.voxel_size[2]:.2f} um"
             )
-            #TODO format to approximate at 2 numbers
         else:
             self.voxel_size_lbl.setText(
-                f"Pixel size: {self.voxel_size[1]} x {self.voxel_size[2]} um"
+                f"Pixel size: {self.voxel_size[1]:.2f} x {self.voxel_size[2]:.2f} um"
             )
 
     def refresh_progress_bar(self):
