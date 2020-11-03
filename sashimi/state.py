@@ -294,6 +294,7 @@ class State:
         self.calibration_ref = None
         self.waveform = None
         self.n_planes = 1
+        self.current_plane = 0
         self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
         self.restart_event = LoggedEvent(self.logger, SashimiEvents.RESTART_SCANNING)
         self.experiment_start_event = LoggedEvent(

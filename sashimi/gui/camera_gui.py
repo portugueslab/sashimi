@@ -113,7 +113,12 @@ class ViewingWidget(QWidget):
         self.viewer.window.qt_viewer.viewerButtons.gridViewButton.hide()
         self.viewer.window.qt_viewer.viewerButtons.transposeDimsButton.hide()
         self.viewer.window.qt_viewer.viewerButtons.resetViewButton.setText("Reset view")
-        self.viewer.window.qt_viewer.viewerButtons.ndisplayButton.setText("3D mode")
+
+        self.ndisplay_button = self.viewer.window.qt_viewer.viewerButtons.ndisplayButton
+        self.ndisplay_button.setText("3D mode")
+        self.ndisplay_button.clicked.connect(self.toggle_ndims)
+
+        self.viewer.dims.events.connect(self.update_current_plane)
 
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
 
@@ -165,7 +170,6 @@ class ViewingWidget(QWidget):
         if self.count_from_change is not None:
             self.count_from_change += 1
             if self.count_from_change == self._DELAY_REFRESH_COUNT:
-                print("delayied resetting")
                 self.reset_contrast()
                 self.count_from_change = None
 
@@ -181,7 +185,6 @@ class ViewingWidget(QWidget):
         """By setting this from None to 0, we schedule a delayed contrast reset.
         The actual counting happens in the main refresh, connected to the timer.
         """
-        print("triggering delayied contrast")
         self.count_from_change = 0
 
     def refresh_image(self):
@@ -193,7 +196,7 @@ class ViewingWidget(QWidget):
         if current_image.shape[0] == 1:
             self.frame_layer.dims.reset()
         self.frame_layer.data = current_image
-        self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
+        # self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
 
         # Check if anything changed in the image shape, which would mean that changes of the contrast
         # are required (in case a parameter update was missed).
@@ -203,6 +206,19 @@ class ViewingWidget(QWidget):
 
         self.image_shape = current_image.shape
         self.is_first_frame = False
+
+    def toggle_ndims(self):
+        """We set the scale only if we are in 3D mode, otherwise there can be funny problems with
+        the image slider in the 2D view.
+        Hopefully all of this will be improved in newer versions of Napari
+        """
+        if self.ndisplay_button.isChecked():
+            self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
+        else:
+            self.frame_layer.scale = [1.0, 1.0, 1.0]
+
+    def update_current_plane(self, _):
+        self.state.current_plane = self.viewer.dims.current_step[0]
 
     def reset_contrast(self):
         if self.auto_contrast:
