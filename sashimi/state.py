@@ -106,15 +106,17 @@ class ZRecordingSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
         self.name = "scanning/volumetric_recording"
-        self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
-        self.frequency = Param(1.0, (0.1, 100), unit="volumes/s (Hz)")
-        self.n_planes = Param(10, (2, 100))
+        self.scan_range = Param((180.0, 220.0), (0.0, 400.0), unit="um")
+        self.frequency = Param(3.0, (0.1, 100), unit="volumes/s (Hz)")
+        self.n_planes = Param(4, (2, 100))
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
 
 
 roi_size = [0, 0] + [r // conf["camera"]["default_binning"]
                      for r in conf["camera"]["max_sensor_resolution"]]
+
+
 class CameraSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
@@ -123,7 +125,6 @@ class CameraSettings(ParametrizedQt):
         self.binning = Param(conf["camera"]["default_binning"], [1, 2, 4])
         self.roi = Param(roi_size, gui=False
         )  # order of params here is [hpos, vpos, hsize, vsize,]; h: horizontal, v: vertical
-
 
 
 class LightSourceSettings(ParametrizedQt):

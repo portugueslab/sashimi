@@ -279,6 +279,7 @@ class VolumetricScanLoop(ScanLoop):
 
     def check_start(self):
         super().check_start()
+        print("check start")
         if (
             self.parameters.experiment_state
             == ExperimentPrepareState.EXPERIMENT_STARTED
