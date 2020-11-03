@@ -167,6 +167,7 @@ class StatusWidget(QTabWidget):
         self.setTabEnabled(2, False)
 
         self.currentChanged.connect(self.update_status)
+        self.currentChanged.connect(self.wid_volume.wid_wave.update_pulses)
 
     def update_status(self):
         self.state.status.scanning_state = self.option_dict[self.currentIndex()]
