@@ -164,7 +164,7 @@ class StatusWidget(QTabWidget):
         self.addTab(self.wid_volume, self.option_dict[3])
 
         # TODO: delete this line when single-plane scanning mode is implemented
-        self.setTabEnabled(2, False)
+        # self.setTabEnabled(2, False)
 
         self.currentChanged.connect(self.update_status)
         self.currentChanged.connect(self.wid_volume.wid_wave.update_pulses)

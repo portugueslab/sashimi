@@ -47,6 +47,7 @@ class GlobalState(Enum):
     VOLUME_PREVIEW = 3
     EXPERIMENT_RUNNING = 4
 
+
 class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
@@ -106,7 +107,7 @@ class ZRecordingSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
         self.name = "scanning/volumetric_recording"
-        self.scan_range = Param((180.0, 220.0), (0.0, 400.0), unit="um")
+        self.piezo_scan_range = Param((180.0, 220.0), (0.0, 400.0), unit="um")
         self.frequency = Param(3.0, (0.1, 100), unit="volumes/s (Hz)")
         self.n_planes = Param(4, (2, 100))
         self.n_skip_start = Param(0, (0, 20))
@@ -213,7 +214,7 @@ def get_voxel_size(
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
 ):
-    scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
+    scan_length = scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
 
     binning = int(camera_settings.binning)
 
@@ -270,8 +271,8 @@ def convert_volume_params(
         state=ScanningState.VOLUMETRIC,
         xy=convert_planar_params(planar),
         z=ZScanning(
-            piezo_min=z_setting.scan_range[0],
-            piezo_max=z_setting.scan_range[1],
+            piezo_min=z_setting.piezo_scan_range[0],
+            piezo_max=z_setting.piezo_scan_range[1],
             frequency=z_setting.frequency,
             lateral_sync=tuple(calibration.calibration[0]),
             frontal_sync=tuple(calibration.calibration[1]),
@@ -294,7 +295,6 @@ class State:
 
         self.calibration_ref = None
         self.waveform = None
-        self.n_planes = 1
         self.current_plane = 0
         self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
         self.restart_event = LoggedEvent(self.logger, SashimiEvents.RESTART_SCANNING)
@@ -394,8 +394,8 @@ class State:
         self.status.sig_param_changed.connect(self.change_global_state)
 
         self.planar_setting.sig_param_changed.connect(self.send_scansave_settings)
-        self.calibration.z_settings.sig_param_changed.connect(self.send_scansave_settings)
-        self.single_plane_settings.sig_param_changed.connect(self.send_scansave_settings)
+        self.calibration.z_settings.sig_param_changed.connect(self.send_scan_settings)
+        self.single_plane_settings.sig_param_changed.connect(self.send_scan_settings)
         self.volume_setting.sig_param_changed.connect(self.send_scan_settings)
 
         self.save_settings.sig_param_changed.connect(self.send_scansave_settings)
@@ -440,7 +440,7 @@ class State:
 
         camera_params.trigger_mode = (
             TriggerMode.FREE
-            if self.global_state == GlobalState.PREVIEW
+            if self.global_state == GlobalState.PREVIEW or self.global_state == GlobalState.PLANAR_PREVIEW
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
@@ -452,13 +452,45 @@ class State:
         self.camera.parameter_queue.put(camera_params)
         self.all_settings["camera"] = camera_params
 
-    def send_scan_settings(self):
+    def send_scan_settings(self, param_changed=None):
         # Restart scanning loop if scanning params have changed:
-        self.restart_event.set()
+        if self.global_state == GlobalState.VOLUME_PREVIEW:
+            self.restart_event.set()
+        # print(param_changed)
+        #
+        # # Synch piezo position across modalities, for usability:
+        # if param_changed is not None:
+        #     key = list(param_changed.keys())[0]
+        #     if "piezo" in key:
+        #         val = param_changed[key]
+        #         piezo_pos = val[0] if type(val) is tuple else val
+        #
+        #         # Block change signals, change, and unblock
+        #         self.single_plane_settings.block_signal = True
+        #         self.calibration.z_settings.block_signal = True
+        #         self.volume_setting.block_signal = True
+        #
+        #         # Change z values:
+        #         self.single_plane_settings.piezo = piezo_pos
+        #         # self.calibration.z_settings.piezo = piezo_pos
+        #         current_range = self.volume_setting.piezo_scan_range[1] - self.volume_setting.piezo_scan_range[0]
+        #         self.volume_setting.piezo_scan_range = (piezo_pos, piezo_pos + current_range)
+        #
+        #         # Unblock change signals:
+        #         self.single_plane_settings.block_signal = False
+        #         self.calibration.z_settings.block_signal = False
+        #         self.volume_setting.block_signal = False
+
         self.send_scansave_settings()
 
+    @property
+    def n_planes(self):
+        if self.global_state == GlobalState.VOLUME_PREVIEW:
+            return self.volume_setting.n_planes - self.volume_setting.n_skip_start - self.volume_setting.n_skip_end
+        else:
+            return 1
+
     def send_scansave_settings(self):
-        self.n_planes = 1
         if self.global_state == GlobalState.PAUSED:
             params = ScanParameters(state=ScanningState.PAUSED)
 
@@ -478,11 +510,7 @@ class State:
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
-            self.n_planes = (
-                self.volume_setting.n_planes
-                - self.volume_setting.n_skip_start
-                - self.volume_setting.n_skip_end
-            )
+
             if self.waveform is not None:
                 pulses = self.calculate_pulse_times() * self.sample_rate
                 try:

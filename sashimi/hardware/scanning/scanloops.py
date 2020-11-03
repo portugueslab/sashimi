@@ -220,6 +220,10 @@ class ScanLoop:
 class PlanarScanLoop(ScanLoop):
     """Class for controlling the planar scanning mode, where we image only one plane and
     do not control the piezo and vertical galvo."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.camera_pulses = RollingBuffer(self.n_samples_period())
+
     def loop_condition(self):
         return (
             super().loop_condition() and self.parameters.state == ScanningState.PLANAR
@@ -279,7 +283,6 @@ class VolumetricScanLoop(ScanLoop):
 
     def check_start(self):
         super().check_start()
-        print("check start")
         if (
             self.parameters.experiment_state
             == ExperimentPrepareState.EXPERIMENT_STARTED
