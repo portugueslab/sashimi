@@ -14,6 +14,7 @@ from sashimi.state import (
     get_voxel_size,
 )
 import napari
+from napari.layers.shapes._shapes_constants import Mode
 import numpy as np
 from warnings import warn
 from sashimi.hardware.cameras.interface import CameraWarning
@@ -93,6 +94,7 @@ class ViewingWidget(QWidget):
             face_contrast_limits=(0, 0),
             opacity=0.7,
             visible=False,
+            name="roi_layer"
         )
 
         self.bottom_layout = QHBoxLayout()
@@ -201,7 +203,6 @@ class CameraSettingsWidget(QWidget):
     """
 
     def __init__(self, state, wid_display, timer):
-
         super().__init__()
         self.wid_display = wid_display
         self.roi = wid_display.roi
@@ -229,11 +230,12 @@ class CameraSettingsWidget(QWidget):
         self.layout().addWidget(self.btn_roi)
         self.layout().addWidget(self.btn_cancel_roi)
 
-        self.btn_roi.clicked.connect(self.roi_action)
+        self.btn_roi.clicked.connect(self.iterate_roi_state)
         self.btn_cancel_roi.clicked.connect(self.cancel_roi_selection)
 
-    def roi_action(self):
-        """Roi action is called whenever we press the set ROI button.
+    def iterate_roi_state(self):
+        """Called whenever we press the set ROI button, go to state of the ROI.
+
         The napari ROI has three states, each of them with buttons and properties etc. The code is executed depending
         on the status the ROI is, and changes the status for the next button press call.
         """
@@ -250,14 +252,15 @@ class CameraSettingsWidget(QWidget):
         elif self.roi_state == RoiState.DISPLAYED:
             self._show_roi()
             self.btn_cancel_roi.show()
-            # TODO: Select shape layer without napari key bindings
-            self.wid_display.viewer.press_key("s")
+            self.wid_display.viewer.layers["roi_layer"].mode = Mode.SELECT
+            #TODO add autoselection of the ROI w/o clicking
+
+            # Disable binning option if an ROI is set:
             self.wid_camera_settings.param_widgets["binning"].setEnabled(False)
         elif self.roi_state == RoiState.SET:
             self._hide_roi()
             self.set_roi()
             self.btn_cancel_roi.hide()
-            # Disable binning option if an ROI is set:
 
         self.btn_roi.setText(ROI_TEXTS[self.roi_state])
 
@@ -269,7 +272,7 @@ class CameraSettingsWidget(QWidget):
 
     def cancel_roi_selection(self):
         self.roi_state = RoiState(3)
-        self.roi_action()
+        self.iterate_roi_state()
 
     def update_on_bin_change(self, changed_params):
         """Update ROI coordinates when changing the binning.

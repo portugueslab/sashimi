@@ -62,9 +62,7 @@ class StatusBarWidget(QStatusBar):
             if self.state.global_state == GlobalState.PREVIEW:
                 expected_frame_rate = None
             if self.state.global_state == GlobalState.VOLUME_PREVIEW:
-                vol_sets = self.state.volume_setting
-                n_planes = (vol_sets.n_planes - vol_sets.n_skip_start - vol_sets.n_skip_end)
-                expected_frame_rate = vol_sets.frequency * n_planes
+                expected_frame_rate = self.state.volume_setting.frequency * self.state.n_planes
             if self.state.global_state == GlobalState.PLANAR_PREVIEW:
                 expected_frame_rate = self.state.single_plane_settings.frequency
 
@@ -87,9 +85,10 @@ class StatusBarWidget(QStatusBar):
             self.voxel_size_lbl.setText(
                 f"Voxel size: {self.voxel_size[0]} x {self.voxel_size[1]} x {self.voxel_size[2]} um"
             )
+            #TODO format to approximate at 2 numbers
         else:
             self.voxel_size_lbl.setText(
-                f"Voxel size: {self.voxel_size[1]} x {self.voxel_size[2]} um"
+                f"Pixel size: {self.voxel_size[1]} x {self.voxel_size[2]} um"
             )
 
     def refresh_progress_bar(self):

@@ -293,6 +293,7 @@ class State:
 
         self.calibration_ref = None
         self.waveform = None
+        self.n_planes = 1
         self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
         self.restart_event = LoggedEvent(self.logger, SashimiEvents.RESTART_SCANNING)
         self.experiment_start_event = LoggedEvent(
@@ -390,13 +391,12 @@ class State:
 
         self.status.sig_param_changed.connect(self.change_global_state)
 
-        self.planar_setting.sig_param_changed.connect(self.send_scan_settings)
-        self.calibration.z_settings.sig_param_changed.connect(self.send_scan_settings)
-        self.single_plane_settings.sig_param_changed.connect(self.send_scan_settings)
+        self.planar_setting.sig_param_changed.connect(self.send_scansave_settings)
+        self.calibration.z_settings.sig_param_changed.connect(self.send_scansave_settings)
+        self.single_plane_settings.sig_param_changed.connect(self.send_scansave_settings)
         self.volume_setting.sig_param_changed.connect(self.send_scan_settings)
 
-        # self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
-        self.save_settings.sig_param_changed.connect(self.send_scan_settings)
+        self.save_settings.sig_param_changed.connect(self.send_scansave_settings)
 
         self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
         self.single_plane_settings.sig_param_changed.connect(
@@ -413,7 +413,7 @@ class State:
         self.all_settings = dict(camera=dict(), scanning=dict())
 
         self.current_binning = conf["camera"]["default_binning"]
-        self.send_scan_settings()
+        self.send_scansave_settings()
         self.logger.log_message("initialized")
 
         self.voxel_size = None
@@ -429,7 +429,7 @@ class State:
     def change_global_state(self):
         self.global_state = scanning_to_global_state[self.status.scanning_state]
         self.send_camera_settings()
-        self.send_scan_settings()
+        self.send_scansave_settings()
 
     def send_camera_settings(self):
         camera_params = CamParameters(exposure_time=self.camera_settings.exposure_time,
@@ -451,7 +451,12 @@ class State:
         self.all_settings["camera"] = camera_params
 
     def send_scan_settings(self):
-        n_planes = 1
+        # Restart scanning loop if scanning params have changed:
+        self.restart_event.set()
+        self.send_scansave_settings()
+
+    def send_scansave_settings(self):
+        self.n_planes = 1
         if self.global_state == GlobalState.PAUSED:
             params = ScanParameters(state=ScanningState.PAUSED)
 
@@ -471,7 +476,7 @@ class State:
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
-            n_planes = (
+            self.n_planes = (
                 self.volume_setting.n_planes
                 - self.volume_setting.n_skip_start
                 - self.volume_setting.n_skip_end
@@ -497,10 +502,7 @@ class State:
         )
         self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(save_params)
-        self.dispatcher.n_planes_queue.put(n_planes)
-
-        # Restart scanning loop:
-        self.restart_event.set()
+        self.dispatcher.n_planes_queue.put(self.n_planes)
 
     def send_dispatcher_settings(self):
         pass
@@ -509,7 +511,7 @@ class State:
         # TODO disable the GUI except the abort button
         self.logger.log_message("started experiment")
         self.scanner.wait_signal.set()
-        self.send_scan_settings()
+        self.send_scansave_settings()
         self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
@@ -521,7 +523,7 @@ class State:
         self.is_saving_event.clear()
         self.experiment_start_event.clear()
         self.saver.save_queue.clear()
-        self.send_scan_settings()
+        self.send_scansave_settings()
 
     def obtain_noise_average(self, n_images=50, dtype=np.uint16):
         """
