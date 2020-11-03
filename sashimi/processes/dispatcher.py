@@ -49,27 +49,22 @@ class VolumeDispatcher(LoggingProcess):
             self.get_frame()
         self.close_log()
 
-    def process_frame(self, current_frame=None):
-        if current_frame is not None:
-            if (
-                self.calibration_ref is not None
-                and self.noise_subtraction_active.is_set()
-            ):
-                current_frame = neg_dif(current_frame, self.calibration_ref)
-            if (
-                self.first_volume
-                or self.volume_buffer.shape[1:3] != current_frame.shape
-            ):
-                self.volume_buffer = np.empty(
-                    (self.n_planes, *current_frame.shape), dtype=np.uint16
-                )
-                self.first_volume = False
-            self.logger.log_message(f"received plane {self.i_plane}")
-            self.volume_buffer[self.i_plane, :, :] = current_frame
-            self.i_plane += 1
-            if self.i_plane == self.n_planes:
-                self.fill_queues()
-                self.i_plane = 0
+    def process_frame(self, current_frame):
+        if self.calibration_ref is not None and self.noise_subtraction_active.is_set():
+            current_frame = neg_dif(current_frame, self.calibration_ref)
+
+        if self.first_volume or self.volume_buffer.shape[1:3] != current_frame.shape:
+            self.volume_buffer = np.empty(
+                (self.n_planes, *current_frame.shape), dtype=np.uint16
+            )
+            self.first_volume = False
+
+        self.logger.log_message(f"received plane {self.i_plane}")
+        self.volume_buffer[self.i_plane, :, :] = current_frame
+        self.i_plane += 1
+        if self.i_plane == self.n_planes:
+            self.fill_queues()
+            self.i_plane = 0
 
     def fill_queues(self):
         if self.viewer_queue.queue.qsize() < 3:

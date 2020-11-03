@@ -37,11 +37,13 @@ ROI_TEXTS = {
 }
 
 
+#TODO this should be logarithmic, temporarily setting it to smaller range for usability.
+# Alternatively, it could be set by the conf file, although I don't want to have view-related stuff under "camera"
 class ContrastSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
         self.name = "image_contrast"
-        self.contrast_range = Param((32, 65530), (0, 65535))
+        self.contrast_range = Param((100, 10000), (0, 20000))
 
 
 class ViewingWidget(QWidget):
@@ -97,9 +99,9 @@ class ViewingWidget(QWidget):
 
         self.viewer.window.qt_viewer.viewerButtons.consoleButton.hide()
         self.viewer.window.qt_viewer.viewerButtons.rollDimsButton.hide()
-        self.viewer.window.qt_viewer.viewerButtons.transposeDimsButton.setText("Rotate view")
+        self.viewer.window.qt_viewer.viewerButtons.gridViewButton.hide()
+        self.viewer.window.qt_viewer.viewerButtons.transposeDimsButton.hide()
         self.viewer.window.qt_viewer.viewerButtons.resetViewButton.setText("Reset view")
-        self.viewer.window.qt_viewer.viewerButtons.gridViewButton.setText("Grid mode")
         self.viewer.window.qt_viewer.viewerButtons.ndisplayButton.setText("3D mode")
 
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
@@ -185,7 +187,7 @@ class ViewingWidget(QWidget):
             self.auto_contrast = False
 
     def set_manual_contrast(self):
-        self.frame_layer.contrast_limits = [i for i in self.contrast_range.contrast_range]
+        self.frame_layer.contrast_limits = self.contrast_range.contrast_range
 
 
 class CameraSettingsWidget(QWidget):

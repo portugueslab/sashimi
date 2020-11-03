@@ -88,7 +88,7 @@ class ScanLoop:
     """General class for the control of the event loop of the scanning, taking
     care of the synchronization between the galvo and piezo scanning and the camera triggering.
     It has a loop method which is defined only here and not overwritten in sublasses, which controls
-    the main order of events. In this class we control only the lateral scanning, which is common to both
+    the main order of events. In this class we handle only the lateral scanning, which is common to both
     planar and volumetric acquisitions.
     """
     def __init__(
@@ -218,6 +218,8 @@ class ScanLoop:
 
 
 class PlanarScanLoop(ScanLoop):
+    """Class for controlling the planar scanning mode, where we image only one plane and
+    do not control the piezo and vertical galvo."""
     def loop_condition(self):
         return (
             super().loop_condition() and self.parameters.state == ScanningState.PLANAR

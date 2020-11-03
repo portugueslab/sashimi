@@ -23,7 +23,6 @@ TEMPLATE_CONF_DICT = {
     "voxel_size" : {
         "x": 0.3,
         "y": 0.3,
-        "z": 6.5
     },
     "default_paths": {
         "data": str(Path.home()),

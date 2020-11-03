@@ -13,5 +13,4 @@ scopecuisine>=0.1.2
 pyqtgraph
 napari
 numba
-numba
 scikit-image
