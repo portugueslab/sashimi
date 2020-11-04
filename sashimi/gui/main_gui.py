@@ -83,6 +83,8 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self.check_end_experiment)
         self.setup_menu_bar()
 
+        self.refresh_param_values()
+
     def setup_menu_bar(self):
         menubar = self.menuBar()
 
@@ -116,6 +118,7 @@ class MainWindow(QMainWindow):
 
     def refresh_param_values(self, omit_wid_camera=False):
         # TODO should be possible with lightparam, when it's implemented there remove here
+        print("refresh")
         self.wid_laser.wid_settings.refresh_widgets()
         self.wid_scan.wid_planar.refresh_widgets()
         self.wid_status.wid_volume.wid_volume.refresh_widgets()
@@ -167,6 +170,7 @@ class StatusWidget(QTabWidget):
         # self.setTabEnabled(2, False)
 
         self.currentChanged.connect(self.update_status)
+        # Make sure pulses are displayed the first time we go to volumetric.
         self.currentChanged.connect(self.wid_volume.wid_wave.update_pulses)
 
     def update_status(self):

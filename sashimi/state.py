@@ -510,7 +510,8 @@ class State:
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
-
+            # Make sure that current plane is updated if we changed number of planes
+            self.current_plane = min(self.current_plane, self.n_planes - 1)
             if self.waveform is not None:
                 pulses = self.calculate_pulse_times() * self.sample_rate
                 try:

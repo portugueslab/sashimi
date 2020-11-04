@@ -207,6 +207,9 @@ class ViewingWidget(QWidget):
         self.image_shape = current_image.shape
         self.is_first_frame = False
 
+        # Keep current plane in synch when the number of planes changes
+        self.viewer.dims.set_current_step(0, self.state.current_plane)
+
     def toggle_ndims(self):
         """We set the scale only if we are in 3D mode, otherwise there can be funny problems with
         the image slider in the 2D view.
