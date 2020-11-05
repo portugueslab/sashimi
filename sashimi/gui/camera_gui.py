@@ -63,7 +63,7 @@ class ViewingWidget(QWidget):
 
     _DELAY_REFRESH_COUNT = 10
 
-    def __init__(self, state: State, timer: QTimer):
+    def __init__(self, state: State, timer: QTimer, style: str):
         super().__init__()
         self.state = state
         timer.timeout.connect(self.refresh)
@@ -85,7 +85,8 @@ class ViewingWidget(QWidget):
         self.image_shape = (1, s, s)
 
         self.viewer = napari.Viewer(show=False)
-        self.viewer.theme = "dark_sashimi"
+        # setting napari style to sashimi's
+        self.viewer.window.qt_viewer.setStyleSheet(style)
 
         # Add image layer that will be used to show frames/volumes:
         self.frame_layer = self.viewer.add_image(

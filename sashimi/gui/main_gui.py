@@ -28,7 +28,7 @@ class DockedWidget(QDockWidget):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, st: State):
+    def __init__(self, st: State, style: str):
         super().__init__()
         self.st = st
         self.timer = QTimer()
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
 
         self.wid_status = StatusWidget(st, self.timer)
-        self.wid_display = ViewingWidget(st, self.timer)
+        self.wid_display = ViewingWidget(st, self.timer, style)
         self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LightSourceWidget(st, self.timer)
         self.wid_scan = PlanarScanningWidget(st)

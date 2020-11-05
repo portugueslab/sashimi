@@ -18,10 +18,11 @@ def main(scopeless, scanning, **kwargs):
     # TODO configure logging with CLI
 
     app = QApplication([])
-    app.setStyleSheet(qdarkstyle.load_stylesheet_pyqt5())
+    style = qdarkstyle.load_stylesheet_pyqt5()
+    app.setStyleSheet(style)
     app.setApplicationName("Sashimi")
     st = State()
-    main_window = MainWindow(st)
+    main_window = MainWindow(st, style)
     icon_dir = (Path(__file__).parents[0]).resolve() / "icons/main_icon.png"
     app.setWindowIcon(QIcon(str(icon_dir)))  # PyQt does not accept Path
     main_window.show()
