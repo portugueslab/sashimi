@@ -38,10 +38,9 @@ You can activate the environment by running:
 
     conda activate sashimi
     
-After this you have to install two extra dependencies: `pyvisa` and our forked version of `napari`:
+After this you have to install two extra dependencies: `pyvisa`:
 
     pip install pyvisa
-    pip install git+https://github.com/portugueslab/napari.git#egg=napari
     
 ### Install with pip
 
