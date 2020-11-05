@@ -56,8 +56,8 @@ class MockCamera(AbstractCamera):
             self.full_mock_image, (self._binning, self._binning), func=np.max
         )
         self.current_mock_image = self.current_mock_image[
-            self._roi[1] : (self._roi[1] + self._roi[3]),
             self._roi[0] : (self._roi[0] + self._roi[2]),
+            self._roi[1] : (self._roi[1] + self._roi[3]),
         ]
 
     def get_frames(self):
