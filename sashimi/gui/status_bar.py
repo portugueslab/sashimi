@@ -53,6 +53,7 @@ class StatusBarWidget(QStatusBar):
         """
 
         frame_rate = self.state.get_triggered_frame_rate()
+        expected_frame_rate = None
         if frame_rate is not None:
             self.framerate_lbl.setText(
                 "Framerate: {} Hz".format(round(frame_rate, 2))
