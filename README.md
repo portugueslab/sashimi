@@ -10,7 +10,7 @@ width="270"></a>
 [![Docs](https://img.shields.io/badge/docs-dev-brightgreen)](https://portugueslab.github.io/sashimi/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4122062.svg)](https://doi.org/10.5281/zenodo.4122062)
-[![Python 3.7-3.8](https://img.shields.io/badge/python-3.7%7C3.8-blue.svg)](https://www.python.org/)
+[![Python 3.7-3.8](https://img.shields.io/badge/python-3.7%7f%7C%7f3.8-blue.svg)](https://www.python.org/)
 
 Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
 It is developed by members of the [PortuguesLab](http://www.portugueslab.com/)
