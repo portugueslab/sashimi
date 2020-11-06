@@ -38,7 +38,7 @@ You can activate the environment by running:
 
     conda activate sashimi
     
-After this you have to install two extra dependencies: `pyvisa`:
+After this you have to install an extra dependency: `pyvisa`:
 
     pip install pyvisa
     
@@ -56,9 +56,8 @@ Now you are ready to go!
 
 ## Configuring sashimi
     
-Running `sashimi --debug` lets you start the software without any hardware connected to the machine. Sashimi includes the
-`sashimi-config` module that lets you interact with the hardware and software settings from command line. You can display the
- current configuration of the system. **You must run this command before launching sashimi for the first time**:
+Sashimi includes the `sashimi-config` module that lets you interact with the hardware and software
+settings from command line. You can display the current configuration of the system.:
  
     sashimi-config show
     
