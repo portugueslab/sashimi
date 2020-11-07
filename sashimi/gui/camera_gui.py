@@ -44,7 +44,7 @@ class ContrastSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
         self.name = "image_contrast"
-        self.contrast_range = Param((100, 10000), (0, 20000))
+        self.contrast_range = Param((0, 2000), (-50, 5000))
 
 
 class ViewingWidget(QWidget):
@@ -98,9 +98,9 @@ class ViewingWidget(QWidget):
         self.roi = self.viewer.add_shapes(
             [np.array([[0, 0], [s[0], 0], [s[0], s[1]], [0, s[1]]])],
             blending="translucent",
-            face_color="yellow",
+            face_color="transparent",
             face_contrast_limits=(0, 0),
-            opacity=0.7,
+            opacity=1,
             visible=False,
             name="roi_layer"
         )

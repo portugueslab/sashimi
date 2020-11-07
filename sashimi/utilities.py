@@ -53,7 +53,10 @@ def clean_json(d):
     elif type(d) in [tuple, list]:
         # json seems to have issues serializing np.int32:
         if type(d[0]) == np.int32:
-            d = tuple([int(i) for i in d])
+            print(d)
+            d = [int(i) for i in d]
+            print(d)
+            print(type(d[0]))
         return d
     else:
         return d

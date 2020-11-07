@@ -5,7 +5,7 @@ from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
 from sashimi.hardware.light_source import light_source_class_dict
 # from sashimi.hardware import light_source_class_dict
-from sashimi.processes.scanning import Scanner
+from sashimi.processes.scanning import ScannerProcess
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
     ExperimentPrepareState,
@@ -312,7 +312,7 @@ class State:
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
 
-        self.scanner = Scanner(
+        self.scanner = ScannerProcess(
             stop_event=self.stop_event,
             restart_event=self.restart_event,
             waiting_event=self.is_waiting_event,
@@ -456,8 +456,8 @@ class State:
         # Restart scanning loop if scanning params have changed:
         if self.global_state == GlobalState.VOLUME_PREVIEW:
             self.restart_event.set()
-        # print(param_changed)
-        #
+        print(param_changed)
+
         # # Synch piezo position across modalities, for usability:
         # if param_changed is not None:
         #     key = list(param_changed.keys())[0]

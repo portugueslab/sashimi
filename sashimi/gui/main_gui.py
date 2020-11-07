@@ -118,7 +118,6 @@ class MainWindow(QMainWindow):
 
     def refresh_param_values(self, omit_wid_camera=False):
         # TODO should be possible with lightparam, when it's implemented there remove here
-        print("refresh")
         self.wid_laser.wid_settings.refresh_widgets()
         self.wid_scan.wid_planar.refresh_widgets()
         self.wid_status.wid_volume.wid_volume.refresh_widgets()

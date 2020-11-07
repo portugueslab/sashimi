@@ -33,12 +33,7 @@ class TriggerMode(Enum):
 class CamParameters:
     exposure_time: float = conf["camera"]["default_exposure"]
     binning: int = 2
-    roi: tuple = (
-        0,
-        0,
-        FULL_SIZE[0],
-        FULL_SIZE[1],
-    )  # order of params here is [hpos, vpos, hsize, vsize,]
+    roi: tuple = (0, 0, FULL_SIZE[0], FULL_SIZE[1])  # order is [hpos, vpos, hsize, vsize]
     image_height: int = FULL_SIZE[0]
     image_width: int = FULL_SIZE[1]
     frame_shape: tuple = (FULL_SIZE[0], FULL_SIZE[1])
@@ -83,7 +78,16 @@ class FramerateRecorder:
 
 
 class CameraProcess(LoggingProcess):
-    """
+    """Process that handles the setting of new parameters to and the acquisition of frames from the camera.
+
+    Parameters
+    ----------
+    stop_event
+    wait_event
+    exp_trigger_event
+    camera_id
+    max_queue_size
+    n_fps_frames
     """
     def __init__(
         self,
@@ -94,8 +98,6 @@ class CameraProcess(LoggingProcess):
         max_queue_size=1200,
         n_fps_frames=20,
     ):
-        """
-        """
         super().__init__(name="camera")
         # Queue to communicate
         self.triggered_frame_rate_queue = Queue()
@@ -164,6 +166,7 @@ class CameraProcess(LoggingProcess):
                     self.logger.log_message("received frame of shape "+str(frame.shape))
                     if self.was_waiting and not is_waiting:
                         self.experiment_trigger_event.set()
+                        #TODO do not crash here if queue is full
                     self.image_queue.put(frame)
                     self.was_waiting = is_waiting
                     self.update_framerate()

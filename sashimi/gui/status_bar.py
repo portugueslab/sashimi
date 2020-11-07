@@ -11,6 +11,8 @@ conf = read_config()
 
 
 class StatusBarWidget(QStatusBar):
+    """Lower bar of the interface with info on framerate, image size and voxel size.
+    """
     def __init__(self, state: State, timer):
         super().__init__()
         self.state = state
@@ -53,26 +55,29 @@ class StatusBarWidget(QStatusBar):
         """
 
         frame_rate = self.state.get_triggered_frame_rate()
-        if frame_rate is not None:
-            self.framerate_lbl.setText(
-                "Framerate: {} Hz".format(round(frame_rate, 2))
-            )
 
-            # Find the expected framerate depending on the global state
-            if self.state.global_state == GlobalState.PREVIEW:
-                expected_frame_rate = None
-            if self.state.global_state == GlobalState.VOLUME_PREVIEW:
-                expected_frame_rate = self.state.volume_setting.frequency * self.state.n_planes
-            if self.state.global_state == GlobalState.PLANAR_PREVIEW:
-                expected_frame_rate = self.state.single_plane_settings.frequency
+        if frame_rate is None:
+            return
 
-            # Add warning if we are lagging:
-            if expected_frame_rate and expected_frame_rate > (frame_rate * 1.1):
-                self.showMessage("Camera lagging behind")
-                self.framerate_lbl.setStyleSheet("color: red")
-            else:
-                self.showMessage("")
-                self.framerate_lbl.setStyleSheet("color: white")
+        self.framerate_lbl.setText(
+            "Framerate: {} Hz".format(round(frame_rate, 2))
+        )
+
+        # Find the expected framerate depending on the global state
+        expected_frame_rate_dict = {GlobalState.PREVIEW: None,
+                                    GlobalState.VOLUME_PREVIEW: self.state.volume_setting.frequency *
+                                                                    self.state.n_planes,
+                                    GlobalState.PLANAR_PREVIEW: self.state.single_plane_settings.frequency}
+
+        expected_frame_rate = expected_frame_rate_dict[self.state.global_state]
+
+        # Add warning if we are lagging:
+        if expected_frame_rate and expected_frame_rate > (frame_rate * 1.1):
+            self.showMessage("Camera lagging behind")
+            self.framerate_lbl.setStyleSheet("color: red")
+        else:
+            self.showMessage("")
+            self.framerate_lbl.setStyleSheet("color: white")
 
     def update_frame_size(self):
         self.frame_size_lbl.setText(
