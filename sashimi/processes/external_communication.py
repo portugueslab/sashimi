@@ -3,7 +3,7 @@ from sashimi.processes.logging import LoggingProcess
 from sashimi.utilities import clean_json
 from sashimi.events import LoggedEvent
 from sashimi.config import read_config
-from sashimi.hardware import external_comm_class_dict
+from sashimi.hardware.external_trigger import external_comm_class_dict
 from queue import Empty
 
 
@@ -28,7 +28,7 @@ class ExternalComm(LoggingProcess):
         self.saving_event = is_saving_event.new_reference(self.logger)
         self.duration_queue = Queue()
         if conf["scopeless"]:
-            self.comm = external_comm_class_dict["test"]()
+            self.comm = external_comm_class_dict["mock"]()
         else:
             self.comm = external_comm_class_dict[
                 conf["external_communication"]["name"]

@@ -7,7 +7,7 @@ from sashimi.hardware.scanning.scanloops import (
     PlanarScanLoop,
     VolumetricScanLoop,
 )
-from sashimi.hardware.scanning.__init__ import ScanningError
+from sashimi.hardware.scanning import ScanningError
 from sashimi.hardware.scanning.mock import open_mockboard
 
 try:
@@ -28,13 +28,33 @@ from sashimi.events import LoggedEvent
 
 conf = read_config()
 
+# Dictionary of options for the context within which the scanning has to run.
 scan_conf_dict = dict(mock=open_mockboard)
 
+# Add NI context if available. NI board will be initialized there.
 if NI_AVAILABLE:
     scan_conf_dict["ni"] = open_niboard
 
 
-class Scanner(LoggingProcess):
+class ScannerProcess(LoggingProcess):
+    """Process that runs the scanning loop.
+
+    Parameters
+    ----------
+    stop_event
+    waiting_event
+    restart_event
+    start_experiment_from_scanner
+    n_samples_waveform
+    sample_rate
+
+    The actual implementation of the control of the scanning loop happens in the ScanLoop class and its children.
+    In the run method we constantly control the parameters, and we "mount" in the Scanner process a ScanLoop object
+    of the suitable ScanLoop subclass depending on the scanning mode.
+    Refer to the sashimi.hardware.scanning.scanloops module for details on the scanning implementation.
+
+    """
+
     def __init__(
         self,
         stop_event: LoggedEvent,
@@ -44,6 +64,7 @@ class Scanner(LoggingProcess):
         n_samples_waveform=10000,
         sample_rate=40000,
     ):
+        """"""
         super().__init__(name="scanner")
 
         self.stop_event = stop_event.new_reference(self.logger)

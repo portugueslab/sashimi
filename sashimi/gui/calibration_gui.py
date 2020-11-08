@@ -86,6 +86,11 @@ class CalibrationWidget(QWidget):
             )
         )
 
+        # Update noise subtraction button if the mode was disabled eg by exposure change:
+        self.chk_noise_subtraction.setChecked(
+            self.state.noise_subtraction_active.is_set()
+        )
+
     def set_noise_subtraction_mode(self):
         # check by the status of the check box
         if self.state.calibration_ref is None:

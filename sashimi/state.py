@@ -3,8 +3,10 @@ from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
-from sashimi.hardware import light_source_class_dict
-from sashimi.processes.scanning import Scanner
+from sashimi.hardware.light_source import light_source_class_dict
+
+# from sashimi.hardware import light_source_class_dict
+from sashimi.processes.scanning import ScannerProcess
 from sashimi.hardware.scanning.scanloops import (
     ScanningState,
     ExperimentPrepareState,
@@ -21,19 +23,20 @@ from sashimi.processes.dispatcher import VolumeDispatcher
 from sashimi.processes.logging import ConcurrenceLogger
 from multiprocessing import Event
 import json
-from sashimi.camera import (
+from sashimi.processes.camera import (
     CameraProcess,
     CamParameters,
     CameraMode,
     TriggerMode,
-    MockCameraProcess,
 )
 from sashimi.processes.streaming_save import StackSaver, SavingParameters, SavingStatus
 from sashimi.events import LoggedEvent, SashimiEvents
 from pathlib import Path
 from enum import Enum
 from sashimi.config import read_config
-from datetime import time
+import time
+from sashimi.utilities import clean_json
+
 
 conf = read_config()
 
@@ -44,15 +47,6 @@ class GlobalState(Enum):
     PLANAR_PREVIEW = 2
     VOLUME_PREVIEW = 3
     EXPERIMENT_RUNNING = 4
-
-
-class ScopeAlignmentInfo(ParametrizedQt):
-    def __init__(self):
-        super().__init__()
-        self.name = "scope_alignment_info"
-        self.waist_width = Param(6.5, (0.1, 100), unit="um")
-        self.pixel_size_x = Param(0.3, (0.1, 10), unit="um (at binning 1x1)")
-        self.pixel_size_y = Param(0.3, (0.1, 10), unit="um (at binning 1x1)")
 
 
 class SaveSettings(ParametrizedQt):
@@ -114,29 +108,37 @@ class ZRecordingSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
         self.name = "scanning/volumetric_recording"
-        self.scan_range = Param((0.0, 100.0), (0.0, 400.0), unit="um")
-        self.frequency = Param(1.0, (0.1, 100), unit="volumes/s (Hz)")
-        self.n_planes = Param(10, (2, 100))
+        self.piezo_scan_range = Param((180.0, 220.0), (0.0, 400.0), unit="um")
+        self.frequency = Param(3.0, (0.1, 100), unit="volumes/s (Hz)")
+        self.n_planes = Param(4, (2, 100))
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
+
+
+roi_size = [0, 0] + [
+    r // conf["camera"]["default_binning"]
+    for r in conf["camera"]["max_sensor_resolution"]
+]
 
 
 class CameraSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "camera/parameters"
-        self.exposure = Param(60, (2, 1000), unit="ms")
-        self.binning = Param("2x2", ["1x1", "2x2", "4x4"])
-        self.subarray = Param(
-            [0, 0, 2048, 2048], gui=False
-        )  # order of params here is [hpos, vpos, hsize, vsize,]
+        self.exposure_time = Param(
+            conf["camera"]["default_exposure"], (0.5, 1000), unit="ms"
+        )
+        self.binning = Param(conf["camera"]["default_binning"], [1, 2, 4])
+        self.roi = Param(
+            roi_size, gui=False
+        )  # order of params here is [hpos, vpos, hsize, vsize,]; h: horizontal, v: vertical
 
 
 class LightSourceSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "general/light_source"
-        self.intensity = Param(0, (0, 40), unit="mA")
+        self.intensity = Param(0, (0, 40), unit=conf["light_source"]["intensity_units"])
 
 
 def convert_planar_params(planar: PlanarScanningSettings):
@@ -214,47 +216,22 @@ class Calibration(ParametrizedQt):
         return True
 
 
-def convert_camera_params(camera_settings: CameraSettings):
-    if camera_settings.binning == "1x1":
-        binning = 1
-    elif camera_settings.binning == "2x2":
-        binning = 2
-    elif camera_settings.binning == "4x4":
-        binning = 4
-    # set binning 2x2 by default
-    else:
-        binning = 2
-
-    return CamParameters(
-        exposure_time=camera_settings.exposure,
-        binning=binning,
-        subarray=tuple(camera_settings.subarray),
-    )
-
-
 def get_voxel_size(
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
-    scope_alignment: ScopeAlignmentInfo,
 ):
-    scan_length = scanning_settings.scan_range[1] - scanning_settings.scan_range[0]
+    scan_length = (
+        scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
+    )
 
-    if camera_settings.binning == "1x1":
-        binning = 1
-    elif camera_settings.binning == "2x2":
-        binning = 2
-    elif camera_settings.binning == "4x4":
-        binning = 4
-        # set binning 2x2 by default
-    else:
-        binning = 2
+    binning = int(camera_settings.binning)
 
     inter_plane = scan_length / scanning_settings.n_planes
 
     return (
         inter_plane,
-        scope_alignment.pixel_size_y * binning,
-        scope_alignment.pixel_size_x * binning,
+        conf["voxel_size"]["y"] * binning,
+        conf["voxel_size"]["x"] * binning,
     )
 
 
@@ -262,7 +239,6 @@ def convert_save_params(
     save_settings: SaveSettings,
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
-    scope_alignment: ScopeAlignmentInfo,
 ):
     n_planes = scanning_settings.n_planes - (
         scanning_settings.n_skip_start + scanning_settings.n_skip_end
@@ -273,7 +249,7 @@ def convert_save_params(
         n_planes=n_planes,
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
-        voxel_size=get_voxel_size(scanning_settings, camera_settings, scope_alignment),
+        voxel_size=get_voxel_size(scanning_settings, camera_settings),
     )
 
 
@@ -303,8 +279,8 @@ def convert_volume_params(
         state=ScanningState.VOLUMETRIC,
         xy=convert_planar_params(planar),
         z=ZScanning(
-            piezo_min=z_setting.scan_range[0],
-            piezo_max=z_setting.scan_range[1],
+            piezo_min=z_setting.piezo_scan_range[0],
+            piezo_max=z_setting.piezo_scan_range[1],
             frequency=z_setting.frequency,
             lateral_sync=tuple(calibration.calibration[0]),
             frontal_sync=tuple(calibration.calibration[1]),
@@ -319,14 +295,15 @@ def convert_volume_params(
 
 
 class State:
-    def __init__(self, sample_rate):
+    def __init__(self):
         self.conf = read_config()
-        self.sample_rate = sample_rate
+        self.sample_rate = conf["sample_rate"]
 
         self.logger = ConcurrenceLogger("main")
 
         self.calibration_ref = None
         self.waveform = None
+        self.current_plane = 0
         self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
         self.restart_event = LoggedEvent(self.logger, SashimiEvents.RESTART_SCANNING)
         self.experiment_start_event = LoggedEvent(
@@ -342,31 +319,31 @@ class State:
 
         self.experiment_state = ExperimentPrepareState.PREVIEW
         self.status = ScanningSettings()
-        self.scope_alignment_info = ScopeAlignmentInfo()
 
-        self.scanner = Scanner(
+        self.scanner = ScannerProcess(
             stop_event=self.stop_event,
             restart_event=self.restart_event,
             waiting_event=self.is_waiting_event,
             sample_rate=self.sample_rate,
         )
+        self.camera_settings = CameraSettings()
+        self.save_settings = SaveSettings()
 
+        self.settings_tree = ParameterTree()
+
+        self.global_state = GlobalState.PAUSED
+        self.pause_after = False
         if self.conf["scopeless"]:
-            self.light_source = light_source_class_dict["test"]()
-            self.camera = MockCameraProcess(
-                stop_event=self.stop_event.event,
-                wait_event=self.scanner.wait_signal,
-                exp_trigger_event=self.experiment_start_event,
-            )
+            self.light_source = light_source_class_dict["mock"]()
         else:
             self.light_source = light_source_class_dict[conf["light_source"]["name"]](
                 port=conf["light_source"]["port"]
             )
-            self.camera = CameraProcess(
-                stop_event=self.stop_event,
-                wait_event=self.scanner.wait_signal,
-                exp_trigger_event=self.experiment_start_event,
-            )
+        self.camera = CameraProcess(
+            stop_event=self.stop_event,
+            wait_event=self.scanner.wait_signal,
+            exp_trigger_event=self.experiment_start_event,
+        )
 
         self.external_comm = ExternalComm(
             stop_event=self.stop_event,
@@ -419,19 +396,17 @@ class State:
             self.calibration.z_settings,
             self.camera_settings,
             self.save_settings,
-            self.scope_alignment_info,
         ]:
             self.settings_tree.add(setting)
 
         self.status.sig_param_changed.connect(self.change_global_state)
 
-        self.planar_setting.sig_param_changed.connect(self.send_scan_settings)
+        self.planar_setting.sig_param_changed.connect(self.send_scansave_settings)
         self.calibration.z_settings.sig_param_changed.connect(self.send_scan_settings)
         self.single_plane_settings.sig_param_changed.connect(self.send_scan_settings)
         self.volume_setting.sig_param_changed.connect(self.send_scan_settings)
 
-        self.camera_settings.sig_param_changed.connect(self.send_camera_settings)
-        self.save_settings.sig_param_changed.connect(self.send_scan_settings)
+        self.save_settings.sig_param_changed.connect(self.send_scansave_settings)
 
         self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
         self.single_plane_settings.sig_param_changed.connect(
@@ -447,9 +422,11 @@ class State:
 
         self.all_settings = dict(camera=dict(), scanning=dict())
 
-        self.current_camera_status = CamParameters()
-        self.send_scan_settings()
+        self.current_binning = conf["camera"]["default_binning"]
+        self.send_scansave_settings()
         self.logger.log_message("initialized")
+
+        self.voxel_size = None
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
@@ -457,18 +434,24 @@ class State:
 
     def save_tree(self, save_file):
         with open(save_file, "w") as f:
-            json.dump(self.settings_tree.serialize(), f)
+            json.dump(clean_json(self.settings_tree.serialize()), f)
 
     def change_global_state(self):
         self.global_state = scanning_to_global_state[self.status.scanning_state]
         self.send_camera_settings()
-        self.send_scan_settings()
+        self.send_scansave_settings()
 
     def send_camera_settings(self):
-        camera_params = convert_camera_params(self.camera_settings)
+        camera_params = CamParameters(
+            exposure_time=self.camera_settings.exposure_time,
+            binning=int(self.camera_settings.binning),
+            roi=tuple(self.camera_settings.roi),
+        )
+
         camera_params.trigger_mode = (
             TriggerMode.FREE
             if self.global_state == GlobalState.PREVIEW
+            or self.global_state == GlobalState.PLANAR_PREVIEW
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
@@ -480,8 +463,49 @@ class State:
         self.camera.parameter_queue.put(camera_params)
         self.all_settings["camera"] = camera_params
 
-    def send_scan_settings(self):
-        n_planes = 1
+    def send_scan_settings(self, param_changed=None):
+        # Restart scanning loop if scanning params have changed:
+        if self.global_state == GlobalState.VOLUME_PREVIEW:
+            self.restart_event.set()
+        print(param_changed)
+
+        # # Synch piezo position across modalities, for usability:
+        # if param_changed is not None:
+        #     key = list(param_changed.keys())[0]
+        #     if "piezo" in key:
+        #         val = param_changed[key]
+        #         piezo_pos = val[0] if type(val) is tuple else val
+        #
+        #         # Block change signals, change, and unblock
+        #         self.single_plane_settings.block_signal = True
+        #         self.calibration.z_settings.block_signal = True
+        #         self.volume_setting.block_signal = True
+        #
+        #         # Change z values:
+        #         self.single_plane_settings.piezo = piezo_pos
+        #         # self.calibration.z_settings.piezo = piezo_pos
+        #         current_range = self.volume_setting.piezo_scan_range[1] - self.volume_setting.piezo_scan_range[0]
+        #         self.volume_setting.piezo_scan_range = (piezo_pos, piezo_pos + current_range)
+        #
+        #         # Unblock change signals:
+        #         self.single_plane_settings.block_signal = False
+        #         self.calibration.z_settings.block_signal = False
+        #         self.volume_setting.block_signal = False
+
+        self.send_scansave_settings()
+
+    @property
+    def n_planes(self):
+        if self.global_state == GlobalState.VOLUME_PREVIEW:
+            return (
+                self.volume_setting.n_planes
+                - self.volume_setting.n_skip_start
+                - self.volume_setting.n_skip_end
+            )
+        else:
+            return 1
+
+    def send_scansave_settings(self):
         if self.global_state == GlobalState.PAUSED:
             params = ScanParameters(state=ScanningState.PAUSED)
 
@@ -501,11 +525,8 @@ class State:
             params = convert_volume_params(
                 self.planar_setting, self.volume_setting, self.calibration
             )
-            n_planes = (
-                self.volume_setting.n_planes
-                - self.volume_setting.n_skip_start
-                - self.volume_setting.n_skip_end
-            )
+            # Make sure that current plane is updated if we changed number of planes
+            self.current_plane = min(self.current_plane, self.n_planes - 1)
             if self.waveform is not None:
                 pulses = self.calculate_pulse_times() * self.sample_rate
                 try:
@@ -524,26 +545,19 @@ class State:
             self.save_settings,
             self.volume_setting,
             self.camera_settings,
-            self.scope_alignment_info,
         )
+        self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(save_params)
-        self.dispatcher.n_planes_queue.put(n_planes)
+        self.dispatcher.n_planes_queue.put(self.n_planes)
 
     def send_dispatcher_settings(self):
         pass
-
-    def get_camera_status(self):
-        try:
-            current_camera_status = self.camera.camera_status_queue.get(timeout=0.001)
-            return current_camera_status
-        except Empty:
-            return None
 
     def start_experiment(self):
         # TODO disable the GUI except the abort button
         self.logger.log_message("started experiment")
         self.scanner.wait_signal.set()
-        self.send_scan_settings()
+        self.send_scansave_settings()
         self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
@@ -555,11 +569,16 @@ class State:
         self.is_saving_event.clear()
         self.experiment_start_event.clear()
         self.saver.save_queue.clear()
-        self.send_scan_settings()
+        self.send_scansave_settings()
 
-    def obtain_noise_average(self, n_images=50, dtype=np.uint16):
-        """
-        Obtains average noise of n_images to subtract to acquired, both for display and saving
+    def obtain_noise_average(self, n_images=50):
+        """Obtains average noise of n_images to subtract to acquired, both for display and saving.
+
+        Parameters
+        ----------
+        n_images : int
+            Number of frames to average.
+
         """
         self.noise_subtraction_active.clear()
 
@@ -572,12 +591,16 @@ class State:
                 current_image = current_volume[0, :, :]
                 if n_image == 0:
                     calibration_set = np.empty(
-                        shape=(n_images, *current_image.shape), dtype=dtype
+                        shape=(n_images, *current_image.shape),
+                        dtype=current_volume.dtype,
                     )
                 calibration_set[n_image, :, :] = current_image
                 n_image += 1
+
         self.noise_subtraction_active.set()
-        self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=dtype)
+        self.calibration_ref = np.mean(calibration_set, axis=0).astype(
+            dtype=current_volume.dtype
+        )
         self.light_source.intensity = light_intensity
 
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
@@ -599,10 +622,13 @@ class State:
             return None
 
     def get_triggered_frame_rate(self):
-        try:
-            return self.camera.triggered_frame_rate_queue.get(timeout=0.001)
-        except Empty:
-            return None
+        framerate = None
+        while True:
+            try:
+                framerate = self.camera.triggered_frame_rate_queue.get(timeout=0.001)
+            except Empty:
+                break
+        return framerate
 
     def get_waveform(self):
         try:

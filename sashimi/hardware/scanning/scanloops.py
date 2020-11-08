@@ -85,6 +85,17 @@ class ScanParameters:
 
 
 class ScanLoop:
+    """General class for the control of the event loop of the scanning, taking
+    care of the synchronization between the galvo and piezo scanning and the camera triggering.
+    It has a loop method which is defined only here and not overwritten in sublasses, which controls
+    the main order of events. In this class we handle only the lateral scanning, which is common to calibration,
+    planar, and volumetric acquisitions.
+
+    The class does not implement a Process by itself; instead, the suitable child of this class (depending on
+    the scanning mode) is "mounted" by the ScannerProcess process, and the ScanLoop.loop method is executed.
+
+    """
+
     def __init__(
         self,
         board: AbstractScanInterface,
@@ -143,20 +154,23 @@ class ScanLoop:
         return lcm(ns_lateral, ns_frontal)
 
     def update_settings(self):
+        """Update parameters and return True only if got new parameters."""
         new_params = get_last_parameters(self.parameter_queue)
-        if new_params is not None:
-            self.parameters = new_params
-            self.lateral_waveform = TriangleWaveform(
-                **asdict(self.parameters.xy.lateral)
-            )
-            self.frontal_waveform = TriangleWaveform(
-                **asdict(self.parameters.xy.frontal)
-            )
-            self.first_update = False
-            return True
-        return False
+        if new_params is None:
+            return False
+
+        self.parameters = new_params
+        self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
+        self.frontal_waveform = TriangleWaveform(**asdict(self.parameters.xy.frontal))
+        self.first_update = False  # To avoid multiple updates
+        return True
 
     def loop_condition(self):
+        """Returns False if main event loop has to be interrupted. this happens both when we want
+        to restart the scanning loop (if restart_event is set), or we want to interrupt scanning
+        (stop_event is set).
+
+        """
         if self.restart_event.is_set():
             self.restart_event.clear()
             return False
@@ -182,6 +196,10 @@ class ScanLoop:
         self.n_samples_read += self.board.n_samples
 
     def loop(self, first_run=False):
+        """Main loop that gets executed in the run of the ScannerProcess class.
+        The stop_event regulates breaking out of this loop and
+        returns to the execution of the run of ScannerProcess.
+        """
         while True:
             self.update_settings()
             self.old_parameters = deepcopy(self.parameters)
@@ -198,6 +216,13 @@ class ScanLoop:
 
 
 class PlanarScanLoop(ScanLoop):
+    """Class for controlling the planar scanning mode, where we image only one plane and
+    do not control the piezo and vertical galvo."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.camera_pulses = RollingBuffer(self.n_samples_period())
+
     def loop_condition(self):
         return (
             super().loop_condition() and self.parameters.state == ScanningState.PLANAR
@@ -317,6 +342,7 @@ class VolumetricScanLoop(ScanLoop):
         super().fill_arrays()
         self.board.z_piezo = self.z_waveform.values(self.shifted_time)
         i_sample = self.i_sample % len(self.recorded_signal.buffer)
+
         if self.recorded_signal.is_complete():
             wave_part = self.recorded_signal.read(i_sample, self.n_samples)
             max_wave, min_wave = (np.max(wave_part), np.min(wave_part))

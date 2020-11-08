@@ -20,6 +20,10 @@ TEMPLATE_CONF_DICT = {
     "scanning": "mock",
     "scopeless": False,
     "sample_rate": 40000,
+    "voxel_size": {
+        "x": 0.3,
+        "y": 0.3,
+    },
     "default_paths": {
         "data": str(Path.home()),
         "presets": str(PRESETS_DIR_PATH),
@@ -42,6 +46,7 @@ TEMPLATE_CONF_DICT = {
     "piezo": {
         "scale": 1 / 40,
     },
+    "email": {"user": "foo", "password": "foo"},
     "xy_board": {
         "write": {
             "channel": "Dev2/ao0:1",
@@ -49,7 +54,14 @@ TEMPLATE_CONF_DICT = {
             "max_val": 10,
         }
     },
-    "light_source": {"name": "cobolt", "port": "COM4"},
+    "camera": {
+        "id": 0,
+        "name": "hamamatsu",
+        "max_sensor_resolution": [2048, 2048],
+        "default_exposure": 60,
+        "default_binning": 1,
+    },
+    "light_source": {"name": "cobolt", "port": "COM4", "intensity_units": "mA"},
     "external_communication": {"name": "stytra", "address": "tcp://O1-589:5555"},
     "notifier": "none",
     "notifier_options": {},
