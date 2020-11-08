@@ -10,6 +10,7 @@ from sashimi.utilities import get_last_parameters
 
 TIMEOUT_S = 0.001
 
+
 class VolumeDispatcher(LoggingProcess):
     """
 
@@ -24,6 +25,7 @@ class VolumeDispatcher(LoggingProcess):
     max_queue_size
 
     """
+
     def __init__(
         self,
         stop_event: LoggedEvent,
@@ -111,7 +113,9 @@ class VolumeDispatcher(LoggingProcess):
             self.reset()
 
         # Get flat noise image to subtract:
-        calibration_ref = get_last_parameters(self.calibration_ref_queue, timeout=TIMEOUT_S)
+        calibration_ref = get_last_parameters(
+            self.calibration_ref_queue, timeout=TIMEOUT_S
+        )
         if calibration_ref is not None:
             self.calibration_ref = calibration_ref
 

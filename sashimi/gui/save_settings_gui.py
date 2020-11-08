@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
     QTextEdit,
     QPushButton,
     QLabel,
-    QComboBox
+    QComboBox,
 )
 from PyQt5.QtCore import pyqtSignal, Qt
 from sashimi.state import State
@@ -105,7 +105,12 @@ class SavingSettingsWidget(QWidget):
         self.html_markdown = markdown.markdown(instructions)
         self.instructions.setText(self.html_markdown)
 
-    def nest_keys(self, this_dict: dict, nesting_level: Optional[list] = None, parent: Optional[dict] = None) -> list:
+    def nest_keys(
+        self,
+        this_dict: dict,
+        nesting_level: Optional[list] = None,
+        parent: Optional[dict] = None,
+    ) -> list:
         keys = []
         if not nesting_level:
             nesting_level = []
@@ -151,7 +156,10 @@ class SavingSettingsWidget(QWidget):
             elif len(query) == 3:
                 value = target[query[0]][query[1]][query[2]]
             else:
-                warn("Dictionary nesting level equal or greater than 3 not supported", Warning)
+                warn(
+                    "Dictionary nesting level equal or greater than 3 not supported",
+                    Warning,
+                )
                 return
         except KeyError:
             return None
@@ -159,13 +167,17 @@ class SavingSettingsWidget(QWidget):
         return value
 
     def _update_config_key_value(self):
-        config_key = self.retrieve_keys_from_nested(self.config_combo.currentText(), "-")
+        config_key = self.retrieve_keys_from_nested(
+            self.config_combo.currentText(), "-"
+        )
         value = self._search_nested_dict(config_key, conf)
         self.config_key_value.setText(str(value))
 
     def _apply_config(self):
         global conf
-        config_key = self.retrieve_keys_from_nested(self.config_combo.currentText(), "-")
+        config_key = self.retrieve_keys_from_nested(
+            self.config_combo.currentText(), "-"
+        )
         value = self._search_nested_dict(config_key, conf)
         new_value = int(self.config_key_value.toPlainText())
         new_value = type(value)(new_value)  # Convert to keep the same type

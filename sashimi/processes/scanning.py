@@ -54,6 +54,7 @@ class ScannerProcess(LoggingProcess):
     Refer to the sashimi.hardware.scanning.scanloops module for details on the scanning implementation.
 
     """
+
     def __init__(
         self,
         stop_event: LoggedEvent,
@@ -63,8 +64,7 @@ class ScannerProcess(LoggingProcess):
         n_samples_waveform=10000,
         sample_rate=40000,
     ):
-        """
-        """
+        """"""
         super().__init__(name="scanner")
 
         self.stop_event = stop_event.new_reference(self.logger)

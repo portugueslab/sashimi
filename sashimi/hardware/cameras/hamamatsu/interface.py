@@ -37,6 +37,7 @@ from sashimi.hardware.cameras.hamamatsu.sdk import (
 )
 
 from sashimi.config import read_config
+
 conf = read_config()
 
 
@@ -89,7 +90,6 @@ class HamamatsuCamera(AbstractCamera):
 
     @binning.setter
     def binning(self, n_bin):
-        b = self.get_property_value("subarray_hsize")
         self.set_property_value("binning", f"{n_bin}x{n_bin}")
 
     @property
@@ -134,9 +134,10 @@ class HamamatsuCamera(AbstractCamera):
 
     @property
     def frame_shape(self):
-        #TODO these get_property value can get cleaned up in another property
-        return tuple(self.get_property_value(v) for v in ["image_height",
-                                                          "image_width"])
+        # TODO these get_property value can get cleaned up in another property
+        return tuple(
+            self.get_property_value(v) for v in ["image_height", "image_width"]
+        )
 
     def get_frames(self):
         frames = []
@@ -153,10 +154,7 @@ class HamamatsuCamera(AbstractCamera):
         # Wait for a new frame if the camera is acquiring.
         if capture_status.value == DCAMCAP_STATUS_BUSY:
             param_start = DCAMWAIT_START(
-                0,
-                0,
-                DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED,
-                100,
+                0, 0, DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED, 100,
             )
             param_start.size = ctypes.sizeof(param_start)
             self.check_status(
@@ -175,7 +173,6 @@ class HamamatsuCamera(AbstractCamera):
         )
         cur_buffer_index = paramtransfer.nNewestFrameIndex
         cur_frame_number = paramtransfer.nFrameCount
-
 
         # Check that we have not acquired more frames than we can store in our buffer.
         # Keep track of the maximum backlog.
@@ -217,9 +214,7 @@ class HamamatsuCamera(AbstractCamera):
         c_value = ctypes.c_double(0)
         self.check_status(
             self.dcam.dcamprop_getvalue(
-                self.camera_handle,
-                ctypes.c_int32(prop_id),
-                ctypes.byref(c_value),
+                self.camera_handle, ctypes.c_int32(prop_id), ctypes.byref(c_value),
             ),
             "dcamprop_getvalue",
         )
@@ -296,9 +291,10 @@ class HamamatsuCamera(AbstractCamera):
         roi_w = self.get_property_value("subarray_hsize")
         roi_h = self.get_property_value("subarray_vsize")
 
-
         # If the ROI is smaller than the entire frame turn on subarray mode:
-        if (roi_h == self.max_sensor_resolution[0]) and (roi_w == self.max_sensor_resolution[1]):
+        if (roi_h == self.max_sensor_resolution[0]) and (
+            roi_w == self.max_sensor_resolution[1]
+        ):
             self.set_property_value("subarray_mode", "OFF")
         else:
             self.set_property_value("subarray_mode", "ON")
@@ -328,10 +324,7 @@ class HamamatsuCamera(AbstractCamera):
         # between acquisitions.
 
         paramattach = DCAMBUF_ATTACH(
-            0,
-            DCAMBUF_ATTACHKIND_FRAME,
-            self.hcam_ptr,
-            self.number_image_buffers,
+            0, DCAMBUF_ATTACHKIND_FRAME, self.hcam_ptr, self.number_image_buffers,
         )
         paramattach.size = ctypes.sizeof(paramattach)
         self.check_status(
@@ -439,10 +432,7 @@ class HamamatsuCamera(AbstractCamera):
         if fn_return == DCAMERR_ERROR:
             c_buf_len = 80
             c_buf = ctypes.create_string_buffer(c_buf_len)
-            # Not sure if this serves any purpose at all
-            c_error = self.dcam.dcam_getlasterror(
-                self.camera_handle, c_buf, ctypes.c_int32(c_buf_len)
-            )
+
             raise Exception("dcam error " + str(fn_name) + " " + str(c_buf.value))
         return fn_return
 
@@ -504,10 +494,7 @@ class HamamatsuCamera(AbstractCamera):
                 self.check_status(ret, "dcamprop_getnextid")
             self.check_status(
                 self.dcam.dcamprop_getname(
-                    self.camera_handle,
-                    prop_id,
-                    c_buf,
-                    ctypes.c_int32(c_buf_len),
+                    self.camera_handle, prop_id, c_buf, ctypes.c_int32(c_buf_len),
                 ),
                 "dcamprop_getname",
             )

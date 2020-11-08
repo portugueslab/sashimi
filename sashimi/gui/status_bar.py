@@ -1,8 +1,4 @@
-from PyQt5.QtWidgets import (
-    QLabel,
-    QStatusBar,
-    QProgressBar
-)
+from PyQt5.QtWidgets import QLabel, QStatusBar, QProgressBar
 
 from sashimi.state import GlobalState, State, get_voxel_size
 from sashimi.config import read_config
@@ -11,8 +7,8 @@ conf = read_config()
 
 
 class StatusBarWidget(QStatusBar):
-    """Lower bar of the interface with info on framerate, image size and voxel size.
-    """
+    """Lower bar of the interface with info on framerate, image size and voxel size."""
+
     def __init__(self, state: State, timer):
         super().__init__()
         self.state = state
@@ -59,15 +55,15 @@ class StatusBarWidget(QStatusBar):
         if frame_rate is None:
             return
 
-        self.framerate_lbl.setText(
-            "Framerate: {} Hz".format(round(frame_rate, 2))
-        )
+        self.framerate_lbl.setText("Framerate: {} Hz".format(round(frame_rate, 2)))
 
         # Find the expected framerate depending on the global state
-        expected_frame_rate_dict = {GlobalState.PREVIEW: None,
-                                    GlobalState.VOLUME_PREVIEW: self.state.volume_setting.frequency *
-                                                                    self.state.n_planes,
-                                    GlobalState.PLANAR_PREVIEW: self.state.single_plane_settings.frequency}
+        expected_frame_rate_dict = {
+            GlobalState.PREVIEW: None,
+            GlobalState.VOLUME_PREVIEW: self.state.volume_setting.frequency
+            * self.state.n_planes,
+            GlobalState.PLANAR_PREVIEW: self.state.single_plane_settings.frequency,
+        }
 
         expected_frame_rate = expected_frame_rate_dict[self.state.global_state]
 
@@ -85,8 +81,13 @@ class StatusBarWidget(QStatusBar):
         )
 
     def update_voxel_size(self):
-        self.voxel_size = get_voxel_size(self.state.volume_setting, self.state.camera_settings)
-        if self.state.voxel_size and self.state.global_state == GlobalState.VOLUME_PREVIEW:
+        self.voxel_size = get_voxel_size(
+            self.state.volume_setting, self.state.camera_settings
+        )
+        if (
+            self.state.voxel_size
+            and self.state.global_state == GlobalState.VOLUME_PREVIEW
+        ):
             self.voxel_size_lbl.setText(
                 f"Voxel size: {self.voxel_size[0]:.2f} x {self.voxel_size[1]:.2f} x {self.voxel_size[2]:.2f} um"
             )

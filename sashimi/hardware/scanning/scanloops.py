@@ -95,6 +95,7 @@ class ScanLoop:
     the scanning mode) is "mounted" by the ScannerProcess process, and the ScanLoop.loop method is executed.
 
     """
+
     def __init__(
         self,
         board: AbstractScanInterface,
@@ -153,19 +154,14 @@ class ScanLoop:
         return lcm(ns_lateral, ns_frontal)
 
     def update_settings(self):
-        """Update parameters and return True only if got new parameters.
-        """
+        """Update parameters and return True only if got new parameters."""
         new_params = get_last_parameters(self.parameter_queue)
         if new_params is None:
             return False
 
         self.parameters = new_params
-        self.lateral_waveform = TriangleWaveform(
-            **asdict(self.parameters.xy.lateral)
-        )
-        self.frontal_waveform = TriangleWaveform(
-            **asdict(self.parameters.xy.frontal)
-        )
+        self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
+        self.frontal_waveform = TriangleWaveform(**asdict(self.parameters.xy.frontal))
         self.first_update = False  # To avoid multiple updates
         return True
 
@@ -203,7 +199,7 @@ class ScanLoop:
         """Main loop that gets executed in the run of the ScannerProcess class.
         The stop_event regulates breaking out of this loop and
         returns to the execution of the run of ScannerProcess.
-         """
+        """
         while True:
             self.update_settings()
             self.old_parameters = deepcopy(self.parameters)
@@ -222,6 +218,7 @@ class ScanLoop:
 class PlanarScanLoop(ScanLoop):
     """Class for controlling the planar scanning mode, where we image only one plane and
     do not control the piezo and vertical galvo."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.camera_pulses = RollingBuffer(self.n_samples_period())

@@ -38,7 +38,7 @@ ROI_TEXTS = {
 }
 
 
-#TODO this should be logarithmic, temporarily setting it to smaller range for usability.
+# TODO this should be logarithmic, temporarily setting it to smaller range for usability.
 # Alternatively, it could be set by the conf file, although I don't want to have view-related stuff under "camera"
 class ContrastSettings(ParametrizedQt):
     def __init__(self):
@@ -103,7 +103,7 @@ class ViewingWidget(QWidget):
             face_contrast_limits=(0, 0),
             opacity=1,
             visible=False,
-            name="roi_layer"
+            name="roi_layer",
         )
 
         self.main_layout = QVBoxLayout()
@@ -143,22 +143,24 @@ class ViewingWidget(QWidget):
 
         self.auto_contrast_chk.setChecked(True)
 
-        self.state.camera_settings.sig_param_changed.connect(self.launch_delayed_contrast_reset)
-        self.state.light_source_settings.sig_param_changed.connect(self.launch_delayed_contrast_reset)
-        self.viewer.window.qt_viewer.viewerButtons.resetViewButton.pressed.connect(self.reset_contrast)
+        self.state.camera_settings.sig_param_changed.connect(
+            self.launch_delayed_contrast_reset
+        )
+        self.state.light_source_settings.sig_param_changed.connect(
+            self.launch_delayed_contrast_reset
+        )
+        self.viewer.window.qt_viewer.viewerButtons.resetViewButton.pressed.connect(
+            self.reset_contrast
+        )
 
     def get_fullframe_size(self):
-        """Maximum size of the image at current binning. As stated above, we assume square sensors.
-        """
+        """Maximum size of the image at current binning. As stated above, we assume square sensors."""
         binning = int(self.state.camera_settings.binning)
         return [r // binning for r in self.max_sensor_resolution]
 
     @property
     def voxel_size(self):
-        return get_voxel_size(
-            self.state.volume_setting,
-            self.state.camera_settings,
-        )
+        return get_voxel_size(self.state.volume_setting, self.state.camera_settings,)
 
     def refresh(self) -> None:
         """Main refresh loop called by timeout of the main timer."""
@@ -175,8 +177,7 @@ class ViewingWidget(QWidget):
                 self.count_from_change = None
 
     def check_noise_subtraction_state(self):
-        """If we toggled noise subtraction, reset contrast.
-        """
+        """If we toggled noise subtraction, reset contrast."""
         noise_subtraction_set = self.state.noise_subtraction_active.is_set()
         if noise_subtraction_set != self.noise_subtraction_set:
             self.noise_subtraction_set = noise_subtraction_set
@@ -305,7 +306,7 @@ class CameraSettingsWidget(QWidget):
             self._show_roi()
             self.btn_cancel_roi.show()
             self.wid_display.viewer.layers["roi_layer"].mode = Mode.SELECT
-            #TODO add autoselection of the ROI w/o clicking
+            # TODO add autoselection of the ROI w/o clicking
 
             # Disable binning option if an ROI is set:
             self.wid_camera_settings.param_widgets["binning"].setEnabled(False)
@@ -358,7 +359,10 @@ class CameraSettingsWidget(QWidget):
         """
         max_image_dimension = self.wid_display.get_fullframe_size()
         # Make sure that the coordinates of the cropped ROI are within the image by cropping at o and max size
-        cropped_coords = [max(min(i, max_image_dimension[n % 2]), 0) for n, i in enumerate(self.roi_coords)]
+        cropped_coords = [
+            max(min(i, max_image_dimension[n % 2]), 0)
+            for n, i in enumerate(self.roi_coords)
+        ]
 
         # Calculate dimensions of the image:
         height = cropped_coords[2] - cropped_coords[0]
@@ -368,7 +372,12 @@ class CameraSettingsWidget(QWidget):
             self.cancel_roi_selection()
             return
 
-        self.state.camera_settings.roi = [cropped_coords[0], cropped_coords[1], height, width]
+        self.state.camera_settings.roi = [
+            cropped_coords[0],
+            cropped_coords[1],
+            height,
+            width,
+        ]
 
     def set_full_frame(self):
         s = self.wid_display.get_fullframe_size()

@@ -13,7 +13,10 @@ from sashimi.utilities import get_last_parameters
 
 conf = read_config()
 
-FULL_SIZE = [r / conf["camera"]["default_binning"] for r in conf["camera"]["max_sensor_resolution"]]
+FULL_SIZE = [
+    r / conf["camera"]["default_binning"]
+    for r in conf["camera"]["max_sensor_resolution"]
+]
 
 
 class CameraMode(Enum):
@@ -33,7 +36,12 @@ class TriggerMode(Enum):
 class CamParameters:
     exposure_time: float = conf["camera"]["default_exposure"]
     binning: int = 2
-    roi: tuple = (0, 0, FULL_SIZE[0], FULL_SIZE[1])  # order is [hpos, vpos, hsize, vsize]
+    roi: tuple = (
+        0,
+        0,
+        FULL_SIZE[0],
+        FULL_SIZE[1],
+    )  # order is [hpos, vpos, hsize, vsize]
     image_height: int = FULL_SIZE[0]
     image_width: int = FULL_SIZE[1]
     frame_shape: tuple = (FULL_SIZE[0], FULL_SIZE[1])
@@ -55,8 +63,7 @@ class FramerateRecorder:
         self.starting_time = datetime.now()
 
     def update_framerate(self):
-        """Calculate the framerate every n_fps_frames frames.
-        """
+        """Calculate the framerate every n_fps_frames frames."""
         # If number of frames for updating is reached:
         if self.i_fps == self.n_fps_frames - 1:
             self.current_time = datetime.now()
@@ -78,7 +85,8 @@ class FramerateRecorder:
 
 
 class CameraProcess(LoggingProcess):
-    """Process that handles the setting of new parameters to and the acquisition of frames from the camera.
+    """Process that handles the setting of new parameters to and the acquisition of
+    frames from the camera.
 
     Parameters
     ----------
@@ -89,6 +97,7 @@ class CameraProcess(LoggingProcess):
     max_queue_size
     n_fps_frames
     """
+
     def __init__(
         self,
         stop_event: LoggedEvent,
@@ -155,18 +164,19 @@ class CameraProcess(LoggingProcess):
                 pass
 
     def camera_loop(self):
-        """Camera running loop, grab frames and set new parameters if available.
-        """
+        """Camera running loop, grab frames and set new parameters if available."""
         while not self.stop_event.is_set():
             is_waiting = self.wait_event.is_set()
             frames = self.camera.get_frames()
             if frames:
 
                 for frame in frames:
-                    self.logger.log_message("received frame of shape "+str(frame.shape))
+                    self.logger.log_message(
+                        "received frame of shape " + str(frame.shape)
+                    )
                     if self.was_waiting and not is_waiting:
                         self.experiment_trigger_event.set()
-                        #TODO do not crash here if queue is full
+                        # TODO do not crash here if queue is full
                     self.image_queue.put(frame)
                     self.was_waiting = is_waiting
                     self.update_framerate()
@@ -181,8 +191,7 @@ class CameraProcess(LoggingProcess):
                     self.update_parameters(new_parameters)
 
     def update_parameters(self, new_parameters, stop_start=True):
-        """"Set new parameters and stop and start the camera to make sure all changes take place.
-        """
+        """ "Set new parameters and stop and start the camera to make sure all changes take place."""
         self.parameters = new_parameters
 
         if stop_start:
@@ -196,7 +205,7 @@ class CameraProcess(LoggingProcess):
         if stop_start:
             self.camera.start_acquisition()
         self.framerate_rec.restart()
-        self.logger.log_message("Updated parameters "+str(self.parameters))
+        self.logger.log_message("Updated parameters " + str(self.parameters))
 
     def update_framerate(self):
         self.framerate_rec.update_framerate()

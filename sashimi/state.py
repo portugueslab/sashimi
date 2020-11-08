@@ -4,6 +4,7 @@ from typing import Optional
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param, ParameterTree
 from sashimi.hardware.light_source import light_source_class_dict
+
 # from sashimi.hardware import light_source_class_dict
 from sashimi.processes.scanning import ScannerProcess
 from sashimi.hardware.scanning.scanloops import (
@@ -33,7 +34,6 @@ from sashimi.events import LoggedEvent, SashimiEvents
 from pathlib import Path
 from enum import Enum
 from sashimi.config import read_config
-from datetime import time
 import time
 from sashimi.utilities import clean_json
 
@@ -64,8 +64,7 @@ class ScanningSettings(ParametrizedQt):
         super().__init__()
         self.name = "general/scanning_state"
         self.scanning_state = Param(
-            "Paused",
-            ["Paused", "Calibration", "Planar", "Volume"],
+            "Paused", ["Paused", "Calibration", "Planar", "Volume"],
         )
 
 
@@ -115,17 +114,22 @@ class ZRecordingSettings(ParametrizedQt):
         self.n_skip_end = Param(0, (0, 20))
 
 
-roi_size = [0, 0] + [r // conf["camera"]["default_binning"]
-                     for r in conf["camera"]["max_sensor_resolution"]]
+roi_size = [0, 0] + [
+    r // conf["camera"]["default_binning"]
+    for r in conf["camera"]["max_sensor_resolution"]
+]
 
 
 class CameraSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "camera/parameters"
-        self.exposure_time = Param(conf["camera"]["default_exposure"], (0.5, 1000), unit="ms")
+        self.exposure_time = Param(
+            conf["camera"]["default_exposure"], (0.5, 1000), unit="ms"
+        )
         self.binning = Param(conf["camera"]["default_binning"], [1, 2, 4])
-        self.roi = Param(roi_size, gui=False
+        self.roi = Param(
+            roi_size, gui=False
         )  # order of params here is [hpos, vpos, hsize, vsize,]; h: horizontal, v: vertical
 
 
@@ -172,11 +176,7 @@ class Calibration(ParametrizedQt):
 
     def add_calibration_point(self):
         self.calibrations_points.append(
-            (
-                self.z_settings.piezo,
-                self.z_settings.lateral,
-                self.z_settings.frontal,
-            )
+            (self.z_settings.piezo, self.z_settings.lateral, self.z_settings.frontal,)
         )
         self.calculate_calibration()
 
@@ -212,10 +212,11 @@ class Calibration(ParametrizedQt):
 
 
 def get_voxel_size(
-    scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
+    scanning_settings: ZRecordingSettings, camera_settings: CameraSettings,
 ):
-    scan_length = scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
+    scan_length = (
+        scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
+    )
 
     binning = int(camera_settings.binning)
 
@@ -435,13 +436,16 @@ class State:
         self.send_scansave_settings()
 
     def send_camera_settings(self):
-        camera_params = CamParameters(exposure_time=self.camera_settings.exposure_time,
-                                      binning=int(self.camera_settings.binning),
-                                      roi=tuple(self.camera_settings.roi))
+        camera_params = CamParameters(
+            exposure_time=self.camera_settings.exposure_time,
+            binning=int(self.camera_settings.binning),
+            roi=tuple(self.camera_settings.roi),
+        )
 
         camera_params.trigger_mode = (
             TriggerMode.FREE
-            if self.global_state == GlobalState.PREVIEW or self.global_state == GlobalState.PLANAR_PREVIEW
+            if self.global_state == GlobalState.PREVIEW
+            or self.global_state == GlobalState.PLANAR_PREVIEW
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
@@ -487,7 +491,11 @@ class State:
     @property
     def n_planes(self):
         if self.global_state == GlobalState.VOLUME_PREVIEW:
-            return self.volume_setting.n_planes - self.volume_setting.n_skip_start - self.volume_setting.n_skip_end
+            return (
+                self.volume_setting.n_planes
+                - self.volume_setting.n_skip_start
+                - self.volume_setting.n_skip_end
+            )
         else:
             return 1
 
@@ -502,9 +510,7 @@ class State:
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
-                self.planar_setting,
-                self.single_plane_settings,
-                self.calibration,
+                self.planar_setting, self.single_plane_settings, self.calibration,
             )
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
@@ -528,9 +534,7 @@ class State:
         self.external_comm.current_settings_queue.put(self.all_settings)
 
         save_params = convert_save_params(
-            self.save_settings,
-            self.volume_setting,
-            self.camera_settings,
+            self.save_settings, self.volume_setting, self.camera_settings,
         )
         self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(save_params)
@@ -577,13 +581,16 @@ class State:
                 current_image = current_volume[0, :, :]
                 if n_image == 0:
                     calibration_set = np.empty(
-                        shape=(n_images, *current_image.shape), dtype=current_volume.dtype
+                        shape=(n_images, *current_image.shape),
+                        dtype=current_volume.dtype,
                     )
                 calibration_set[n_image, :, :] = current_image
                 n_image += 1
 
         self.noise_subtraction_active.set()
-        self.calibration_ref = np.mean(calibration_set, axis=0).astype(dtype=current_volume.dtype)
+        self.calibration_ref = np.mean(calibration_set, axis=0).astype(
+            dtype=current_volume.dtype
+        )
         self.light_source.intensity = light_intensity
 
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
@@ -621,13 +628,10 @@ class State:
             return None
 
     def calculate_pulse_times(self):
-        return (
-            np.arange(
-                self.volume_setting.n_skip_start,
-                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-            )
-            / (self.volume_setting.frequency * self.volume_setting.n_planes)
-        )
+        return np.arange(
+            self.volume_setting.n_skip_start,
+            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
 
     def wrap_up(self):
         self.stop_event.set()
