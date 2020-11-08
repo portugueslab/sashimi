@@ -1,6 +1,5 @@
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget, QLabel
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QWidget, QMainWindow, QDockWidget, QTabWidget
 from sashimi.gui.calibration_gui import CalibrationWidget
 from sashimi.gui.scanning_gui import (
     PlanarScanningWidget,
