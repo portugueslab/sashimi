@@ -20,7 +20,10 @@ TEMPLATE_CONF_DICT = {
     "scanning": "mock",
     "scopeless": False,
     "sample_rate": 40000,
-    "voxel_size": {"x": 0.3, "y": 0.3,},
+    "voxel_size": {
+        "x": 0.3,
+        "y": 0.3,
+    },
     "default_paths": {
         "data": str(Path.home()),
         "presets": str(PRESETS_DIR_PATH),
@@ -28,13 +31,29 @@ TEMPLATE_CONF_DICT = {
         "scope_instructions": str(SCOPE_INSTRUCTIONS_PATH),
     },
     "z_board": {
-        "read": {"channel": "Dev1/ai0:0", "min_val": 0, "max_val": 10,},
-        "write": {"channel": "Dev1/ao0:3", "min_val": -5, "max_val": 10,},
+        "read": {
+            "channel": "Dev1/ai0:0",
+            "min_val": 0,
+            "max_val": 10,
+        },
+        "write": {
+            "channel": "Dev1/ao0:3",
+            "min_val": -5,
+            "max_val": 10,
+        },
         "sync": {"channel": "/Dev1/ao/StartTrigger"},
     },
-    "piezo": {"scale": 1 / 40,},
+    "piezo": {
+        "scale": 1 / 40,
+    },
     "email": {"user": "foo", "password": "foo"},
-    "xy_board": {"write": {"channel": "Dev2/ao0:1", "min_val": -5, "max_val": 10,}},
+    "xy_board": {
+        "write": {
+            "channel": "Dev2/ao0:1",
+            "min_val": -5,
+            "max_val": 10,
+        }
+    },
     "camera": {
         "id": 0,
         "name": "hamamatsu",
@@ -121,7 +140,10 @@ def write_config_value(dict_path, val, file_path=CONFIG_PATH):
 @click.option("-n", "--name", help="Path (section/name) of parameter to be changed")
 @click.option("-v", "--val", help="Value of parameter to be changed")
 @click.option(
-    "-p", "--file_path", default=CONFIG_PATH, help="Path to the config file (optional)",
+    "-p",
+    "--file_path",
+    default=CONFIG_PATH,
+    help="Path to the config file (optional)",
 )
 def cli_modify_config(command, name=None, val=None, file_path=CONFIG_PATH):
     file_path = Path(file_path)

@@ -90,7 +90,12 @@ class ViewingWidget(QWidget):
 
         # Add image layer that will be used to show frames/volumes:
         self.frame_layer = self.viewer.add_image(
-            np.zeros([1,] + self.max_sensor_resolution),
+            np.zeros(
+                [
+                    1,
+                ]
+                + self.max_sensor_resolution
+            ),
             blending="translucent",
             name="frame_layer",
         )
@@ -160,7 +165,10 @@ class ViewingWidget(QWidget):
 
     @property
     def voxel_size(self):
-        return get_voxel_size(self.state.volume_setting, self.state.camera_settings,)
+        return get_voxel_size(
+            self.state.volume_setting,
+            self.state.camera_settings,
+        )
 
     def refresh(self) -> None:
         """Main refresh loop called by timeout of the main timer."""

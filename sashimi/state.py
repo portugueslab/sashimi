@@ -64,7 +64,8 @@ class ScanningSettings(ParametrizedQt):
         super().__init__()
         self.name = "general/scanning_state"
         self.scanning_state = Param(
-            "Paused", ["Paused", "Calibration", "Planar", "Volume"],
+            "Paused",
+            ["Paused", "Calibration", "Planar", "Volume"],
         )
 
 
@@ -176,7 +177,11 @@ class Calibration(ParametrizedQt):
 
     def add_calibration_point(self):
         self.calibrations_points.append(
-            (self.z_settings.piezo, self.z_settings.lateral, self.z_settings.frontal,)
+            (
+                self.z_settings.piezo,
+                self.z_settings.lateral,
+                self.z_settings.frontal,
+            )
         )
         self.calculate_calibration()
 
@@ -212,7 +217,8 @@ class Calibration(ParametrizedQt):
 
 
 def get_voxel_size(
-    scanning_settings: ZRecordingSettings, camera_settings: CameraSettings,
+    scanning_settings: ZRecordingSettings,
+    camera_settings: CameraSettings,
 ):
     scan_length = (
         scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
@@ -510,7 +516,9 @@ class State:
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
-                self.planar_setting, self.single_plane_settings, self.calibration,
+                self.planar_setting,
+                self.single_plane_settings,
+                self.calibration,
             )
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
@@ -534,7 +542,9 @@ class State:
         self.external_comm.current_settings_queue.put(self.all_settings)
 
         save_params = convert_save_params(
-            self.save_settings, self.volume_setting, self.camera_settings,
+            self.save_settings,
+            self.volume_setting,
+            self.camera_settings,
         )
         self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(save_params)
@@ -628,10 +638,13 @@ class State:
             return None
 
     def calculate_pulse_times(self):
-        return np.arange(
-            self.volume_setting.n_skip_start,
-            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
+        return (
+            np.arange(
+                self.volume_setting.n_skip_start,
+                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+            )
+            / (self.volume_setting.frequency * self.volume_setting.n_planes)
+        )
 
     def wrap_up(self):
         self.stop_event.set()
