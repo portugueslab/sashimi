@@ -35,6 +35,7 @@ from enum import Enum
 from sashimi.config import read_config
 from datetime import time
 import time
+from sashimi.utilities import clean_json
 
 
 conf = read_config()
@@ -426,7 +427,7 @@ class State:
 
     def save_tree(self, save_file):
         with open(save_file, "w") as f:
-            json.dump(self.settings_tree.serialize(), f)
+            json.dump(clean_json(self.settings_tree.serialize()), f)
 
     def change_global_state(self):
         self.global_state = scanning_to_global_state[self.status.scanning_state]
