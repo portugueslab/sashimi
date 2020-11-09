@@ -1,5 +1,6 @@
 import numpy as np
 from numba import jit
+from sashimi.rolling_buffer import RollingBuffer
 
 
 class Waveform:
@@ -62,8 +63,16 @@ class TriangleWaveform(Waveform):
 
 
 @jit(nopython=True)
-def set_impulses(buffer, n_planes, n_skip_start, n_skip_end, high=5):
+def _set_impulses(buffer, n_planes, n_skip_start, n_skip_end, high):
     buffer[:] = 0
     n_between_planes = int(round(len(buffer) / n_planes))
     for i in range(n_skip_start, n_planes - n_skip_end):
         buffer[i * n_between_planes] = high
+
+
+class CameraRollingBuffer(RollingBuffer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def set_impulses(self, n_planes, n_skip_start, n_skip_end):
+        _set_impulses(self.buffer, n_planes, n_skip_start, n_skip_end, high=5)

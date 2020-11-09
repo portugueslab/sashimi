@@ -12,7 +12,7 @@ from scopecuisine.rolling_buffer import FillingRollingBuffer, RollingBuffer
 from sashimi.config import read_config
 from sashimi.processes.logging import ConcurrenceLogger
 from sashimi.utilities import lcm, get_last_parameters
-from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, set_impulses
+from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, CameraRollingBuffer
 from sashimi.hardware.scanning.__init__ import AbstractScanInterface
 
 conf = read_config()
@@ -148,13 +148,14 @@ class ScanLoop:
         self.i_sample = 0
         self.n_samples_read = 0
 
-    def n_samples_period(self):
+    def _n_samples_period(self):
         ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
         ns_frontal = int(round(self.sample_rate / self.frontal_waveform.frequency))
         return lcm(ns_lateral, ns_frontal)
 
-    def update_settings(self):
-        """Update parameters and return True only if got new parameters."""
+    def _update_settings(self):
+        """Update parameters and return True only if got new parameters.
+        """
         new_params = get_last_parameters(self.parameter_queue)
         if new_params is None:
             return False
@@ -165,7 +166,7 @@ class ScanLoop:
         self.first_update = False  # To avoid multiple updates
         return True
 
-    def loop_condition(self):
+    def _loop_condition(self):
         """Returns False if main event loop has to be interrupted. this happens both when we want
         to restart the scanning loop (if restart_event is set), or we want to interrupt scanning
         (stop_event is set).
@@ -176,7 +177,7 @@ class ScanLoop:
             return False
         return not self.stop_event.is_set()
 
-    def check_start(self):
+    def _check_start(self):
         if not self.started:
             self.board.start()
             self.started = True
@@ -201,15 +202,15 @@ class ScanLoop:
         returns to the execution of the run of ScannerProcess.
         """
         while True:
-            self.update_settings()
+            self._update_settings()
             self.old_parameters = deepcopy(self.parameters)
-            if not self.loop_condition():
+            if not self._loop_condition():
                 break
             self.fill_arrays()
             self.write()
-            self.check_start()
+            self._check_start()
             self.read()
-            self.i_sample = (self.i_sample + self.n_samples) % self.n_samples_period()
+            self.i_sample = (self.i_sample + self.n_samples) % self._n_samples_period()
             self.n_acquired += 1
             if first_run:
                 break
@@ -221,31 +222,37 @@ class PlanarScanLoop(ScanLoop):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.camera_pulses = RollingBuffer(self.n_samples_period())
+        self.camera_pulses = RollingBuffer(self._n_samples_period())
 
-    def loop_condition(self):
+    def _loop_condition(self):
         return (
-            super().loop_condition() and self.parameters.state == ScanningState.PLANAR
+                super()._loop_condition() and self.parameters.state == ScanningState.PLANAR
         )
 
-    def n_samples_period(self):
+    def _n_samples_period(self):
+        # If we are not using camera trigger, the period is dictated by lateral scanning:
         if (
             self.parameters.triggering.frequency is None
             or self.parameters.triggering.frequency == 0
         ):
-            return super().n_samples_period()
+            return super()._n_samples_period()
+        # Else, find least common multiple between timepoints required for trigger and for the lateral scanning:
         else:
             n_samples_trigger = int(
                 round(self.sample_rate / self.parameters.triggering.frequency)
             )
-            return lcm(n_samples_trigger, super().n_samples_period())
+            return lcm(n_samples_trigger, super()._n_samples_period())
 
     def fill_arrays(self):
-        # Fill the z values
+        # Drive the piezo z to specified position:
         self.board.z_piezo = self.parameters.z.piezo
+
+        # If we are in calibration mode and galvos are not synched, use interface value to set them:
         if isinstance(self.parameters.z, ZManual):
             self.board.z_lateral = self.parameters.z.lateral
             self.board.z_frontal = self.parameters.z.frontal
+
+        # Else, calculate the galvo z from the calibration:
         elif isinstance(self.parameters.z, ZSynced):
             self.board.z_lateral = calc_sync(
                 self.parameters.z.piezo, self.parameters.z.lateral_sync
@@ -262,38 +269,39 @@ class VolumetricScanLoop(ScanLoop):
         self.z_waveform = SawtoothWaveform()
         buffer_len = int(round(self.sample_rate / self.parameters.z.frequency))
         self.recorded_signal = FillingRollingBuffer(buffer_len)
-        self.camera_pulses = RollingBuffer(buffer_len)
+        self.camera_pulses_buffer = CameraRollingBuffer(buffer_len)
         self.current_frequency = self.parameters.z.frequency
         self.camera_on = False
         self.trigger_exp_start = False
         self.camera_was_off = True
         self.wait_signal.set()
 
+    def _loop_condition(self):
+        return (
+            super()._loop_condition()
+            and self.parameters.state == ScanningState.VOLUMETRIC
+        )
+
     def initialize(self):
         super().initialize()
         self.camera_on = False
         self.wait_signal.set()
 
-    def loop_condition(self):
-        return (
-            super().loop_condition()
-            and self.parameters.state == ScanningState.VOLUMETRIC
-        )
-
-    def check_start(self):
-        super().check_start()
+    def _check_start(self):
+        super()._check_start()
+        # Toggle the experiment state after starting the new acquisition
         if (
             self.parameters.experiment_state
             == ExperimentPrepareState.EXPERIMENT_STARTED
         ):
             self.parameters.experiment_state = ExperimentPrepareState.PREVIEW
 
-    def n_samples_period(self):
+    def _n_samples_period(self):
         n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
-        return max(n_samples_trigger, super().n_samples_period())
+        return max(n_samples_trigger, super()._n_samples_period())
 
-    def update_settings(self):
-        updated = super().update_settings()
+    def _update_settings(self):
+        updated = super()._update_settings()
         if not updated and not self.first_update:
             return False
 
@@ -304,11 +312,10 @@ class VolumetricScanLoop(ScanLoop):
             if self.parameters.z.frequency > 0.1:
                 full_period = int(round(self.sample_rate / self.parameters.z.frequency))
                 self.recorded_signal = FillingRollingBuffer(full_period)
-                self.camera_pulses = RollingBuffer(full_period)
+                self.camera_pulses_buffer = CameraRollingBuffer(full_period)
                 self.initialize()
 
-        set_impulses(
-            self.camera_pulses.buffer,
+        self.camera_pulses_buffer.set_impulses(
             self.parameters.triggering.n_planes,
             n_skip_start=self.parameters.triggering.n_skip_start,
             n_skip_end=self.parameters.triggering.n_skip_end,
@@ -320,7 +327,7 @@ class VolumetricScanLoop(ScanLoop):
             vmax=self.parameters.z.piezo_max,
         )
 
-        if not self.camera_on and self.n_samples_read > self.n_samples_period():
+        if not self.camera_on and self.n_samples_read > self._n_samples_period():
             self.camera_on = True
             self.trigger_exp_start = True
         elif not self.camera_on:
@@ -367,20 +374,20 @@ class VolumetricScanLoop(ScanLoop):
                 self.logger.log_message("Camera was off")
                 # calculate how many samples are remaining until we are in a new period
                 if i_sample == 0:
-                    camera_pulses = self.camera_pulses.read(i_sample, self.n_samples)
+                    camera_pulses = self.camera_pulses_buffer.read(i_sample, self.n_samples)
                     self.camera_was_off = False
                     self.wait_signal.clear()
                 else:
-                    n_to_next_start = self.n_samples_period() - i_sample
+                    n_to_next_start = self._n_samples_period() - i_sample
                     if n_to_next_start < self.n_samples:
-                        camera_pulses = self.camera_pulses.read(
+                        camera_pulses = self.camera_pulses_buffer.read(
                             i_sample, self.n_samples
                         ).copy()
                         camera_pulses[:n_to_next_start] = 0
                         self.camera_was_off = False
                         self.wait_signal.clear()
             else:
-                camera_pulses = self.camera_pulses.read(i_sample, self.n_samples)
+                camera_pulses = self.camera_pulses_buffer.read(i_sample, self.n_samples)
 
         self.board.camera_trigger = camera_pulses
 
