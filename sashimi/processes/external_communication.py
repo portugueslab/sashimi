@@ -31,8 +31,9 @@ class ExternalComm(LoggingProcess):
         external_trigger_conf = conf.pop("external_communication")
         external_trigger_name = external_trigger_conf.pop("name")
 
-        self.comm = external_comm_class_dict[external_trigger_name](**external_trigger_conf)
-
+        self.comm = external_comm_class_dict[external_trigger_name](
+            **external_trigger_conf
+        )
 
         self.scanning_trigger = scanning_trigger
         if self.scanning_trigger:

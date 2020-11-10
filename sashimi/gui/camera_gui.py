@@ -90,12 +90,7 @@ class ViewingWidget(QWidget):
 
         # Add image layer that will be used to show frames/volumes:
         self.frame_layer = self.viewer.add_image(
-            np.zeros(
-                [
-                    1,
-                ]
-                + self.max_sensor_resolution
-            ),
+            np.zeros([1,] + self.max_sensor_resolution),
             blending="translucent",
             name="frame_layer",
         )
@@ -165,10 +160,7 @@ class ViewingWidget(QWidget):
 
     @property
     def voxel_size(self):
-        return get_voxel_size(
-            self.state.volume_setting,
-            self.state.camera_settings,
-        )
+        return get_voxel_size(self.state.volume_setting, self.state.camera_settings,)
 
     def refresh(self) -> None:
         """Main refresh loop called by timeout of the main timer."""
@@ -176,8 +168,9 @@ class ViewingWidget(QWidget):
 
         self.check_noise_subtraction_state()
 
-        # This pattern with the counting is required to update the image range with some delay,
-        # as the first received afterwards might still be the wrong one when changing exposure or noise subtraction
+        # This pattern with the counting is required to update the image range
+        # with some delay, as the first received afterwards might still be
+        # the wrong one when changing exposure or noise subtraction
         if self.count_from_change is not None:
             self.count_from_change += 1
             if self.count_from_change == self._DELAY_REFRESH_COUNT:

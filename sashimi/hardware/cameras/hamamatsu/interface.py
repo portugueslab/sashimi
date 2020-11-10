@@ -154,10 +154,7 @@ class HamamatsuCamera(AbstractCamera):
         # Wait for a new frame if the camera is acquiring.
         if capture_status.value == DCAMCAP_STATUS_BUSY:
             param_start = DCAMWAIT_START(
-                0,
-                0,
-                DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED,
-                100,
+                0, 0, DCAMWAIT_CAPEVENT_FRAMEREADY | DCAMWAIT_CAPEVENT_STOPPED, 100,
             )
             param_start.size = ctypes.sizeof(param_start)
             self.check_status(
@@ -217,9 +214,7 @@ class HamamatsuCamera(AbstractCamera):
         c_value = ctypes.c_double(0)
         self.check_status(
             self.dcam.dcamprop_getvalue(
-                self.camera_handle,
-                ctypes.c_int32(prop_id),
-                ctypes.byref(c_value),
+                self.camera_handle, ctypes.c_int32(prop_id), ctypes.byref(c_value),
             ),
             "dcamprop_getvalue",
         )
@@ -329,10 +324,7 @@ class HamamatsuCamera(AbstractCamera):
         # between acquisitions.
 
         paramattach = DCAMBUF_ATTACH(
-            0,
-            DCAMBUF_ATTACHKIND_FRAME,
-            self.hcam_ptr,
-            self.number_image_buffers,
+            0, DCAMBUF_ATTACHKIND_FRAME, self.hcam_ptr, self.number_image_buffers,
         )
         paramattach.size = ctypes.sizeof(paramattach)
         self.check_status(
@@ -502,10 +494,7 @@ class HamamatsuCamera(AbstractCamera):
                 self.check_status(ret, "dcamprop_getnextid")
             self.check_status(
                 self.dcam.dcamprop_getname(
-                    self.camera_handle,
-                    prop_id,
-                    c_buf,
-                    ctypes.c_int32(c_buf_len),
+                    self.camera_handle, prop_id, c_buf, ctypes.c_int32(c_buf_len),
                 ),
                 "dcamprop_getname",
             )

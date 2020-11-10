@@ -4,7 +4,6 @@ from typing import Optional
 
 
 class ZmqComm(AbstractComm):
-
     def trigger_and_receive_duration(self, config) -> Optional[float]:
         zmq_context = zmq.Context()
         with zmq_context.socket(zmq.REQ) as zmq_socket:

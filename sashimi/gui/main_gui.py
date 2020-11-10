@@ -47,8 +47,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.wid_display)
 
         self.addDockWidget(
-            Qt.LeftDockWidgetArea,
-            DockedWidget(widget=self.wid_status, title="Mode"),
+            Qt.LeftDockWidgetArea, DockedWidget(widget=self.wid_status, title="Mode"),
         )
 
         self.addDockWidget(
@@ -113,7 +112,7 @@ class MainWindow(QMainWindow):
         self.wid_settings_tree.conf_window.close()
         self.wid_settings_tree.guide_window.close()
         self.st.wrap_up()
-        a0.accept()
+        # a0.accept()
 
     def refresh_param_values(self, omit_wid_camera=False):
         # TODO should be possible with lightparam, when it's implemented there remove here

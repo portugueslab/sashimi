@@ -126,8 +126,7 @@ class CameraProcess(LoggingProcess):
         camera_conf = conf.pop("camera")
         camera_name = camera_conf.pop("name")
 
-        self.camera = camera_class_dict[camera_name](
-            **camera_conf)
+        self.camera = camera_class_dict[camera_name](**camera_conf)
 
         # if conf["scopeless"]:
         #     self.camera = camera_class_dict["mock"]()

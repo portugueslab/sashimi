@@ -3,6 +3,7 @@ from sashimi.hardware.scanning.interface import ScanningError, AbstractScanInter
 
 try:
     from sashimi.hardware.scanning.ni import open_niboard
+
     NI_AVAILABLE = True
 except ImportError:
     NI_AVAILABLE = False
