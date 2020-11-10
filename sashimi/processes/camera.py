@@ -123,13 +123,18 @@ class CameraProcess(LoggingProcess):
         self.was_waiting = False
 
     def initialize_camera(self):
-        if conf["scopeless"]:
-            self.camera = camera_class_dict["mock"]()
-        else:
-            self.camera = camera_class_dict[conf["camera"]["name"]](
-                camera_id=conf["camera"]["id"],
-                max_sensor_resolution=tuple(conf["camera"]["max_sensor_resolution"]),
-            )
+        camera_conf = conf.pop("camera")
+        camera_name = camera_conf.pop("name")
+
+        self.camera = camera_class_dict[camera_name](
+            **camera_conf)
+
+        # if conf["scopeless"]:
+        #     self.camera = camera_class_dict["mock"]()
+        #     self.camera = camera_class_dict[["name"]](
+        #         camera_id=conf["camera"]["id"],
+        #         max_sensor_resolution=tuple(conf["camera"]["max_sensor_resolution"]),
+        #     )
 
     def run(self):
         self.logger.log_message("started")

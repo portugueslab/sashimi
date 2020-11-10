@@ -15,8 +15,8 @@ class TriggerMode(Enum):
 
 
 class AbstractCamera:
-    def __init__(self, camera_id, max_sensor_resolution=None):
-        self.camera_id = camera_id
+    def __init__(self, id=None, max_sensor_resolution=None, **kwargs):
+        self.camera_id = id
         self.max_sensor_resolution = max_sensor_resolution
 
     def get_frames(self):

@@ -15,7 +15,7 @@ class LaserWarning(Warning):
 
 
 class AbstractLightSource:
-    def __init__(self, port):
+    def __init__(self, port=None, **kwargs):
         self.port = port
         self._status = LaserState.OFF
         self.intensity_units = None

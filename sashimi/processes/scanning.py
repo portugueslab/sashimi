@@ -1,21 +1,13 @@
 from multiprocessing import Queue
 from copy import deepcopy
 
-from sashimi.hardware.scanning.scanloops import (
+from sashimi.processes.scanloops import (
     ScanningState,
     ScanParameters,
     PlanarScanLoop,
     VolumetricScanLoop,
 )
-from sashimi.hardware.scanning import ScanningError
-from sashimi.hardware.scanning.mock import open_mockboard
-
-try:
-    from sashimi.hardware.scanning.ni import open_niboard
-
-    NI_AVAILABLE = True
-except ImportError:
-    NI_AVAILABLE = False
+from sashimi.hardware.scanning import ScanningError, scan_conf_dict
 
 from warnings import warn
 from arrayqueues.shared_arrays import ArrayQueue
@@ -27,13 +19,6 @@ from sashimi.events import LoggedEvent
 
 
 conf = read_config()
-
-# Dictionary of options for the context within which the scanning has to run.
-scan_conf_dict = dict(mock=open_mockboard)
-
-# Add NI context if available. NI board will be initialized there.
-if NI_AVAILABLE:
-    scan_conf_dict["ni"] = open_niboard
 
 
 class ScannerProcess(LoggingProcess):

@@ -7,15 +7,18 @@ try:
 
     manager = visa.ResourceManager()
 except (ImportError, ValueError):
-    warn("PyVisa not installed, no laser control available", LaserWarning)
+    manager = None
 
 
 conf = read_config()
 
 
 class CoboltLaser(AbstractLightSource):
-    def __init__(self, port):
-        super().__init__(port)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if manager is None:
+            raise ImportError("PyVisa not installed, no laser control available")
+
         self.socket = manager.open_resource(
             self.port,
             **{

@@ -42,8 +42,8 @@ conf = read_config()
 
 
 class HamamatsuCamera(AbstractCamera):
-    def __init__(self, camera_id, max_sensor_resolution):
-        super().__init__(camera_id, max_sensor_resolution)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         # This need to be specified at the beginning, not to change with the ROI that we set.
         self.dcam = ctypes.windll.dcamapi

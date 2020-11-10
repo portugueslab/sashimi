@@ -17,7 +17,6 @@ class ExternalComm(LoggingProcess):
         experiment_start_event: LoggedEvent,
         is_saving_event: LoggedEvent,
         is_waiting_event: LoggedEvent,
-        address=conf["external_communication"]["address"],
         scanning_trigger=True,
     ):
         super().__init__(name="external_comm")
@@ -27,12 +26,14 @@ class ExternalComm(LoggingProcess):
         self.stop_event = stop_event.new_reference(self.logger)
         self.saving_event = is_saving_event.new_reference(self.logger)
         self.duration_queue = Queue()
-        if conf["scopeless"]:
-            self.comm = external_comm_class_dict["mock"]()
-        else:
-            self.comm = external_comm_class_dict[
-                conf["external_communication"]["name"]
-            ](address)
+
+        # Set up external communication from conf file
+        external_trigger_conf = conf.pop("external_communication")
+        external_trigger_name = external_trigger_conf.pop("name")
+
+        self.comm = external_comm_class_dict[external_trigger_name](**external_trigger_conf)
+
+
         self.scanning_trigger = scanning_trigger
         if self.scanning_trigger:
             self.waiting_event = is_waiting_event.new_reference(self.logger)

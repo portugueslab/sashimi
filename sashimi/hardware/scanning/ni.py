@@ -1,4 +1,4 @@
-from sashimi.hardware.scanning.__init__ import AbstractScanInterface
+from sashimi.hardware.scanning.interface import AbstractScanInterface
 
 from contextlib import contextmanager
 

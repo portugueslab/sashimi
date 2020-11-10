@@ -5,8 +5,8 @@ from skimage.measure import block_reduce
 
 
 class MockCamera(AbstractCamera):
-    def __init__(self, camera_id=None, sensor_resolution=None):
-        super().__init__(camera_id, sensor_resolution)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._exposure_time = 60
         self._sensor_resolution: tuple = (256, 256)
         self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])

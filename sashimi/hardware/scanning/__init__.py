@@ -1,77 +1,15 @@
-from contextlib import contextmanager
+from sashimi.hardware.scanning.mock import open_mockboard
+from sashimi.hardware.scanning.interface import ScanningError, AbstractScanInterface
 
+try:
+    from sashimi.hardware.scanning.ni import open_niboard
+    NI_AVAILABLE = True
+except ImportError:
+    NI_AVAILABLE = False
 
-class ScanningError(Exception):
-    pass
+# Dictionary of options for the context within which the scanning has to run.
+scan_conf_dict = dict(mock=open_mockboard)
 
-
-class AbstractScanInterface:
-    def __init__(self, sample_rate, n_samples, conf, *args, **kwargs):
-        self.sample_rate = sample_rate
-        self.n_samples = n_samples
-        self.conf = conf
-
-    def start(self):
-        pass
-
-    @property
-    def z_piezo(self):
-        return None
-
-    @z_piezo.setter
-    def z_piezo(self, waveform):
-        pass
-
-    @property
-    def z_frontal(self):
-        return None
-
-    @z_frontal.setter
-    def z_frontal(self, waveform):
-        pass
-
-    @property
-    def z_lateral(self):
-        return None
-
-    @z_lateral.setter
-    def z_lateral(self, waveform):
-        pass
-
-    @property
-    def camera_trigger(self):
-        return None
-
-    @camera_trigger.setter
-    def camera_trigger(self, waveform):
-        pass
-
-    @property
-    def xy_frontal(self):
-        return None
-
-    @xy_frontal.setter
-    def xy_frontal(self, waveform):
-        pass
-
-    @property
-    def xy_lateral(self):
-        return None
-
-    @xy_lateral.setter
-    def xy_lateral(self, waveform):
-        pass
-
-    def write(self):
-        pass
-
-    def read(self):
-        pass
-
-
-@contextmanager
-def open_abstract_interface(sample_rate, n_samples, conf) -> AbstractScanInterface:
-    try:
-        yield AbstractScanInterface(sample_rate, n_samples, conf)
-    finally:
-        pass
+# Add NI context if available. NI board will be initialized there.
+if NI_AVAILABLE:
+    scan_conf_dict["ni"] = open_niboard

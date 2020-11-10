@@ -2,8 +2,8 @@ from sashimi.hardware.light_source.interface import AbstractLightSource
 
 
 class MockLaser(AbstractLightSource):
-    def __init__(self, port=None):
-        super().__init__(port)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self._current = 0
         self.intensity_units = "mocks"
 

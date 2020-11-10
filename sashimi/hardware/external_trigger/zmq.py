@@ -3,10 +3,7 @@ import zmq
 from typing import Optional
 
 
-class StytraComm(AbstractComm):
-    def __init__(self, address):
-        super().__init__(address)
-        self.address = address
+class ZmqComm(AbstractComm):
 
     def trigger_and_receive_duration(self, config) -> Optional[float]:
         zmq_context = zmq.Context()
