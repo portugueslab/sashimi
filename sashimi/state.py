@@ -37,7 +37,6 @@ from sashimi.config import read_config
 import time
 from sashimi.utilities import clean_json
 
-
 conf = read_config()
 
 
@@ -57,6 +56,16 @@ class SaveSettings(ParametrizedQt):
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("")
         self.overwrite_save_folder = Param(0, (0, 1), gui=False, loadable=False)
+
+
+# TODO: This creates a dichotomy between SaveSettings.experiment_duration and TriggerSettings.duration.
+# the reason for the dichotomy is that this way we can disable the widget if experiment is triggered
+class TriggerSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__(self)
+        self.name = "trigger_settings"
+        self.duration = Param(2_000, (1, 10_000), unit="s")
+        self.is_triggered = Param(True, [True, False], gui=False)
 
 
 class ScanningSettings(ParametrizedQt):
@@ -157,7 +166,7 @@ def convert_planar_params(planar: PlanarScanningSettings):
 
 
 def convert_calibration_params(
-    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
+        planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
         state=ScanningState.PLANAR,
@@ -217,11 +226,11 @@ class Calibration(ParametrizedQt):
 
 
 def get_voxel_size(
-    scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
+        scanning_settings: ZRecordingSettings,
+        camera_settings: CameraSettings,
 ):
     scan_length = (
-        scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
+            scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
     )
 
     binning = int(camera_settings.binning)
@@ -236,12 +245,12 @@ def get_voxel_size(
 
 
 def convert_save_params(
-    save_settings: SaveSettings,
-    scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
+        save_settings: SaveSettings,
+        scanning_settings: ZRecordingSettings,
+        camera_settings: CameraSettings,
 ):
     n_planes = scanning_settings.n_planes - (
-        scanning_settings.n_skip_start + scanning_settings.n_skip_end
+            scanning_settings.n_skip_start + scanning_settings.n_skip_end
     )
 
     return SavingParameters(
@@ -254,9 +263,9 @@ def convert_save_params(
 
 
 def convert_single_plane_params(
-    planar: PlanarScanningSettings,
-    single_plane_setting: SinglePlaneSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        single_plane_setting: SinglePlaneSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -271,9 +280,9 @@ def convert_single_plane_params(
 
 
 def convert_volume_params(
-    planar: PlanarScanningSettings,
-    z_setting: ZRecordingSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        z_setting: ZRecordingSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
@@ -327,7 +336,7 @@ class State:
             sample_rate=self.sample_rate,
         )
         self.camera_settings = CameraSettings()
-        self.save_settings = SaveSettings()
+        self.trigger_settings = TriggerSettings()
 
         self.settings_tree = ParameterTree()
 
@@ -451,7 +460,7 @@ class State:
         camera_params.trigger_mode = (
             TriggerMode.FREE
             if self.global_state == GlobalState.PREVIEW
-            or self.global_state == GlobalState.PLANAR_PREVIEW
+               or self.global_state == GlobalState.PLANAR_PREVIEW
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
@@ -498,9 +507,9 @@ class State:
     def n_planes(self):
         if self.global_state == GlobalState.VOLUME_PREVIEW:
             return (
-                self.volume_setting.n_planes
-                - self.volume_setting.n_skip_start
-                - self.volume_setting.n_skip_end
+                    self.volume_setting.n_planes
+                    - self.volume_setting.n_skip_start
+                    - self.volume_setting.n_skip_end
             )
         else:
             return 1
@@ -550,6 +559,7 @@ class State:
         self.saver.saving_parameter_queue.put(save_params)
         self.dispatcher.n_planes_queue.put(self.n_planes)
 
+    # TODO: What is the purpose of this?
     def send_dispatcher_settings(self):
         pass
 
@@ -561,6 +571,7 @@ class State:
         self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
+        # TODO why are we shooting on our own foot? I am sure there is a better way
         time.sleep(0.01)
         self.is_saving_event.set()
 
@@ -639,11 +650,11 @@ class State:
 
     def calculate_pulse_times(self):
         return (
-            np.arange(
-                self.volume_setting.n_skip_start,
-                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-            )
-            / (self.volume_setting.frequency * self.volume_setting.n_planes)
+                np.arange(
+                    self.volume_setting.n_skip_start,
+                    self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+                )
+                / (self.volume_setting.frequency * self.volume_setting.n_planes)
         )
 
     def wrap_up(self):

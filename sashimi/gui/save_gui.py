@@ -3,13 +3,15 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QPushButton,
     QFileDialog,
+    QCheckBox,
 )
 from lightparam.gui import ParameterGui
+from sashimi.state import State
 from pathlib import Path
 
 
 class SaveWidget(QWidget):
-    def __init__(self, state, timer):
+    def __init__(self, state: State, timer):
         super().__init__()
         self.state = state
         self.timer = timer
@@ -18,12 +20,21 @@ class SaveWidget(QWidget):
         self.wid_save_options = ParameterGui(state.save_settings)
         self.save_location_button = QPushButton()
 
+        self.manual_duration_chk = QCheckBox("Triggered experiment")
+
+        self.wid_manual_duration = ParameterGui(self.state.trigger_settings)
+
         self.layout().addWidget(self.wid_save_options)
         self.layout().addWidget(self.save_location_button)
+        self.layout().addWidget(self.wid_manual_duration)
+        self.layout().addWidget(self.manual_duration_chk)
 
         self.set_locationbutton()
 
         self.save_location_button.clicked.connect(self.set_save_location)
+        self.manual_duration_chk.stateChanged.connect(self.update_triggered_option)
+
+        self.manual_duration_chk.setChecked(True)
 
     def set_save_location(self):
         save_dir = QFileDialog.getExistingDirectory()
@@ -43,3 +54,11 @@ class SaveWidget(QWidget):
             self.save_location_button.setText("Save in " + pathtext)
             self.save_location_button.setStyleSheet("")
             self.state.save_settings.overwrite_save_folder = 0
+
+    def update_triggered_option(self, is_checked):
+        if is_checked:
+            self.wid_manual_duration.setEnabled(False)
+            self.state.trigger_settings.is_triggered = True
+        else:
+            self.wid_manual_duration.setEnabled(True)
+            self.state.trigger_settings.is_triggered = False
