@@ -133,7 +133,7 @@ class CameraSettings(ParametrizedQt):
         super().__init__()
         self.name = "camera/parameters"
         self.exposure_time = Param(
-            conf["camera"]["default_exposure"], (0.5, 1000), unit="ms"
+            conf["camera"]["default_exposure"], (1, 1000), unit="ms"
         )
         self.binning = Param(conf["camera"]["default_binning"], [1, 2, 4])
         self.roi = Param(
