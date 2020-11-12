@@ -5,6 +5,7 @@ from sashimi.events import LoggedEvent
 from sashimi.config import read_config
 from sashimi.hardware.external_trigger import external_comm_class_dict
 from queue import Empty
+from multiprocessing import Event
 
 
 conf = read_config()
@@ -17,6 +18,7 @@ class ExternalComm(LoggingProcess):
         experiment_start_event: LoggedEvent,
         is_saving_event: LoggedEvent,
         is_waiting_event: LoggedEvent,
+        duration_queue: Queue,
         address=conf["external_communication"]["address"],
         scanning_trigger=True,
     ):
@@ -26,13 +28,15 @@ class ExternalComm(LoggingProcess):
         self.start_comm = experiment_start_event.new_reference(self.logger)
         self.stop_event = stop_event.new_reference(self.logger)
         self.saving_event = is_saving_event.new_reference(self.logger)
-        self.duration_queue = Queue()
+        self.is_triggered_event = Event()
+        self.duration_queue = duration_queue
+        self.address = address
         if conf["scopeless"]:
             self.comm = external_comm_class_dict["mock"]()
         else:
             self.comm = external_comm_class_dict[
                 conf["external_communication"]["name"]
-            ](address)
+            ](self.address)
         self.scanning_trigger = scanning_trigger
         if self.scanning_trigger:
             self.waiting_event = is_waiting_event.new_reference(self.logger)
@@ -42,6 +46,7 @@ class ExternalComm(LoggingProcess):
             return (
                 self.start_comm.is_set()
                 and self.saving_event.is_set()
+                and self.is_triggered_event.is_set()
                 and not self.waiting_event.is_set()
             )
 

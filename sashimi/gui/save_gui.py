@@ -33,6 +33,9 @@ class SaveWidget(QWidget):
 
         self.save_location_button.clicked.connect(self.set_save_location)
         self.manual_duration_chk.stateChanged.connect(self.update_triggered_option)
+        self.state.trigger_settings.sig_param_changed.connect(
+            self.state.send_manual_duration
+        )
 
         self.manual_duration_chk.setChecked(True)
 
@@ -59,6 +62,8 @@ class SaveWidget(QWidget):
         if is_checked:
             self.wid_manual_duration.setEnabled(False)
             self.state.trigger_settings.is_triggered = True
+            self.state.set_trigger_mode(False)
         else:
             self.wid_manual_duration.setEnabled(True)
             self.state.trigger_settings.is_triggered = False
+            self.state.set_trigger_mode(True)

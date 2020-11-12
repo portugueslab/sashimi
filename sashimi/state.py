@@ -1,4 +1,5 @@
 import numpy as np
+from multiprocessing import Manager as MultiprocessingManager
 from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
@@ -53,18 +54,15 @@ class SaveSettings(ParametrizedQt):
         super().__init__()
         self.name = "experiment_settings"
         self.save_dir = Param(conf["default_paths"]["data"], gui=False)
-        self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("")
         self.overwrite_save_folder = Param(0, (0, 1), gui=False, loadable=False)
 
 
-# TODO: This creates a dichotomy between SaveSettings.experiment_duration and TriggerSettings.duration.
-# the reason for the dichotomy is that this way we can disable the widget if experiment is triggered
 class TriggerSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
         self.name = "trigger_settings"
-        self.duration = Param(2_000, (1, 10_000), unit="s")
+        self.experiment_duration = Param(2_000, (1, 10_000), unit="s")
         self.is_triggered = Param(True, [True, False], gui=False)
 
 
@@ -166,7 +164,7 @@ def convert_planar_params(planar: PlanarScanningSettings):
 
 
 def convert_calibration_params(
-        planar: PlanarScanningSettings, zsettings: CalibrationZSettings
+    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
         state=ScanningState.PLANAR,
@@ -226,11 +224,11 @@ class Calibration(ParametrizedQt):
 
 
 def get_voxel_size(
-        scanning_settings: ZRecordingSettings,
-        camera_settings: CameraSettings,
+    scanning_settings: ZRecordingSettings,
+    camera_settings: CameraSettings,
 ):
     scan_length = (
-            scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
+        scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
     )
 
     binning = int(camera_settings.binning)
@@ -245,12 +243,12 @@ def get_voxel_size(
 
 
 def convert_save_params(
-        save_settings: SaveSettings,
-        scanning_settings: ZRecordingSettings,
-        camera_settings: CameraSettings,
+    save_settings: SaveSettings,
+    scanning_settings: ZRecordingSettings,
+    camera_settings: CameraSettings,
 ):
     n_planes = scanning_settings.n_planes - (
-            scanning_settings.n_skip_start + scanning_settings.n_skip_end
+        scanning_settings.n_skip_start + scanning_settings.n_skip_end
     )
 
     return SavingParameters(
@@ -263,9 +261,9 @@ def convert_save_params(
 
 
 def convert_single_plane_params(
-        planar: PlanarScanningSettings,
-        single_plane_setting: SinglePlaneSettings,
-        calibration: Calibration,
+    planar: PlanarScanningSettings,
+    single_plane_setting: SinglePlaneSettings,
+    calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -280,9 +278,9 @@ def convert_single_plane_params(
 
 
 def convert_volume_params(
-        planar: PlanarScanningSettings,
-        z_setting: ZRecordingSettings,
-        calibration: Calibration,
+    planar: PlanarScanningSettings,
+    z_setting: ZRecordingSettings,
+    calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
@@ -354,17 +352,22 @@ class State:
             exp_trigger_event=self.experiment_start_event,
         )
 
+        self.multiprocessing_manager = MultiprocessingManager()
+
+        self.experiment_duration_queue = self.multiprocessing_manager.Queue()
+
         self.external_comm = ExternalComm(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
             is_saving_event=self.is_saving_event,
             is_waiting_event=self.is_waiting_event,
+            duration_queue=self.experiment_duration_queue,
         )
 
         self.saver = StackSaver(
             stop_event=self.stop_event,
             is_saving_event=self.is_saving_event,
-            duration_queue=self.external_comm.duration_queue,
+            duration_queue=self.experiment_duration_queue,
         )
 
         self.dispatcher = VolumeDispatcher(
@@ -382,7 +385,6 @@ class State:
         self.settings_tree = ParameterTree()
 
         self.global_state = GlobalState.PAUSED
-        self.pause_after = False
 
         self.planar_setting = PlanarScanningSettings()
         self.light_source_settings = LightSourceSettings()
@@ -460,7 +462,7 @@ class State:
         camera_params.trigger_mode = (
             TriggerMode.FREE
             if self.global_state == GlobalState.PREVIEW
-               or self.global_state == GlobalState.PLANAR_PREVIEW
+            or self.global_state == GlobalState.PLANAR_PREVIEW
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
@@ -507,9 +509,9 @@ class State:
     def n_planes(self):
         if self.global_state == GlobalState.VOLUME_PREVIEW:
             return (
-                    self.volume_setting.n_planes
-                    - self.volume_setting.n_skip_start
-                    - self.volume_setting.n_skip_end
+                self.volume_setting.n_planes
+                - self.volume_setting.n_skip_start
+                - self.volume_setting.n_skip_end
             )
         else:
             return 1
@@ -650,12 +652,21 @@ class State:
 
     def calculate_pulse_times(self):
         return (
-                np.arange(
-                    self.volume_setting.n_skip_start,
-                    self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-                )
-                / (self.volume_setting.frequency * self.volume_setting.n_planes)
+            np.arange(
+                self.volume_setting.n_skip_start,
+                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+            )
+            / (self.volume_setting.frequency * self.volume_setting.n_planes)
         )
+
+    def set_trigger_mode(self, mode: bool):
+        if mode:
+            self.external_comm.is_triggered_event.set()
+        else:
+            self.external_comm.is_triggered_event.clear()
+
+    def send_manual_duration(self):
+        self.experiment_duration_queue.put(self.trigger_settings.experiment_duration)
 
     def wrap_up(self):
         self.stop_event.set()
