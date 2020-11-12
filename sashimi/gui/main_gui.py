@@ -90,11 +90,9 @@ class MainWindow(QMainWindow):
         file_menu = menubar.addMenu("File")
         load = file_menu.addAction("Load presets")
         save_settings = file_menu.addAction("Save presets")
-        save_dir = file_menu.addAction("Save in...")
         exit = file_menu.addAction("Exit")
         load.triggered.connect(self.wid_settings_tree.load)
         save_settings.triggered.connect(self.wid_settings_tree.save)
-        save_dir.triggered.connect(self.wid_save_options.set_save_location)
         exit.triggered.connect(self.close)
 
         edit_menu = menubar.addMenu("Edit")
