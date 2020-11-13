@@ -10,7 +10,8 @@ class MockBoard(AbstractScanInterface):
 
     @property
     def z_piezo(self):
-        return self.piezo_array.copy()
+        len_sampling = len(self.piezo_array)
+        return np.ones(len_sampling)
 
     @z_piezo.setter
     def z_piezo(self, waveform):

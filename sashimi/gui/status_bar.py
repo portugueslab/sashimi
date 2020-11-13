@@ -59,6 +59,7 @@ class StatusBarWidget(QStatusBar):
 
         # Find the expected framerate depending on the global state
         expected_frame_rate_dict = {
+            GlobalState.PAUSED: None,
             GlobalState.PREVIEW: None,
             GlobalState.VOLUME_PREVIEW: self.state.volume_setting.frequency
             * self.state.n_planes,
