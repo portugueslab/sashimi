@@ -2,7 +2,6 @@ from PyQt5.QtWidgets import QLabel, QStatusBar, QProgressBar
 
 from sashimi.state import GlobalState, State, get_voxel_size
 from sashimi.config import read_config
-from warnings import warn
 
 conf = read_config()
 
@@ -20,6 +19,7 @@ class StatusBarWidget(QStatusBar):
         self.voxel_size_lbl = QLabel()
         self.interplane_lbl = QLabel()
         self.warning_lbl = QLabel()
+        self.warning_lbl.setStyleSheet("color: red")
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
         self.lbl_experiment_progress = QLabel()
@@ -114,6 +114,4 @@ class StatusBarWidget(QStatusBar):
 
     def update_warning_msg(self):
         if self.state.global_state == GlobalState.VOLUME_PREVIEW and len(self.state.calibration.calibrations_points) < 2:
-            num_points = len(self.state.calibration.calibrations_points)
-            warn(f"Volumetric mode requires at least 2 calibration points, but only {num_points} were provided. Add "
-                 f"more calibration points", Warning)
+            self.warning_lbl.setText("Not enough calibration points")
