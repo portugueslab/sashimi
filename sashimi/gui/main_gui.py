@@ -11,6 +11,7 @@ from sashimi.gui.save_settings_gui import SavingSettingsWidget
 from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsWidget
 from sashimi.gui.save_gui import SaveWidget
 from sashimi.gui.status_bar import StatusBarWidget
+from sashimi.gui.top_bar import TopWidget
 from sashimi.state import State
 
 
@@ -43,6 +44,12 @@ class MainWindow(QMainWindow):
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
         self.wid_status_bar = StatusBarWidget(st, self.timer)
+        self.wid_top = TopWidget(st, self.timer)
+
+        self.addDockWidget(
+            Qt.TopDockWidgetArea,
+            DockedWidget(self.wid_top)
+        )
 
         self.setCentralWidget(self.wid_display)
 
@@ -133,8 +140,8 @@ class MainWindow(QMainWindow):
                 self.wid_status.setCurrentIndex(0)
                 self.wid_laser.btn_off.click()
             self.refresh_param_values(omit_wid_camera=True)
-            self.wid_status_bar.experiment_progress.hide()
-            self.wid_status_bar.lbl_experiment_progress.hide()
+            self.wid_top.experiment_progress.hide()
+            self.wid_top.lbl_experiment_progress.hide()
             self.st.saver.saver_stopped_signal.clear()
 
 
