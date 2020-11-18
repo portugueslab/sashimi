@@ -314,7 +314,7 @@ class CameraSettingsWidget(QWidget):
             self._show_roi()
             self.btn_cancel_roi.show()
             self.wid_display.viewer.layers["roi_layer"].mode = Mode.SELECT
-            # TODO add autoselection of the ROI w/o clicking
+            self.wid_display.viewer.layers["roi_layer"].select_all()
 
             # Disable binning option if an ROI is set:
             self.wid_camera_settings.param_widgets["binning"].setEnabled(False)
