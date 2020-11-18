@@ -159,7 +159,8 @@ class CameraProcess(LoggingProcess):
                 new_parameters = self.parameter_queue.get(timeout=0.001)
                 if new_parameters != self.parameters:
                     self.update_parameters(new_parameters, stop_start=False)
-                    break
+                    if self.parameters.camera_mode != CameraMode.PAUSED:
+                        break
             except Empty:
                 pass
 

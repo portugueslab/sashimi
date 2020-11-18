@@ -338,7 +338,6 @@ class State:
 
         self.settings_tree = ParameterTree()
 
-        self.global_state = GlobalState.PAUSED
         self.pause_after = False
         if self.conf["scopeless"]:
             self.light_source = light_source_class_dict["mock"]()
