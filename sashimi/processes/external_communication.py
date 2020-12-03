@@ -5,6 +5,7 @@ from sashimi.events import LoggedEvent
 from sashimi.config import read_config
 from sashimi.hardware.external_trigger import external_comm_class_dict
 from queue import Empty
+from time import sleep
 
 
 conf = read_config()
@@ -57,9 +58,10 @@ class ExternalComm(LoggingProcess):
                 except Empty:
                     break
             if self.trigger_condition():
-                duration = self.comm.trigger_and_receive_duration(current_config)
-                if duration is not None:
-                    self.duration_queue.put(duration)
+                # self.comm.trigger_and_receive_duration(current_config)
+                #if duration is not None:
+                #    self.duration_queue.put(duration)
+                sleep(1)
                 self.logger.log_message("sent communication")
                 self.start_comm.clear()
         self.close_log()

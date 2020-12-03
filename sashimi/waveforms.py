@@ -62,6 +62,21 @@ class TriangleWaveform(Waveform):
         )
 
 
+class NegativeStepWaveform(Waveform):
+    def __init__(self, *args, frequency=1, vmin=0, vmax=1,
+                 threshold=0.5, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.vmin = vmin
+        self.vmax = vmax
+        self.frequency = frequency
+        self.threshold = threshold
+
+    def values(self, t):
+        tf = t * self.frequency
+        thresholded = np.abs(np.sin((tf * (2*np.pi)) - np.pi/2)) < self.threshold
+        return (thresholded.astype(float))*(self.vmax-self.vmin)+self.vmin
+
+
 @jit(nopython=True)
 def _set_impulses(buffer, n_planes, n_skip_start, n_skip_end, high):
     buffer[:] = 0

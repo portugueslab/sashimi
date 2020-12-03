@@ -12,7 +12,8 @@ from scopecuisine.rolling_buffer import FillingRollingBuffer, RollingBuffer
 from sashimi.config import read_config
 from sashimi.processes.logging import ConcurrenceLogger
 from sashimi.utilities import lcm, get_last_parameters
-from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, CameraRollingBuffer
+from sashimi.waveforms import TriangleWaveform, SawtoothWaveform, NegativeStepWaveform, \
+    CameraRollingBuffer
 from sashimi.hardware.scanning.__init__ import AbstractScanInterface
 
 conf = read_config()
@@ -37,11 +38,18 @@ class XYScanning:
     vmax: float = 0
     frequency: float = 800
 
+@dataclass
+class PowerCntrScanning:
+    vmin: float = 1
+    vmax: float = 0
+    frequency: float = 800
+    threshold: float = 0.9
+
 
 @dataclass
 class PlanarScanning:
     lateral: XYScanning = XYScanning()
-    frontal: XYScanning = XYScanning()
+    power: PowerCntrScanning = PowerCntrScanning()
 
 
 @dataclass
@@ -80,6 +88,8 @@ class ScanParameters:
     state: ScanningState = ScanningState.PAUSED
     experiment_state: ExperimentPrepareState = ExperimentPrepareState.PREVIEW
     z: Union[ZScanning, ZManual, ZSynced] = ZManual()
+    offset: float = 0
+    amplitude: float = -0.015
     xy: PlanarScanning = PlanarScanning()
     triggering: TriggeringParameters = TriggeringParameters()
 
@@ -135,36 +145,17 @@ class ScanLoop:
         self.n_samples_read = 0
 
         self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
-        self.frontal_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
+        self.frontal_waveform = NegativeStepWaveform(**asdict(self.parameters.xy.power))
 
         self.time = np.arange(self.n_samples) / self.sample_rate
         self.shifted_time = self.time.copy()
 
         self.wait_signal = wait_signal
 
-    def initialize(self):
-        self.n_acquired = 0
-        self.first_update = True
-        self.i_sample = 0
-        self.n_samples_read = 0
-
     def _n_samples_period(self):
         ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
         ns_frontal = int(round(self.sample_rate / self.frontal_waveform.frequency))
         return lcm(ns_lateral, ns_frontal)
-
-    def _update_settings(self):
-        """Update parameters and return True only if got new parameters.
-        """
-        new_params = get_last_parameters(self.parameter_queue)
-        if new_params is None:
-            return False
-
-        self.parameters = new_params
-        self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
-        self.frontal_waveform = TriangleWaveform(**asdict(self.parameters.xy.frontal))
-        self.first_update = False  # To avoid multiple updates
-        return True
 
     def _loop_condition(self):
         """Returns False if main event loop has to be interrupted. this happens both when we want
@@ -182,19 +173,38 @@ class ScanLoop:
             self.board.start()
             self.started = True
 
-    def fill_arrays(self):
+    def _fill_arrays(self):
         self.shifted_time[:] = self.time + self.i_sample / self.sample_rate
         self.board.xy_lateral = self.lateral_waveform.values(self.shifted_time)
         self.board.xy_frontal = self.frontal_waveform.values(self.shifted_time)
 
-    def write(self):
+    def _write(self):
         self.board.write()
         self.logger.log_message("write")
 
-    def read(self):
+    def _read(self):
         self.board.read()
         self.logger.log_message("read")
         self.n_samples_read += self.board.n_samples
+
+    def initialize(self):
+        self.n_acquired = 0
+        self.first_update = True
+        self.i_sample = 0
+        self.n_samples_read = 0
+
+    def _update_settings(self):
+        """Update parameters and return True only if got new parameters.
+        """
+        new_params = get_last_parameters(self.parameter_queue)
+        if new_params is None:
+            return False
+
+        self.parameters = new_params
+        self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
+        self.frontal_waveform = NegativeStepWaveform(**asdict(self.parameters.xy.power))
+        self.first_update = False  # To avoid multiple updates
+        return True
 
     def loop(self, first_run=False):
         """Main loop that gets executed in the run of the ScannerProcess class.
@@ -206,10 +216,10 @@ class ScanLoop:
             self.old_parameters = deepcopy(self.parameters)
             if not self._loop_condition():
                 break
-            self.fill_arrays()
-            self.write()
+            self._fill_arrays()
+            self._write()
             self._check_start()
-            self.read()
+            self._read()
             self.i_sample = (self.i_sample + self.n_samples) % self._n_samples_period()
             self.n_acquired += 1
             if first_run:
@@ -223,11 +233,6 @@ class PlanarScanLoop(ScanLoop):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.camera_pulses = RollingBuffer(self._n_samples_period())
-
-    def _loop_condition(self):
-        return (
-                super()._loop_condition() and self.parameters.state == ScanningState.PLANAR
-        )
 
     def _n_samples_period(self):
         # If we are not using camera trigger, the period is dictated by lateral scanning:
@@ -243,7 +248,12 @@ class PlanarScanLoop(ScanLoop):
             )
             return lcm(n_samples_trigger, super()._n_samples_period())
 
-    def fill_arrays(self):
+    def _loop_condition(self):
+        return (
+                super()._loop_condition() and self.parameters.state == ScanningState.PLANAR
+        )
+
+    def _fill_arrays(self):
         # Drive the piezo z to specified position:
         self.board.z_piezo = self.parameters.z.piezo
 
@@ -260,7 +270,7 @@ class PlanarScanLoop(ScanLoop):
             self.board.z_frontal = calc_sync(
                 self.parameters.z.piezo, self.parameters.z.frontal_sync
             )
-        super().fill_arrays()
+        super()._fill_arrays()
 
 
 class VolumetricScanLoop(ScanLoop):
@@ -276,29 +286,24 @@ class VolumetricScanLoop(ScanLoop):
         self.camera_was_off = True
         self.wait_signal.set()
 
+    def _n_samples_period(self):
+        n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
+        return max(n_samples_trigger, super()._n_samples_period())
+
     def _loop_condition(self):
         return (
             super()._loop_condition()
             and self.parameters.state == ScanningState.VOLUMETRIC
         )
 
-    def initialize(self):
-        super().initialize()
-        self.camera_on = False
-        self.wait_signal.set()
-
     def _check_start(self):
         super()._check_start()
-        # Toggle the experiment state after starting the new acquisition
+        # Toggle the experiment state after starting the new acquisition:
         if (
             self.parameters.experiment_state
             == ExperimentPrepareState.EXPERIMENT_STARTED
         ):
             self.parameters.experiment_state = ExperimentPrepareState.PREVIEW
-
-    def _n_samples_period(self):
-        n_samples_trigger = int(round(self.sample_rate / self.parameters.z.frequency))
-        return max(n_samples_trigger, super()._n_samples_period())
 
     def _update_settings(self):
         updated = super()._update_settings()
@@ -334,31 +339,29 @@ class VolumetricScanLoop(ScanLoop):
             self.wait_signal.set()
         return True
 
-    def read(self):
-        super().read()
-        i_insert = (self.i_sample - self.n_samples) % len(self.recorded_signal.buffer)
-        self.recorded_signal.write(
-            self.board.z_piezo[
-                : min(len(self.recorded_signal.buffer), len(self.board.z_piezo))
-            ],
-            i_insert,
-        )
-        self.waveform_queue.put(self.recorded_signal.buffer)
-
-    def fill_arrays(self):
-        super().fill_arrays()
+    def _fill_arrays(self):
+        super()._fill_arrays()
         self.board.z_piezo = self.z_waveform.values(self.shifted_time)
         i_sample = self.i_sample % len(self.recorded_signal.buffer)
 
         if self.recorded_signal.is_complete():
             wave_part = self.recorded_signal.read(i_sample, self.n_samples)
             max_wave, min_wave = (np.max(wave_part), np.min(wave_part))
+            print(calc_sync(min_wave, (self.parameters.offset,
+                                          self.parameters.amplitude)),
+                  calc_sync(max_wave, (self.parameters.offset,
+                                       self.parameters.amplitude))
+                  )
+            SAFE_COEF = 5
             if (
-                -2 < calc_sync(min_wave, self.parameters.z.lateral_sync) < 2
-                and -2 < calc_sync(max_wave, self.parameters.z.lateral_sync) < 2
+                -SAFE_COEF < calc_sync(min_wave, (self.parameters.offset,
+                                          self.parameters.amplitude)) < SAFE_COEF
+                and -SAFE_COEF < calc_sync(max_wave, (self.parameters.offset,
+                                              self.parameters.amplitude)) < SAFE_COEF
             ):
                 self.board.z_lateral = calc_sync(
-                    wave_part, self.parameters.z.lateral_sync
+                    wave_part, (self.parameters.offset,
+                                self.parameters.amplitude)
                 )
             if (
                 -2 < calc_sync(min_wave, self.parameters.z.frontal_sync) < 2
@@ -391,6 +394,22 @@ class VolumetricScanLoop(ScanLoop):
 
         self.board.camera_trigger = camera_pulses
 
+    def _read(self):
+        super()._read()
+        i_insert = (self.i_sample - self.n_samples) % len(self.recorded_signal.buffer)
+        self.recorded_signal.write(
+            self.board.z_piezo[
+                : min(len(self.recorded_signal.buffer), len(self.board.z_piezo))
+            ],
+            i_insert,
+        )
+        self.waveform_queue.put(self.recorded_signal.buffer)
+
+    def initialize(self):
+        super().initialize()
+        self.camera_on = False
+        self.wait_signal.set()
+
 
 def calc_sync(z, sync_coef):
-    return sync_coef[0] + sync_coef[1] * z
+    return sync_coef[0] + sync_coef[1] * z / 100

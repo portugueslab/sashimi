@@ -1,3 +1,6 @@
+from os import path
+from datetime import datetime
+import pyvisa
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import (
     QWidget,
@@ -5,7 +8,10 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QPushButton,
     QCheckBox,
+    QFileDialog,
+    QPlainTextEdit
 )
+from sashimi.utilities import clean_json
 from lightparam.gui import ParameterGui
 from lightparam import Param
 from lightparam.param_qt import ParametrizedQt
@@ -13,6 +19,8 @@ from sashimi.state import (
     State,
     get_voxel_size,
 )
+import json
+import tifffile
 import napari
 from napari.layers.shapes._shapes_constants import Mode
 import numpy as np
@@ -128,6 +136,24 @@ class ViewingWidget(QWidget):
 
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
 
+        self.power_widget = QPushButton("Pow: ?")
+        self.power_widget.clicked.connect(self.update_power)
+        self.bottom_layout.addWidget(self.power_widget)
+        self.power_handle = None  # would probably best to put somewhere else, but this is quick
+        self.currentpower = None
+
+        self.bottom_layout_screenshot = QVBoxLayout()
+
+        self.screenshot_button = QPushButton("Save screenshot")
+        self.bottom_layout_screenshot.addWidget(self.screenshot_button)
+        self.screenshot_button.clicked.connect(self.get_screenshot)
+
+        self.screenshot_name = QPlainTextEdit('test')
+        self.screenshot_name.setMaximumSize(120, 60)
+
+        self.bottom_layout_screenshot.addWidget(self.screenshot_name)
+        self.bottom_layout.addLayout(self.bottom_layout_screenshot)
+
         self.auto_contrast_chk = QCheckBox("Autoadjust contrast")
 
         self.contrast_range = ContrastSettings()
@@ -157,6 +183,34 @@ class ViewingWidget(QWidget):
         self.viewer.window.qt_viewer.viewerButtons.resetViewButton.pressed.connect(
             self.reset_contrast
         )
+
+    def get_screenshot(self):
+        datetime_str = datetime.today().strftime('%Y_%m_%d_%H_%M_%S ')
+        pow_str = ''
+        if self.currentpower is not None:
+            pow_str = " {:.5f}mwGG ".format(self.currentpower * 10e3).replace('.', '_')
+        save_loc = path.join(self.state.save_settings.save_dir,
+                             datetime_str + self.screenshot_name.toPlainText() + pow_str + ".tif")
+        tifffile.imsave(save_loc, self.viewer.layers["frame_layer"].data)
+        self.state.save_tree(save_loc[0][:-4] + ".json")
+
+    def update_power(self):
+        # reads from thorlabs power meter if possible
+        if self.power_handle is None:
+            from ..hardware.powermeter import Powermeter
+            try:
+                self.power_handle = Powermeter()
+            except pyvisa.errors.VisaIOError:
+                print('Failed to init powermeter')  # TODO warnings
+
+            else:
+                try:
+                    self.currentpower = self.power_handle.measure()
+                    self.power_widget.setText("Pow: {:.5f}mw".format(self.currentpower * 10e3))
+                except pyvisa.errors.VisaIOError:
+                    self.currentpower = None
+                    print('Failed to read powermeter')
+                    self.power_widget.setText("Pow: ?")
 
     def get_fullframe_size(self):
         """Maximum size of the image at current binning. As stated above, we assume square sensors."""

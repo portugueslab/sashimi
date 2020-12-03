@@ -11,6 +11,7 @@ from sashimi.hardware.scanning.scanloops import (
     ScanningState,
     ExperimentPrepareState,
     XYScanning,
+    PowerCntrScanning,
     PlanarScanning,
     ZManual,
     ZSynced,
@@ -53,6 +54,7 @@ class SaveSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "experiment_settings"
+        self.duration = Param(10, (1, 2000))
         self.save_dir = Param(conf["default_paths"]["data"], gui=False)
         self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("")
@@ -81,10 +83,11 @@ class PlanarScanningSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "scanning/planar_scanning"
-        self.lateral_range = Param((0, 0.5), (-2, 2))
+        self.lateral_range = Param((0, 0.5), (-10, 10))
         self.lateral_frequency = Param(500.0, (10, 1000), unit="Hz")
-        self.frontal_range = Param((0, 0.5), (-2, 2))
-        self.frontal_frequency = Param(500.0, (10, 1000), unit="Hz")
+        self.pow_cntl_range = Param((0, 0.5), (-5, 5))
+        self.pow_cntl_frequency = Param(500.0, (10, 1000), unit="Hz")
+        self.pow_cntl_threshold = Param(0.9, (0., 1.))
 
 
 class CalibrationZSettings(ParametrizedQt):
@@ -92,8 +95,8 @@ class CalibrationZSettings(ParametrizedQt):
         super().__init__()
         self.name = "scanning/z_manual"
         self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
-        self.lateral = Param(0.0, (-2.0, 2.0), gui="slider")
-        self.frontal = Param(0.0, (-2.0, 2.0), gui="slider")
+        self.lateral = Param(0.0, (-4.0, 4.0), gui="slider")
+        self.frontal = Param(0.0, (-4.0, 4.0), gui="slider")
 
 
 class SinglePlaneSettings(ParametrizedQt):
@@ -113,6 +116,8 @@ class ZRecordingSettings(ParametrizedQt):
         self.n_planes = Param(4, (2, 100))
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
+        self.offset = Param(0., (-5., 5.), gui="slider")
+        self.param = Param(-0.15, (-1, 0.), gui="slider")
 
 
 roi_size = [0, 0] + [
@@ -148,10 +153,11 @@ def convert_planar_params(planar: PlanarScanningSettings):
             vmax=planar.lateral_range[1],
             frequency=planar.lateral_frequency,
         ),
-        frontal=XYScanning(
-            vmin=planar.frontal_range[0],
-            vmax=planar.frontal_range[1],
-            frequency=planar.frontal_frequency,
+        power=PowerCntrScanning(
+            vmin=planar.pow_cntl_range[0],
+            vmax=planar.pow_cntl_range[1],
+            frequency=planar.pow_cntl_frequency,
+            threshold=planar.pow_cntl_threshold
         ),
     )
 
@@ -249,6 +255,7 @@ def convert_save_params(
         n_planes=n_planes,
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
+        n_volumes=save_settings.duration,
         voxel_size=get_voxel_size(scanning_settings, camera_settings),
     )
 
@@ -278,6 +285,8 @@ def convert_volume_params(
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
         xy=convert_planar_params(planar),
+        offset=z_setting.offset,
+        amplitude=z_setting.amplitude,
         z=ZScanning(
             piezo_min=z_setting.piezo_scan_range[0],
             piezo_max=z_setting.piezo_scan_range[1],
@@ -327,7 +336,6 @@ class State:
             sample_rate=self.sample_rate,
         )
         self.camera_settings = CameraSettings()
-        self.save_settings = SaveSettings()
 
         self.settings_tree = ParameterTree()
 
@@ -369,6 +377,7 @@ class State:
 
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
+        self.save_settings.sig_param_changed.connect(self.send_duration)
 
         self.settings_tree = ParameterTree()
 
@@ -436,6 +445,17 @@ class State:
         with open(save_file, "w") as f:
             json.dump(clean_json(self.settings_tree.serialize()), f)
 
+    def send_duration(self, param_changed):
+        k = list(param_changed.keys())[0]
+        if k == "duration":
+            self.external_comm.duration_queue.put(param_changed[k])
+        #     try:
+                # from  time import sleep
+                # sleep(1)
+                # print(self.external_comm.duration_queue.get(timeout=0.1))
+            # except Empty:
+            #     print("pass")
+
     def change_global_state(self):
         self.global_state = scanning_to_global_state[self.status.scanning_state]
         self.send_camera_settings()
@@ -467,7 +487,6 @@ class State:
         # Restart scanning loop if scanning params have changed:
         if self.global_state == GlobalState.VOLUME_PREVIEW:
             self.restart_event.set()
-        print(param_changed)
 
         # # Synch piezo position across modalities, for usability:
         # if param_changed is not None:

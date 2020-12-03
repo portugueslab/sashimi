@@ -20,7 +20,7 @@ conf = read_config()
 class SavingParameters:
     output_dir: Path = conf["default_paths"]["data"]
     n_planes: int = 1
-    n_volumes: int = 10000
+    n_volumes: int = 10
     chunk_size: int = 20
     optimal_chunk_MB_RAM: int = conf[
         "array_ram_MB"
@@ -77,6 +77,7 @@ class StackSaver(LoggingProcess):
         self.close_log()
 
     def save_loop(self):
+        print(self.save_parameters)
         notifier = self.notifier("lightsheet", **conf["notifier_options"])
         # remove files if some are found at the save location
         Path(self.save_parameters.output_dir).mkdir(parents=True, exist_ok=True)
@@ -203,8 +204,8 @@ class StackSaver(LoggingProcess):
             pass
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
-            self.save_parameters.n_volumes = int(
-                np.ceil(self.save_parameters.volumerate * new_duration)
-            )
+            print(new_duration)
+            self.save_parameters.n_volumes = new_duration
+            print(self.save_parameters.n_volumes)
         except Empty:
             pass

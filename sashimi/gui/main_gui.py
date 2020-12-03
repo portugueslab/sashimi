@@ -44,6 +44,7 @@ class MainWindow(QMainWindow):
         self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
         self.wid_status_bar = StatusBarWidget(st, self.timer)
 
+
         self.setCentralWidget(self.wid_display)
 
         self.addDockWidget(
