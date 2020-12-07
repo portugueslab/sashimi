@@ -345,13 +345,13 @@ class VolumetricScanLoop(ScanLoop):
         self.board.z_piezo = self.z_waveform.values(self.shifted_time)
         i_sample = self.i_sample % len(self.recorded_signal.buffer)
 
-        if self.recorded_signal.is_complete():
-            wave_part = self.recorded_signal.read(i_sample, self.n_samples)  # piezo Z AI
-            piezo_maxmin_voltage = 5  # Max (and -min) voltage
-            for board, parameters in ((self.board.z_lateral, self.parameters.z.lateral_sync),
-                                      (self.board.z_frontal, self.parameters.z.frontal_sync)):
-                wave_out = np.clip(calc_sync(wave_part, parameters), -piezo_maxmin_voltage, piezo_maxmin_voltage)
-                board = wave_out
+        # if self.recorded_signal.is_complete():
+        #     wave_part = self.recorded_signal.read(i_sample, self.n_samples)  # piezo Z AI
+        #     piezo_maxmin_voltage = 5  # Max (and -min) voltage
+        #     for board, parameters in ((self.board.z_lateral, self.parameters.z.lateral_sync),
+        #                               (self.board.z_frontal, self.parameters.z.frontal_sync)):
+        #         wave_out = np.clip(calc_sync(wave_part, parameters), -piezo_maxmin_voltage, piezo_maxmin_voltage)
+        #         board = wave_out
 
             # max_wave, min_wave = (np.max(wave_part), np.min(wave_part))
             # print(calc_sync(min_wave, (self.parameters.offset,
