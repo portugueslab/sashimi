@@ -38,6 +38,7 @@ class XYScanning:
     vmax: float = 0
     frequency: float = 800
 
+
 @dataclass
 class PowerCntrScanning:
     vmin: float = 1
@@ -107,18 +108,18 @@ class ScanLoop:
     """
 
     def __init__(
-        self,
-        board: AbstractScanInterface,
-        stop_event,
-        restart_event,
-        initial_parameters: ScanParameters,
-        parameter_queue: Queue,
-        n_samples,
-        sample_rate,
-        waveform_queue: ArrayQueue,
-        wait_signal,
-        logger: ConcurrenceLogger,
-        trigger_exp_from_scanner,
+            self,
+            board: AbstractScanInterface,
+            stop_event,
+            restart_event,
+            initial_parameters: ScanParameters,
+            parameter_queue: Queue,
+            n_samples,
+            sample_rate,
+            waveform_queue: ArrayQueue,
+            wait_signal,
+            logger: ConcurrenceLogger,
+            trigger_exp_from_scanner,
     ):
 
         self.sample_rate = sample_rate
@@ -237,8 +238,8 @@ class PlanarScanLoop(ScanLoop):
     def _n_samples_period(self):
         # If we are not using camera trigger, the period is dictated by lateral scanning:
         if (
-            self.parameters.triggering.frequency is None
-            or self.parameters.triggering.frequency == 0
+                self.parameters.triggering.frequency is None
+                or self.parameters.triggering.frequency == 0
         ):
             return super()._n_samples_period()
         # Else, find least common multiple between timepoints required for trigger and for the lateral scanning:
@@ -292,16 +293,16 @@ class VolumetricScanLoop(ScanLoop):
 
     def _loop_condition(self):
         return (
-            super()._loop_condition()
-            and self.parameters.state == ScanningState.VOLUMETRIC
+                super()._loop_condition()
+                and self.parameters.state == ScanningState.VOLUMETRIC
         )
 
     def _check_start(self):
         super()._check_start()
         # Toggle the experiment state after starting the new acquisition:
         if (
-            self.parameters.experiment_state
-            == ExperimentPrepareState.EXPERIMENT_STARTED
+                self.parameters.experiment_state
+                == ExperimentPrepareState.EXPERIMENT_STARTED
         ):
             self.parameters.experiment_state = ExperimentPrepareState.PREVIEW
 
@@ -345,31 +346,39 @@ class VolumetricScanLoop(ScanLoop):
         i_sample = self.i_sample % len(self.recorded_signal.buffer)
 
         if self.recorded_signal.is_complete():
-            wave_part = self.recorded_signal.read(i_sample, self.n_samples)
-            max_wave, min_wave = (np.max(wave_part), np.min(wave_part))
-            print(calc_sync(min_wave, (self.parameters.offset,
-                                          self.parameters.amplitude)),
-                  calc_sync(max_wave, (self.parameters.offset,
-                                       self.parameters.amplitude))
-                  )
-            SAFE_COEF = 5
-            if (
-                -SAFE_COEF < calc_sync(min_wave, (self.parameters.offset,
-                                          self.parameters.amplitude)) < SAFE_COEF
-                and -SAFE_COEF < calc_sync(max_wave, (self.parameters.offset,
-                                              self.parameters.amplitude)) < SAFE_COEF
-            ):
-                self.board.z_lateral = calc_sync(
-                    wave_part, (self.parameters.offset,
-                                self.parameters.amplitude)
-                )
-            if (
-                -2 < calc_sync(min_wave, self.parameters.z.frontal_sync) < 2
-                and -2 < calc_sync(max_wave, self.parameters.z.frontal_sync) < 2
-            ):
-                self.board.z_frontal = calc_sync(
-                    wave_part, self.parameters.z.frontal_sync
-                )
+            wave_part = self.recorded_signal.read(i_sample, self.n_samples)  # piezo Z AI
+            piezo_maxmin_voltage = 5  # Max (and -min) voltage
+            for board, parameters in ((self.board.z_lateral, self.parameters.z.lateral_sync),
+                                      (self.board.z_frontal, self.parameters.z.frontal_sync)):
+                wave_out = np.clip(calc_sync(wave_part, parameters), -piezo_maxmin_voltage, piezo_maxmin_voltage)
+                board = wave_out
+
+            # max_wave, min_wave = (np.max(wave_part), np.min(wave_part))
+            # print(calc_sync(min_wave, (self.parameters.offset,
+            #                            self.parameters.amplitude)),
+            #       calc_sync(max_wave, (self.parameters.offset,
+            #                            self.parameters.amplitude))
+            #       )
+            # SAFE_COEF = 5  # clipping for safety, in Volts
+            # if (
+            #         -SAFE_COEF < calc_sync(min_wave, (self.parameters.offset,
+            #                                           self.parameters.amplitude)) < SAFE_COEF
+            #         and -SAFE_COEF < calc_sync(max_wave, (self.parameters.offset,
+            #                                               self.parameters.amplitude)) < SAFE_COEF
+            # ):
+            #     self.board.z_lateral = calc_sync(
+            #         wave_part, (self.parameters.offset,
+            #                     self.parameters.amplitude)
+            #     )
+            #
+            # # Frontal beam
+            # if (
+            #         -2 < calc_sync(min_wave, self.parameters.z.frontal_sync) < 2
+            #         and -2 < calc_sync(max_wave, self.parameters.z.frontal_sync) < 2
+            # ):
+            #     self.board.z_frontal = calc_sync(
+            #         wave_part, self.parameters.z.frontal_sync
+            #     )
 
         camera_pulses = 0
         if self.camera_on:
@@ -399,7 +408,7 @@ class VolumetricScanLoop(ScanLoop):
         i_insert = (self.i_sample - self.n_samples) % len(self.recorded_signal.buffer)
         self.recorded_signal.write(
             self.board.z_piezo[
-                : min(len(self.recorded_signal.buffer), len(self.board.z_piezo))
+            : min(len(self.recorded_signal.buffer), len(self.board.z_piezo))
             ],
             i_insert,
         )
@@ -412,4 +421,5 @@ class VolumetricScanLoop(ScanLoop):
 
 
 def calc_sync(z, sync_coef):
-    return sync_coef[0] + sync_coef[1] * z / 100
+    """sync_coef is slope and intercept"""
+    return sync_coef[0] + sync_coef[1] * z
