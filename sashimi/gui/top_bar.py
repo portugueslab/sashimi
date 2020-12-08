@@ -1,15 +1,18 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QLabel, QProgressBar, QMessageBox
+from PyQt5.QtWidgets import QToolBar, QHBoxLayout, QLabel, QProgressBar, QMessageBox
 
 from sashimi.gui.buttons import ToggleIconButton
 from sashimi.state import State, GlobalState
 
 
-class TopWidget(QWidget):
+class TopWidget(QToolBar):
     def __init__(self, st: State, timer):
         super().__init__()
         self.state = st
         self.timer = timer
         self.setLayout(QHBoxLayout())
+
+        # TODO: This was in Stytra figure out what it does, whether it has to be intercalated between widgets
+        self.addSeparator()
 
         self.experiment_toggle_btn = ToggleIconButton(
             icon_off="play", icon_on="stop", action_on="play", on=False
