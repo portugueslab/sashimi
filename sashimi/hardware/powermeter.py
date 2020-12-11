@@ -36,6 +36,6 @@ if __name__ == "__main__":
     t0 = time.time()
     wavelength = float(inst.query("SENS:CORR:WAV?"))
     power = float(inst.query("MEAS:POW?"))
-    print("{:.6f} mW at {:.0f}nm".format(power * 10e3, wavelength))
+    print("{:.6f} mW at {:.0f}nm".format(power * 1e3, wavelength))
     print(time.time() - t0)
     inst.close()

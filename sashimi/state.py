@@ -38,7 +38,6 @@ from sashimi.config import read_config
 import time
 from sashimi.utilities import clean_json
 
-
 conf = read_config()
 
 
@@ -83,11 +82,10 @@ class PlanarScanningSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
         self.name = "scanning/planar_scanning"
-        self.lateral_range = Param((0, 0.5), (-10, 10))
-        self.lateral_frequency = Param(500.0, (10, 1000), unit="Hz")
-        self.pow_cntl_range = Param((0, 0.5), (-5, 5))
-        self.pow_cntl_frequency = Param(500.0, (10, 1000), unit="Hz")
-        self.pow_cntl_threshold = Param(0.9, (0., 1.))
+        self.lateral_range = Param((-0.5, 0.5), (-10, 10))
+        self.lateral_frequency = Param(500.0, (10, 2000), unit="Hz")
+        self.pow_cntl_range = Param((0, 0.5), (0, 1.5))  # Output voltage to Pockels
+        self.pow_cntl_threshold = Param(0.2, (0., 1.))  # how much to clip from each side of scan, in 'scan range' units
 
 
 class CalibrationZSettings(ParametrizedQt):
@@ -156,14 +154,14 @@ def convert_planar_params(planar: PlanarScanningSettings):
         power=PowerCntrScanning(
             vmin=planar.pow_cntl_range[0],
             vmax=planar.pow_cntl_range[1],
-            frequency=planar.pow_cntl_frequency,
+            frequency=planar.lateral_frequency, #blanking should run at same rate as normal
             threshold=planar.pow_cntl_threshold
         ),
     )
 
 
 def convert_calibration_params(
-    planar: PlanarScanningSettings, zsettings: CalibrationZSettings
+        planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
         state=ScanningState.PLANAR,
@@ -223,11 +221,11 @@ class Calibration(ParametrizedQt):
 
 
 def get_voxel_size(
-    scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
+        scanning_settings: ZRecordingSettings,
+        camera_settings: CameraSettings,
 ):
     scan_length = (
-        scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
+            scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
     )
 
     binning = int(camera_settings.binning)
@@ -242,12 +240,12 @@ def get_voxel_size(
 
 
 def convert_save_params(
-    save_settings: SaveSettings,
-    scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
+        save_settings: SaveSettings,
+        scanning_settings: ZRecordingSettings,
+        camera_settings: CameraSettings,
 ):
     n_planes = scanning_settings.n_planes - (
-        scanning_settings.n_skip_start + scanning_settings.n_skip_end
+            scanning_settings.n_skip_start + scanning_settings.n_skip_end
     )
 
     return SavingParameters(
@@ -261,9 +259,9 @@ def convert_save_params(
 
 
 def convert_single_plane_params(
-    planar: PlanarScanningSettings,
-    single_plane_setting: SinglePlaneSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        single_plane_setting: SinglePlaneSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.PLANAR,
@@ -278,15 +276,15 @@ def convert_single_plane_params(
 
 
 def convert_volume_params(
-    planar: PlanarScanningSettings,
-    z_setting: ZRecordingSettings,
-    calibration: Calibration,
+        planar: PlanarScanningSettings,
+        z_setting: ZRecordingSettings,
+        calibration: Calibration,
 ):
     return ScanParameters(
         state=ScanningState.VOLUMETRIC,
         xy=convert_planar_params(planar),
         offset=z_setting.offset,
-        amplitude=z_setting.amplitude,
+        amplitude=z_setting.param,
         z=ZScanning(
             piezo_min=z_setting.piezo_scan_range[0],
             piezo_max=z_setting.piezo_scan_range[1],
@@ -450,11 +448,11 @@ class State:
         if k == "duration":
             self.external_comm.duration_queue.put(param_changed[k])
         #     try:
-                # from  time import sleep
-                # sleep(1)
-                # print(self.external_comm.duration_queue.get(timeout=0.1))
-            # except Empty:
-            #     print("pass")
+        # from  time import sleep
+        # sleep(1)
+        # print(self.external_comm.duration_queue.get(timeout=0.1))
+        # except Empty:
+        #     print("pass")
 
     def change_global_state(self):
         self.global_state = scanning_to_global_state[self.status.scanning_state]
@@ -471,7 +469,7 @@ class State:
         camera_params.trigger_mode = (
             TriggerMode.FREE
             if self.global_state == GlobalState.PREVIEW
-            or self.global_state == GlobalState.PLANAR_PREVIEW
+               or self.global_state == GlobalState.PLANAR_PREVIEW
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
@@ -517,9 +515,9 @@ class State:
     def n_planes(self):
         if self.global_state == GlobalState.VOLUME_PREVIEW:
             return (
-                self.volume_setting.n_planes
-                - self.volume_setting.n_skip_start
-                - self.volume_setting.n_skip_end
+                    self.volume_setting.n_planes
+                    - self.volume_setting.n_skip_start
+                    - self.volume_setting.n_skip_end
             )
         else:
             return 1
@@ -658,11 +656,11 @@ class State:
 
     def calculate_pulse_times(self):
         return (
-            np.arange(
-                self.volume_setting.n_skip_start,
-                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-            )
-            / (self.volume_setting.frequency * self.volume_setting.n_planes)
+                np.arange(
+                    self.volume_setting.n_skip_start,
+                    self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+                )
+                / (self.volume_setting.frequency * self.volume_setting.n_planes)
         )
 
     def wrap_up(self):

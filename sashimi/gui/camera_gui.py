@@ -188,7 +188,7 @@ class ViewingWidget(QWidget):
         datetime_str = datetime.today().strftime('%Y_%m_%d_%H_%M_%S ')
         pow_str = ''
         if self.currentpower is not None:
-            pow_str = " {:.5f}mwGG ".format(self.currentpower * 10e3).replace('.', '_')
+            pow_str = " {:.5f}mwGG ".format(self.currentpower * 1e3).replace('.', '_')
         save_loc = path.join(self.state.save_settings.save_dir,
                              datetime_str + self.screenshot_name.toPlainText() + pow_str + ".tif")
         tifffile.imsave(save_loc, self.viewer.layers["frame_layer"].data)
@@ -202,15 +202,16 @@ class ViewingWidget(QWidget):
                 self.power_handle = Powermeter()
             except pyvisa.errors.VisaIOError:
                 print('Failed to init powermeter')  # TODO warnings
+                return None
+                self.currentpower = None
 
-            else:
-                try:
-                    self.currentpower = self.power_handle.measure()
-                    self.power_widget.setText("Pow: {:.5f}mw".format(self.currentpower * 10e3))
-                except pyvisa.errors.VisaIOError:
-                    self.currentpower = None
-                    print('Failed to read powermeter')
-                    self.power_widget.setText("Pow: ?")
+        try:
+            self.currentpower = self.power_handle.measure()
+            self.power_widget.setText("Pow: {:.5f}mw".format(self.currentpower * 1e3))
+        except pyvisa.errors.VisaIOError:
+            self.currentpower = None
+            print('Failed to read powermeter')
+            self.power_widget.setText("Pow: ?")
 
     def get_fullframe_size(self):
         """Maximum size of the image at current binning. As stated above, we assume square sensors."""

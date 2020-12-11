@@ -44,7 +44,7 @@ class PowerCntrScanning:
     vmin: float = 1
     vmax: float = 0
     frequency: float = 800
-    threshold: float = 0.9
+    threshold: float = 0.05
 
 
 @dataclass
@@ -146,7 +146,7 @@ class ScanLoop:
         self.n_samples_read = 0
 
         self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
-        self.frontal_waveform = NegativeStepWaveform(**asdict(self.parameters.xy.power))
+        self.frontal_waveform = NegativeStepWaveform(self.lateral_waveform, **asdict(self.parameters.xy.power))
 
         self.time = np.arange(self.n_samples) / self.sample_rate
         self.shifted_time = self.time.copy()
@@ -203,7 +203,7 @@ class ScanLoop:
 
         self.parameters = new_params
         self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
-        self.frontal_waveform = NegativeStepWaveform(**asdict(self.parameters.xy.power))
+        self.frontal_waveform = NegativeStepWaveform(self.lateral_waveform, **asdict(self.parameters.xy.power))
         self.first_update = False  # To avoid multiple updates
         return True
 
@@ -343,15 +343,24 @@ class VolumetricScanLoop(ScanLoop):
     def _fill_arrays(self):
         super()._fill_arrays()
         self.board.z_piezo = self.z_waveform.values(self.shifted_time)
+
         i_sample = self.i_sample % len(self.recorded_signal.buffer)
 
-        # if self.recorded_signal.is_complete():
-        #     wave_part = self.recorded_signal.read(i_sample, self.n_samples)  # piezo Z AI
-        #     piezo_maxmin_voltage = 5  # Max (and -min) voltage
-        #     for board, parameters in ((self.board.z_lateral, self.parameters.z.lateral_sync),
-        #                               (self.board.z_frontal, self.parameters.z.frontal_sync)):
-        #         wave_out = np.clip(calc_sync(wave_part, parameters), -piezo_maxmin_voltage, piezo_maxmin_voltage)
-        #         board = wave_out
+        if self.recorded_signal.is_complete():
+            # wave_part = self.recorded_signal.read(i_sample, self.n_samples)  # piezo Z AI
+            wave_part = self.z_waveform.values(self.shifted_time)
+            piezo_maxmin_voltage = 5  # Max (and -min) voltage
+            for board, parameters in (("z_lateral", self.parameters.z.lateral_sync),
+                                      ("z_frontal", self.parameters.z.frontal_sync)):
+                wave_out = np.clip(calc_sync(wave_part, parameters), -piezo_maxmin_voltage, piezo_maxmin_voltage)
+                self.board.__setattr__(board, wave_out)
+
+                # if board == "z_lateral":
+                #     print("waveform out minmax ", self.z_waveform.vmin, self.z_waveform.vmax, " actual ",
+                #           self.board.z_piezo.min(), self.board.z_piezo.max(),
+                #           " waveout ", wave_out.min(), wave_out.max()
+                #           )
+                #offset -1.56, slope = -.0018 piezo um to galvo volts
 
             # max_wave, min_wave = (np.max(wave_part), np.min(wave_part))
             # print(calc_sync(min_wave, (self.parameters.offset,
@@ -421,5 +430,5 @@ class VolumetricScanLoop(ScanLoop):
 
 
 def calc_sync(z, sync_coef):
-    """sync_coef is slope and intercept"""
-    return sync_coef[0] + sync_coef[1] * z
+    """sync_coef is intercept and slope"""
+    return sync_coef[0] + sync_coef[1]*z

@@ -39,7 +39,7 @@ class RecordedWaveform(Waveform):
         self.i_sample = 0
 
     def values(self, t):
-        out = self.recording[self.i_sample : self.i_sample + len(t)]
+        out = self.recording[self.i_sample: self.i_sample + len(t)]
         self.i_sample = (self.i_sample + len(t)) % self.recording.shape[0]
         return out
 
@@ -54,27 +54,31 @@ class TriangleWaveform(Waveform):
     def values(self, t):
         tf = t * self.frequency
         return (
-            self.vmin
-            + (self.vmax - self.vmin) / 2
-            + +(self.vmax - self.vmin)
-            * (np.abs((tf - np.floor(tf + 1 / 2))) - 0.25)
-            * 2
+                self.vmin
+                + (self.vmax - self.vmin) / 2
+                + +(self.vmax - self.vmin)
+                * (np.abs((tf - np.floor(tf + 1 / 2))) - 0.25)
+                * 2
         )
 
 
 class NegativeStepWaveform(Waveform):
-    def __init__(self, *args, frequency=1, vmin=0, vmax=1,
-                 threshold=0.5, **kwargs):
+    # Used for power control
+    def __init__(self, scanwave, *args, frequency=1, vmin=0, vmax=1,
+                 threshold=0.05, **kwargs):
         super().__init__(*args, **kwargs)
+        # scanwave is the scanning waveform, used as ref
+        self.scanwave = scanwave
         self.vmin = vmin
         self.vmax = vmax
         self.frequency = frequency
         self.threshold = threshold
 
     def values(self, t):
-        tf = t * self.frequency
-        thresholded = np.abs(np.sin((tf * (2*np.pi)) - np.pi/2)) < self.threshold
-        return (thresholded.astype(float))*(self.vmax-self.vmin)+self.vmin
+        # use the scanning wave, if it's with threshold of extremes, clip
+        scan = self.scanwave.values(t)
+        mask = ~((scan < self.scanwave.vmin + self.threshold) | (scan > self.scanwave.vmax - self.threshold))
+        return mask.astype(float) * (self.vmax - self.vmin) + self.vmin
 
 
 @jit(nopython=True)
