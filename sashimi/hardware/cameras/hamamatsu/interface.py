@@ -242,6 +242,7 @@ class HamamatsuCamera(AbstractCamera):
     def set_property_value(self, property_name, property_value, *args, **kwargs):
         # Check if the property exists.
         if not (property_name in self.properties):
+
             raise CameraException(f"Unknown property name {property_name}")
 
         # If the value is text, figure out what the
@@ -509,4 +510,8 @@ class HamamatsuCamera(AbstractCamera):
                 ),
                 "dcamprop_getname",
             )
+
+        if properties == {'': 0}:
+            raise ConnectionError("The Hamamatsu camera seems to be off!")
+
         return properties
