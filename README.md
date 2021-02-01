@@ -38,9 +38,10 @@ You can activate the environment by running:
 
     conda activate sashimi
     
-After this you have to install an extra dependency: `pyvisa`:
+After this you moght have to install two extra dependencies for controlling a Cobolt laser:
 
     pip install pyvisa
+    pip install pyvisa-py
     
 ### Install with pip
 
