@@ -665,6 +665,7 @@ class State:
             self.external_comm.is_triggered_event.clear()
 
     def send_manual_duration(self):
+        print("duration sent to saver and communication clients")
         self.experiment_duration_queue.put(self.trigger_settings.experiment_duration)
 
     def wrap_up(self):

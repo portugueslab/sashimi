@@ -1,18 +1,18 @@
-from PyQt5.QtWidgets import QToolBar, QHBoxLayout, QLabel, QProgressBar, QMessageBox
+from PyQt5.QtWidgets import QToolBar, QHBoxLayout, QLabel, QProgressBar, QMessageBox, QWidget, QAction
 
 from sashimi.gui.buttons import ToggleIconButton
 from sashimi.state import State, GlobalState
 
 
-class TopWidget(QToolBar):
+class TopWidget(QWidget):
     def __init__(self, st: State, timer):
         super().__init__()
         self.state = st
         self.timer = timer
-        self.setLayout(QHBoxLayout())
+        self.main_layout = QHBoxLayout()
 
         # TODO: This was in Stytra figure out what it does, whether it has to be intercalated between widgets
-        self.addSeparator()
+        #self.addSeparator()
 
         self.experiment_toggle_btn = ToggleIconButton(
             icon_off="play", icon_on="stop", action_on="play", on=False
@@ -23,6 +23,7 @@ class TopWidget(QToolBar):
         self.lbl_experiment_progress = QLabel()
         self.experiment_progress.hide()
         self.lbl_experiment_progress.hide()
+        self.experiment_toggle_btn.setEnabled(False)
 
         self.overwrite_dialog = QMessageBox()
         self.btn_overwrite_ok = self.overwrite_dialog.addButton(
@@ -32,9 +33,11 @@ class TopWidget(QToolBar):
             self.overwrite_dialog.Abort
         )
 
-        self.layout().addWidget(self.experiment_progress)
-        self.layout().addWidget(self.lbl_experiment_progress)
-        self.layout().addWidget(self.experiment_toggle_btn)
+        self.main_layout.addWidget(self.experiment_progress)
+        self.main_layout.addWidget(self.lbl_experiment_progress)
+        self.main_layout.addWidget(self.experiment_toggle_btn)
+
+        self.setLayout(self.main_layout)
 
         self.timer.timeout.connect(self.refresh_progress_bar)
         self.timer.timeout.connect(self.show_hide_toggle_btn)
@@ -72,9 +75,7 @@ class TopWidget(QToolBar):
         self.overwrite_dialog.show()
 
     def show_hide_toggle_btn(self):
-        if self.state.global_state == GlobalState.VOLUME_PREVIEW or\
-                GlobalState.EXPERIMENT_RUNNING or\
-                GlobalState.PLANAR_PREVIEW:
-            self.experiment_toggle_btn.show()
+        if self.state.global_state is GlobalState.PAUSED or self.state.global_state is GlobalState.PREVIEW:
+            self.experiment_toggle_btn.setEnabled(False)
         else:
-            self.experiment_toggle_btn.hide()
+            self.experiment_toggle_btn.setEnabled(True)

@@ -1,16 +1,16 @@
 from PyQt5.QtCore import QSize
-from PyQt5.QtWidgets import QToolButton
+from PyQt5.QtWidgets import QToolButton, QPushButton
 from PyQt5.QtGui import QIcon
-import pkg_resources
+from pathlib import Path
 
 
 def get_icon(icon_name):
     return QIcon(
-        pkg_resources.resource_filename(__name__, "../icons/" + icon_name + ".svg")
+        str((Path(__file__).parents[1]).resolve() / f"icons/{icon_name}.svg")
     )
 
 
-class IconButton(QToolButton):
+class IconButton(QPushButton):
     def __init__(self, *args, icon_name="", action_name="", **kwargs):
         super().__init__(*args, **kwargs)
         self.icon = get_icon(icon_name)
@@ -20,7 +20,7 @@ class IconButton(QToolButton):
         self.setIconSize(QSize(32, 32))
 
 
-class ToggleIconButton(QToolButton):
+class ToggleIconButton(QPushButton):
     def __init__(
             self,
             *args,
