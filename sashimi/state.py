@@ -320,6 +320,8 @@ class State:
             self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, Event()
         )
         self.is_saving_event = LoggedEvent(self.logger, SashimiEvents.IS_SAVING)
+
+        # The even active during scanning preparation (before first real camera trigger)
         self.is_waiting_event = LoggedEvent(
             self.logger, SashimiEvents.WAITING_FOR_TRIGGER
         )
@@ -477,9 +479,8 @@ class State:
         # Restart scanning loop if scanning params have changed:
         if self.global_state == GlobalState.VOLUME_PREVIEW:
             self.restart_event.set()
-        print(param_changed)
 
-        # # Synch piezo position across modalities, for usability:
+        # # Sync piezo position across modalities, for usability:
         # if param_changed is not None:
         #     key = list(param_changed.keys())[0]
         #     if "piezo" in key:
@@ -572,7 +573,6 @@ class State:
         self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
-        # TODO why are we shooting on our own foot? I am sure there is a better way
         time.sleep(0.01)
         self.is_saving_event.set()
 

@@ -363,6 +363,7 @@ class VolumetricScanLoop(ScanLoop):
 
         camera_pulses = 0
         if self.camera_on:
+            self.logger.log_message("I")
             if self.camera_was_off:
                 self.logger.log_message("Camera was off")
                 # calculate how many samples are remaining until we are in a new period

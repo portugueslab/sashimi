@@ -4,15 +4,12 @@ from sashimi.gui.buttons import ToggleIconButton
 from sashimi.state import State, GlobalState
 
 
-class TopWidget(QWidget):
+class TopWidget(QToolBar):
     def __init__(self, st: State, timer):
         super().__init__()
         self.state = st
         self.timer = timer
         self.main_layout = QHBoxLayout()
-
-        # TODO: This was in Stytra figure out what it does, whether it has to be intercalated between widgets
-        #self.addSeparator()
 
         self.experiment_toggle_btn = ToggleIconButton(
             icon_off="play", icon_on="stop", action_on="play", on=False
@@ -32,12 +29,9 @@ class TopWidget(QWidget):
         self.btn_overwrite_abort = self.overwrite_dialog.addButton(
             self.overwrite_dialog.Abort
         )
-
-        self.main_layout.addWidget(self.experiment_progress)
-        self.main_layout.addWidget(self.lbl_experiment_progress)
-        self.main_layout.addWidget(self.experiment_toggle_btn)
-
-        self.setLayout(self.main_layout)
+        self.addWidget(self.experiment_toggle_btn)
+        self.addWidget(self.experiment_progress)
+        self.addWidget(self.lbl_experiment_progress)
 
         self.timer.timeout.connect(self.refresh_progress_bar)
         self.timer.timeout.connect(self.show_hide_toggle_btn)
