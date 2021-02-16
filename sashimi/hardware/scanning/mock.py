@@ -21,6 +21,9 @@ class MockBoard(AbstractScanInterface):
     def read(self):
         sleep(0.05)
 
+    def write(self):
+        sleep(0.05)
+
 
 
 @contextmanager

@@ -255,6 +255,8 @@ class PlanarScanLoop(ScanLoop):
             )
         super().fill_arrays()
 
+        self.wait_signal.clear()
+
 
 class VolumetricScanLoop(ScanLoop):
     def __init__(self, *args, **kwargs):

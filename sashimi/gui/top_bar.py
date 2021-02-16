@@ -18,8 +18,8 @@ class TopWidget(QToolBar):
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
         self.lbl_experiment_progress = QLabel()
-        self.experiment_progress.hide()
-        self.lbl_experiment_progress.hide()
+        # self.experiment_progress.hide()
+        # self.lbl_experiment_progress.hide()
         self.experiment_toggle_btn.setEnabled(False)
 
         self.overwrite_dialog = QMessageBox()
@@ -71,5 +71,8 @@ class TopWidget(QToolBar):
     def show_hide_toggle_btn(self):
         if self.state.global_state is GlobalState.PAUSED or self.state.global_state is GlobalState.PREVIEW:
             self.experiment_toggle_btn.setEnabled(False)
+            self.experiment_toggle_btn.hide()
+            self.experiment_progress.hide()
+            self.lbl_experiment_progress.hide()
         else:
             self.experiment_toggle_btn.setEnabled(True)
