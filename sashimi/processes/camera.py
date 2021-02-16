@@ -169,12 +169,18 @@ class CameraProcess(LoggingProcess):
         while not self.stop_event.is_set():
             is_waiting = self.wait_event.is_set()
             frames = self.camera.get_frames()
+
+            # if no frames are received (either this loop is in between frames
+            # or we are in the waining period)
             if frames:
 
                 for frame in frames:
                     self.logger.log_message(
                         "received frame of shape " + str(frame.shape)
                     )
+                    # this means this is the first frame received since
+                    # the waiting period is over, the signal has to be sent that
+                    # saving can start
                     if self.was_waiting and not is_waiting:
                         self.experiment_trigger_event.set()
                         # TODO do not crash here if queue is full

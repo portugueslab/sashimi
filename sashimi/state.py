@@ -246,14 +246,20 @@ def convert_save_params(
     save_settings: SaveSettings,
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
+    trigger_settings: TriggerSettings
 ):
     n_planes = scanning_settings.n_planes - (
         scanning_settings.n_skip_start + scanning_settings.n_skip_end
     )
+    if trigger_settings.is_triggered:
+        n_volumes = SavingParameters.n_volumes
+    else:
+        n_volumes = int(np.ceil(scanning_settings.frequency * trigger_settings.experiment_duration))
 
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
         n_planes=n_planes,
+        n_volumes=n_volumes,
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
         voxel_size=get_voxel_size(scanning_settings, camera_settings),
@@ -320,6 +326,8 @@ class State:
             self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, Event()
         )
         self.is_saving_event = LoggedEvent(self.logger, SashimiEvents.IS_SAVING)
+
+        # The even active during scanning preparation (before first real camera trigger)
         self.is_waiting_event = LoggedEvent(
             self.logger, SashimiEvents.WAITING_FOR_TRIGGER
         )
@@ -477,9 +485,8 @@ class State:
         # Restart scanning loop if scanning params have changed:
         if self.global_state == GlobalState.VOLUME_PREVIEW:
             self.restart_event.set()
-        print(param_changed)
 
-        # # Synch piezo position across modalities, for usability:
+        # # Sync piezo position across modalities, for usability:
         # if param_changed is not None:
         #     key = list(param_changed.keys())[0]
         #     if "piezo" in key:
@@ -555,6 +562,7 @@ class State:
             self.save_settings,
             self.volume_setting,
             self.camera_settings,
+            self.trigger_settings
         )
         self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(save_params)
@@ -572,7 +580,6 @@ class State:
         self.restart_event.set()
         self.saver.save_queue.empty()
         self.camera.image_queue.empty()
-        # TODO why are we shooting on our own foot? I am sure there is a better way
         time.sleep(0.01)
         self.is_saving_event.set()
 
@@ -665,7 +672,6 @@ class State:
             self.external_comm.is_triggered_event.clear()
 
     def send_manual_duration(self):
-        print("duration sent to saver and communication clients")
         self.experiment_duration_queue.put(self.trigger_settings.experiment_duration)
 
     def wrap_up(self):

@@ -1,6 +1,7 @@
 from sashimi.hardware.scanning.__init__ import AbstractScanInterface
 from contextlib import contextmanager
 import numpy as np
+from time import sleep
 
 
 class MockBoard(AbstractScanInterface):
@@ -16,6 +17,13 @@ class MockBoard(AbstractScanInterface):
     @z_piezo.setter
     def z_piezo(self, waveform):
         self.piezo_array[:] = waveform
+
+    def read(self):
+        sleep(0.05)
+
+    def write(self):
+        sleep(0.05)
+
 
 
 @contextmanager

@@ -4,15 +4,12 @@ from sashimi.gui.buttons import ToggleIconButton
 from sashimi.state import State, GlobalState
 
 
-class TopWidget(QWidget):
+class TopWidget(QToolBar):
     def __init__(self, st: State, timer):
         super().__init__()
         self.state = st
         self.timer = timer
         self.main_layout = QHBoxLayout()
-
-        # TODO: This was in Stytra figure out what it does, whether it has to be intercalated between widgets
-        #self.addSeparator()
 
         self.experiment_toggle_btn = ToggleIconButton(
             icon_off="play", icon_on="stop", action_on="play", on=False
@@ -21,9 +18,6 @@ class TopWidget(QWidget):
         self.experiment_progress = QProgressBar()
         self.experiment_progress.setFormat("Volume %v of %m")
         self.lbl_experiment_progress = QLabel()
-        self.experiment_progress.hide()
-        self.lbl_experiment_progress.hide()
-        self.experiment_toggle_btn.setEnabled(False)
 
         self.overwrite_dialog = QMessageBox()
         self.btn_overwrite_ok = self.overwrite_dialog.addButton(
@@ -32,12 +26,10 @@ class TopWidget(QWidget):
         self.btn_overwrite_abort = self.overwrite_dialog.addButton(
             self.overwrite_dialog.Abort
         )
+        self.addWidget(self.experiment_toggle_btn)
+        self.addWidget(self.experiment_progress)
+        self.addWidget(self.lbl_experiment_progress)
 
-        self.main_layout.addWidget(self.experiment_progress)
-        self.main_layout.addWidget(self.lbl_experiment_progress)
-        self.main_layout.addWidget(self.experiment_toggle_btn)
-
-        self.setLayout(self.main_layout)
 
         self.timer.timeout.connect(self.refresh_progress_bar)
         self.timer.timeout.connect(self.show_hide_toggle_btn)
@@ -46,12 +38,12 @@ class TopWidget(QWidget):
     def refresh_progress_bar(self):
         sstatus = self.state.get_save_status()
         if sstatus is not None:
-            self.experiment_progress.show()
-            self.lbl_experiment_progress.show()
+            #self.experiment_progress.show()
+            #self.lbl_experiment_progress.show()
             self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
             self.experiment_progress.setValue(sstatus.i_volume)
             self.lbl_experiment_progress.setText(
-                "Saved files: {}".format(sstatus.i_chunk)
+                f"Saved files: {sstatus.i_chunk}"
             )
 
     # TODO: Rethink logic here to ensure button and state are coordinated
@@ -77,5 +69,10 @@ class TopWidget(QWidget):
     def show_hide_toggle_btn(self):
         if self.state.global_state is GlobalState.PAUSED or self.state.global_state is GlobalState.PREVIEW:
             self.experiment_toggle_btn.setEnabled(False)
+            self.experiment_progress.setEnabled(False)
+            self.lbl_experiment_progress.setEnabled(False)
+
         else:
             self.experiment_toggle_btn.setEnabled(True)
+            self.experiment_progress.setEnabled(True)
+            self.lbl_experiment_progress.setEnabled(True)

@@ -44,12 +44,9 @@ class MainWindow(QMainWindow):
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
         self.wid_status_bar = StatusBarWidget(st, self.timer)
-        self.wid_top = TopWidget(st, self.timer)
+        self.toolbar = TopWidget(st, self.timer)
 
-        self.addDockWidget(
-            Qt.TopDockWidgetArea,
-            DockedWidget(self.wid_top)
-        )
+        self.addToolBar(Qt.TopToolBarArea, self.toolbar)
 
         self.setCentralWidget(self.wid_display)
 
@@ -140,8 +137,8 @@ class MainWindow(QMainWindow):
                 self.wid_status.setCurrentIndex(0)
                 self.wid_laser.btn_off.click()
             self.refresh_param_values(omit_wid_camera=True)
-            self.wid_top.experiment_progress.hide()
-            self.wid_top.lbl_experiment_progress.hide()
+            self.toolbar.experiment_progress.hide()
+            self.toolbar.lbl_experiment_progress.hide()
             self.st.saver.saver_stopped_signal.clear()
 
 
