@@ -205,7 +205,7 @@ class ViewingWidget(QWidget):
 
         # If not volumetric or out of range, reset indexes:
         if current_image.shape[0] == 1:
-            self.frame_layer.dims.reset()
+            self.viewer.dims.reset()
         self.frame_layer.data = current_image
         # self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
 
