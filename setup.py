@@ -18,12 +18,11 @@ setup(
     packages=find_packages(),
     install_requires=requirements,
     extras_require=dict(dev=requirements_dev),
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
         "Natural Language :: English",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
     keywords="imaging microscopy lightsheet",
