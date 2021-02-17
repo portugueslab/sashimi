@@ -1,4 +1,4 @@
-arrayqueues==1.2.0b0
+arrayqueues==1.2.3
 flammkuchen==0.9
 lightparam>=0.4, <0.5
 pyqt5>=5.15
