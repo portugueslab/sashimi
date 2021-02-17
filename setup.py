@@ -4,6 +4,12 @@ from setuptools import find_packages
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
+with open("requirements_dev.txt") as f:
+    requirements_dev = f.read().splitlines()
+
+with open("README.md") as f:
+    long_description = f.read()
+
 setup(
     name="sashimi",
     version="0.2.0",
@@ -11,6 +17,7 @@ setup(
     author_email="vilim@neuro.mpg.de",
     packages=find_packages(),
     install_requires=requirements,
+    extras_require=dict(dev=requirements_dev),
     python_requires=">=3.7",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
@@ -21,6 +28,9 @@ setup(
     ],
     keywords="imaging microscopy lightsheet",
     description="A user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://github.com/portugueslab/sashimi",
     entry_points={
         "console_scripts": [
             "sashimi=sashimi.main:main",
