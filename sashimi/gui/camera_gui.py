@@ -14,6 +14,8 @@ from sashimi.state import (
     get_voxel_size,
 )
 import napari
+
+# TODO: In future realeases of napari remove monkey patched code. Accessing protected elements is bad practice
 from napari.layers.shapes._shapes_constants import Mode
 import numpy as np
 from warnings import warn
@@ -314,7 +316,6 @@ class CameraSettingsWidget(QWidget):
             self._show_roi()
             self.btn_cancel_roi.show()
             self.wid_display.viewer.layers["roi_layer"].mode = Mode.SELECT
-            # TODO add autoselection of the ROI w/o clicking
 
             # Disable binning option if an ROI is set:
             self.wid_camera_settings.param_widgets["binning"].setEnabled(False)
@@ -336,9 +337,8 @@ class CameraSettingsWidget(QWidget):
         self.iterate_roi_state()
 
     def update_on_bin_change(self, changed_params):
-        """Update ROI coordinates when changing the binning.
-        #TODO check if possible to trigger only on change of the binning parameter instead of checking
-        """
+        """Update ROI coordinates when changing the binning."""
+        # TODO check if possible to trigger only on change of the binning parameter instead of checking
         if "binning" in changed_params.keys():
             b = int(changed_params["binning"][0])
             self.roi.data = [self.roi.data[0] / (b / self.current_binning)]

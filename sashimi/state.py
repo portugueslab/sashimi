@@ -1,4 +1,5 @@
 import numpy as np
+from multiprocessing import Manager as MultiprocessingManager
 from queue import Empty
 from typing import Optional
 from lightparam.param_qt import ParametrizedQt
@@ -37,7 +38,6 @@ from sashimi.config import read_config
 import time
 from sashimi.utilities import clean_json
 
-
 conf = read_config()
 
 
@@ -54,9 +54,16 @@ class SaveSettings(ParametrizedQt):
         super().__init__()
         self.name = "experiment_settings"
         self.save_dir = Param(conf["default_paths"]["data"], gui=False)
-        self.experiment_duration = Param(0, (0, 100_000), gui=False)
         self.notification_email = Param("")
         self.overwrite_save_folder = Param(0, (0, 1), gui=False, loadable=False)
+
+
+class TriggerSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__(self)
+        self.name = "trigger_settings"
+        self.experiment_duration = Param(2_000, (1, 10_000), unit="s")
+        self.is_triggered = Param(True, [True, False], gui=False)
 
 
 class ScanningSettings(ParametrizedQt):
@@ -64,8 +71,7 @@ class ScanningSettings(ParametrizedQt):
         super().__init__()
         self.name = "general/scanning_state"
         self.scanning_state = Param(
-            "Paused",
-            ["Paused", "Calibration", "Planar", "Volume"],
+            "Paused", ["Paused", "Calibration", "Planar", "Volume"],
         )
 
 
@@ -126,7 +132,7 @@ class CameraSettings(ParametrizedQt):
         super().__init__()
         self.name = "camera/parameters"
         self.exposure_time = Param(
-            conf["camera"]["default_exposure"], (0.5, 1000), unit="ms"
+            conf["camera"]["default_exposure"], (1, 1000), unit="ms"
         )
         self.binning = Param(conf["camera"]["default_binning"], [1, 2, 4])
         self.roi = Param(
@@ -177,11 +183,7 @@ class Calibration(ParametrizedQt):
 
     def add_calibration_point(self):
         self.calibrations_points.append(
-            (
-                self.z_settings.piezo,
-                self.z_settings.lateral,
-                self.z_settings.frontal,
-            )
+            (self.z_settings.piezo, self.z_settings.lateral, self.z_settings.frontal,)
         )
         self.calculate_calibration()
 
@@ -217,8 +219,7 @@ class Calibration(ParametrizedQt):
 
 
 def get_voxel_size(
-    scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
+    scanning_settings: ZRecordingSettings, camera_settings: CameraSettings,
 ):
     scan_length = (
         scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
@@ -239,6 +240,7 @@ def convert_save_params(
     save_settings: SaveSettings,
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
+    trigger_settings: TriggerSettings,
 ):
     n_planes = scanning_settings.n_planes - (
         scanning_settings.n_skip_start + scanning_settings.n_skip_end
@@ -313,6 +315,8 @@ class State:
             self.logger, SashimiEvents.NOISE_SUBTRACTION_ACTIVE, Event()
         )
         self.is_saving_event = LoggedEvent(self.logger, SashimiEvents.IS_SAVING)
+
+        # The even active during scanning preparation (before first real camera trigger)
         self.is_waiting_event = LoggedEvent(
             self.logger, SashimiEvents.WAITING_FOR_TRIGGER
         )
@@ -327,11 +331,10 @@ class State:
             sample_rate=self.sample_rate,
         )
         self.camera_settings = CameraSettings()
-        self.save_settings = SaveSettings()
+        self.trigger_settings = TriggerSettings()
 
         self.settings_tree = ParameterTree()
 
-        self.global_state = GlobalState.PAUSED
         self.pause_after = False
         if self.conf["scopeless"]:
             self.light_source = light_source_class_dict["mock"]()
@@ -345,17 +348,22 @@ class State:
             exp_trigger_event=self.experiment_start_event,
         )
 
+        self.multiprocessing_manager = MultiprocessingManager()
+
+        self.experiment_duration_queue = self.multiprocessing_manager.Queue()
+
         self.external_comm = ExternalComm(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
             is_saving_event=self.is_saving_event,
             is_waiting_event=self.is_waiting_event,
+            duration_queue=self.experiment_duration_queue,
         )
 
         self.saver = StackSaver(
             stop_event=self.stop_event,
             is_saving_event=self.is_saving_event,
-            duration_queue=self.external_comm.duration_queue,
+            duration_queue=self.experiment_duration_queue,
         )
 
         self.dispatcher = VolumeDispatcher(
@@ -373,7 +381,6 @@ class State:
         self.settings_tree = ParameterTree()
 
         self.global_state = GlobalState.PAUSED
-        self.pause_after = False
 
         self.planar_setting = PlanarScanningSettings()
         self.light_source_settings = LightSourceSettings()
@@ -467,9 +474,8 @@ class State:
         # Restart scanning loop if scanning params have changed:
         if self.global_state == GlobalState.VOLUME_PREVIEW:
             self.restart_event.set()
-        print(param_changed)
 
-        # # Synch piezo position across modalities, for usability:
+        # # Sync piezo position across modalities, for usability:
         # if param_changed is not None:
         #     key = list(param_changed.keys())[0]
         #     if "piezo" in key:
@@ -516,9 +522,7 @@ class State:
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
-                self.planar_setting,
-                self.single_plane_settings,
-                self.calibration,
+                self.planar_setting, self.single_plane_settings, self.calibration,
             )
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
@@ -545,11 +549,13 @@ class State:
             self.save_settings,
             self.volume_setting,
             self.camera_settings,
+            self.trigger_settings,
         )
         self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(save_params)
         self.dispatcher.n_planes_queue.put(self.n_planes)
 
+    # TODO: What is the purpose of this?
     def send_dispatcher_settings(self):
         pass
 
@@ -638,13 +644,19 @@ class State:
             return None
 
     def calculate_pulse_times(self):
-        return (
-            np.arange(
-                self.volume_setting.n_skip_start,
-                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-            )
-            / (self.volume_setting.frequency * self.volume_setting.n_planes)
-        )
+        return np.arange(
+            self.volume_setting.n_skip_start,
+            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
+
+    def set_trigger_mode(self, mode: bool):
+        if mode:
+            self.external_comm.is_triggered_event.set()
+        else:
+            self.external_comm.is_triggered_event.clear()
+
+    def send_manual_duration(self):
+        self.experiment_duration_queue.put(self.trigger_settings.experiment_duration)
 
     def wrap_up(self):
         self.stop_event.set()

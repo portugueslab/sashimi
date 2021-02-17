@@ -2,19 +2,21 @@ from sashimi.hardware.cameras.interface import AbstractCamera
 import numpy as np
 import time
 from skimage.measure import block_reduce
+from scipy.ndimage.filters import gaussian_filter
 
 
 class MockCamera(AbstractCamera):
-    def __init__(self, camera_id=None, sensor_resolution=None):
-        super().__init__(camera_id, sensor_resolution)
+    def __init__(self, camera_id=None, max_sensor_resolution=None):
+        super().__init__(camera_id, max_sensor_resolution)
         self._exposure_time = 60
         self._sensor_resolution: tuple = (256, 256)
         self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
         self._frame_rate = 1 / self._exposure_time
         self._binning = 1
-        self.full_mock_image = np.random.randint(
-            0, 65534, size=self._sensor_resolution, dtype=np.uint16
-        )
+        self.full_mock_image = gaussian_filter(
+            np.random.randint(0, 65534, size=self._sensor_resolution, dtype=np.uint16),
+            5,
+        ).astype(np.uint16)
         self.current_mock_image = self.full_mock_image
         self.previous_frame_time = None
         self.current_time = time.time_ns()

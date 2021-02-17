@@ -11,6 +11,7 @@ from sashimi.gui.save_settings_gui import SavingSettingsWidget
 from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsWidget
 from sashimi.gui.save_gui import SaveWidget
 from sashimi.gui.status_bar import StatusBarWidget
+from sashimi.gui.top_bar import TopWidget
 from sashimi.state import State
 
 
@@ -43,6 +44,9 @@ class MainWindow(QMainWindow):
         self.wid_scan = PlanarScanningWidget(st)
         self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
         self.wid_status_bar = StatusBarWidget(st, self.timer)
+        self.toolbar = TopWidget(st, self.timer)
+
+        self.addToolBar(Qt.TopToolBarArea, self.toolbar)
 
         self.setCentralWidget(self.wid_display)
 
@@ -90,11 +94,9 @@ class MainWindow(QMainWindow):
         file_menu = menubar.addMenu("File")
         load = file_menu.addAction("Load presets")
         save_settings = file_menu.addAction("Save presets")
-        save_dir = file_menu.addAction("Save in...")
         exit = file_menu.addAction("Exit")
         load.triggered.connect(self.wid_settings_tree.load)
         save_settings.triggered.connect(self.wid_settings_tree.save)
-        save_dir.triggered.connect(self.wid_save_options.set_save_location)
         exit.triggered.connect(self.close)
 
         edit_menu = menubar.addMenu("Edit")
@@ -128,6 +130,7 @@ class MainWindow(QMainWindow):
         self.wid_save_options.wid_save_options.refresh_widgets()
         self.wid_save_options.set_locationbutton()
 
+    # TODO: Avoid hierarchy in GUI by emitting a PyQt5.QtCore.pyqtSignal() when experiment ends/aborts
     def check_end_experiment(self):
         if self.st.saver.saver_stopped_signal.is_set():
             self.st.end_experiment()
@@ -135,9 +138,10 @@ class MainWindow(QMainWindow):
                 self.wid_status.setCurrentIndex(0)
                 self.wid_laser.btn_off.click()
             self.refresh_param_values(omit_wid_camera=True)
-            self.wid_status_bar.experiment_progress.hide()
-            self.wid_status_bar.lbl_experiment_progress.hide()
+            self.toolbar.experiment_progress.hide()
+            self.toolbar.lbl_experiment_progress.hide()
             self.st.saver.saver_stopped_signal.clear()
+            self.toolbar.experiment_toggle_btn.flip_icon(False)
 
 
 class StatusWidget(QTabWidget):

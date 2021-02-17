@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QLabel, QStatusBar, QProgressBar
+from PyQt5.QtWidgets import QLabel, QStatusBar
 
 from sashimi.state import GlobalState, State, get_voxel_size
 from sashimi.config import read_config
@@ -18,18 +18,14 @@ class StatusBarWidget(QStatusBar):
         self.frame_size_lbl = QLabel()
         self.voxel_size_lbl = QLabel()
         self.interplane_lbl = QLabel()
-        self.experiment_progress = QProgressBar()
-        self.experiment_progress.setFormat("Volume %v of %m")
-        self.lbl_experiment_progress = QLabel()
-        self.experiment_progress.hide()
-        self.lbl_experiment_progress.hide()
+        self.warning_lbl = QLabel()
+        self.warning_lbl.setStyleSheet("color: red")
 
         self.addPermanentWidget(self.framerate_lbl)
         self.addPermanentWidget(self.frame_size_lbl)
         self.addPermanentWidget(self.voxel_size_lbl)
         self.addPermanentWidget(self.interplane_lbl)
-        self.addPermanentWidget(self.experiment_progress)
-        self.addPermanentWidget(self.lbl_experiment_progress)
+        self.addPermanentWidget(self.warning_lbl)
 
         self.voxel_size = None
 
@@ -39,7 +35,7 @@ class StatusBarWidget(QStatusBar):
         self.update_framerate_view()
         self.update_frame_size()
         self.update_voxel_size()
-        self.refresh_progress_bar()
+        self.update_warning_msg()
         if self.state.global_state == GlobalState.PAUSED:
             self.hide()
         else:
@@ -59,6 +55,7 @@ class StatusBarWidget(QStatusBar):
 
         # Find the expected framerate depending on the global state
         expected_frame_rate_dict = {
+            GlobalState.PAUSED: None,
             GlobalState.PREVIEW: None,
             GlobalState.VOLUME_PREVIEW: self.state.volume_setting.frequency
             * self.state.n_planes,
@@ -96,13 +93,9 @@ class StatusBarWidget(QStatusBar):
                 f"Pixel size: {self.voxel_size[1]:.2f} x {self.voxel_size[2]:.2f} um"
             )
 
-    def refresh_progress_bar(self):
-        sstatus = self.state.get_save_status()
-        if sstatus is not None:
-            self.experiment_progress.show()
-            self.lbl_experiment_progress.show()
-            self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
-            self.experiment_progress.setValue(sstatus.i_volume)
-            self.lbl_experiment_progress.setText(
-                "Saved files: {}".format(sstatus.i_chunk)
-            )
+    def update_warning_msg(self):
+        if (
+            self.state.global_state == GlobalState.VOLUME_PREVIEW
+            and len(self.state.calibration.calibrations_points) < 2
+        ):
+            self.warning_lbl.setText("Not enough calibration points")
