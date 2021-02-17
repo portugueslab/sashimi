@@ -116,15 +116,20 @@ class StackSaver(LoggingProcess):
                 notifier.notify()
 
         self.saving_signal.clear()
-        self.save_parameters = None
         self.saver_stopped_signal.set()
+
+        # Update status queue by resetting it:
+        self.update_saved_status_queue()
+        self.i_in_chunk = 0
+        self.i_chunk = 0
+        self.i_volume = 0
+        self.save_parameters = None
 
     def fill_dataset(self, volume):
         if self.current_data is None:
             self.calculate_optimal_size(volume)
             self.current_data = np.empty(
-                (self.save_parameters.chunk_size, *volume.shape),
-                dtype=self.dtype,
+                (self.save_parameters.chunk_size, *volume.shape), dtype=self.dtype,
             )
 
         self.current_data[self.i_in_chunk, :, :, :] = volume
