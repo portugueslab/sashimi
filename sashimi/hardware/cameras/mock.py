@@ -13,9 +13,10 @@ class MockCamera(AbstractCamera):
         self._roi = (0, 0, self._sensor_resolution[0], self._sensor_resolution[1])
         self._frame_rate = 1 / self._exposure_time
         self._binning = 1
-        self.full_mock_image = gaussian_filter(np.random.randint(
-            0, 65534, size=self._sensor_resolution, dtype=np.uint16
-        ), 5).astype(np.uint16)
+        self.full_mock_image = gaussian_filter(
+            np.random.randint(0, 65534, size=self._sensor_resolution, dtype=np.uint16),
+            5,
+        ).astype(np.uint16)
         self.current_mock_image = self.full_mock_image
         self.previous_frame_time = None
         self.current_time = time.time_ns()

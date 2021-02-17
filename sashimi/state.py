@@ -246,7 +246,7 @@ def convert_save_params(
     save_settings: SaveSettings,
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings,
-    trigger_settings: TriggerSettings
+    trigger_settings: TriggerSettings,
 ):
     n_planes = scanning_settings.n_planes - (
         scanning_settings.n_skip_start + scanning_settings.n_skip_end
@@ -254,7 +254,9 @@ def convert_save_params(
     if trigger_settings.is_triggered:
         n_volumes = SavingParameters.n_volumes
     else:
-        n_volumes = int(np.ceil(scanning_settings.frequency * trigger_settings.experiment_duration))
+        n_volumes = int(
+            np.ceil(scanning_settings.frequency * trigger_settings.experiment_duration)
+        )
 
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
@@ -562,7 +564,7 @@ class State:
             self.save_settings,
             self.volume_setting,
             self.camera_settings,
-            self.trigger_settings
+            self.trigger_settings,
         )
         self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(save_params)

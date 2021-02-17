@@ -1,4 +1,10 @@
-from PyQt5.QtWidgets import QToolBar, QHBoxLayout, QLabel, QProgressBar, QMessageBox, QWidget, QAction
+from PyQt5.QtWidgets import (
+    QToolBar,
+    QHBoxLayout,
+    QLabel,
+    QProgressBar,
+    QMessageBox,
+)
 
 from sashimi.gui.buttons import ToggleIconButton
 from sashimi.state import State, GlobalState
@@ -12,7 +18,11 @@ class TopWidget(QToolBar):
         self.main_layout = QHBoxLayout()
 
         self.experiment_toggle_btn = ToggleIconButton(
-            icon_off="play", icon_on="stop", action_on="play", on=False
+            icon_off="play",
+            icon_on="stop",
+            action_on="start",
+            action_off="stop",
+            on=False,
         )
         self.experiment_toggle_btn.clicked.connect(self.change_experiment_state)
         self.experiment_progress = QProgressBar()
@@ -30,21 +40,19 @@ class TopWidget(QToolBar):
         self.addWidget(self.experiment_progress)
         self.addWidget(self.lbl_experiment_progress)
 
-
         self.timer.timeout.connect(self.refresh_progress_bar)
         self.timer.timeout.connect(self.show_hide_toggle_btn)
         self.btn_overwrite_ok.clicked.connect(self.state.start_experiment)
+        self.btn_overwrite_abort.clicked.connect(self.experiment_toggle_btn.flip_icon)
 
     def refresh_progress_bar(self):
         sstatus = self.state.get_save_status()
         if sstatus is not None:
-            #self.experiment_progress.show()
-            #self.lbl_experiment_progress.show()
+            # self.experiment_progress.show()
+            # self.lbl_experiment_progress.show()
             self.experiment_progress.setMaximum(sstatus.target_params.n_volumes)
             self.experiment_progress.setValue(sstatus.i_volume)
-            self.lbl_experiment_progress.setText(
-                f"Saved files: {sstatus.i_chunk}"
-            )
+            self.lbl_experiment_progress.setText(f"Saved files: {sstatus.i_chunk}")
 
     # TODO: Rethink logic here to ensure button and state are coordinated
     def change_experiment_state(self):
@@ -67,7 +75,10 @@ class TopWidget(QToolBar):
         self.overwrite_dialog.show()
 
     def show_hide_toggle_btn(self):
-        if self.state.global_state is GlobalState.PAUSED or self.state.global_state is GlobalState.PREVIEW:
+        if (
+            self.state.global_state is GlobalState.PAUSED
+            or self.state.global_state is GlobalState.PREVIEW
+        ):
             self.experiment_toggle_btn.setEnabled(False)
             self.experiment_progress.setEnabled(False)
             self.lbl_experiment_progress.setEnabled(False)

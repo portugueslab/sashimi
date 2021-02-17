@@ -1,13 +1,11 @@
 from PyQt5.QtCore import QSize
-from PyQt5.QtWidgets import QToolButton, QPushButton
+from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtGui import QIcon
 from pathlib import Path
 
 
 def get_icon(icon_name):
-    return QIcon(
-        str((Path(__file__).parents[1]).resolve() / f"icons/{icon_name}.svg")
-    )
+    return QIcon(str((Path(__file__).parents[1]).resolve() / f"icons/{icon_name}.svg"))
 
 
 class IconButton(QPushButton):
@@ -22,14 +20,14 @@ class IconButton(QPushButton):
 
 class ToggleIconButton(QPushButton):
     def __init__(
-            self,
-            *args,
-            icon_on="",
-            icon_off=None,
-            action_on="",
-            action_off=None,
-            on=False,
-            **kwargs
+        self,
+        *args,
+        icon_on="",
+        icon_off=None,
+        action_on="",
+        action_off=None,
+        on=False,
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.icon_on = get_icon(icon_on)
@@ -58,4 +56,4 @@ class ToggleIconButton(QPushButton):
             self.setIcon(self.icon_on)
             self.on = True
             self.setChecked(True)
-        self.setToolTip(self.action_on if self.on else self.action_off)
+        self.setToolTip(self.action_on if not self.on else self.action_off)

@@ -8,9 +8,8 @@ from sashimi import config
 
 
 class ConcurrenceLogger:
-    """A utility class for logging different kinds of events, periods and messages with multiprocessing
+    """A utility class for logging different kinds of events, periods and messages with multiprocessing"""
 
-    """
     def __init__(self, process_name):
         self.file: Optional[TextIO] = None
         self.process_name = process_name
@@ -46,6 +45,7 @@ class ConcurrenceLogger:
 
 class LoggingProcess(Process):
     """A process with an integrated concurrence logger"""
+
     def __init__(self, *args, name, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger = ConcurrenceLogger(name)

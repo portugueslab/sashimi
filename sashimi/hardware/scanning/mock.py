@@ -25,7 +25,6 @@ class MockBoard(AbstractScanInterface):
         sleep(0.05)
 
 
-
 @contextmanager
 def open_mockboard(sample_rate, n_samples, conf) -> MockBoard:
     try:

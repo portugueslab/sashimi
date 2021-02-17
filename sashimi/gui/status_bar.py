@@ -94,5 +94,8 @@ class StatusBarWidget(QStatusBar):
             )
 
     def update_warning_msg(self):
-        if self.state.global_state == GlobalState.VOLUME_PREVIEW and len(self.state.calibration.calibrations_points) < 2:
+        if (
+            self.state.global_state == GlobalState.VOLUME_PREVIEW
+            and len(self.state.calibration.calibrations_points) < 2
+        ):
             self.warning_lbl.setText("Not enough calibration points")
