@@ -20,7 +20,6 @@ conf = read_config()
 class SavingParameters:
     output_dir: Path = conf["default_paths"]["data"]
     n_planes: int = 1
-    n_volumes: int = 10000
     chunk_size: int = 20
     optimal_chunk_MB_RAM: int = conf[
         "array_ram_MB"
@@ -36,6 +35,7 @@ class SavingStatus:
     i_in_chunk: int = 0
     i_volume: int = 0
     i_chunk: int = 0
+    n_volumes: int = 10
 
 
 class StackSaver(LoggingProcess):
@@ -60,6 +60,7 @@ class StackSaver(LoggingProcess):
         self.i_chunk = 0
         self.i_plane = 0
         self.i_volume = 0
+        self.n_volumes = 10
         self.current_data = None
         self.saved_status_queue = Queue()
         self.frame_shape = None
@@ -94,7 +95,7 @@ class StackSaver(LoggingProcess):
         self.current_data = None
 
         while (
-            self.i_volume < self.save_parameters.n_volumes
+            self.i_volume < self.n_volumes
             and self.saving_signal.is_set()
             and not self.stop_event.is_set()
         ):
@@ -148,6 +149,7 @@ class StackSaver(LoggingProcess):
                 i_in_chunk=self.i_in_chunk,
                 i_chunk=self.i_chunk,
                 i_volume=self.i_volume,
+                n_volumes=self.n_volumes,
             )
         )
 
@@ -163,10 +165,7 @@ class StackSaver(LoggingProcess):
         ) as f:
             json.dump(
                 {
-                    "shape_full": (
-                        self.save_parameters.n_volumes,
-                        *self.current_data.shape[1:],
-                    ),
+                    "shape_full": (self.n_volumes, *self.current_data.shape[1:],),
                     "shape_block": (
                         self.save_parameters.chunk_size,
                         *self.current_data.shape[1:],
@@ -208,8 +207,10 @@ class StackSaver(LoggingProcess):
             pass
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
-            self.save_parameters.n_volumes = int(
+            print(new_duration)
+            self.n_volumes = int(
                 np.ceil(self.save_parameters.volumerate * new_duration)
             )
+            print(self.n_volumes)
         except Empty:
             pass

@@ -71,8 +71,7 @@ class ScanningSettings(ParametrizedQt):
         super().__init__()
         self.name = "general/scanning_state"
         self.scanning_state = Param(
-            "Paused",
-            ["Paused", "Calibration", "Planar", "Volume"],
+            "Paused", ["Paused", "Calibration", "Planar", "Volume"],
         )
 
 
@@ -184,11 +183,7 @@ class Calibration(ParametrizedQt):
 
     def add_calibration_point(self):
         self.calibrations_points.append(
-            (
-                self.z_settings.piezo,
-                self.z_settings.lateral,
-                self.z_settings.frontal,
-            )
+            (self.z_settings.piezo, self.z_settings.lateral, self.z_settings.frontal,)
         )
         self.calculate_calibration()
 
@@ -224,8 +219,7 @@ class Calibration(ParametrizedQt):
 
 
 def get_voxel_size(
-    scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
+    scanning_settings: ZRecordingSettings, camera_settings: CameraSettings,
 ):
     scan_length = (
         scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
@@ -251,17 +245,10 @@ def convert_save_params(
     n_planes = scanning_settings.n_planes - (
         scanning_settings.n_skip_start + scanning_settings.n_skip_end
     )
-    if trigger_settings.is_triggered:
-        n_volumes = SavingParameters.n_volumes
-    else:
-        n_volumes = int(
-            np.ceil(scanning_settings.frequency * trigger_settings.experiment_duration)
-        )
 
     return SavingParameters(
         output_dir=Path(save_settings.save_dir),
         n_planes=n_planes,
-        n_volumes=n_volumes,
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
         voxel_size=get_voxel_size(scanning_settings, camera_settings),
@@ -535,9 +522,7 @@ class State:
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             params = convert_single_plane_params(
-                self.planar_setting,
-                self.single_plane_settings,
-                self.calibration,
+                self.planar_setting, self.single_plane_settings, self.calibration,
             )
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
@@ -659,13 +644,10 @@ class State:
             return None
 
     def calculate_pulse_times(self):
-        return (
-            np.arange(
-                self.volume_setting.n_skip_start,
-                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-            )
-            / (self.volume_setting.frequency * self.volume_setting.n_planes)
-        )
+        return np.arange(
+            self.volume_setting.n_skip_start,
+            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
 
     def set_trigger_mode(self, mode: bool):
         if mode:
