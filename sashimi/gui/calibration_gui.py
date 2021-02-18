@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QCheckBox,
 )
 from lightparam.gui import ParameterGui
-from sashimi.state import Calibration
+from sashimi.hardware.scanning.scanstate import Calibration
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
 

@@ -2,7 +2,7 @@ from multiprocessing import Queue
 from copy import deepcopy
 
 from sashimi.hardware.scanning.scanloops import (
-    ScanningState,
+    ScanningMode,
     ScanParameters,
     PlanarScanLoop,
     VolumetricScanLoop,
@@ -90,13 +90,13 @@ class ScannerProcess(LoggingProcess):
         configurator = scan_conf_dict[conf["scanning"]]
         first_volume_run = True
         while not self.stop_event.is_set():
-            if self.parameters.state == ScanningState.PAUSED:
+            if self.parameters.mode == ScanningMode.PAUSED:
                 self.retrieve_parameters()
                 continue
             with configurator(self.sample_rate, self.n_samples, conf) as board:
-                if self.parameters.state == ScanningState.PLANAR:
+                if self.parameters.mode == ScanningMode.PLANAR:
                     loop = PlanarScanLoop
-                elif self.parameters.state == ScanningState.VOLUMETRIC:
+                elif self.parameters.mode == ScanningMode.VOLUMETRIC:
                     loop = VolumetricScanLoop
 
                 scanloop = loop(

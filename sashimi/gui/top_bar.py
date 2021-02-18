@@ -7,7 +7,8 @@ from PyQt5.QtWidgets import (
 )
 
 from sashimi.gui.buttons import ToggleIconButton
-from sashimi.state import State, GlobalState
+from sashimi.state import State
+from sashimi.hardware.scanning.scanstate import ScanningUseMode
 
 
 class TopWidget(QToolBar):
@@ -76,8 +77,8 @@ class TopWidget(QToolBar):
 
     def show_hide_toggle_btn(self):
         if (
-            self.state.global_state is GlobalState.PAUSED
-            or self.state.global_state is GlobalState.PREVIEW
+            self.state.global_state is ScanningUseMode.PAUSED
+            or self.state.global_state is ScanningUseMode.PREVIEW
         ):
             self.experiment_toggle_btn.setEnabled(False)
             self.experiment_progress.setEnabled(False)
