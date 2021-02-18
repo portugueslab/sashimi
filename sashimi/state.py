@@ -512,8 +512,6 @@ class State:
             return 1
 
     def send_scansave_settings(self):
-        print ('gloabl state', self.global_state)
-        print ("trigger settings", self.trigger_settings.is_triggered)
         if self.global_state == GlobalState.PAUSED:
             params = ScanParameters(state=ScanningState.PAUSED)
 

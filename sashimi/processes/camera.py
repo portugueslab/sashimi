@@ -143,35 +143,30 @@ class CameraProcess(LoggingProcess):
         either the self.pause_loop or self.camera_loop are executed.
         """
         while not self.stop_event.is_set():
-            print ('camera mode', self.parameters.camera_mode)
-            if self.parameters.camera_mode == CameraMode.PAUSED:
-                print ("paused camera mode")
-                self.pause_loop()
-                print ('ran pauseed looop')
-            else:
-                print ('im here now')
-                self.camera.start_acquisition()
-                self.logger.log_message("Started acquisition")
-                self.camera_loop()
+            #if self.parameters.camera_mode == CameraMode.PAUSED:
+            self.pause_loop()
+            #else:
+            self.camera.start_acquisition()
+            self.logger.log_message("Started acquisition")
+            self.camera_loop()
 
     def pause_loop(self):
         """Camera idle loop, just wait until parameters are updated. Check them, and if
         CameraMode.PAUSED is still set, return here.
         """
-        while not self.stop_event.is_set():
+        while not self.stop_event.is_set() and self.parameters.camera_mode == CameraMode.PAUSED:
             try:
                 new_parameters = self.parameter_queue.get(timeout=0.001)
                 if new_parameters != self.parameters:
                     self.update_parameters(new_parameters, stop_start=False)
                     if self.parameters.camera_mode != CameraMode.PAUSED:
-                        print ('pause loop broken', self.parameters.camera_mode, new_parameters.camera_mode)
                         break
             except Empty:
                 pass
 
     def camera_loop(self):
         """Camera running loop, grab frames and set new parameters if available."""
-        while not self.stop_event.is_set():
+        while not self.stop_event.is_set() and self.parameters.camera_mode != CameraMode.PAUSED:
             is_waiting = self.wait_event.is_set()
             frames = self.camera.get_frames()
 
@@ -201,6 +196,7 @@ class CameraProcess(LoggingProcess):
                     new_parameters != self.parameters
                 ):
                     self.update_parameters(new_parameters)
+
 
     def update_parameters(self, new_parameters, stop_start=True):
         """ "Set new parameters and stop and start the camera to make sure all changes take place."""
