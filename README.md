@@ -6,7 +6,7 @@ align="left"
 height="190" 
 width="270"></a>
 
-[![Actions Status](https://github.com/{owner}/{repo}/workflows/{workflow_name}/badge.svg)](https://github.com/{owner}/{repo}/actions)
+![tests](https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master)
 [![Docs](https://img.shields.io/badge/docs-dev-brightgreen)](https://portugueslab.github.io/sashimi/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4122062.svg)](https://doi.org/10.5281/zenodo.4122062)
