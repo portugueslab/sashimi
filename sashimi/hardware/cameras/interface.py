@@ -30,13 +30,15 @@ class AbstractCamera:
         """
         Allocate as many frames as will fit in 2GB of memory and start data acquisition.
         """
-        pass
+        #pass
+        print ('started aqisuition')
 
     def stop_acquisition(self):
         """
         Stop data acquisition and release the memory allocated for frames.
         """
-        pass
+        #pass
+        print ("stopped aqisition")
 
     def shutdown(self):
         """

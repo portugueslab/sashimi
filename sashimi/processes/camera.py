@@ -21,8 +21,8 @@ FULL_SIZE = [
 
 class CameraMode(Enum):
     PREVIEW = 1
-    TRIGGERED = 2
-    EXPERIMENT_RUNNING = 3
+    #TRIGGERED = 2
+    #EXPERIMENT_RUNNING = 3
     PAUSED = 4
     ABORT = 5
 
@@ -143,9 +143,13 @@ class CameraProcess(LoggingProcess):
         either the self.pause_loop or self.camera_loop are executed.
         """
         while not self.stop_event.is_set():
+            print ('camera mode', self.parameters.camera_mode)
             if self.parameters.camera_mode == CameraMode.PAUSED:
+                print ("paused camera mode")
                 self.pause_loop()
+                print ('ran pauseed looop')
             else:
+                print ('im here now')
                 self.camera.start_acquisition()
                 self.logger.log_message("Started acquisition")
                 self.camera_loop()
@@ -160,6 +164,7 @@ class CameraProcess(LoggingProcess):
                 if new_parameters != self.parameters:
                     self.update_parameters(new_parameters, stop_start=False)
                     if self.parameters.camera_mode != CameraMode.PAUSED:
+                        print ('pause loop broken', self.parameters.camera_mode, new_parameters.camera_mode)
                         break
             except Empty:
                 pass
