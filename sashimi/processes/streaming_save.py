@@ -12,6 +12,7 @@ from scopecuisine.notifiers import notifiers
 from sashimi.config import read_config
 from sashimi.processes.logging import LoggingProcess
 from sashimi.events import LoggedEvent, SashimiEvents
+from sashimi.utilities import get_last_parameters
 
 conf = read_config()
 
@@ -130,7 +131,8 @@ class StackSaver(LoggingProcess):
         if self.current_data is None:
             self.calculate_optimal_size(volume)
             self.current_data = np.empty(
-                (self.save_parameters.chunk_size, *volume.shape), dtype=self.dtype,
+                (self.save_parameters.chunk_size, *volume.shape),
+                dtype=self.dtype,
             )
 
         self.current_data[self.i_in_chunk, :, :, :] = volume
@@ -165,7 +167,10 @@ class StackSaver(LoggingProcess):
         ) as f:
             json.dump(
                 {
-                    "shape_full": (self.n_volumes, *self.current_data.shape[1:],),
+                    "shape_full": (
+                        self.n_volumes,
+                        *self.current_data.shape[1:],
+                    ),
                     "shape_block": (
                         self.save_parameters.chunk_size,
                         *self.current_data.shape[1:],
@@ -201,16 +206,17 @@ class StackSaver(LoggingProcess):
         )
 
     def receive_save_parameters(self):
-        try:
-            self.save_parameters = self.saving_parameter_queue.get(timeout=0.001)
-        except Empty:
-            pass
-        try:
-            new_duration = self.duration_queue.get(timeout=0.001)
-            print(new_duration)
+        """Receive parameters on the stack shape from the `State` obj and new duration
+        from either the `EsternalTrigger` or the `State` if triggering is disabled.
+        """
+        # Get parameters:
+        parameters = get_last_parameters(self.saving_parameter_queue)
+        if parameters is not None:
+            self.save_parameters = parameters
+
+        # Get duration and update number of volumes:
+        new_duration = get_last_parameters(self.duration_queue)
+        if new_duration is not None:
             self.n_volumes = int(
                 np.ceil(self.save_parameters.volumerate * new_duration)
             )
-            print(self.n_volumes)
-        except Empty:
-            pass
