@@ -19,8 +19,6 @@ def conf_path():
 
 def test_config_creation(conf_path):
     conf = config.read_config(file_path=conf_path)
-    print(conf_path)
-    print(conf)
     assert conf == config.TEMPLATE_CONF_DICT
 
 
