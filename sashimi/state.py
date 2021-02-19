@@ -479,15 +479,13 @@ class State:
 
     @property
     def scan_params(self):
-        """Return parameters for the scanning, depending on the state.
-        """
+        """Return parameters for the scanning, depending on the state."""
         if self.global_state == GlobalState.PAUSED:
             params = ScanParameters(state=ScanningState.PAUSED)
 
         elif self.global_state == GlobalState.PREVIEW:
             params = convert_calibration_params(
-                self.planar_setting,
-                self.calibration.z_settings
+                self.planar_setting, self.calibration.z_settings
             )
 
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
@@ -499,9 +497,7 @@ class State:
 
         elif self.global_state == GlobalState.VOLUME_PREVIEW:
             params = convert_volume_params(
-                self.planar_setting,
-                self.volume_setting,
-                self.calibration
+                self.planar_setting, self.volume_setting, self.calibration
             )
         else:
             return
@@ -520,7 +516,7 @@ class State:
         camera_params.trigger_mode = (
             TriggerMode.FREE
             if self.global_state == GlobalState.PREVIEW
-               or self.global_state == GlobalState.PLANAR_PREVIEW
+            or self.global_state == GlobalState.PLANAR_PREVIEW
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
@@ -532,8 +528,7 @@ class State:
 
     @property
     def all_settings(self):
-        all_settings = dict(scanning=self.scan_params,
-                            camera=self.camera_params)
+        all_settings = dict(scanning=self.scan_params, camera=self.camera_params)
 
         if self.waveform is not None:
             pulses = self.calculate_pulse_times() * self.sample_rate
