@@ -213,6 +213,7 @@ class StackSaver(LoggingProcess):
         parameters = get_last_parameters(self.saving_parameter_queue)
         if parameters is not None:
             self.save_parameters = parameters
+            print ('volumerate gotten', self.save_parameters.volumerate)
 
         # Get duration and update number of volumes:
         new_duration = get_last_parameters(self.duration_queue)
@@ -220,3 +221,4 @@ class StackSaver(LoggingProcess):
             self.n_volumes = int(
                 np.ceil(self.save_parameters.volumerate * new_duration)
             )
+            print("volumerate used: ", self.save_parameters.volumerate)

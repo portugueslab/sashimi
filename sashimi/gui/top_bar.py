@@ -48,8 +48,6 @@ class TopWidget(QToolBar):
     def refresh_progress_bar(self):
         sstatus = self.state.get_save_status()
         if sstatus is not None:
-            # self.experiment_progress.show()
-            # self.lbl_experiment_progress.show()
             self.experiment_progress.setMaximum(sstatus.n_volumes)
             self.experiment_progress.setValue(sstatus.i_volume)
             self.lbl_experiment_progress.setText(f"Saved files: {sstatus.i_chunk}")

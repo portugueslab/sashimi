@@ -110,7 +110,6 @@ class SinglePlaneSettings(ParametrizedQt):
         self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
         self.frequency = Param(1.0, (0.1, 1000), unit="planes/s (Hz)")
 
-
 class ZRecordingSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
@@ -241,7 +240,6 @@ def get_voxel_size(
         conf["voxel_size"]["x"] * binning,
     )
 
-
 def convert_save_params(
     save_settings: SaveSettings,
     scanning_settings: ZRecordingSettings,
@@ -258,6 +256,20 @@ def convert_save_params(
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
         voxel_size=get_voxel_size(scanning_settings, camera_settings),
+    )
+
+def convert_planar_save_params(
+    save_settings: SaveSettings,
+    scanning_settings: SinglePlaneSettings,
+    camera_settings: CameraSettings,
+    trigger_settings: TriggerSettings,
+):
+    n_planes = 1
+    return SavingParameters(
+        output_dir=Path(save_settings.save_dir),
+        n_planes=n_planes,
+        notification_email=str(save_settings.notification_email),
+        volumerate=scanning_settings.frequency
     )
 
 
@@ -470,12 +482,25 @@ class State:
 
     @property
     def save_params(self):
-        return convert_save_params(
-            self.save_settings,
-            self.volume_setting,
-            self.camera_settings,
-            self.trigger_settings,
-        )
+        #todo this works but only if trigger settings are updated. or trigger button clicked and unclicked
+        if self.global_state ==GlobalState.PLANAR_PREVIEW:
+            print ("returning planar params",self.single_plane_settings.frequency)
+            params= convert_planar_save_params(
+                self.save_settings,
+                self.single_plane_settings,
+                self.camera_settings,
+                self.trigger_settings,
+            )
+        else:
+            print ('returning volumentric params', self.volume_setting.frequency)
+            params= convert_save_params(
+                self.save_settings,
+                self.volume_setting,
+                self.camera_settings,
+                self.trigger_settings,
+            )
+        return params
+
 
     @property
     def scan_params(self):
@@ -550,6 +575,7 @@ class State:
 
         self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(self.save_params)
+        print ("volumerate put in queue", self.save_params.volumerate)
         self.dispatcher.n_planes_queue.put(self.n_planes)
 
     def start_experiment(self):
