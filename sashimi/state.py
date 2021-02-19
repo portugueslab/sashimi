@@ -36,7 +36,7 @@ from pathlib import Path
 from enum import Enum
 from sashimi.config import read_config
 import time
-from sashimi.utilities import clean_json
+from sashimi.utilities import clean_json, get_last_parameters
 
 conf = read_config()
 
@@ -62,7 +62,7 @@ class TriggerSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
         self.name = "trigger_settings"
-        self.experiment_duration = Param(2_000, (1, 10_000), unit="s")
+        self.experiment_duration = Param(5, (1, 50_000), unit="s")
         self.is_triggered = Param(True, [True, False], gui=False)
 
 
@@ -71,7 +71,8 @@ class ScanningSettings(ParametrizedQt):
         super().__init__()
         self.name = "general/scanning_state"
         self.scanning_state = Param(
-            "Paused", ["Paused", "Calibration", "Planar", "Volume"],
+            "Paused",
+            ["Paused", "Calibration", "Planar", "Volume"],
         )
 
 
@@ -183,7 +184,11 @@ class Calibration(ParametrizedQt):
 
     def add_calibration_point(self):
         self.calibrations_points.append(
-            (self.z_settings.piezo, self.z_settings.lateral, self.z_settings.frontal,)
+            (
+                self.z_settings.piezo,
+                self.z_settings.lateral,
+                self.z_settings.frontal,
+            )
         )
         self.calculate_calibration()
 
@@ -219,7 +224,8 @@ class Calibration(ParametrizedQt):
 
 
 def get_voxel_size(
-    scanning_settings: ZRecordingSettings, camera_settings: CameraSettings,
+    scanning_settings: ZRecordingSettings,
+    camera_settings: CameraSettings,
 ):
     scan_length = (
         scanning_settings.piezo_scan_range[1] - scanning_settings.piezo_scan_range[0]
@@ -415,19 +421,11 @@ class State:
 
         self.save_settings.sig_param_changed.connect(self.send_scansave_settings)
 
-        self.volume_setting.sig_param_changed.connect(self.send_dispatcher_settings)
-        self.single_plane_settings.sig_param_changed.connect(
-            self.send_dispatcher_settings
-        )
-        self.status.sig_param_changed.connect(self.send_dispatcher_settings)
-
         self.camera.start()
         self.scanner.start()
         self.external_comm.start()
         self.saver.start()
         self.dispatcher.start()
-
-        self.all_settings = dict(camera=dict(), scanning=dict())
 
         self.current_binning = conf["camera"]["default_binning"]
         self.send_scansave_settings()
@@ -449,6 +447,66 @@ class State:
         self.send_scansave_settings()
 
     def send_camera_settings(self):
+        self.camera.image_queue.clear()
+        self.camera.parameter_queue.put(self.camera_params)
+
+    def send_scan_settings(self, param_changed=None):
+        # Restart scanning loop if scanning params have changed:
+        if self.global_state == GlobalState.VOLUME_PREVIEW:
+            self.restart_event.set()
+
+        self.send_scansave_settings()
+
+    @property
+    def n_planes(self):
+        if self.global_state == GlobalState.VOLUME_PREVIEW:
+            return (
+                self.volume_setting.n_planes
+                - self.volume_setting.n_skip_start
+                - self.volume_setting.n_skip_end
+            )
+        else:
+            return 1
+
+    @property
+    def save_params(self):
+        return convert_save_params(
+            self.save_settings,
+            self.volume_setting,
+            self.camera_settings,
+            self.trigger_settings,
+        )
+
+    @property
+    def scan_params(self):
+        """Return parameters for the scanning, depending on the state."""
+        if self.global_state == GlobalState.PAUSED:
+            params = ScanParameters(state=ScanningState.PAUSED)
+
+        elif self.global_state == GlobalState.PREVIEW:
+            params = convert_calibration_params(
+                self.planar_setting, self.calibration.z_settings
+            )
+
+        elif self.global_state == GlobalState.PLANAR_PREVIEW:
+            params = convert_single_plane_params(
+                self.planar_setting,
+                self.single_plane_settings,
+                self.calibration,
+            )
+
+        elif self.global_state == GlobalState.VOLUME_PREVIEW:
+            params = convert_volume_params(
+                self.planar_setting, self.volume_setting, self.calibration
+            )
+        else:
+            return
+
+        params.experiment_state = self.experiment_state
+        return params
+
+    @property
+    def camera_params(self):
         camera_params = CamParameters(
             exposure_time=self.camera_settings.exposure_time,
             binning=int(self.camera_settings.binning),
@@ -466,100 +524,33 @@ class State:
         else:
             camera_params.camera_mode = CameraMode.PREVIEW
 
-        self.camera.image_queue.clear()
-        self.camera.parameter_queue.put(camera_params)
-        self.all_settings["camera"] = camera_params
-
-    def send_scan_settings(self, param_changed=None):
-        # Restart scanning loop if scanning params have changed:
-        if self.global_state == GlobalState.VOLUME_PREVIEW:
-            self.restart_event.set()
-
-        # # Sync piezo position across modalities, for usability:
-        # if param_changed is not None:
-        #     key = list(param_changed.keys())[0]
-        #     if "piezo" in key:
-        #         val = param_changed[key]
-        #         piezo_pos = val[0] if type(val) is tuple else val
-        #
-        #         # Block change signals, change, and unblock
-        #         self.single_plane_settings.block_signal = True
-        #         self.calibration.z_settings.block_signal = True
-        #         self.volume_setting.block_signal = True
-        #
-        #         # Change z values:
-        #         self.single_plane_settings.piezo = piezo_pos
-        #         # self.calibration.z_settings.piezo = piezo_pos
-        #         current_range = self.volume_setting.piezo_scan_range[1] - self.volume_setting.piezo_scan_range[0]
-        #         self.volume_setting.piezo_scan_range = (piezo_pos, piezo_pos + current_range)
-        #
-        #         # Unblock change signals:
-        #         self.single_plane_settings.block_signal = False
-        #         self.calibration.z_settings.block_signal = False
-        #         self.volume_setting.block_signal = False
-
-        self.send_scansave_settings()
+        return camera_params
 
     @property
-    def n_planes(self):
-        if self.global_state == GlobalState.VOLUME_PREVIEW:
-            return (
-                self.volume_setting.n_planes
-                - self.volume_setting.n_skip_start
-                - self.volume_setting.n_skip_end
-            )
-        else:
-            return 1
+    def all_settings(self):
+        all_settings = dict(scanning=self.scan_params, camera=self.camera_params)
+
+        if self.waveform is not None:
+            pulses = self.calculate_pulse_times() * self.sample_rate
+            try:
+                pulse_log = self.waveform[pulses.astype(int)]
+                all_settings["piezo_log"] = dict(trigger=pulse_log.tolist())
+            except IndexError:
+                pass
+
+        return all_settings
 
     def send_scansave_settings(self):
-        print ('gloabl state', self.global_state)
-        print ("trigger settings", self.trigger_settings.is_triggered)
-        if self.global_state == GlobalState.PAUSED:
-            params = ScanParameters(state=ScanningState.PAUSED)
-
-        elif self.global_state == GlobalState.PREVIEW:
-            params = convert_calibration_params(
-                self.planar_setting, self.calibration.z_settings
-            )
-
-        elif self.global_state == GlobalState.PLANAR_PREVIEW:
-            params = convert_single_plane_params(
-                self.planar_setting, self.single_plane_settings, self.calibration,
-            )
-
-        elif self.global_state == GlobalState.VOLUME_PREVIEW:
-            params = convert_volume_params(
-                self.planar_setting, self.volume_setting, self.calibration
-            )
-            # Make sure that current plane is updated if we changed number of planes
+        # Make sure that current plane is updated if we changed number of planes
+        if self.global_state == GlobalState.VOLUME_PREVIEW:
             self.current_plane = min(self.current_plane, self.n_planes - 1)
-            if self.waveform is not None:
-                pulses = self.calculate_pulse_times() * self.sample_rate
-                try:
-                    pulse_log = self.waveform[pulses.astype(int)]
-                    self.all_settings["piezo_log"] = {"trigger": pulse_log.tolist()}
-                except IndexError:
-                    pass
 
-        params.experiment_state = self.experiment_state
-        self.all_settings["scanning"] = params
-
-        self.scanner.parameter_queue.put(params)
+        self.scanner.parameter_queue.put(self.scan_params)
         self.external_comm.current_settings_queue.put(self.all_settings)
 
-        save_params = convert_save_params(
-            self.save_settings,
-            self.volume_setting,
-            self.camera_settings,
-            self.trigger_settings,
-        )
         self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
-        self.saver.saving_parameter_queue.put(save_params)
+        self.saver.saving_parameter_queue.put(self.save_params)
         self.dispatcher.n_planes_queue.put(self.n_planes)
-
-    # TODO: What is the purpose of this?
-    def send_dispatcher_settings(self):
-        pass
 
     def start_experiment(self):
         # TODO disable the GUI except the abort button
@@ -580,7 +571,8 @@ class State:
         self.send_scansave_settings()
 
     def obtain_noise_average(self, n_images=50):
-        """Obtains average noise of n_images to subtract to acquired, both for display and saving.
+        """Obtains average noise of n_images to subtract to acquired,
+        both for display and saving.
 
         Parameters
         ----------
@@ -618,38 +610,29 @@ class State:
         self.noise_subtraction_active.clear()
 
     def get_volume(self):
+        # TODO consider get_last_parameters method
         try:
             return self.dispatcher.viewer_queue.get(timeout=0.001)
         except Empty:
             return None
 
     def get_save_status(self) -> Optional[SavingStatus]:
-        try:
-            return self.saver.saved_status_queue.get(timeout=0.001)
-        except Empty:
-            return None
+        return get_last_parameters(self.saver.saved_status_queue)
 
     def get_triggered_frame_rate(self):
-        framerate = None
-        while True:
-            try:
-                framerate = self.camera.triggered_frame_rate_queue.get(timeout=0.001)
-            except Empty:
-                break
-        return framerate
+        return get_last_parameters(self.camera.triggered_frame_rate_queue)
 
     def get_waveform(self):
-        try:
-            self.waveform = self.scanner.waveform_queue.get(timeout=0.001)
-            return self.waveform
-        except Empty:
-            return None
+        return get_last_parameters(self.scanner.waveform_queue)
 
     def calculate_pulse_times(self):
-        return np.arange(
-            self.volume_setting.n_skip_start,
-            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
+        return (
+            np.arange(
+                self.volume_setting.n_skip_start,
+                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+            )
+            / (self.volume_setting.frequency * self.volume_setting.n_planes)
+        )
 
     def set_trigger_mode(self, mode: bool):
         if mode:
