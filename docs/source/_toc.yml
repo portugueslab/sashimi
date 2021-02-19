@@ -1,0 +1,8 @@
+file: index
+sections:
+- file: configuration
+- file: hardware
+- file: conf
+- file: timeline
+- file: intro
+- file: development/code_organization
