@@ -511,7 +511,7 @@ class HamamatsuCamera(AbstractCamera):
                 "dcamprop_getname",
             )
 
-        if properties == {'': 0}:
+        if properties == {"": 0}:
             raise ConnectionError("The Hamamatsu camera seems to be off!")
 
         return properties

@@ -141,7 +141,7 @@ class CameraProcess(LoggingProcess):
         either the self.pause_loop or self.camera_loop are executed.
         """
         while not self.stop_event.is_set():
-            #removed if statement based on camera mode: toggeling between modes is done in loops.
+            # removed if statement based on camera mode: toggeling between modes is done in loops.
             self.pause_loop()
             self.camera_loop()
 
@@ -151,7 +151,10 @@ class CameraProcess(LoggingProcess):
         """
         self.logger.log_message("Paused aquisition")
         self.camera.stop_acquisition()
-        while not self.stop_event.is_set() and self.parameters.camera_mode == CameraMode.PAUSED:
+        while (
+            not self.stop_event.is_set()
+            and self.parameters.camera_mode == CameraMode.PAUSED
+        ):
             try:
                 new_parameters = self.parameter_queue.get(timeout=0.001)
                 if new_parameters != self.parameters:
@@ -165,7 +168,10 @@ class CameraProcess(LoggingProcess):
         """Camera running loop, grab frames and set new parameters if available."""
         self.logger.log_message("Started acquisition")
         self.camera.start_acquisition()
-        while not self.stop_event.is_set() and self.parameters.camera_mode != CameraMode.PAUSED:
+        while (
+            not self.stop_event.is_set()
+            and self.parameters.camera_mode != CameraMode.PAUSED
+        ):
             is_waiting = self.wait_event.is_set()
             frames = self.camera.get_frames()
 
@@ -195,7 +201,6 @@ class CameraProcess(LoggingProcess):
                     new_parameters != self.parameters
                 ):
                     self.update_parameters(new_parameters)
-
 
     def update_parameters(self, new_parameters, stop_start=True):
         """ "Set new parameters and stop and start the camera to make sure all changes take place."""
