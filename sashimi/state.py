@@ -62,7 +62,7 @@ class TriggerSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
         self.name = "trigger_settings"
-        self.experiment_duration = Param(2_000, (1, 10_000), unit="s")
+        self.experiment_duration = Param(5, (1, 50_000), unit="s")
         self.is_triggered = Param(True, [True, False], gui=False)
 
 
