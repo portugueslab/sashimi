@@ -1,9 +1,9 @@
 name: deploy_doc
 
 on: push
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 jobs:
   deploy-book:
