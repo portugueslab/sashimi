@@ -1,0 +1,9 @@
+pytest-cov
+pytest-qt
+pytest
+gitpython
+coverage
+pre-commit
+black
+flake8
+isort
