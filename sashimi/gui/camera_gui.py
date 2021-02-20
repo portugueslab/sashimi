@@ -131,12 +131,14 @@ class ViewingWidget(QWidget):
         self.bottom_layout.addWidget(self.viewer.window.qt_viewer.viewerButtons)
 
         self.auto_contrast_chk = QCheckBox("Autoadjust contrast")
+        self.toggle_scalebar_btn = QPushButton("Show/hide scalebar")
 
         self.contrast_range = ContrastSettings()
         self.wid_contrast_range = ParameterGui(self.contrast_range)
 
         self.bottom_layout.addWidget(self.auto_contrast_chk)
         self.bottom_layout.addWidget(self.wid_contrast_range)
+        self.bottom_layout.addWidget(self.toggle_scalebar_btn)
 
         self.bottom_layout.addStretch()
 
@@ -147,6 +149,7 @@ class ViewingWidget(QWidget):
         # Connect changes of camera and laser to contrast reset:
         self.auto_contrast_chk.stateChanged.connect(self.update_auto_contrast)
         self.contrast_range.sig_param_changed.connect(self.set_manual_contrast)
+        self.toggle_scalebar_btn.pressed.connect(self.toggle_scalebar)
 
         self.auto_contrast_chk.setChecked(True)
 
@@ -253,6 +256,12 @@ class ViewingWidget(QWidget):
 
     def set_manual_contrast(self):
         self.frame_layer.contrast_limits = self.contrast_range.contrast_range
+
+    def toggle_scalebar(self):
+        if self.viewer.scale_bar.visible:
+            self.viewer.scale_bar.visible = False
+        else:
+            self.viewer.scale_bar.visible = True
 
 
 class CameraSettingsWidget(QWidget):
