@@ -207,10 +207,8 @@ class StackSaver(LoggingProcess):
             pass
         try:
             new_duration = self.duration_queue.get(timeout=0.001)
-            print(new_duration)
             self.n_volumes = int(
                 np.ceil(self.save_parameters.volumerate * new_duration)
             )
-            print(self.n_volumes)
         except Empty:
             pass

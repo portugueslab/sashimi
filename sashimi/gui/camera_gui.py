@@ -100,6 +100,7 @@ class ViewingWidget(QWidget):
             ),
             blending="translucent",
             name="frame_layer",
+            scale=self.voxel_size,
         )
 
         # Add square ROI of size max image size:
