@@ -22,8 +22,8 @@ def main(scopeless, scanning, **kwargs):
     style = qdarkstyle.load_stylesheet_pyqt5()
     app.setStyleSheet(style)
     app.setApplicationName("Sashimi")
-    st = State()
-    main_window = MainWindow(st, style, viewer)
+    state = State()
+    main_window = MainWindow(state, style, viewer)
     icon_dir = (Path(__file__).parents[0]).resolve() / "icons/main_icon.png"
     app.setWindowIcon(QIcon(str(icon_dir)))  # PyQt does not accept Path
     main_window.show()
