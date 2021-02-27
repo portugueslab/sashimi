@@ -37,11 +37,11 @@ class MainWindow(QMainWindow):
         self.wid_settings_tree = SavingSettingsWidget(st)
         self.wid_settings_tree.sig_params_loaded.connect(self.refresh_param_values)
 
-        self.wid_status = StatusWidget(st, self.timer)
+        self.wid_status = ScanningManagementWidget(st, self.timer)
         self.wid_display = ViewingWidget(st, self.timer, style)
         self.wid_save_options = SaveWidget(st, self.timer)
         self.wid_laser = LightSourceWidget(st, self.timer)
-        self.wid_scan = PlanarScanningWidget(st)
+        self.wid_scan = PlanarScanningWidget(st.scanning_manager)
         self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
         self.wid_status_bar = StatusBarWidget(st, self.timer)
         self.toolbar = TopWidget(st, self.timer)
@@ -144,7 +144,7 @@ class MainWindow(QMainWindow):
             self.toolbar.experiment_toggle_btn.flip_icon(False)
 
 
-class StatusWidget(QTabWidget):
+class ScanningManagementWidget(QTabWidget):
     def __init__(self, st: State, timer):
         super().__init__()
 
@@ -159,9 +159,9 @@ class StatusWidget(QTabWidget):
         }
 
         self.wid_paused = PausedWidget()
-        self.wid_calibration = CalibrationWidget(st, st.calibration, self.timer)
-        self.wid_single_plane = SinglePlaneScanningWidget(st)
-        self.wid_volume = VolumeScanningWidget(st, self.timer)
+        self.wid_calibration = CalibrationWidget(st, st.scanning_manager.calibration, self.timer)
+        self.wid_single_plane = SinglePlaneScanningWidget(st.scanning_manager)
+        self.wid_volume = VolumeScanningWidget(st, timer)
 
         self.addTab(self.wid_paused, self.option_dict[0])
         self.addTab(self.wid_calibration, self.option_dict[1])

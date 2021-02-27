@@ -11,7 +11,6 @@ from lightparam import Param
 from lightparam.param_qt import ParametrizedQt
 from sashimi.state import (
     State,
-    get_voxel_size,
 )
 import napari
 
@@ -165,13 +164,6 @@ class ViewingWidget(QWidget):
         binning = int(self.state.camera_settings.binning)
         return [r // binning for r in self.max_sensor_resolution]
 
-    @property
-    def voxel_size(self):
-        return get_voxel_size(
-            self.state.volume_setting,
-            self.state.camera_settings,
-        )
-
     def refresh(self) -> None:
         """Main refresh loop called by timeout of the main timer."""
         self.refresh_image()
@@ -228,7 +220,7 @@ class ViewingWidget(QWidget):
         Hopefully all of this will be improved in newer versions of Napari
         """
         if self.ndisplay_button.isChecked():
-            self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
+            self.frame_layer.scale = [self.state.voxel_size[0] / self.state.voxel_size[1], 1.0, 1.0]
         else:
             self.frame_layer.scale = [1.0, 1.0, 1.0]
 

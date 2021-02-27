@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import (
 
 from sashimi.gui.buttons import ToggleIconButton
 from sashimi.state import State
-from sashimi.hardware.scanning.scanstate import ScanningUseMode
+from sashimi.hardware.scanning.scanning_manager import ScanningUseMode
 
 
 class TopWidget(QToolBar):

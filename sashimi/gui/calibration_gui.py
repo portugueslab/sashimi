@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import (
     QCheckBox,
 )
 from lightparam.gui import ParameterGui
-from sashimi.hardware.scanning.scanstate import Calibration
+from sashimi.hardware.scanning.scanning_manager import Calibration
 from lightparam.param_qt import ParametrizedQt
 from lightparam import Param
 
@@ -93,7 +93,7 @@ class CalibrationWidget(QWidget):
 
     def set_noise_subtraction_mode(self):
         # check by the status of the check box
-        if self.state.calibration_ref is None:
+        if self.state.noise_image is None:
             self.show_dialog_box(finished=False)
         else:
             self.state.reset_noise_subtraction()

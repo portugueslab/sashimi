@@ -1,6 +1,7 @@
 import pyqtgraph as pg
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 import numpy as np
+from sashimi.state import State
 
 color_plane = (166, 196, 240, 100)
 color_current_plane = (100, 100, 240, 100)
@@ -16,10 +17,10 @@ class WaveformWidget(QWidget):
     state
     """
 
-    def __init__(self, timer, state):
+    def __init__(self, state: State, timer):
         super().__init__()
         self.state = state
-        self.sample_rate = self.state.sample_rate
+        self.sample_rate = self.state.scanning_manager.sample_rate
         self.timer = timer
         self.highlighted_plane = 0
 
@@ -34,7 +35,7 @@ class WaveformWidget(QWidget):
         self.layout().addWidget(self.plot_widget)
 
         self.timer.timeout.connect(self.update)
-        self.state.volume_setting.sig_param_changed.connect(self.update_pulses)
+        self.state.scanning_manager.scanning_changed.connect(self.update_pulses)
         self.state.camera_settings.sig_param_changed.connect(self.update_pulses)
 
     @property
@@ -44,7 +45,7 @@ class WaveformWidget(QWidget):
 
     def update_pulses(self):
         """When number of planes is changed, update the full plot by drawing new regions."""
-        self.pulse_times = self.state.calculate_pulse_times()
+        self.pulse_times = self.state.scanning_manager.calculate_pulse_times()
 
         for region in range(len(self.pulse_regions)):
             self.plot_widget.removeItem(self.pulse_regions[region])
@@ -55,7 +56,7 @@ class WaveformWidget(QWidget):
         ]
 
         # The last region is overlaid and marks the current plane:
-        current_pulse = self.pulse_times[self.state.current_plane]
+        current_pulse = self.pulse_times[self.state.scanning_manager.current_plane]
         self.pulse_regions.append(
             self._create_hspan(
                 (current_pulse, current_pulse + self.camera_exposure_s),
@@ -75,7 +76,7 @@ class WaveformWidget(QWidget):
             )
 
         if len(self.pulse_times) > 0:
-            current_pulse = self.pulse_times[self.state.current_plane]
+            current_pulse = self.pulse_times[self.state.scanning_manager.current_plane]
             self.pulse_regions[-1].setRegion(
                 (current_pulse, current_pulse + self.camera_exposure_s)
             )

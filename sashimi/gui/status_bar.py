@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QLabel, QStatusBar
 
-from sashimi.state import State, get_voxel_size
-from sashimi.hardware.scanning.scanstate import ScanningUseMode
+from sashimi.state import State
+from sashimi.hardware.scanning.scanning_manager import ScanningUseMode
 from sashimi.config import read_config
 
 conf = read_config()
@@ -55,12 +55,12 @@ class StatusBarWidget(QStatusBar):
         self.framerate_lbl.setText("Framerate: {} Hz".format(round(frame_rate, 2)))
 
         # Find the expected framerate depending on the global state
+        # TODO expected frame rate calculation belogs in state
         expected_frame_rate_dict = {
             ScanningUseMode.PAUSED: None,
             ScanningUseMode.PREVIEW: None,
-            ScanningUseMode.VOLUME: self.state.volume_setting.frequency
-                                    * self.state.n_planes,
-            ScanningUseMode.PLANAR: self.state.single_plane_settings.frequency,
+            ScanningUseMode.VOLUME: self.state.volume_rate * self.state.n_planes,
+            ScanningUseMode.PLANAR: self.state.volume_rate,
         }
 
         expected_frame_rate = expected_frame_rate_dict[self.state.global_state]
@@ -79,13 +79,8 @@ class StatusBarWidget(QStatusBar):
         )
 
     def update_voxel_size(self):
-        self.voxel_size = get_voxel_size(
-            self.state.volume_setting, self.state.camera_settings
-        )
-        if (
-            self.state.voxel_size
-            and self.state.global_state == ScanningUseMode.VOLUME
-        ):
+        self.voxel_size = self.state.voxel_size
+        if self.state.is_volumetric:
             self.voxel_size_lbl.setText(
                 f"Voxel size: {self.voxel_size[0]:.2f} x {self.voxel_size[1]:.2f} x {self.voxel_size[2]:.2f} um"
             )
@@ -97,6 +92,6 @@ class StatusBarWidget(QStatusBar):
     def update_warning_msg(self):
         if (
             self.state.global_state == ScanningUseMode.VOLUME
-            and len(self.state.calibration.calibrations_points) < 2
+            and len(self.state.scanning_manager.calibration.calibrations_points) < 2
         ):
             self.warning_lbl.setText("Not enough calibration points")

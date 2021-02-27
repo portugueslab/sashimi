@@ -46,7 +46,7 @@ class VolumeDispatcher(LoggingProcess):
         self.saver_queue = saver_queue
         self.n_planes_queue = Queue()
         self.viewer_queue = ArrayQueue(max_mbytes=max_queue_size)
-        self.calibration_ref_queue = ArrayQueue()
+        self.noise_image_queue = ArrayQueue()
 
         self.volume_buffer = None
         self.calibration_ref = None
@@ -114,7 +114,7 @@ class VolumeDispatcher(LoggingProcess):
 
         # Get flat noise image to subtract:
         calibration_ref = get_last_parameters(
-            self.calibration_ref_queue, timeout=TIMEOUT_S
+            self.noise_image_queue, timeout=TIMEOUT_S
         )
         if calibration_ref is not None:
             self.calibration_ref = calibration_ref

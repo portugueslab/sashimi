@@ -25,7 +25,7 @@ def test_main(qtbot, temp_path):
     # Manually update new directory (to avoid nasty pop up window for filesystem):
     st.save_settings.save_dir = str(temp_path)
     main_window.wid_save_options.set_locationbutton()
-    st.send_scansave_settings()
+    st.send_imaging_settings()
 
     # Wait to send and receive parameters:
     qtbot.wait(10000)

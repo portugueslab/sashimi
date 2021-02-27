@@ -1,13 +1,26 @@
 from enum import Enum
 from queue import Empty
 
+from PyQt5.Qt import QObject, pyqtSignal
+
+from typing import Optional
 import numpy as np
 from lightparam import Param
 from lightparam.param_qt import ParametrizedQt
 
+from sashimi.events import LoggedEvent, SashimiEvents
 from sashimi.processes.scanning import ScannerProcess
-from sashimi.hardware.scanning.scanloops import PlanarScanning, XYScanning, ScanParameters, ScanningMode, ZManual, \
-    ZSynced, TriggeringParameters, ZScanning
+from sashimi.hardware.scanning.scanloops import (
+    PlanarScanning,
+    XYScanning,
+    ScanParameters,
+    ScanningMode,
+    ZManual,
+    ZSynced,
+    TriggeringParameters,
+    ZScanning,
+)
+from sashimi.utilities import get_last_parameters
 
 
 class ScanningUseMode(Enum):
@@ -83,7 +96,7 @@ def convert_calibration_params(
     planar: PlanarScanningSettings, zsettings: CalibrationZSettings
 ):
     sp = ScanParameters(
-        state=ScanningUseMode.PLANAR,
+        mode=ScanningMode.PLANAR,
         xy=convert_planar_params(planar),
         z=ZManual(**zsettings.params.values),
     )
@@ -141,7 +154,7 @@ def convert_single_plane_params(
     calibration: Calibration,
 ):
     return ScanParameters(
-        state=ScanningUseMode.PLANAR,
+        mode=ScanningMode.PLANAR,
         xy=convert_planar_params(planar),
         z=ZSynced(
             piezo=single_plane_setting.piezo,
@@ -158,7 +171,7 @@ def convert_volume_params(
     calibration: Calibration,
 ):
     return ScanParameters(
-        state=ScanningUseMode.VOLUMETRIC,
+        mode=ScanningMode.VOLUMETRIC,
         xy=convert_planar_params(planar),
         z=ZScanning(
             piezo_min=z_setting.piezo_scan_range[0],
@@ -176,47 +189,104 @@ def convert_volume_params(
     )
 
 
-class ScanningManager:
-    def __init__(self):
+def significant_scanning_change(new_params: ScanParameters, old_params: Optional[ScanParameters]):
+    if old_params is None:
+        return True
+    if new_params.experiment_state != old_params.experiment_state:
+        return True
+    if new_params.triggering.n_planes != old_params.triggering.n_planes:
+        return True
+    return False
+
+
+def merits_restart(new_params: ScanParameters, old_params: Optional[ScanParameters]):
+    # TODO insert the condition that the restart should not happen if all the important
+    # conditions are the same, (the exception being camera triggerning)
+    if new_params.mode == ScanningMode.VOLUMETRIC:
+        return True
+    return False
+
+
+class ScanningManager(QObject):
+    """Class that manages everything scanning-related in the main thread
+
+    """
+
+    scanning_changed = pyqtSignal()
+
+    def __init__(self, sample_rate, stop_event, logger):
+        super().__init__()
+        self.logger = logger
         self.scanning_mode = ScanningUseMode.PAUSED
 
         self.planar_setting = PlanarScanningSettings()
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
         self.calibration = Calibration()
+        self.sample_rate = sample_rate
+
+        # The even active during scanning preparation (before first real camera trigger)
+        self.is_waiting_event = LoggedEvent(
+            self.logger, SashimiEvents.WAITING_FOR_TRIGGER
+        )
+        self.restart_event = LoggedEvent(self.logger, SashimiEvents.RESTART_SCANNING)
+
+        self.planar_setting.sig_param_changed.connect(self.settings_changed)
+        self.calibration.z_settings.sig_param_changed.connect(self.settings_changed)
+        self.single_plane_settings.sig_param_changed.connect(self.settings_changed)
+        self.volume_setting.sig_param_changed.connect(self.settings_changed)
 
         self.scanner = ScannerProcess(
-            stop_event=self.stop_event,
+            stop_event=stop_event,
             restart_event=self.restart_event,
             waiting_event=self.is_waiting_event,
             sample_rate=self.sample_rate,
         )
 
-        self.all_settings = [self.planar_setting, self.single_plane_settings, self.volume_setting, self.calibration, self.calibration.z_settings]
+        self.all_settings = [
+            self.planar_setting,
+            self.single_plane_settings,
+            self.volume_setting,
+            self.calibration,
+            self.calibration.z_settings,
+        ]
 
         self.current_plane = 0
+        self.waveform = None
+        self.last_params = None
+
+    def start(self):
+        self.scanner.start()
 
     @property
     def n_planes(self):
         if self.scanning_mode == ScanningUseMode.VOLUME:
             return (
-                    self.volume_setting.n_planes
-                    - self.volume_setting.n_skip_start
-                    - self.volume_setting.n_skip_end
+                self.volume_setting.n_planes
+                - self.volume_setting.n_skip_start
+                - self.volume_setting.n_skip_end
             )
         else:
             return 1
 
     @property
+    def volume_rate(self) -> Optional[float]:
+        return self.volume_setting.frequency
+
+    @property
     def interplane_distance(self):
         scan_length = (
-                self.volume_setting.piezo_scan_range[1] - self.volume_setting.piezo_scan_range[0]
+            self.volume_setting.piezo_scan_range[1]
+            - self.volume_setting.piezo_scan_range[0]
         )
         return scan_length / self.volume_setting.n_planes
 
+    def settings_changed(self):
+        self.configure_scanning()
+
     def configure_scanning(self):
         if self.scanning_mode == ScanningUseMode.PAUSED:
-            params = ScanParameters(state=ScanningUseMode.PAUSED)
+            params = ScanParameters(mode=ScanningMode.PAUSED)
 
         elif self.scanning_mode == ScanningUseMode.PREVIEW:
             params = convert_calibration_params(
@@ -244,6 +314,12 @@ class ScanningManager:
 
         params.experiment_state = self.scanning_mode
 
+        if merits_restart(params, self.last_params):
+            self.restart_event.set()
+
+        if significant_scanning_change(params, self.last_params):
+            self.scanning_changed.emit()
+
         # TODO introduce previous_mode to persist z settings across the modes
         # if param_changed is not None:
         #     key = list(param_changed.keys())[0]
@@ -268,7 +344,14 @@ class ScanningManager:
         #         self.volume_setting.block_signal = False
 
         self.scanner.parameter_queue.put(params)
-        return params
+
+        self.last_params = params
+
+    def prepare_experiment(self):
+        self.scanner.wait_signal.set()
+
+    def wrap_up(self):
+        self.scanner.join(timeout=10)
 
     def calculate_pulse_times(self):
         return np.arange(
@@ -276,9 +359,13 @@ class ScanningManager:
             self.volume_setting.n_planes - self.volume_setting.n_skip_end,
         ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
 
-    def get_waveform(self):
+    def piezo_values_at_trigger_times(self):
+        pulses = self.calculate_pulse_times() * self.sample_rate
         try:
-            self.waveform = self.scanner.waveform_queue.get(timeout=0.001)
-            return self.waveform
-        except Empty:
-            return None
+            pulse_log = self.waveform[pulses.astype(int)]
+            return dict(trigger=pulse_log.tolist())
+        except IndexError:
+            pass
+
+    def get_waveform(self):
+        get_last_parameters(self.scanner.waveform_queue)
