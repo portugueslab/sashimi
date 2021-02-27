@@ -113,9 +113,7 @@ class VolumeDispatcher(LoggingProcess):
             self.reset()
 
         # Get flat noise image to subtract:
-        calibration_ref = get_last_parameters(
-            self.noise_image_queue, timeout=TIMEOUT_S
-        )
+        calibration_ref = get_last_parameters(self.noise_image_queue, timeout=TIMEOUT_S)
         if calibration_ref is not None:
             self.calibration_ref = calibration_ref
 

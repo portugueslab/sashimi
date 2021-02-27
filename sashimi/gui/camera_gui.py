@@ -9,9 +9,7 @@ from PyQt5.QtWidgets import (
 from lightparam.gui import ParameterGui
 from lightparam import Param
 from lightparam.param_qt import ParametrizedQt
-from sashimi.state import (
-    State,
-)
+from sashimi.state import State
 import napari
 
 # TODO: In future realeases of napari remove monkey patched code. Accessing protected elements is bad practice
@@ -91,12 +89,7 @@ class ViewingWidget(QWidget):
 
         # Add image layer that will be used to show frames/volumes:
         self.frame_layer = self.viewer.add_image(
-            np.zeros(
-                [
-                    1,
-                ]
-                + self.max_sensor_resolution
-            ),
+            np.zeros([1,] + self.max_sensor_resolution),
             blending="translucent",
             name="frame_layer",
         )
@@ -220,7 +213,11 @@ class ViewingWidget(QWidget):
         Hopefully all of this will be improved in newer versions of Napari
         """
         if self.ndisplay_button.isChecked():
-            self.frame_layer.scale = [self.state.voxel_size[0] / self.state.voxel_size[1], 1.0, 1.0]
+            self.frame_layer.scale = [
+                self.state.voxel_size[0] / self.state.voxel_size[1],
+                1.0,
+                1.0,
+            ]
         else:
             self.frame_layer.scale = [1.0, 1.0, 1.0]
 

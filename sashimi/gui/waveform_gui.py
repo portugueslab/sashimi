@@ -71,8 +71,7 @@ class WaveformWidget(QWidget):
         current_waveform = self.state.get_waveform()
         if current_waveform is not None:
             self.plot_curve.setData(
-                np.arange(len(current_waveform)) / self.sample_rate,
-                current_waveform,
+                np.arange(len(current_waveform)) / self.sample_rate, current_waveform,
             )
 
         if len(self.pulse_times) > 0:

@@ -51,8 +51,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.wid_display)
 
         self.addDockWidget(
-            Qt.LeftDockWidgetArea,
-            DockedWidget(widget=self.wid_status, title="Mode"),
+            Qt.LeftDockWidgetArea, DockedWidget(widget=self.wid_status, title="Mode"),
         )
 
         self.addDockWidget(
@@ -159,7 +158,9 @@ class ScanningManagementWidget(QTabWidget):
         }
 
         self.wid_paused = PausedWidget()
-        self.wid_calibration = CalibrationWidget(st, st.scanning_manager.calibration, self.timer)
+        self.wid_calibration = CalibrationWidget(
+            st, st.scanning_manager.calibration, self.timer
+        )
         self.wid_single_plane = SinglePlaneScanningWidget(st.scanning_manager)
         self.wid_volume = VolumeScanningWidget(st, timer)
 

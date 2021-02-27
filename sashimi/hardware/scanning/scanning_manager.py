@@ -189,7 +189,9 @@ def convert_volume_params(
     )
 
 
-def significant_scanning_change(new_params: ScanParameters, old_params: Optional[ScanParameters]):
+def significant_scanning_change(
+    new_params: ScanParameters, old_params: Optional[ScanParameters]
+):
     if old_params is None:
         return True
     if new_params.experiment_state != old_params.experiment_state:
