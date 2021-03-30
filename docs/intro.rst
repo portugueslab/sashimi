@@ -1,8 +1,4 @@
-```{admonition} Here's my title
-:class: warning
+Readme File
+===========
 
-Here's my admonition content
-```
-
-```{include} ../../README.md
-```
+.. mdinclude:: ../README.md
