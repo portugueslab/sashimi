@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="a timeline here" href="timeline.html" /><link rel="prev" title="Welcome to the Sashimi documentation!" href="index.html" />
 
     <meta name="generator" content="sphinx-3.5.3, furo 2021.03.20.beta30"/>
-        <title>Readme File 3 - Sashimi</title>
+        <title>Readme File 5 - Sashimi</title>
       <link rel="stylesheet" href="_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="_static/pygments_dark.css">
@@ -119,7 +119,7 @@
 </form><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Readme File 3</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Readme File 5</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timeline.html">a timeline here</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Configuration</span></p>
@@ -190,88 +190,8 @@
         <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
-        <div class="section" id="readme-file-3">
-<h1>Readme File 3<a class="headerlink" href="#readme-file-3" title="Permalink to this headline">¶</a></h1>
-<p># Sashimi</p>
-<p>&lt;a href=”url”&gt;&lt;img
-src=”<a class="reference external" href="https://github.com/portugueslab/sashimi/blob/master/sashimi/icons/main_icon.png">https://github.com/portugueslab/sashimi/blob/master/sashimi/icons/main_icon.png</a>”
-align=”left”
-height=”190”
-width=”270”&gt;&lt;/a&gt;</p>
-<p>![tests](<a class="reference external" href="https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master">https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master</a>)
-[![Docs](<a class="reference external" href="https://img.shields.io/badge/docs-dev-brightgreen)](https://portugueslab.github.io/sashimi/">https://img.shields.io/badge/docs-dev-brightgreen)](https://portugueslab.github.io/sashimi/</a>)
-[![Coverage Status](<a class="reference external" href="https://coveralls.io/repos/github/portugueslab/sashimi/badge.svg)](https://coveralls.io/github/portugueslab/sashimi">https://coveralls.io/repos/github/portugueslab/sashimi/badge.svg)](https://coveralls.io/github/portugueslab/sashimi</a>)
-[![Code style: black](<a class="reference external" href="https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black">https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black</a>)
-[![DOI](<a class="reference external" href="https://zenodo.org/badge/DOI/10.5281/zenodo.4122062.svg)](https://doi.org/10.5281/zenodo.4122062">https://zenodo.org/badge/DOI/10.5281/zenodo.4122062.svg)](https://doi.org/10.5281/zenodo.4122062</a>)
-[![Python 3.8](<a class="reference external" href="https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/">https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/</a>)</p>
-<p>Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
-It is developed by members of the [PortuguesLab](<a class="reference external" href="http://www.portugueslab.com/">http://www.portugueslab.com/</a>)</p>
-<blockquote>
-<div><p>at the Technical University of Munich and Max Planck Institute of Neurobiology. Sashimi relies on the fast, multidimensional
-[Napari viewer](<a class="reference external" href="https://github.com/napari/napari">https://github.com/napari/napari</a>).</p>
-</div></blockquote>
-<p>While built for a particular microscope configuration, the modular architecture allows for easy replacement of
-hardware by other vendors (we will help with and welcome contributions for supporting other cameras, boards and light sources).</p>
-<p>## Installation</p>
-<p>[Install the latest Anaconda](<a class="reference external" href="https://www.anaconda.com/">https://www.anaconda.com/</a>) distribution of Python 3.</p>
-<p>Clone this repository and navigate to the main folder <cite>../sashimi</cite></p>
-<p>### Recommended: Create a new environment</p>
-<p>It is a good practice to create an environment for every project. The provided <cite>environment.yml</cite> sets up almost all required dependencies (see below).</p>
-<blockquote>
-<div><p>conda env create -f {path to environment.yml}</p>
-</div></blockquote>
-<p>You can activate the environment by running:</p>
-<blockquote>
-<div><p>conda activate sashimi</p>
-</div></blockquote>
-<p>After this you moght have to install two extra dependencies for controlling a Cobolt laser:</p>
-<blockquote>
-<div><p>pip install pyvisa
-pip install pyvisa-py</p>
-</div></blockquote>
-<p>### Install with pip</p>
-<p>For a non-editable installation run:</p>
-<blockquote>
-<div><p>pip install .</p>
-</div></blockquote>
-<p>Otherwise, if you want to contribute to the project as a developer, for editable installation run:</p>
-<blockquote>
-<div><p>pip install -e .</p>
-</div></blockquote>
-<p>Now you are ready to go!</p>
-<p>## Configuring sashimi</p>
-<p>Sashimi includes the <cite>sashimi-config</cite> module that lets you interact with the hardware and software
-settings from command line. You can display the current configuration of the system.:</p>
-<blockquote>
-<div><p>sashimi-config show</p>
-</div></blockquote>
-<p>You can ask sashimi for help:</p>
-<blockquote>
-<div><p>sashimi –help</p>
-</div></blockquote>
-<p>More information on its usage can be found by asking <cite>sashimi-config</cite> for help:</p>
-<blockquote>
-<div><p>sashimi-config –help</p>
-</div></blockquote>
-<p>You can add and modify parameters just from the command line. For example, to set the piezo waveform readout channel to <cite>Dev1/ao0:0</cite> just run:</p>
-<blockquote>
-<div><p>sashimi-config edit -n z_board.write.channel -v Dev1/ao0:0</p>
-</div></blockquote>
-<p>Or to modify the minimum and maximum voltage (in Volts) of the channel:</p>
-<blockquote>
-<div><p>sashimi-config edit -n piezo.position_write.min_val -v 0
-sashimi-config edit -n piezo.position_write.max_val -v 10</p>
-</div></blockquote>
-<p>## Starting the software from command line</p>
-<p>Open a new anaconda prompt and activate your environment like above. Then run:</p>
-<blockquote>
-<div><p>sashimi</p>
-</div></blockquote>
-<p>Add the option <cite>–scopeless</cite>:</p>
-<blockquote>
-<div><p>sashimi –scopeless</p>
-</div></blockquote>
-<p>If you want to run the software with mock hardware, such as for debugging or developing.</p>
+        <div class="section" id="readme-file-5">
+<h1>Readme File 5<a class="headerlink" href="#readme-file-5" title="Permalink to this headline">¶</a></h1>
 </div>
 <script type="text/x-thebe-config">
     {
