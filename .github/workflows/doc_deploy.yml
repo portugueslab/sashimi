@@ -1,11 +1,11 @@
 name: page_deploy
 
-on: push
+on: #push
   # Trigger the workflow on push or pull request,
   # but only for the main branch
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
 
 jobs:
   deploy-book:
