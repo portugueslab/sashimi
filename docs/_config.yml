@@ -1,0 +1,58 @@
+# Book settings
+# Learn more at https://jupyterbook.org/customize/config.html
+
+title: Sashimi
+author: Diego Asua, Vilim Stih, Luigi Petrucco @portugueslab
+logo: 
+copyright: Portugues lab
+release: 0.2.0
+# only_build_toc_files: true
+
+# Force re-execution of notebooks on each build.
+# See https://jupyterbook.org/content/execute.html
+execute:
+  execute_notebooks: force
+
+# Information about where the book exists on the web
+repository:
+  url: https://github.com/portugueslab/sashimi/tree/doc_automated # Online location of your book
+  path_to_book: docs # Optional path to your book, relative to the repository root
+
+# Add GitHub buttons to your book
+# See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
+html:
+  use_issues_button: true
+  use_repository_button: true
+  use_edit_page_button      : false  # Whether to add an "edit this page" button to pages. If `true`, repository information in repository: must be filled in
+  extra_navbar              : Powered by <a href="https://jupyterbook.org">Jupyter Book</a>  # Will be displayed underneath the left navbar.
+  extra_footer              : "Mantained by Federico Puppo"  # Will be displayed underneath the footer.
+
+latex:
+  latex_engine              : pdflatex  # one of 'pdflatex', 'xelatex' (recommended for unicode), 'luatex', 'platex', 'uplatex'
+
+
+sphinx:
+  extra_extensions:
+    - sphinx.ext.viewcode
+    - sphinx.ext.napoleon
+    - sphinx.ext.autodoc
+    - sphinx_autodoc_typehints
+    - sphinx.ext.autosummary
+    - sphinx.ext.intersphinx
+    - sphinx.ext.coverage
+    - sphinx.ext.inheritance_diagram
+    - sphinx.ext.githubpages
+
+  config:
+    autosummary_generate: True
+    autosummary_imported_members: True
+    html_theme: furo
+    templates_path:
+        - '_templates'
+    intersphinx_mapping:
+      python:
+        - "https://docs.python.org/3"
+        - null
+      numpy:
+        - "https://docs.scipy.org/doc/numpy/"
+        - null

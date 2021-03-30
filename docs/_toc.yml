@@ -1,0 +1,22 @@
+- file: index
+
+- part: Introduction
+  chapters:
+    - file: intro
+    - file: timeline
+
+- part: Configuration
+  chapters:
+    - file: configuration/configuration
+
+- part: Development
+  chapters:
+    - file: development/code_organization
+
+- part: Hardware
+  chapters:
+    - file: hardware/hardware
+
+- part: Api
+  chapters:
+    - file: api/index

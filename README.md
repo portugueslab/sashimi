@@ -1,13 +1,14 @@
 # Sashimi
 
 <a href="url"><img 
-src="https://github.com/portugueslab/sashimi/blob/master/sashimi/icons/main_icon.png" 
+src="https://github.com/portugueslab/sashimi/blob/master/sashimi/icons/main_icon.png"
 align="left" 
 height="190" 
 width="270"></a>
 
 ![tests](https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master)
 [![Docs](https://img.shields.io/badge/docs-dev-brightgreen)](https://portugueslab.github.io/sashimi/)
+[![Coverage Status](https://coveralls.io/repos/github/portugueslab/sashimi/badge.svg)](https://coveralls.io/github/portugueslab/sashimi)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4122062.svg)](https://doi.org/10.5281/zenodo.4122062)
 [![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)](https://www.python.org/)

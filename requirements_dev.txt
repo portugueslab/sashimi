@@ -7,4 +7,3 @@ pre-commit
 black
 flake8
 isort
-jupyter-book>=0.7.0b
