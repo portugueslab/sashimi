@@ -4,7 +4,6 @@
   chapters:
     - file: intro
     - file: timeline
-    - file: ../README
 
 - part: Configuration
   chapters:
