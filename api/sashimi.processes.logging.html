@@ -1,0 +1,304 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.processes.logging.ConcurrenceLogger" href="sashimi.processes.logging.ConcurrenceLogger.html" /><link rel="prev" title="sashimi.utilities.Empty" href="sashimi.utilities.Empty.html" />
+
+    <meta name="generator" content="sphinx-3.5.3, furo 2021.03.20.beta30"/>
+        <title>sashimi.processes.logging - Sashimi</title>
+      <link rel="stylesheet" href="../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
+    <link rel="stylesheet" href="../_static/pygments.css">
+    <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../_static/pygments_dark.css">
+    
+
+
+<style>
+  :root {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+
+  /* For allowing end-user-specific overrides */
+  .override-light {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  .override-dark {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+</style><link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" href="../_static/styles/furo-extensions.css?digest=d391b54134226e4196576da3bdb6dddb7e05ba2b"></head>
+  <body dir="">
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z"/>
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      class="feather feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      class="feather feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Sashimi</div></a>
+    </div>
+    <div class="header-right">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">Sashimi</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html">
+  <input class="sidebar-search" placeholder=Search name="q">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../timeline.html">a timeline here</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/configuration.html">Configuring Sashimi</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/code_organization.html">Code organization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope hardware</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Api</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label for="toctree-checkbox-1"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.events.html">sashimi.events</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label for="toctree-checkbox-2"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.AutoName.html">sashimi.events.AutoName</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.Enum.html">sashimi.events.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.LoggedEvent.html">sashimi.events.LoggedEvent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.SashimiEvents.html">sashimi.events.SashimiEvents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.auto.html">sashimi.events.auto</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.hardware.cameras.html">sashimi.hardware.cameras</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label for="toctree-checkbox-3"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.cameras.HamamatsuCamera.html">sashimi.hardware.cameras.HamamatsuCamera</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.cameras.MockCamera.html">sashimi.hardware.cameras.MockCamera</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.utilities.html">sashimi.utilities</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label for="toctree-checkbox-4"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.Enum.html">sashimi.utilities.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.SpeedyArrayBuffer.html">sashimi.utilities.SpeedyArrayBuffer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.Empty.html">sashimi.utilities.Empty</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">sashimi.processes.logging</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label for="toctree-checkbox-5"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.ConcurrenceLogger.html">sashimi.processes.logging.ConcurrenceLogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.Enum.html">sashimi.processes.logging.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.LoggingProcess.html">sashimi.processes.logging.LoggingProcess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.Path.html">sashimi.processes.logging.Path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.Process.html">sashimi.processes.logging.Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.TextIO.html">sashimi.processes.logging.TextIO</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.config.html">sashimi.config</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label for="toctree-checkbox-6"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.config.Path.html">sashimi.config.Path</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.hardware.scanning.html">sashimi.hardware.scanning</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label for="toctree-checkbox-7"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.AbstractScanInterface.html">sashimi.hardware.scanning.AbstractScanInterface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.ScanningError.html">sashimi.hardware.scanning.ScanningError</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <main class="main">
+    <div class="content">
+      <article role="main">
+        <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        </label>
+        <div class="section" id="module-sashimi.processes.logging">
+<span id="sashimi-processes-logging"></span><h1>sashimi.processes.logging<a class="headerlink" href="#module-sashimi.processes.logging" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Classes</p>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sashimi.processes.logging.ConcurrenceLogger.html#sashimi.processes.logging.ConcurrenceLogger" title="sashimi.processes.logging.ConcurrenceLogger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConcurrenceLogger</span></code></a></p></td>
+<td><p>A utility class for logging different kinds of events, periods and messages with multiprocessing</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sashimi.processes.logging.Enum.html#sashimi.processes.logging.Enum" title="sashimi.processes.logging.Enum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Enum</span></code></a></p></td>
+<td><p>Generic enumeration.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sashimi.processes.logging.LoggingProcess.html#sashimi.processes.logging.LoggingProcess" title="sashimi.processes.logging.LoggingProcess"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LoggingProcess</span></code></a></p></td>
+<td><p>A process with an integrated concurrence logger</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sashimi.processes.logging.Path.html#sashimi.processes.logging.Path" title="sashimi.processes.logging.Path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></p></td>
+<td><p>PurePath subclass that can make system calls.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="sashimi.processes.logging.Process.html#sashimi.processes.logging.Process" title="sashimi.processes.logging.Process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Process</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sashimi.processes.logging.TextIO.html#sashimi.processes.logging.TextIO" title="sashimi.processes.logging.TextIO"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TextIO</span></code></a></p></td>
+<td><p>Typed version of the return of open() in text mode.</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./api"
+        },
+        predefinedOutput: true
+    }
+    </script>
+<script>kernelName = 'python3'</script>
+      </article>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="sashimi.processes.logging.ConcurrenceLogger.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">sashimi.processes.logging.ConcurrenceLogger</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="sashimi.utilities.Empty.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">sashimi.utilities.Empty</div>
+                
+              </div>
+            </a>
+        </div>
+
+        <div class="related-information">
+              Copyright &#169; Portugues lab
+            |
+            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
+              and
+              <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+              <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            |
+            <a class="muted-link" href="../_sources/api/sashimi.processes.logging.rst"
+               rel="nofollow">
+              Show Source
+            </a>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </main>
+</div>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/sphinx-book-theme.7d483ff0a819d6edff12ce0b1ead3928.js"></script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script src="../_static/scripts/main.js?digest=e931d09b2a40c1bb82b542effe772014573baf67"></script></body>
+</html>

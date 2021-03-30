@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.events" href="sashimi.events.html" /><link rel="prev" title="sashimi.hardware" href="sashimi.hardware.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.hardware.cameras.HamamatsuCamera" href="sashimi.hardware.cameras.HamamatsuCamera.html" /><link rel="prev" title="sashimi.events.auto" href="sashimi.events.auto.html" />
 
     <meta name="generator" content="sphinx-3.5.3, furo 2021.03.20.beta30"/>
-        <title>sashimi.processes - Sashimi</title>
+        <title>sashimi.hardware.cameras - Sashimi</title>
       <link rel="stylesheet" href="../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="../_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../_static/pygments_dark.css">
@@ -116,7 +116,6 @@
 </form><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../timeline.html">a timeline here</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Configuration</span></p>
@@ -134,9 +133,6 @@
 <p class="caption"><span class="caption-text">Api</span></p>
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label for="toctree-checkbox-1"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="sashimi.html">sashimi</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.html">sashimi.hardware</a></li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">sashimi.processes</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.events.html">sashimi.events</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label for="toctree-checkbox-2"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.events.AutoName.html">sashimi.events.AutoName</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.events.Enum.html">sashimi.events.Enum</a></li>
@@ -145,10 +141,33 @@
 <li class="toctree-l3"><a class="reference internal" href="sashimi.events.auto.html">sashimi.events.auto</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.utilities.html">sashimi.utilities</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label for="toctree-checkbox-3"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">sashimi.hardware.cameras</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label for="toctree-checkbox-3"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.cameras.HamamatsuCamera.html">sashimi.hardware.cameras.HamamatsuCamera</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.cameras.MockCamera.html">sashimi.hardware.cameras.MockCamera</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.utilities.html">sashimi.utilities</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label for="toctree-checkbox-4"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.Enum.html">sashimi.utilities.Enum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.SpeedyArrayBuffer.html">sashimi.utilities.SpeedyArrayBuffer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.Empty.html">sashimi.utilities.Empty</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.processes.logging.html">sashimi.processes.logging</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label for="toctree-checkbox-5"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.ConcurrenceLogger.html">sashimi.processes.logging.ConcurrenceLogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.Enum.html">sashimi.processes.logging.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.LoggingProcess.html">sashimi.processes.logging.LoggingProcess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.Path.html">sashimi.processes.logging.Path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.Process.html">sashimi.processes.logging.Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.TextIO.html">sashimi.processes.logging.TextIO</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.config.html">sashimi.config</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label for="toctree-checkbox-6"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.config.Path.html">sashimi.config.Path</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.hardware.scanning.html">sashimi.hardware.scanning</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label for="toctree-checkbox-7"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.AbstractScanInterface.html">sashimi.hardware.scanning.AbstractScanInterface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.ScanningError.html">sashimi.hardware.scanning.ScanningError</a></li>
 </ul>
 </li>
 </ul>
@@ -167,8 +186,23 @@
         <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
-        <div class="section" id="module-sashimi.processes">
-<span id="sashimi-processes"></span><h1>sashimi.processes<a class="headerlink" href="#module-sashimi.processes" title="Permalink to this headline">¶</a></h1>
+        <div class="section" id="module-sashimi.hardware.cameras">
+<span id="sashimi-hardware-cameras"></span><h1>sashimi.hardware.cameras<a class="headerlink" href="#module-sashimi.hardware.cameras" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Classes</p>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sashimi.hardware.cameras.HamamatsuCamera.html#sashimi.hardware.cameras.HamamatsuCamera" title="sashimi.hardware.cameras.HamamatsuCamera"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HamamatsuCamera</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sashimi.hardware.cameras.MockCamera.html#sashimi.hardware.cameras.MockCamera" title="sashimi.hardware.cameras.MockCamera"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MockCamera</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table></div>
 </div>
 <script type="text/x-thebe-config">
     {
@@ -193,23 +227,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="sashimi.events.html">
+          <a class="next-page" href="sashimi.hardware.cameras.HamamatsuCamera.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">sashimi.events</div>
+                <div class="title">sashimi.hardware.cameras.HamamatsuCamera</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="sashimi.hardware.html">
+          <a class="prev-page" href="sashimi.events.auto.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">sashimi.hardware</div>
+                <div class="title">sashimi.events.auto</div>
                 
               </div>
             </a>
@@ -223,7 +257,7 @@
               <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
               <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             |
-            <a class="muted-link" href="../_sources/api/sashimi.processes.rst"
+            <a class="muted-link" href="../_sources/api/sashimi.hardware.cameras.rst"
                rel="nofollow">
               Show Source
             </a>

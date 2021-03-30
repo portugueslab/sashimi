@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.hardware" href="sashimi.hardware.html" /><link rel="prev" title="API Reference" href="index.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.processes.logging.Enum" href="sashimi.processes.logging.Enum.html" /><link rel="prev" title="sashimi.processes.logging" href="sashimi.processes.logging.html" />
 
     <meta name="generator" content="sphinx-3.5.3, furo 2021.03.20.beta30"/>
-        <title>sashimi - Sashimi</title>
+        <title>sashimi.processes.logging.ConcurrenceLogger - Sashimi</title>
       <link rel="stylesheet" href="../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
     <link rel="stylesheet" href="../_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../_static/pygments_dark.css">
@@ -116,7 +116,6 @@
 </form><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption"><span class="caption-text">Introduction</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../timeline.html">a timeline here</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Configuration</span></p>
@@ -134,9 +133,6 @@
 <p class="caption"><span class="caption-text">Api</span></p>
 <ul class="current">
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label for="toctree-checkbox-1"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">sashimi</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.html">sashimi.hardware</a></li>
-<li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html">sashimi.processes</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.events.html">sashimi.events</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label for="toctree-checkbox-2"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.events.AutoName.html">sashimi.events.AutoName</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.events.Enum.html">sashimi.events.Enum</a></li>
@@ -145,10 +141,33 @@
 <li class="toctree-l3"><a class="reference internal" href="sashimi.events.auto.html">sashimi.events.auto</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.utilities.html">sashimi.utilities</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label for="toctree-checkbox-3"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.hardware.cameras.html">sashimi.hardware.cameras</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label for="toctree-checkbox-3"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.cameras.HamamatsuCamera.html">sashimi.hardware.cameras.HamamatsuCamera</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.cameras.MockCamera.html">sashimi.hardware.cameras.MockCamera</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.utilities.html">sashimi.utilities</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/><label for="toctree-checkbox-4"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.Enum.html">sashimi.utilities.Enum</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.SpeedyArrayBuffer.html">sashimi.utilities.SpeedyArrayBuffer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.Empty.html">sashimi.utilities.Empty</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="sashimi.processes.logging.html">sashimi.processes.logging</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/><label for="toctree-checkbox-5"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">sashimi.processes.logging.ConcurrenceLogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.Enum.html">sashimi.processes.logging.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.LoggingProcess.html">sashimi.processes.logging.LoggingProcess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.Path.html">sashimi.processes.logging.Path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.Process.html">sashimi.processes.logging.Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.processes.logging.TextIO.html">sashimi.processes.logging.TextIO</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.config.html">sashimi.config</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/><label for="toctree-checkbox-6"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.config.Path.html">sashimi.config.Path</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.hardware.scanning.html">sashimi.hardware.scanning</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/><label for="toctree-checkbox-7"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.AbstractScanInterface.html">sashimi.hardware.scanning.AbstractScanInterface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.ScanningError.html">sashimi.hardware.scanning.ScanningError</a></li>
 </ul>
 </li>
 </ul>
@@ -167,8 +186,30 @@
         <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
-        <div class="section" id="module-sashimi">
-<span id="sashimi"></span><h1>sashimi<a class="headerlink" href="#module-sashimi" title="Permalink to this headline">¶</a></h1>
+        <div class="section" id="sashimi-processes-logging-concurrencelogger">
+<h1>sashimi.processes.logging.ConcurrenceLogger<a class="headerlink" href="#sashimi-processes-logging-concurrencelogger" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="sashimi.processes.logging.ConcurrenceLogger">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">sashimi.processes.logging.</span></code><code class="sig-name descname"><span class="pre">ConcurrenceLogger</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">process_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/processes/logging.html#ConcurrenceLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.ConcurrenceLogger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A utility class for logging different kinds of events, periods and messages with multiprocessing</p>
+<p class="rubric">Methods</p>
+<dl class="py method">
+<dt id="sashimi.processes.logging.ConcurrenceLogger.log_event">
+<code class="sig-name descname"><span class="pre">log_event</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sender</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">event_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/processes/logging.html#ConcurrenceLogger.log_event"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.ConcurrenceLogger.log_event" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs multiprocessing synchronization events (multiprocessing.Event)</p>
+</dd></dl>
+<dl class="py method">
+<dt id="sashimi.processes.logging.ConcurrenceLogger.log_message">
+<code class="sig-name descname"><span class="pre">log_message</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/processes/logging.html#ConcurrenceLogger.log_message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.ConcurrenceLogger.log_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs any kind of message</p>
+</dd></dl>
+<dl class="py method">
+<dt id="sashimi.processes.logging.ConcurrenceLogger.log_queue">
+<code class="sig-name descname"><span class="pre">log_queue</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">queue_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_sender</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/processes/logging.html#ConcurrenceLogger.log_queue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.ConcurrenceLogger.log_queue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs queue-related events</p>
+</dd></dl>
+</dd></dl>
 </div>
 <script type="text/x-thebe-config">
     {
@@ -193,23 +234,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="sashimi.hardware.html">
+          <a class="next-page" href="sashimi.processes.logging.Enum.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">sashimi.hardware</div>
+                <div class="title">sashimi.processes.logging.Enum</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="index.html">
+          <a class="prev-page" href="sashimi.processes.logging.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">API Reference</div>
+                <div class="title">sashimi.processes.logging</div>
                 
               </div>
             </a>
@@ -223,7 +264,7 @@
               <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
               <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             |
-            <a class="muted-link" href="../_sources/api/sashimi.rst"
+            <a class="muted-link" href="../_sources/api/sashimi.processes.logging.ConcurrenceLogger.rst"
                rel="nofollow">
               Show Source
             </a>

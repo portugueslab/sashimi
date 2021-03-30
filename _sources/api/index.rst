@@ -15,8 +15,10 @@ For the average user's workflows.
    :toctree:
    :recursive:
 
-   sashimi
-   sashimi.hardware
-   sashimi.processes
+   
    sashimi.events
+   sashimi.hardware.cameras
    sashimi.utilities
+   sashimi.processes.logging
+   sashimi.config
+   sashimi.hardware.scanning
