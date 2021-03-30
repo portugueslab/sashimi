@@ -42,7 +42,8 @@ sphinx:
     - sphinx.ext.coverage
     - sphinx.ext.inheritance_diagram
     - sphinx.ext.githubpages
-    - sphinx.ext.m2r
+    - m2r
+    - recommonmark
 
   config:
     autosummary_generate: True
