@@ -2,4 +2,4 @@ jupyter-book
 jupytext
 sphinx_autodoc_typehints
 furo
-m2r2
+recommonmark
