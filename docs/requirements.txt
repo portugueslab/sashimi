@@ -3,4 +3,4 @@ jupytext
 sphinx_autodoc_typehints
 furo
 recommonmark
-m2r
+m2r2

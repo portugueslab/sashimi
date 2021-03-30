@@ -42,7 +42,7 @@ sphinx:
     - sphinx.ext.coverage
     - sphinx.ext.inheritance_diagram
     - sphinx.ext.githubpages
-    - m2r
+    - m2r2
     - recommonmark
 
   config:
