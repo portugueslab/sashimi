@@ -1,0 +1,382 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.utilities.Enum" href="sashimi.utilities.Enum.html" /><link rel="prev" title="sashimi.events.auto" href="sashimi.events.auto.html" />
+
+    <meta name="generator" content="sphinx-3.5.3, furo 2021.03.20.beta30"/>
+        <title>sashimi.utilities - Sashimi</title>
+      <link rel="stylesheet" href="../_static/styles/furo.css?digest=978e1795dfe158b585dda6a8417f6411828bf3ed">
+    <link rel="stylesheet" href="../_static/pygments.css">
+    <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../_static/pygments_dark.css">
+    
+
+
+<style>
+  :root {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+
+  /* For allowing end-user-specific overrides */
+  .override-light {
+    --color-code-background: #eeffcc;
+  --color-code-foreground: black;
+  
+  }
+  .override-dark {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+</style><link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" href="../_static/styles/furo-extensions.css?digest=d391b54134226e4196576da3bdb6dddb7e05ba2b"></head>
+  <body dir="">
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z"/>
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      class="feather feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      class="feather feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">Sashimi</div></a>
+    </div>
+    <div class="header-right">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  
+  <span class="sidebar-brand-text">Sashimi</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html">
+  <input class="sidebar-search" placeholder=Search name="q">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../timeline.html">a timeline here</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/configuration.html">Configuring Sashimi</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development/code_organization.html">Code organization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope hardware</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Api</span></p>
+<ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">API Reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label for="toctree-checkbox-1"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="sashimi.html">sashimi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sashimi.hardware.html">sashimi.hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sashimi.processes.html">sashimi.processes</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="sashimi.events.html">sashimi.events</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label for="toctree-checkbox-2"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.AutoName.html">sashimi.events.AutoName</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.Enum.html">sashimi.events.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.LoggedEvent.html">sashimi.events.LoggedEvent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.SashimiEvents.html">sashimi.events.SashimiEvents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.events.auto.html">sashimi.events.auto</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">sashimi.utilities</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label for="toctree-checkbox-3"><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.Enum.html">sashimi.utilities.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.SpeedyArrayBuffer.html">sashimi.utilities.SpeedyArrayBuffer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.utilities.Empty.html">sashimi.utilities.Empty</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <main class="main">
+    <div class="content">
+      <article role="main">
+        <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+        </label>
+        <div class="section" id="module-sashimi.utilities">
+<span id="sashimi-utilities"></span><h1>sashimi.utilities<a class="headerlink" href="#module-sashimi.utilities" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Classes</p>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sashimi.utilities.Enum.html#sashimi.utilities.Enum" title="sashimi.utilities.Enum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Enum</span></code></a></p></td>
+<td><p>Generic enumeration.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sashimi.utilities.SpeedyArrayBuffer.html#sashimi.utilities.SpeedyArrayBuffer" title="sashimi.utilities.SpeedyArrayBuffer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SpeedyArrayBuffer</span></code></a></p></td>
+<td><p>Buffer for large data arrays based on numpy and using ctypes for speedy copy of data</p></td>
+</tr>
+</tbody>
+</table></div>
+<p class="rubric">Functions</p>
+<dl class="py function">
+<dt id="sashimi.utilities.asdict">
+<code class="sig-prename descclassname"><span class="pre">sashimi.utilities.</span></code><code class="sig-name descname"><span class="pre">asdict</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="pre">obj</span></em>, <em class="sig-param"><span class="pre">*</span></em>, <em class="sig-param"><span class="pre">dict_factory=&lt;class</span> <span class="pre">'dict'&gt;</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dataclasses.html#asdict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.utilities.asdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the fields of a dataclass instance as a new dictionary mapping
+field names to field values.</p>
+<p>Example usage:</p>
+<blockquote>
+<div><p>@dataclass
+class C:</p>
+<blockquote>
+<div><p>x: int
+y: int</p>
+</div></blockquote>
+<p>c = C(1, 2)
+assert asdict(c) == {‘x’: 1, ‘y’: 2}</p>
+</div></blockquote>
+<p>If given, ‘dict_factory’ will be used instead of built-in dict.
+The function applies recursively to field values that are
+dataclass instances. This will also look into built-in containers:
+tuples, lists, and dicts.</p>
+</dd></dl>
+<dl class="py function">
+<dt id="sashimi.utilities.clean_json">
+<code class="sig-prename descclassname"><span class="pre">sashimi.utilities.</span></code><code class="sig-name descname"><span class="pre">clean_json</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/utilities.html#clean_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.utilities.clean_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py function">
+<dt id="sashimi.utilities.gcd">
+<code class="sig-prename descclassname"><span class="pre">sashimi.utilities.</span></code><code class="sig-name descname"><span class="pre">gcd</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">/</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.utilities.gcd" title="Permalink to this definition">¶</a></dt>
+<dd><p>greatest common divisor of x and y</p>
+</dd></dl>
+<dl class="py function">
+<dt id="sashimi.utilities.get_last_parameters">
+<code class="sig-prename descclassname"><span class="pre">sashimi.utilities.</span></code><code class="sig-name descname"><span class="pre">get_last_parameters</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_queue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/utilities.html#get_last_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.utilities.get_last_parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+<dl class="py function">
+<dt id="sashimi.utilities.is_dataclass">
+<code class="sig-prename descclassname"><span class="pre">sashimi.utilities.</span></code><code class="sig-name descname"><span class="pre">is_dataclass</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dataclasses.html#is_dataclass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.utilities.is_dataclass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True if obj is a dataclass or an instance of a
+dataclass.</p>
+</dd></dl>
+<dl class="py function">
+<dt id="sashimi.utilities.lcm">
+<code class="sig-prename descclassname"><span class="pre">sashimi.utilities.</span></code><code class="sig-name descname"><span class="pre">lcm</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/utilities.html#lcm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.utilities.lcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return lowest common multiple.</p>
+</dd></dl>
+<dl class="py function">
+<dt id="sashimi.utilities.vectorize">
+<code class="sig-prename descclassname"><span class="pre">sashimi.utilities.</span></code><code class="sig-name descname"><span class="pre">vectorize</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ftylist_or_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/numba/np/ufunc/decorators.html#vectorize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.utilities.vectorize" title="Permalink to this definition">¶</a></dt>
+<dd><p>A decorator that creates a Numpy ufunc object using Numba compiled
+code.  When no arguments or only keyword arguments are given,
+vectorize will return a Numba dynamic ufunc (DUFunc) object, where
+compilation/specialization may occur at call-time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ftylist_or_function</strong> (<em>function</em><em> or </em><em>iterable</em>) – <p>When the first argument is a function, signatures are dealt
+with at call-time.</p>
+<p>When the first argument is an iterable of type signatures,
+which are either function type object or a string describing
+the function type, signatures are finalized at decoration
+time.</p>
+</p>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – A string for code generation target.  Default to “cpu”.</p></li>
+<li><p><strong>identity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><em>None</em></a>) – The identity (or unit) value for the element-wise function
+being implemented.  Allowed values are None (the default), 0, 1,
+and “reorderable”.</p></li>
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – Turns on caching.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>A NumPy universal function</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<dl class="simple">
+<dt>@vectorize([‘float32(float32, float32)’,</dt><dd><p>‘float64(float64, float64)’], identity=1)</p>
+</dd>
+<dt>def sum(a, b):</dt><dd><p>return a + b</p>
+</dd>
+</dl>
+<p>@vectorize
+def sum(a, b):</p>
+<blockquote>
+<div><p>return a + b</p>
+</div></blockquote>
+<p>@vectorize(identity=1)
+def mul(a, b):</p>
+<blockquote>
+<div><p>return a * b</p>
+</div></blockquote>
+</dd></dl>
+<p class="rubric">Exceptions</p>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="sashimi.utilities.Empty.html#sashimi.utilities.Empty" title="sashimi.utilities.Empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Empty</span></code></a></p></td>
+<td><p>Exception raised by Queue.get(block=0)/get_nowait().</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./api"
+        },
+        predefinedOutput: true
+    }
+    </script>
+<script>kernelName = 'python3'</script>
+      </article>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="sashimi.utilities.Enum.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">sashimi.utilities.Enum</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="sashimi.events.auto.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">sashimi.events.auto</div>
+                
+              </div>
+            </a>
+        </div>
+
+        <div class="related-information">
+              Copyright &#169; Portugues lab
+            |
+            Built with <a href="https://www.sphinx-doc.org/">Sphinx</a>
+              and
+              <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+              <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            |
+            <a class="muted-link" href="../_sources/api/sashimi.utilities.rst"
+               rel="nofollow">
+              Show Source
+            </a>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </main>
+</div>
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="../_static/sphinx-book-theme.7d483ff0a819d6edff12ce0b1ead3928.js"></script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script src="../_static/scripts/main.js?digest=e931d09b2a40c1bb82b542effe772014573baf67"></script></body>
+</html>
