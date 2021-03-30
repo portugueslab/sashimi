@@ -42,6 +42,7 @@ sphinx:
     - sphinx.ext.coverage
     - sphinx.ext.inheritance_diagram
     - sphinx.ext.githubpages
+    - m2r
 
   config:
     autosummary_generate: True
