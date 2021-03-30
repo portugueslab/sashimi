@@ -43,7 +43,6 @@ sphinx:
     - sphinx.ext.inheritance_diagram
     - sphinx.ext.githubpages
     - m2r2
-    - recommonmark
 
   config:
     autosummary_generate: True
