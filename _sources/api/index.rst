@@ -16,4 +16,9 @@ For the average user's workflows.
    :recursive:
 
    sashimi
-   sashimi/sashimi
+   sashimi.sashimi
+   SashimiEvents
+   LoggedEvent
+   sashimi.SashimiEvents
+   sashimi.AbstractComm
+   AbstractComm
