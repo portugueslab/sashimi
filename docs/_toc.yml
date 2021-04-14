@@ -1,6 +1,6 @@
 - file: index
 
-- part: Introduction
+- part: Overview
   chapters:
     - file: intro
     - file: timeline
