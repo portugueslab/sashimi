@@ -1,10 +1,12 @@
 # Sashimi
 
-<a href="url"><img 
-src="https://github.com/portugueslab/sashimi/blob/master/sashimi/icons/main_icon.png"
+<img 
+src="../../sashimi/sashimi/icons/main_icon.png"
+alt="sashimi logo"
+style = "height: 190px; width:270px; "
 align="left" 
-height="190" 
-width="270"></a>
+/>
+
 
 ![tests](https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master)
 [![Docs](https://img.shields.io/badge/docs-dev-brightgreen)](https://portugueslab.github.io/sashimi/)
