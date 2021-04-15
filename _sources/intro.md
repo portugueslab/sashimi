@@ -1,6 +1,12 @@
 # Sashimi
 
-<img src="./images/main_icon.png" align="left" height="190" width="270">
+<img src="_static/main_icon.png" align="left" height="190" width="270">
+
+
+![image](_static/main_icon.png)
+
+
+
 
 
 ![tests](https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master)
