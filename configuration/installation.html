@@ -2,10 +2,10 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Code organization" href="../development/code_organization.html" /><link rel="prev" title="Installation" href="installation.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Configuring Sashimi" href="configuration.html" /><link rel="prev" title="Timeline" href="../timeline.html" />
 
     <meta name="generator" content="sphinx-3.5.4, furo 2021.04.11.beta34"/>
-        <title>Configuring Sashimi - Sashimi</title>
+        <title>Installation - Sashimi</title>
       <link rel="stylesheet" href="../_static/styles/furo.css?digest=59ab60ac09ea94ccfe6deddff6d715cce948a6fc">
     <link rel="stylesheet" href="../_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="../_static/pygments_dark.css">
@@ -123,8 +123,8 @@
 </ul>
 <p class="caption"><span class="caption-text">Configuration</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Configuring Sashimi</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring Sashimi</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Development</span></p>
 <ul>
@@ -190,41 +190,37 @@
         <label class="toc-overlay-icon toc-content-icon" for="__toc">
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
-        <div class="section" id="configuring-sashimi">
-<h1>Configuring Sashimi<a class="headerlink" href="#configuring-sashimi" title="Permalink to this headline">¶</a></h1>
-<p>Sashimi includes the <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> module that lets you interact with the hardware and software
-settings from command line. You can display the current configuration of the system.:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config show
+        <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://www.anaconda.com/">Install the latest Anaconda</a> distribution of Python 3.</p>
+<p>Clone this repository and navigate to the main folder <code class="docutils literal notranslate"><span class="pre">../sashimi</span></code></p>
+<div class="section" id="recommended-create-a-new-environment">
+<h2>Recommended: Create a new environment<a class="headerlink" href="#recommended-create-a-new-environment" title="Permalink to this headline">¶</a></h2>
+<p>It is a good practice to create an environment for every project. The provided <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> sets up almost all required dependencies (see below).</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda env create -f {path to environment.yml}
 </pre></div>
 </div>
-<p>You can ask sashimi for help:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi --help
+<p>You can activate the environment by running:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda activate sashimi
 </pre></div>
 </div>
-<p>More information on its usage can be found by asking <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> for help:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config --help
+<p>After this you moght have to install two extra dependencies for controlling a Cobolt laser:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install pyvisa
+pip install pyvisa-py
 </pre></div>
 </div>
-<p>You can add and modify parameters just from the command line. For example, to set the piezo waveform readout channel to <code class="docutils literal notranslate"><span class="pre">Dev1/ao0:0</span></code> just run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n z_board.write.channel -v Dev1/ao0:0
+</div>
+<div class="section" id="install-with-pip">
+<h2>Install with pip<a class="headerlink" href="#install-with-pip" title="Permalink to this headline">¶</a></h2>
+<p>For a non-editable installation run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install .
 </pre></div>
 </div>
-<p>Or to modify the minimum and maximum voltage (in Volts) of the channel:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n piezo.position_write.min_val -v 0
-sashimi-config edit -n piezo.position_write.max_val -v 10
+<p>Otherwise, if you want to contribute to the project as a developer, for editable installation run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install -e .
 </pre></div>
 </div>
-<div class="section" id="starting-the-software-from-command-line">
-<h2>Starting the software from command line<a class="headerlink" href="#starting-the-software-from-command-line" title="Permalink to this headline">¶</a></h2>
-<p>Open a new anaconda prompt and activate your environment like above. Then run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi
-</pre></div>
-</div>
-<p>Add the option <code class="docutils literal notranslate"><span class="pre">--scopeless</span></code>:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi --scopeless
-</pre></div>
-</div>
-<p>If you want to run the software with mock hardware, such as for debugging or developing.</p>
+<p>Now you are ready to go!</p>
 </div>
 </div>
 <script type="text/x-thebe-config">
@@ -250,23 +246,23 @@ sashimi-config edit -n piezo.position_write.max_val -v 10
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../development/code_organization.html">
+          <a class="next-page" href="configuration.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Code organization</div>
+                <div class="title">Configuring Sashimi</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="installation.html">
+          <a class="prev-page" href="../timeline.html">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Installation</div>
+                <div class="title">Timeline</div>
                 
               </div>
             </a>
@@ -280,7 +276,7 @@ sashimi-config edit -n piezo.position_write.max_val -v 10
               <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
               <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
             |
-            <a class="muted-link" href="../_sources/configuration/configuration.md"
+            <a class="muted-link" href="../_sources/configuration/installation.md"
                rel="nofollow">
               Show Source
             </a>
@@ -300,8 +296,9 @@ sashimi-config edit -n piezo.position_write.max_val -v 10
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Configuring Sashimi</a><ul>
-<li><a class="reference internal" href="#starting-the-software-from-command-line">Starting the software from command line</a></li>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#recommended-create-a-new-environment">Recommended: Create a new environment</a></li>
+<li><a class="reference internal" href="#install-with-pip">Install with pip</a></li>
 </ul>
 </li>
 </ul>
