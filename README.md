@@ -1,11 +1,10 @@
 # Sashimi
 
-<img 
-src="./sashimi/icons/main_icon.png"
-alt="sashimi logo"
-style = "height: 190px; width:270px; "
+<a href="url"><img 
+src="https://github.com/portugueslab/sashimi/blob/master/sashimi/icons/main_icon.png" 
 align="left" 
-/>
+height="190" 
+width="270"></a>
 
 
 
