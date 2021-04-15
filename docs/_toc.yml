@@ -2,11 +2,11 @@
 
 - part: Overview
   chapters:
-    - file: intro
     - file: timeline
 
 - part: Configuration
   chapters:
+    - file: configuration/installation
     - file: configuration/configuration
 
 - part: Development
