@@ -17,6 +17,8 @@ It is developed by members of the [PortuguesLab](http://www.portugueslab.com/)
  
 While built for a particular microscope configuration, the modular architecture allows for easy replacement of
 hardware by other vendors (we will help with and welcome contributions for supporting other cameras, boards and light sources).
+
+## Table of Contents
  
 ```{tableofcontents}
 ```

@@ -1,10 +1,11 @@
-# Installation
+# Installation & Configuration
 
+## Installation
 [Install the latest Anaconda](https://www.anaconda.com/) distribution of Python 3.
 
 Clone this repository and navigate to the main folder `../sashimi`
 
-## Recommended: Create a new environment
+### Recommended: Create a new environment
 
 It is a good practice to create an environment for every project. The provided `environment.yml` sets up almost all required dependencies (see below).
 
@@ -19,7 +20,7 @@ After this you moght have to install two extra dependencies for controlling a Co
     pip install pyvisa
     pip install pyvisa-py
     
-## Install with pip
+### Install with pip
 
 For a non-editable installation run:
 
@@ -31,7 +32,7 @@ Otherwise, if you want to contribute to the project as a developer, for editable
 
 Now you are ready to go!
 
-# Configuring sashimi
+## Configuring sashimi
     
 Sashimi includes the `sashimi-config` module that lets you interact with the hardware and software
 settings from command line. You can display the current configuration of the system.:
@@ -56,7 +57,7 @@ Or to modify the minimum and maximum voltage (in Volts) of the channel:
     sashimi-config edit -n piezo.position_write.max_val -v 10
     
 
-# Starting the software from command line
+## Starting the software from command line
 
 Open a new anaconda prompt and activate your environment like above. Then run:
 

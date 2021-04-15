@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Timeline" href="timeline.html" /><link rel="prev" title="Welcome to the Sashimi documentation!" href="index.html" />
 
     <meta name="generator" content="sphinx-3.5.4, furo 2021.04.11.beta34"/>
-        <title>Installation - Sashimi</title>
+        <title>Installation &amp; Configuration - Sashimi</title>
       <link rel="stylesheet" href="_static/styles/furo.css?digest=59ab60ac09ea94ccfe6deddff6d715cce948a6fc">
     <link rel="stylesheet" href="_static/pygments.css">
     <link media="(prefers-color-scheme: dark)" rel="stylesheet" href="_static/pygments_dark.css">
@@ -119,9 +119,7 @@
 </form><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption"><span class="caption-text">Overview</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#configuring-sashimi">Configuring sashimi</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#starting-the-software-from-command-line">Starting the software from command line</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Installation &amp; Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="timeline.html">Timeline</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Configuration</span></p>
@@ -192,12 +190,14 @@
         <label class="toc-overlay-icon toc-content-icon" for="__toc">
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
-        <div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+        <div class="section" id="installation-configuration">
+<h1>Installation &amp; Configuration<a class="headerlink" href="#installation-configuration" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://www.anaconda.com/">Install the latest Anaconda</a> distribution of Python 3.</p>
 <p>Clone this repository and navigate to the main folder <code class="docutils literal notranslate"><span class="pre">../sashimi</span></code></p>
 <div class="section" id="recommended-create-a-new-environment">
-<h2>Recommended: Create a new environment<a class="headerlink" href="#recommended-create-a-new-environment" title="Permalink to this headline">¶</a></h2>
+<h3>Recommended: Create a new environment<a class="headerlink" href="#recommended-create-a-new-environment" title="Permalink to this headline">¶</a></h3>
 <p>It is a good practice to create an environment for every project. The provided <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> sets up almost all required dependencies (see below).</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda env create -f {path to environment.yml}
 </pre></div>
@@ -213,7 +213,7 @@ pip install pyvisa-py
 </div>
 </div>
 <div class="section" id="install-with-pip">
-<h2>Install with pip<a class="headerlink" href="#install-with-pip" title="Permalink to this headline">¶</a></h2>
+<h3>Install with pip<a class="headerlink" href="#install-with-pip" title="Permalink to this headline">¶</a></h3>
 <p>For a non-editable installation run:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install .
 </pre></div>
@@ -226,7 +226,7 @@ pip install pyvisa-py
 </div>
 </div>
 <div class="section" id="configuring-sashimi">
-<h1>Configuring sashimi<a class="headerlink" href="#configuring-sashimi" title="Permalink to this headline">¶</a></h1>
+<h2>Configuring sashimi<a class="headerlink" href="#configuring-sashimi" title="Permalink to this headline">¶</a></h2>
 <p>Sashimi includes the <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> module that lets you interact with the hardware and software
 settings from command line. You can display the current configuration of the system.:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config show
@@ -251,7 +251,7 @@ sashimi-config edit -n piezo.position_write.max_val -v 10
 </div>
 </div>
 <div class="section" id="starting-the-software-from-command-line">
-<h1>Starting the software from command line<a class="headerlink" href="#starting-the-software-from-command-line" title="Permalink to this headline">¶</a></h1>
+<h2>Starting the software from command line<a class="headerlink" href="#starting-the-software-from-command-line" title="Permalink to this headline">¶</a></h2>
 <p>Open a new anaconda prompt and activate your environment like above. Then run:</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi
 </pre></div>
@@ -261,6 +261,7 @@ sashimi-config edit -n piezo.position_write.max_val -v 10
 </pre></div>
 </div>
 <p>If you want to run the software with mock hardware, such as for debugging or developing.</p>
+</div>
 </div>
 <script type="text/x-thebe-config">
     {
@@ -335,13 +336,16 @@ sashimi-config edit -n piezo.position_write.max_val -v 10
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#">Installation &amp; Configuration</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
 <li><a class="reference internal" href="#recommended-create-a-new-environment">Recommended: Create a new environment</a></li>
 <li><a class="reference internal" href="#install-with-pip">Install with pip</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#configuring-sashimi">Configuring sashimi</a></li>
 <li><a class="reference internal" href="#starting-the-software-from-command-line">Starting the software from command line</a></li>
+</ul>
+</li>
 </ul>
 
           </div>
