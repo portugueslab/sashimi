@@ -2,7 +2,7 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Sashimi" href="intro.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Installation" href="intro.html" />
 
     <meta name="generator" content="sphinx-3.5.4, furo 2021.04.11.beta34"/>
         <title>Home - Sashimi</title>
@@ -96,7 +96,7 @@
       <a href="#"><div class="brand">Sashimi</div></a>
     </div>
     <div class="header-right">
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
     </div>
@@ -119,8 +119,10 @@
 </form><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption"><span class="caption-text">Overview</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Sashimi</a></li>
-<li class="toctree-l1"><a class="reference internal" href="timeline.html">Readme</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#configuring-sashimi">Configuring sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#starting-the-software-from-command-line">Starting the software from command line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timeline.html">Timeline</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Configuration</span></p>
 <ul>
@@ -187,7 +189,7 @@
   <main class="main">
     <div class="content">
       <article role="main">
-        <label class="toc-overlay-icon toc-content-icon" for="__toc">
+        <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
           <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
         </label>
         <div class="section" id="welcome-to-the-sashimi-documentation">
@@ -205,76 +207,69 @@ at the Technical University of Munich and Max Planck Institute of Neurobiology. 
 <a class="reference external" href="https://github.com/napari/napari">Napari viewer</a>.</p>
 <p>While built for a particular microscope configuration, the modular architecture allows for easy replacement of
 hardware by other vendors (we will help with and welcome contributions for supporting other cameras, boards and light sources).</p>
-<div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="https://www.anaconda.com/">Install the latest Anaconda</a> distribution of Python 3.</p>
-<p>Clone this repository and navigate to the main folder <code class="docutils literal notranslate"><span class="pre">../sashimi</span></code></p>
-<div class="section" id="recommended-create-a-new-environment">
-<h3>Recommended: Create a new environment<a class="headerlink" href="#recommended-create-a-new-environment" title="Permalink to this headline">¶</a></h3>
-<p>It is a good practice to create an environment for every project. The provided <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> sets up almost all required dependencies (see below).</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda env create -f {path to environment.yml}
-</pre></div>
-</div>
-<p>You can activate the environment by running:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda activate sashimi
-</pre></div>
-</div>
-<p>After this you moght have to install two extra dependencies for controlling a Cobolt laser:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install pyvisa
-pip install pyvisa-py
-</pre></div>
-</div>
-</div>
-<div class="section" id="install-with-pip">
-<h3>Install with pip<a class="headerlink" href="#install-with-pip" title="Permalink to this headline">¶</a></h3>
-<p>For a non-editable installation run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install .
-</pre></div>
-</div>
-<p>Otherwise, if you want to contribute to the project as a developer, for editable installation run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install -e .
-</pre></div>
-</div>
-<p>Now you are ready to go!</p>
-</div>
-</div>
-<div class="section" id="configuring-sashimi">
-<h2>Configuring sashimi<a class="headerlink" href="#configuring-sashimi" title="Permalink to this headline">¶</a></h2>
-<p>Sashimi includes the <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> module that lets you interact with the hardware and software
-settings from command line. You can display the current configuration of the system.:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config show
-</pre></div>
-</div>
-<p>You can ask sashimi for help:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi --help
-</pre></div>
-</div>
-<p>More information on its usage can be found by asking <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> for help:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config --help
-</pre></div>
-</div>
-<p>You can add and modify parameters just from the command line. For example, to set the piezo waveform readout channel to <code class="docutils literal notranslate"><span class="pre">Dev1/ao0:0</span></code> just run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n z_board.write.channel -v Dev1/ao0:0
-</pre></div>
-</div>
-<p>Or to modify the minimum and maximum voltage (in Volts) of the channel:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n piezo.position_write.min_val -v 0
-sashimi-config edit -n piezo.position_write.max_val -v 10
-</pre></div>
-</div>
-</div>
-<div class="section" id="starting-the-software-from-command-line">
-<h2>Starting the software from command line<a class="headerlink" href="#starting-the-software-from-command-line" title="Permalink to this headline">¶</a></h2>
-<p>Open a new anaconda prompt and activate your environment like above. Then run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi
-</pre></div>
-</div>
-<p>Add the option <code class="docutils literal notranslate"><span class="pre">--scopeless</span></code>:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi --scopeless
-</pre></div>
-</div>
-<p>If you want to run the software with mock hardware, such as for debugging or developing.</p>
-<div class="toctree-wrapper compound">
+<div class="tableofcontents-wrapper compound">
+<p class="caption"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#configuring-sashimi">Configuring sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#starting-the-software-from-command-line">Starting the software from command line</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timeline.html">Timeline</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Configuration</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="configuration/configuration.html">Configuring Sashimi</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development/code_organization.html">Code organization</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Hardware</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="hardware/hardware.html">Microscope hardware</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Api</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/sashimi.events.html">sashimi.events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.events.AutoName.html">sashimi.events.AutoName</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.events.Enum.html">sashimi.events.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.events.LoggedEvent.html">sashimi.events.LoggedEvent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.events.SashimiEvents.html">sashimi.events.SashimiEvents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.events.auto.html">sashimi.events.auto</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/sashimi.hardware.cameras.html">sashimi.hardware.cameras</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.hardware.cameras.HamamatsuCamera.html">sashimi.hardware.cameras.HamamatsuCamera</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.hardware.cameras.MockCamera.html">sashimi.hardware.cameras.MockCamera</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/sashimi.utilities.html">sashimi.utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.utilities.Enum.html">sashimi.utilities.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.utilities.SpeedyArrayBuffer.html">sashimi.utilities.SpeedyArrayBuffer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.utilities.Empty.html">sashimi.utilities.Empty</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/sashimi.processes.logging.html">sashimi.processes.logging</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.processes.logging.ConcurrenceLogger.html">sashimi.processes.logging.ConcurrenceLogger</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.processes.logging.Enum.html">sashimi.processes.logging.Enum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.processes.logging.LoggingProcess.html">sashimi.processes.logging.LoggingProcess</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.processes.logging.Path.html">sashimi.processes.logging.Path</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.processes.logging.Process.html">sashimi.processes.logging.Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.processes.logging.TextIO.html">sashimi.processes.logging.TextIO</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/sashimi.config.html">sashimi.config</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.config.Path.html">sashimi.config.Path</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api/sashimi.hardware.scanning.html">sashimi.hardware.scanning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.hardware.scanning.AbstractScanInterface.html">sashimi.hardware.scanning.AbstractScanInterface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api/sashimi.hardware.scanning.ScanningError.html">sashimi.hardware.scanning.ScanningError</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 </div>
 <div class="toctree-wrapper compound">
 </div>
@@ -284,6 +279,7 @@ sashimi-config edit -n piezo.position_write.max_val -v 10
 </div>
 <div class="toctree-wrapper compound">
 </div>
+<div class="toctree-wrapper compound">
 </div>
 </div>
 <script type="text/x-thebe-config">
@@ -314,7 +310,7 @@ sashimi-config edit -n piezo.position_write.max_val -v 10
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Sashimi</div>
+                <div class="title">Installation</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -337,35 +333,8 @@ sashimi-config edit -n piezo.position_write.max_val -v 10
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            Contents
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Welcome to the Sashimi documentation!</a><ul>
-<li><a class="reference internal" href="#installation">Installation</a><ul>
-<li><a class="reference internal" href="#recommended-create-a-new-environment">Recommended: Create a new environment</a></li>
-<li><a class="reference internal" href="#install-with-pip">Install with pip</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#configuring-sashimi">Configuring sashimi</a></li>
-<li><a class="reference internal" href="#starting-the-software-from-command-line">Starting the software from command line</a><ul>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>
