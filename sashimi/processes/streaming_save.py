@@ -131,8 +131,7 @@ class StackSaver(LoggingProcess):
         if self.current_data is None:
             self.calculate_optimal_size(volume)
             self.current_data = np.empty(
-                (self.save_parameters.chunk_size, *volume.shape),
-                dtype=self.dtype,
+                (self.save_parameters.chunk_size, *volume.shape), dtype=self.dtype,
             )
 
         self.current_data[self.i_in_chunk, :, :, :] = volume
@@ -167,10 +166,7 @@ class StackSaver(LoggingProcess):
         ) as f:
             json.dump(
                 {
-                    "shape_full": (
-                        self.n_volumes,
-                        *self.current_data.shape[1:],
-                    ),
+                    "shape_full": (self.n_volumes, *self.current_data.shape[1:],),
                     "shape_block": (
                         self.save_parameters.chunk_size,
                         *self.current_data.shape[1:],
