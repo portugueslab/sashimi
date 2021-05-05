@@ -38,73 +38,109 @@ class NIBoards(AbstractScanInterface):
         self.z_reader = AnalogSingleChannelReader(read_task.in_stream)
 
         self.xy_array = np.zeros((2, self.n_samples))
-        self.z_array = np.zeros((4, self.n_samples))
 
         self.read_array = np.zeros(self.n_samples)
 
+        self.channel_config = dict()
+        self.lateral_scanning_config = dict()
+        #todo change this to read from config file
+
+        if self.lfm:
+            self.z_array = np.zeros((1, self.n_samples))
+            self.channel_config = dict(camera_trigger=0)
+        else:
+            self.z_array = np.zeros((4, self.n_samples))
+            self.channel_config = dict(camera_trigger=3, z_frontal= 2, z_lateral=1, z_piezo=0)
+            self.lateral_scanning_config = dict(lateral=0, frontal=1)
+
         self.setup_tasks()
+
+    @property
+    def lfm(self):
+        return self.conf["lfm"]
 
     def setup_tasks(self):
         # Configure the channels
+        if self.lfm:
+            # write channels are on board 1: piezo and z galvos
+            self.write_task_z.ao_channels.add_ao_voltage_chan(
+                self.conf["z_board"]["write"]["channel"],
+                min_val=self.conf["z_board"]["write"]["min_val"],
+                max_val=self.conf["z_board"]["write"]["max_val"],
+            )
 
-        # read channel is only the piezo position on board 1
-        self.read_task.ai_channels.add_ai_voltage_chan(
-            self.conf["z_board"]["read"]["channel"],
-            min_val=self.conf["z_board"]["read"]["min_val"],
-            max_val=self.conf["z_board"]["read"]["max_val"],
-        )
+            self.write_task_z.timing.cfg_samp_clk_timing(
+                rate=self.sample_rate,
+                source="OnboardClock",
+                active_edge=Edge.RISING,
+                sample_mode=AcquisitionType.CONTINUOUS,
+                samps_per_chan=self.n_samples,
+            )
 
-        # write channels are on board 1: piezo and z galvos
-        self.write_task_z.ao_channels.add_ao_voltage_chan(
-            self.conf["z_board"]["write"]["channel"],
-            min_val=self.conf["z_board"]["write"]["min_val"],
-            max_val=self.conf["z_board"]["write"]["max_val"],
-        )
 
-        # on board 2: lateral galvos
-        self.write_task_xy.ao_channels.add_ao_voltage_chan(
-            self.conf["xy_board"]["write"]["channel"],
-            min_val=self.conf["xy_board"]["write"]["min_val"],
-            max_val=self.conf["xy_board"]["write"]["max_val"],
-        )
+        else:
+            # read channel is only the piezo position on board 1
+            self.read_task.ai_channels.add_ai_voltage_chan(
+                self.conf["z_board"]["read"]["channel"],
+                min_val=self.conf["z_board"]["read"]["min_val"],
+                max_val=self.conf["z_board"]["read"]["max_val"],
+            )
 
-        # Set the timing of both to the onboard clock so that they are synchronised
-        self.read_task.timing.cfg_samp_clk_timing(
-            rate=self.sample_rate,
-            source="OnboardClock",
-            active_edge=Edge.RISING,
-            sample_mode=AcquisitionType.CONTINUOUS,
-            samps_per_chan=self.n_samples,
-        )
-        self.write_task_z.timing.cfg_samp_clk_timing(
-            rate=self.sample_rate,
-            source="OnboardClock",
-            active_edge=Edge.RISING,
-            sample_mode=AcquisitionType.CONTINUOUS,
-            samps_per_chan=self.n_samples,
-        )
+            # write channels are on board 1: piezo and z galvos
+            self.write_task_z.ao_channels.add_ao_voltage_chan(
+                self.conf["z_board"]["write"]["channel"],
+                min_val=self.conf["z_board"]["write"]["min_val"],
+                max_val=self.conf["z_board"]["write"]["max_val"],
+            )
 
-        self.write_task_xy.timing.cfg_samp_clk_timing(
-            rate=self.sample_rate,
-            source="OnboardClock",
-            active_edge=Edge.RISING,
-            sample_mode=AcquisitionType.CONTINUOUS,
-            samps_per_chan=self.n_samples,
-        )
+            # on board 2: lateral galvos
+            self.write_task_xy.ao_channels.add_ao_voltage_chan(
+                self.conf["xy_board"]["write"]["channel"],
+                min_val=self.conf["xy_board"]["write"]["min_val"],
+                max_val=self.conf["xy_board"]["write"]["max_val"],
+            )
 
-        # This is necessary to synchronise reading and writing
-        self.read_task.triggers.start_trigger.cfg_dig_edge_start_trig(
-            self.conf["z_board"]["sync"]["channel"], Edge.RISING
-        )
+            # Set the timing of both to the onboard clock so that they are synchronised
+            self.read_task.timing.cfg_samp_clk_timing(
+                rate=self.sample_rate,
+                source="OnboardClock",
+                active_edge=Edge.RISING,
+                sample_mode=AcquisitionType.CONTINUOUS,
+                samps_per_chan=self.n_samples,
+            )
+
+            self.write_task_z.timing.cfg_samp_clk_timing(
+                rate=self.sample_rate,
+                source="OnboardClock",
+                active_edge=Edge.RISING,
+                sample_mode=AcquisitionType.CONTINUOUS,
+                samps_per_chan=self.n_samples,
+            )
+
+            self.write_task_xy.timing.cfg_samp_clk_timing(
+                rate=self.sample_rate,
+                source="OnboardClock",
+                active_edge=Edge.RISING,
+                sample_mode=AcquisitionType.CONTINUOUS,
+                samps_per_chan=self.n_samples,
+            )
+
+            # This is necessary to synchronise reading and writing
+            self.read_task.triggers.start_trigger.cfg_dig_edge_start_trig(
+                self.conf["z_board"]["sync"]["channel"], Edge.RISING
+            )
 
     def start(self):
-        self.read_task.start()
-        self.write_task_xy.start()
         self.write_task_z.start()
+        if not self.lfm:
+            self.read_task.start()
+            self.write_task_xy.start()
 
     def write(self):
         self.z_writer.write_many_sample(self.z_array)
-        self.xy_writer.write_many_sample(self.xy_array)
+        if not self.lfm:
+            self.z_writer.write_many_sample(self.z_array)
+            self.xy_writer.write_many_sample(self.xy_array)
 
     def read(self):
         self.z_reader.read_many_sample(
@@ -120,44 +156,44 @@ class NIBoards(AbstractScanInterface):
 
     @z_piezo.setter
     def z_piezo(self, waveform):
-        self.z_array[0, :] = waveform * self.conf["piezo"]["scale"]
+        self.z_array[self.channel_config["z_piezo"], :] = waveform * self.conf["piezo"]["scale"]
 
     @property
     def z_lateral(self):
-        return self.z_array[1, :]
+        return self.z_array[self.channel_config["z_lateral"], :]
 
     @property
     def z_frontal(self):
-        return self.z_array[2, :]
+        return self.z_array[self.channel_config["z_frontal"], :]
 
     @z_lateral.setter
     def z_lateral(self, waveform):
-        self.z_array[1, :] = waveform
+        self.z_array[self.channel_config["z_lateral"], :] = waveform
 
     @z_frontal.setter
     def z_frontal(self, waveform):
-        self.z_array[2, :] = waveform
+        self.z_array[self.channel_config["z_frontal"], :] = waveform
 
     @property
     def camera_trigger(self):
-        return self.z_array[3, :]
+        return self.z_array[self.channel_config["camera_trigger"], :]
 
     @camera_trigger.setter
     def camera_trigger(self, waveform):
-        self.z_array[3, :] = waveform
+        self.z_array[self.channel_config["camera_trigger"], :] = waveform
 
     @property
     def xy_frontal(self):
-        return self.xy_array[1, :]
+        return self.xy_array[self.lateral_scanning_config["frontal"], :]
 
     @xy_frontal.setter
     def xy_frontal(self, waveform):
-        self.xy_array[1, :] = waveform
+        self.xy_array[self.lateral_scanning_config["frontal"], :] = waveform
 
     @property
     def xy_lateral(self):
-        return self.xy_array[0, :]
+        return self.xy_array[self.lateral_scanning_config["lateral"], :]
 
     @xy_lateral.setter
     def xy_lateral(self, waveform):
-        self.xy_array[0, :] = waveform
+        self.xy_array[self.lateral_scanning_config["lateral"], :] = waveform

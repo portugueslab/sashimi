@@ -517,7 +517,7 @@ class State:
             TriggerMode.FREE
             if self.global_state == GlobalState.PREVIEW
             or self.global_state == GlobalState.PLANAR_PREVIEW
-            else TriggerMode.EXTERNAL_TRIGGER
+            else TriggerMode.EXTERNAL_TRIGGER #todo change this here
         )
         if self.global_state == GlobalState.PAUSED:
             camera_params.camera_mode = CameraMode.PAUSED

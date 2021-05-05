@@ -17,7 +17,6 @@ from sashimi.hardware.scanning.__init__ import AbstractScanInterface
 
 conf = read_config()
 
-
 class ScanningState(Enum):
     PAUSED = 1
     PLANAR = 2
@@ -49,6 +48,7 @@ class ZManual:
     piezo: float = 0
     lateral: float = 0
     frontal: float = 0
+    frequency: float = 1
 
 
 @dataclass
@@ -56,6 +56,7 @@ class ZSynced:
     piezo: float = 0
     lateral_sync: Tuple[float, float] = (0.0, 0.0)
     frontal_sync: Tuple[float, float] = (0.0, 0.0)
+    frequency: float = 1
 
 
 @dataclass
@@ -136,8 +137,9 @@ class ScanLoop:
 
         self.lateral_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
         self.frontal_waveform = TriangleWaveform(**asdict(self.parameters.xy.lateral))
-
+        #Calculate time array for oscillations to be written
         self.time = np.arange(self.n_samples) / self.sample_rate
+        #time will be rewritten with a shift leftover from previous oscillations
         self.shifted_time = self.time.copy()
 
         self.wait_signal = wait_signal
@@ -149,6 +151,8 @@ class ScanLoop:
         self.n_samples_read = 0
 
     def n_samples_period(self):
+        if conf["lfm"]:
+            return self.sample_rate
         ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
         ns_frontal = int(round(self.sample_rate / self.frontal_waveform.frequency))
         return lcm(ns_lateral, ns_frontal)
@@ -183,8 +187,9 @@ class ScanLoop:
 
     def fill_arrays(self):
         self.shifted_time[:] = self.time + self.i_sample / self.sample_rate
-        self.board.xy_lateral = self.lateral_waveform.values(self.shifted_time)
-        self.board.xy_frontal = self.frontal_waveform.values(self.shifted_time)
+        if not conf["lfm"]:
+            self.board.xy_lateral = self.lateral_waveform.values(self.shifted_time)
+            self.board.xy_frontal = self.frontal_waveform.values(self.shifted_time)
 
     def write(self):
         self.board.write()
@@ -206,10 +211,11 @@ class ScanLoop:
             if not self.loop_condition():
                 break
             self.fill_arrays()
+            self.check_start()
             self.write()
             self.check_start()
-            self.read()
-            self.i_sample = (self.i_sample + self.n_samples) % self.n_samples_period()
+            if not conf["lfm"]:
+                self.read()
             self.n_acquired += 1
             if first_run:
                 break
@@ -221,7 +227,10 @@ class PlanarScanLoop(ScanLoop):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.camera_pulses = RollingBuffer(self.n_samples_period())
+
+        self.z_waveform = SawtoothWaveform()
+        buffer_len = int(round(self.sample_rate))
+        self.camera_pulses = RollingBuffer(buffer_len)
 
     def loop_condition(self):
         return (
@@ -240,22 +249,33 @@ class PlanarScanLoop(ScanLoop):
             )
             return lcm(n_samples_trigger, super().n_samples_period())
 
-    def fill_arrays(self):
-        # Fill the z values
-        self.board.z_piezo = self.parameters.z.piezo
-        if isinstance(self.parameters.z, ZManual):
-            self.board.z_lateral = self.parameters.z.lateral
-            self.board.z_frontal = self.parameters.z.frontal
-        elif isinstance(self.parameters.z, ZSynced):
-            self.board.z_lateral = calc_sync(
-                self.parameters.z.piezo, self.parameters.z.lateral_sync
-            )
-            self.board.z_frontal = calc_sync(
-                self.parameters.z.piezo, self.parameters.z.frontal_sync
-            )
-        super().fill_arrays()
+    def update_settings(self):
+        super().update_settings()
+        set_impulses(
+            self.camera_pulses.buffer,
+            200, #todo remove hardcoding
+            n_skip_start=0,
+            n_skip_end=0,
+        )
 
-        self.wait_signal.clear()
+    def fill_arrays(self):
+        if not conf["lfm"]:
+            self.board.z_piezo = self.z_waveform.values(self.shifted_time)
+            if isinstance(self.parameters.z, ZManual):
+                self.board.z_lateral = self.parameters.z.lateral
+                self.board.z_frontal = self.parameters.z.frontal
+            elif isinstance(self.parameters.z, ZSynced):
+                self.board.z_lateral = calc_sync(
+                    self.parameters.z.piezo, self.parameters.z.lateral_sync
+                )
+                self.board.z_frontal = calc_sync(
+                    self.parameters.z.piezo, self.parameters.z.frontal_sync
+                )
+            super().fill_arrays()
+
+        else:
+            self.board.camera_trigger = self.camera_pulses.read(self.i_sample, self.n_samples)
+            self.wait_signal.clear()
 
 
 class VolumetricScanLoop(ScanLoop):
