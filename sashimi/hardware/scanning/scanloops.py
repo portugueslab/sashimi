@@ -73,7 +73,7 @@ class TriggeringParameters:
     n_planes: int = 0
     n_skip_start: int = 0
     n_skip_end: int = 0
-    frequency: Union[None, float] = None
+    frequency: Union[None, float] = None #why is this None?
 
 
 @dataclass
@@ -253,7 +253,8 @@ class PlanarScanLoop(ScanLoop):
         super().update_settings()
         set_impulses(
             self.camera_pulses.buffer,
-            200, #todo remove hardcoding
+            200, #frequency with which pulses are sent in ms
+            #todo change hardcoding to self.parameters.triggering.frequency?
             n_skip_start=0,
             n_skip_end=0,
         )
@@ -275,6 +276,7 @@ class PlanarScanLoop(ScanLoop):
 
         else:
             self.board.camera_trigger = self.camera_pulses.read(self.i_sample, self.n_samples)
+
             self.wait_signal.clear()
 
 

@@ -27,8 +27,6 @@ from sashimi.events import LoggedEvent
 
 
 conf = read_config()
-#todo change later
-conf["lfm"] = True
 
 # Dictionary of options for the context within which the scanning has to run.
 scan_conf_dict = dict(mock=open_mockboard)

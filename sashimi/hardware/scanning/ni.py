@@ -43,17 +43,31 @@ class NIBoards(AbstractScanInterface):
 
         self.channel_config = dict()
         self.lateral_scanning_config = dict()
-        #todo change this to read from config file
 
         if self.lfm:
-            self.z_array = np.zeros((1, self.n_samples))
             self.channel_config = dict(camera_trigger=0)
+            self.z_array = np.zeros((1, self.n_samples))
         else:
+            # self.channel_config = dict(camera_trigger=3, z_frontal= 2, z_lateral=1, z_piezo=0)
+            # self.lateral_scanning_config = dict(lateral=0, frontal=1)
+            self.channel_config = self.get_channel_config()
+            self.lateral_scanning_config = self.get_lateral_channel_config()
             self.z_array = np.zeros((4, self.n_samples))
-            self.channel_config = dict(camera_trigger=3, z_frontal= 2, z_lateral=1, z_piezo=0)
-            self.lateral_scanning_config = dict(lateral=0, frontal=1)
 
         self.setup_tasks()
+
+    #functions to read channels from config files
+    #todo: is there a better way?
+    def get_lateral_channel_config(self):
+        channel_max = int(self.conf["xy_board"]["write"]["channel"][-1])
+        self.lateral_scanning_config = dict(lateral=channel_max-1, frontal=channel_max)
+        return self.lateral_scanning_config
+
+    def get_channel_config(self):
+        channel_max = int(self.conf["z_board"]["write"]["channel"][-1])
+        self.channel_config = dict(camera_trigger=channel_max, z_frontal= channel_max-1, z_lateral=channel_max-2, z_piezo=channel_max-3)
+        return self.channel_config
+
 
     @property
     def lfm(self):
