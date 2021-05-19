@@ -348,7 +348,11 @@ permissions are changed, rather than its target’s.</p>
 <dl class="py method">
 <dt id="sashimi.config.Path.link_to">
 <code class="sig-name descname"><span class="pre">link_to</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.link_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.config.Path.link_to" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a hard link pointing to a path named target.</p>
+<dd><p>Make the target path a hard link pointing to this path.</p>
+<p>Note this function does not make this path a hard link to <em>target</em>,
+despite the implication of the function and argument names. The order
+of arguments (target, link) is the reverse of Path.symlink_to, but
+matches that of os.link.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="sashimi.config.Path.lstat">
@@ -489,8 +493,8 @@ os.stat() does.</p>
 <dl class="py method">
 <dt id="sashimi.config.Path.symlink_to">
 <code class="sig-name descname"><span class="pre">symlink_to</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_is_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.symlink_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.config.Path.symlink_to" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make this path a symlink pointing to the given path.
-Note the order of arguments (self, target) is the reverse of os.symlink’s.</p>
+<dd><p>Make this path a symlink pointing to the target path.
+Note the order of arguments (link, target) is the reverse of os.symlink.</p>
 </dd></dl>
 <dl class="py method">
 <dt id="sashimi.config.Path.touch">

@@ -887,7 +887,7 @@
     <span class="c1"># In addition to checking for actual types here, also check for</span>
     <span class="c1"># string annotations.  get_type_hints() won't always work for us</span>
     <span class="c1"># (see https://github.com/python/typing/issues/508 for example),</span>
-    <span class="c1"># plus it's expensive and would require an eval for every stirng</span>
+    <span class="c1"># plus it's expensive and would require an eval for every string</span>
     <span class="c1"># annotation.  So, make a best effort to see if this is a ClassVar</span>
     <span class="c1"># or InitVar using regex's and checking that the thing referenced</span>
     <span class="c1"># is actually of the correct type.</span>
@@ -1027,7 +1027,7 @@
         <span class="c1"># Only process classes that have been processed by our</span>
         <span class="c1"># decorator.  That is, they have a _FIELDS attribute.</span>
         <span class="n">base_fields</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">_FIELDS</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">base_fields</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">base_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">has_dataclass_bases</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">base_fields</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">fields</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
@@ -1473,7 +1473,7 @@
             <span class="k">continue</span>
 
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">_field_type</span> <span class="ow">is</span> <span class="n">_FIELD_INITVAR</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">_field_type</span> <span class="ow">is</span> <span class="n">_FIELD_INITVAR</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">MISSING</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"InitVar </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> "</span>
                                  <span class="s1">'must be specified with replace()'</span><span class="p">)</span>
             <span class="n">changes</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
