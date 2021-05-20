@@ -108,7 +108,7 @@ class SinglePlaneSettings(ParametrizedQt):
         super().__init__()
         self.name = "scanning/z_single_plane"
         self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
-        self.frequency = Param(1.0, (0.1, 1000), unit="planes/s (Hz)")
+        self.frequency = Param(1.0, (1.0, 1000), unit="planes/s (Hz)")
 
 
 class ZRecordingSettings(ParametrizedQt):

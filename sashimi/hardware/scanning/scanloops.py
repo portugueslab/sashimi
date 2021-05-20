@@ -253,9 +253,19 @@ class PlanarScanLoop(ScanLoop):
 
     def update_settings(self):
         super().update_settings()
+        #this is done for preview mode in lfm
+        if (
+                self.parameters.triggering.frequency is None
+                or self.parameters.triggering.frequency == 0
+        ):
+            trigger = 1
+        else:
+            #choose for experiment planar mode for lfm
+            trigger = self.parameters.triggering.frequency
+
         set_impulses(
             self.camera_pulses.buffer,
-            int(self.parameters.triggering.frequency), #frequency with which pulses are sent, cannot be 0 or float
+            int(trigger), #frequency with which pulses are sent, cannot be 0 or float
             n_skip_start=0,
             n_skip_end=0,
         )
