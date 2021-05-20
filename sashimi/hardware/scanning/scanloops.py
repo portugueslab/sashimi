@@ -258,14 +258,14 @@ class PlanarScanLoop(ScanLoop):
                 self.parameters.triggering.frequency is None
                 or self.parameters.triggering.frequency == 0
         ):
-            trigger = 1
+            trigger = 1 #cannot be 0 or None
         else:
             #choose for experiment planar mode for lfm
             trigger = self.parameters.triggering.frequency
 
         set_impulses(
             self.camera_pulses.buffer,
-            int(trigger), #frequency with which pulses are sent, cannot be 0 or float
+            int(trigger), #frequency with which pulses are sent, cannot be float
             n_skip_start=0,
             n_skip_end=0,
         )
@@ -285,6 +285,7 @@ class PlanarScanLoop(ScanLoop):
                     self.parameters.z.piezo, self.parameters.z.frontal_sync
                 )
             super().fill_arrays()
+            self.wait_signal.clear()
 
         else:
             self.wait_signal.clear()
