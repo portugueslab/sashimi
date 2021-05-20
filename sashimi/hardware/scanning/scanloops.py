@@ -231,6 +231,8 @@ class PlanarScanLoop(ScanLoop):
         self.z_waveform = SawtoothWaveform()
         buffer_len = int(round(self.sample_rate))
         self.camera_pulses = RollingBuffer(buffer_len)
+        self.trigger_exp_start = False
+        self.wait_signal.set()
 
     def loop_condition(self):
         return (
@@ -253,11 +255,11 @@ class PlanarScanLoop(ScanLoop):
         super().update_settings()
         set_impulses(
             self.camera_pulses.buffer,
-            200, #frequency with which pulses are sent in ms
-            #todo change hardcoding to self.parameters.triggering.frequency?
+            int(self.parameters.triggering.frequency), #frequency with which pulses are sent, cannot be 0 or float
             n_skip_start=0,
             n_skip_end=0,
         )
+        return True
 
     def fill_arrays(self):
         if not conf["lfm"]:
@@ -275,9 +277,8 @@ class PlanarScanLoop(ScanLoop):
             super().fill_arrays()
 
         else:
-            self.board.camera_trigger = self.camera_pulses.read(self.i_sample, self.n_samples)
-
             self.wait_signal.clear()
+            self.board.camera_trigger = self.camera_pulses.read(self.i_sample, self.n_samples)
 
 
 class VolumetricScanLoop(ScanLoop):
