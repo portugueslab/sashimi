@@ -108,7 +108,11 @@ class SinglePlaneSettings(ParametrizedQt):
         super().__init__()
         self.name = "scanning/z_single_plane"
         self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
+        self.piezo_scan_range = Param((180.0, 220.0), (0.0, 400.0), unit="um",gui=False)
         self.frequency = Param(1.0, (1.0, 1000), unit="planes/s (Hz)")
+        self.n_planes = Param(1,(1,1),gui=False)
+        self.n_skip_start = Param(0, (0, 0),gui=False)
+        self.n_skip_end = Param(0, (0, 0),gui=False)
 
 
 class ZRecordingSettings(ParametrizedQt):
@@ -470,12 +474,20 @@ class State:
 
     @property
     def save_params(self):
-        return convert_save_params(
-            self.save_settings,
-            self.volume_setting,
-            self.camera_settings,
-            self.trigger_settings,
-        )
+        if self.global_state == GlobalState.VOLUME_PREVIEW:
+            return convert_save_params(
+                self.save_settings,
+                self.volume_setting,
+                self.camera_settings,
+                self.trigger_settings,
+            )
+        elif self.global_state == GlobalState.PLANAR_PREVIEW:
+            return convert_save_params(
+                self.save_settings,
+                self.single_plane_settings,
+                self.camera_settings,
+                self.trigger_settings,
+            )
 
     @property
     def scan_params(self):
