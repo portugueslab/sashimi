@@ -61,10 +61,13 @@ class ExternalComm(LoggingProcess):
                     current_config = dict(lightsheet=clean_json(self.current_settings))
                 except Empty:
                     break
+
             if self.trigger_condition():
+                print ("trigger cond", self.trigger_condition())
                 duration = self.comm.trigger_and_receive_duration(current_config)
                 if duration is not None:
                     self.duration_queue.put(duration)
+                    print ("gotten duration of protocol")
                 self.logger.log_message("sent communication")
                 self.start_comm.clear()
         self.close_log()

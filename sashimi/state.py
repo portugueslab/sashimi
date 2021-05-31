@@ -249,8 +249,7 @@ def get_voxel_size(
 def convert_save_params(
     save_settings: SaveSettings,
     scanning_settings: ZRecordingSettings,
-    camera_settings: CameraSettings,
-    trigger_settings: TriggerSettings,
+    camera_settings: CameraSettings
 ):
     n_planes = scanning_settings.n_planes - (
         scanning_settings.n_skip_start + scanning_settings.n_skip_end
@@ -458,6 +457,8 @@ class State:
         # Restart scanning loop if scanning params have changed:
         if self.global_state == GlobalState.VOLUME_PREVIEW:
             self.restart_event.set()
+        if self.global_state == GlobalState.PLANAR_PREVIEW:
+            self.restart_event.set()
 
         self.send_scansave_settings()
 
@@ -478,15 +479,13 @@ class State:
             return convert_save_params(
                 self.save_settings,
                 self.volume_setting,
-                self.camera_settings,
-                self.trigger_settings,
+                self.camera_settings
             )
         elif self.global_state == GlobalState.PLANAR_PREVIEW:
             return convert_save_params(
                 self.save_settings,
                 self.single_plane_settings,
-                self.camera_settings,
-                self.trigger_settings,
+                self.camera_settings
             )
 
     @property
@@ -652,8 +651,11 @@ class State:
         else:
             self.external_comm.is_triggered_event.clear()
 
-    def send_manual_duration(self):
-        self.experiment_duration_queue.put(self.trigger_settings.experiment_duration)
+    def send_manual_duration(self, mode: bool):
+        if mode:
+            self.experiment_duration_queue.put(self.trigger_settings.experiment_duration)
+        else:
+            pass
 
     def wrap_up(self):
         self.stop_event.set()

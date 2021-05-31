@@ -63,7 +63,10 @@ class SaveWidget(QWidget):
             self.wid_manual_duration.setEnabled(False)
             self.state.trigger_settings.is_triggered = True
             self.state.set_trigger_mode(True)
+            self.state.send_manual_duration(False)
         else:
             self.wid_manual_duration.setEnabled(True)
             self.state.trigger_settings.is_triggered = False
             self.state.set_trigger_mode(False)
+            self.state.send_manual_duration(True)
+
