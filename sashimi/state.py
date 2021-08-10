@@ -109,10 +109,10 @@ class SinglePlaneSettings(ParametrizedQt):
         self.name = "scanning/z_single_plane"
         self.piezo = Param(200.0, (0.0, 400.0), unit="um", gui="slider")
         self.piezo_scan_range = Param((180.0, 220.0), (0.0, 400.0), unit="um",gui=False)
-        self.frequency = Param(1.0, (1.0, 1000), unit="planes/s (Hz)")
-        self.n_planes = Param(1,(1,1),gui=False)
-        self.n_skip_start = Param(0, (0, 0),gui=False)
-        self.n_skip_end = Param(0, (0, 0),gui=False)
+        self.frequency = Param(1.0, (1.0, 1000), unit="planes/s (Hz)") #todo why does this need to be 4?
+        self.n_planes = Param(1.0, (1, 1), gui=False)
+        self.n_skip_start = Param(0, (0, 0), gui=False)
+        self.n_skip_end = Param(0, (0, 0), gui=False)
 
 
 class ZRecordingSettings(ParametrizedQt):
@@ -573,6 +573,10 @@ class State:
         self.camera.image_queue.empty()
         time.sleep(0.01)
         self.is_saving_event.set()
+        self.experiment_start_event.set()
+        #todo i added this because this event was set nowhere but i think in the volumetric scanning loop maybe it takes place
+        #todo check if this breaks the volumetric scanning and works on ls computer
+
 
     def end_experiment(self):
         self.logger.log_message("experiment ended")
