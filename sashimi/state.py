@@ -481,7 +481,7 @@ class State:
                 self.volume_setting,
                 self.camera_settings
             )
-        elif self.global_state == GlobalState.PLANAR_PREVIEW:
+        if self.global_state == GlobalState.PLANAR_PREVIEW:
             return convert_save_params(
                 self.save_settings,
                 self.single_plane_settings,
@@ -651,11 +651,8 @@ class State:
         else:
             self.external_comm.is_triggered_event.clear()
 
-    def send_manual_duration(self, mode: bool):
-        if mode:
-            self.experiment_duration_queue.put(self.trigger_settings.experiment_duration)
-        else:
-            pass
+    def send_manual_duration(self):
+        self.experiment_duration_queue.put(self.trigger_settings.experiment_duration)
 
     def wrap_up(self):
         self.stop_event.set()
