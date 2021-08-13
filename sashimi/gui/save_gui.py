@@ -36,6 +36,7 @@ class SaveWidget(QWidget):
         self.state.trigger_settings.sig_param_changed.connect(
             self.state.send_manual_duration
         )
+        self.wid_manual_duration.refresh_widgets() #minor bug fix. updating manual duration was not send again
 
         self.manual_duration_chk.setChecked(True)
 

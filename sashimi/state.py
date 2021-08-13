@@ -573,7 +573,7 @@ class State:
         self.camera.image_queue.empty()
         time.sleep(0.01)
         self.is_saving_event.set()
-        self.experiment_start_event.set()
+        self.experiment_start_event.set() # bug fix
         #todo i added this because this event was set nowhere but i think in the volumetric scanning loop maybe it takes place
         #todo check if this breaks the volumetric scanning and works on ls computer
 

@@ -262,6 +262,7 @@ class PlanarScanLoop(ScanLoop):
         else:
             #choose for experiment planar mode for lfm
             trigger = self.parameters.triggering.frequency
+            self.sample_rate =  self.parameters.triggering.frequency #overwriting sample rate with input from GUI
 
         set_impulses(
             self.camera_pulses.buffer,

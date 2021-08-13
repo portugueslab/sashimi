@@ -130,6 +130,7 @@ class MainWindow(QMainWindow):
         self.wid_save_options.wid_save_options.refresh_widgets()
         self.wid_save_options.set_locationbutton()
 
+
     # TODO: Avoid hierarchy in GUI by emitting a PyQt5.QtCore.pyqtSignal() when experiment ends/aborts
     def check_end_experiment(self):
         if self.st.saver.saver_stopped_signal.is_set():
