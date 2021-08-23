@@ -153,7 +153,6 @@ class NIBoards(AbstractScanInterface):
     def write(self):
         self.z_writer.write_many_sample(self.z_array)
         if not self.lfm:
-            self.z_writer.write_many_sample(self.z_array)
             self.xy_writer.write_many_sample(self.xy_array)
 
     def read(self):
