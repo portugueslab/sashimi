@@ -153,9 +153,10 @@ class ScanLoop:
     def n_samples_period(self):
         if conf["lfm"]:
             return self.sample_rate
-        ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
-        ns_frontal = int(round(self.sample_rate / self.frontal_waveform.frequency))
-        return lcm(ns_lateral, ns_frontal)
+        else:
+            ns_lateral = int(round(self.sample_rate / self.lateral_waveform.frequency))
+            ns_frontal = int(round(self.sample_rate / self.frontal_waveform.frequency))
+            return lcm(ns_lateral, ns_frontal)
 
     def update_settings(self):
         """Update parameters and return True only if got new parameters."""
@@ -190,6 +191,7 @@ class ScanLoop:
         if not conf["lfm"]:
             self.board.xy_lateral = self.lateral_waveform.values(self.shifted_time)
             self.board.xy_frontal = self.frontal_waveform.values(self.shifted_time)
+
 
     def write(self):
         self.board.write()
@@ -285,12 +287,13 @@ class PlanarScanLoop(ScanLoop):
                 self.board.z_frontal = calc_sync(
                     self.parameters.z.piezo, self.parameters.z.frontal_sync
                 )
+            self.board.camera_trigger = self.camera_pulses.read(self.i_sample, self.n_samples) #added this for planar triggering option
             super().fill_arrays()
             self.wait_signal.clear()
 
         else:
-            self.wait_signal.clear()
             self.board.camera_trigger = self.camera_pulses.read(self.i_sample, self.n_samples)
+            self.wait_signal.clear()
 
 
 class VolumetricScanLoop(ScanLoop):

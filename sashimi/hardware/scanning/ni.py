@@ -48,8 +48,6 @@ class NIBoards(AbstractScanInterface):
             self.channel_config = dict(camera_trigger=0)
             self.z_array = np.zeros((1, self.n_samples))
         else:
-            # self.channel_config = dict(camera_trigger=3, z_frontal= 2, z_lateral=1, z_piezo=0)
-            # self.lateral_scanning_config = dict(lateral=0, frontal=1)
             self.channel_config = self.get_channel_config()
             self.lateral_scanning_config = self.get_lateral_channel_config()
             self.z_array = np.zeros((4, self.n_samples))
@@ -65,7 +63,7 @@ class NIBoards(AbstractScanInterface):
 
     def get_channel_config(self):
         channel_max = int(self.conf["z_board"]["write"]["channel"][-1])
-        self.channel_config = dict(camera_trigger=channel_max, z_frontal= channel_max-1, z_lateral=channel_max-2, z_piezo=channel_max-3)
+        self.channel_config = dict(camera_trigger=channel_max, z_frontal=channel_max-1, z_lateral=channel_max-2, z_piezo=channel_max-3)
         return self.channel_config
 
 
@@ -145,15 +143,15 @@ class NIBoards(AbstractScanInterface):
             )
 
     def start(self):
-        self.write_task_z.start()
         if not self.lfm:
             self.read_task.start()
             self.write_task_xy.start()
+        self.write_task_z.start()
 
     def write(self):
-        self.z_writer.write_many_sample(self.z_array)
         if not self.lfm:
             self.xy_writer.write_many_sample(self.xy_array)
+        self.z_writer.write_many_sample(self.z_array)
 
     def read(self):
         self.z_reader.read_many_sample(
