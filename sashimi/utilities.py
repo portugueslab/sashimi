@@ -34,7 +34,7 @@ def get_last_parameters(parameter_queue, timeout=0.0001):
     params = None
     while True:
         try:
-            params = parameter_queue.get(timeout=timeout)
+            params = parameter_queue.get(timeout=timeout, block=False)
         except Empty:
             break
     return params
