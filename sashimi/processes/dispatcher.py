@@ -93,13 +93,13 @@ class VolumeDispatcher(LoggingProcess):
             self.saver_queue.clear()
             while self.wait_signal.is_set():
                 try:
-                    _ = self.camera_queue.get(timeout=TIMEOUT_S)
+                    _ = self.camera_queue.get(timeout=TIMEOUT_S, block=False)
                 except Empty:
                     pass
             self.logger.log_message("wait over")
             self.i_plane = 0
         try:
-            current_frame = self.camera_queue.get(timeout=TIMEOUT_S)
+            current_frame = self.camera_queue.get(timeout=TIMEOUT_S, block=False)
             self.process_frame(current_frame)
         except Empty:
             pass
