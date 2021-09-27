@@ -18,7 +18,7 @@ from sashimi.hardware.scanning.__init__ import AbstractScanInterface
 conf = read_config()
 
 
-class ScanningState(Enum):
+class ScanningMode(Enum):
     PAUSED = 1
     PLANAR = 2
     VOLUMETRIC = 3
@@ -77,7 +77,7 @@ class TriggeringParameters:
 
 @dataclass
 class ScanParameters:
-    state: ScanningState = ScanningState.PAUSED
+    mode: ScanningMode = ScanningMode.PAUSED
     experiment_state: ExperimentPrepareState = ExperimentPrepareState.PREVIEW
     z: Union[ZScanning, ZManual, ZSynced] = ZManual()
     xy: PlanarScanning = PlanarScanning()
@@ -224,9 +224,7 @@ class PlanarScanLoop(ScanLoop):
         self.camera_pulses = RollingBuffer(self.n_samples_period())
 
     def loop_condition(self):
-        return (
-            super().loop_condition() and self.parameters.state == ScanningState.PLANAR
-        )
+        return super().loop_condition() and self.parameters.mode == ScanningMode.PLANAR
 
     def n_samples_period(self):
         if (
@@ -278,8 +276,7 @@ class VolumetricScanLoop(ScanLoop):
 
     def loop_condition(self):
         return (
-            super().loop_condition()
-            and self.parameters.state == ScanningState.VOLUMETRIC
+            super().loop_condition() and self.parameters.mode == ScanningMode.VOLUMETRIC
         )
 
     def check_start(self):
@@ -299,7 +296,7 @@ class VolumetricScanLoop(ScanLoop):
         if not updated and not self.first_update:
             return False
 
-        if self.parameters.state != ScanningState.VOLUMETRIC:
+        if self.parameters.mode != ScanningMode.VOLUMETRIC:
             return True
 
         if self.parameters != self.old_parameters:
