@@ -103,6 +103,15 @@ class CalibrationZSettings(ParametrizedQt):
         self.frontal = Param(0.0, (-2.0, 2.0), gui="slider")
 
 
+class StageMotorSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__()
+        self.name = "Stage Motors"
+        self.z_axis = Param(1.0, (0.0, 13.0), unit="mm", gui="slider")
+        self.x_axis = Param(1.0, (0.0, 13.0), unit="mm", gui="slider")
+        self.y_axis = Param(1.0, (0.0, 13.0), unit="mm", gui="slider")
+
+
 class SinglePlaneSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
@@ -389,6 +398,7 @@ class State:
         self.global_state = GlobalState.PAUSED
 
         self.planar_setting = PlanarScanningSettings()
+        self.stage_setting = StageMotorSettings()
         self.light_source_settings = LightSourceSettings()
         self.light_source_settings.params.intensity.unit = (
             self.light_source.intensity_units
@@ -402,6 +412,7 @@ class State:
 
         for setting in [
             self.planar_setting,
+            self.stage_setting,
             self.light_source_settings,
             self.single_plane_settings,
             self.volume_setting,
