@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (
 from lightparam.gui import ParameterGui
 
 
-
+# stage motors setting for LFM
 class StageMotorWidget(QWidget):
     def __init__(self, state):
         super().__init__()

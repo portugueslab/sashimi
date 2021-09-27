@@ -102,7 +102,7 @@ class CalibrationZSettings(ParametrizedQt):
         self.lateral = Param(0.0, (-2.0, 2.0), gui="slider")
         self.frontal = Param(0.0, (-2.0, 2.0), gui="slider")
 
-
+# stage motors setting for LFM
 class StageMotorSettings(ParametrizedQt):
     def __init__(self):
         super().__init__()
