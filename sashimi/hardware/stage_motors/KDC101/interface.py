@@ -1,4 +1,4 @@
-import KCube_py_int as kdc
+import KDC101.KCube_py_int as kdc
 from ctypes import (
     c_short,
     c_int,
@@ -9,8 +9,8 @@ import time
 import numpy as np
 import pandas as pd
 from time import sleep
-from sashimi.hardware.stage_motors.interface import AbstractMotor
-from sashimi.hardware.stage_motors.KDC101.utils import *
+from interface import AbstractMotor
+from KDC101.utils import *
 
 #Building our functions on top of the KCube class from Thorlabs
 class KC_motor(AbstractMotor):
@@ -24,6 +24,7 @@ class KC_motor(AbstractMotor):
     # Default values set for each motor upon initialization, can be altered
     def __init__(self, serial_no, poll=200, pause=0.4, acc=800, vel=2e6,
                  motor_axis=str, max_range=13.0, verbose=False):
+        super().__init__(serial_no, max_range)
         """
 
         Parameters
@@ -40,26 +41,30 @@ class KC_motor(AbstractMotor):
         isOpen = is the motor active
         msg = array of messages to keep track of errors
         """
+        
         self.id = c_char_p(bytes(serial_no, "utf-8"))
-        self.poll = poll
-        self.pause = pause
-        self.acc = acc
-        self.vel = vel
+        self.poll = c_int(poll)
+        self._pause = pause
+        self.acc = kdc.c_int(acc)
+        self.vel = kdc.c_int(int(vel))
         self.msg = []
         self.verbose = verbose
         self.motor_axis = motor_axis #x,y,z for logging
         self.max_range = max_range
 
-        # self.max_vel = kdc.c_int()  # to work on it
-        # self.acc = kdc.c_int()  # to work on it
+        self.max_vel = kdc.c_int(int(2e7))  # to work on it
+#         self.acc = kdc.c_int(2000)  # to work on it
 
         self.isOpen = False
+    
+    
+    def clear_msg(self):
+        self.msg = []
 
-        KC_motor.set_Polling(self, self.poll) #polling
-        KC_motor.set_Pause(self, self.pause) #pause
-        KC_motor.set_Verbose(self, self.verbose) #verbose
-        KC_motor.set_velParams(self)
-
+    @property
+    def axis(self):
+        return self.motor_axis
+    
     @property
     def get_id(self):
         return self.id
@@ -79,26 +84,38 @@ class KC_motor(AbstractMotor):
 
     @property
     def pause(self):
-        return self.pause
+        return self._pause
 
     @pause.setter
-    def pause(self, sleep_s=0.4):
-        self.pause = sleep_s
+    def pause(self, sleep_s = 0.4):
+        self._pause = sleep_s
 
     @property
     def verbose(self):
-        return self.pause
+        return self.ver
 
     @verbose.setter
     def verbose(self, verb=False):
         self.ver = verb
+        
+    @property
+    def maximum_range(self):
+        return self.max_range
+
+    @maximum_range.setter
+    def maximum_range(self, max_range=13.0):
+        self.max_range = float(max_range)
 
     @property
-    def position(self):
+    def position_abs(self):
         return kdc.CC_GetPosition(self.id)
-
+    
     @property
-    def vel_params(self):
+    def position_mm(self):
+        return abs_to_mm(kdc.CC_GetPosition(self.id), False)
+
+    
+    def get_vel_params(self):
         """
         Gets the velocity parameters:
         - acceleration
@@ -109,8 +126,8 @@ class KC_motor(AbstractMotor):
             self.msg.append("Requested vel Params.")
 
             # get parameters
-            if kdc.CC_GetVelParams(self.id, byref(self.acc), byref(self.max_vel)) == 0:
-                self.msg.append(f"acc = {self.acc} - max_vel = {self.max_vel}.")
+            if kdc.CC_GetVelParams(self.id, byref(self.acc), byref(self.vel)) == 0:
+                self.msg.append(f"acc = {self.acc} - max_vel = {self.vel}.")
 
                 if self.ver:
                     return [self.acc, self.max_vel, self.msg]
@@ -118,14 +135,15 @@ class KC_motor(AbstractMotor):
                     return [self.acc, self.max_vel]
             else:
                 self.msg.append("Error - Couldn't get vel params.")
-                if self.ver: return self.msg
+                if self.ver: 
+                    return self.msg
         else:
             self.msg.append("Error - Couldn't request vel params.")
             if self.ver:
                 return self.msg
 
-    @vel_params.setter
-    def vel_params(self, acc = 800, vel = 2e6):
+    
+    def set_vel_params(self, acc = 800, vel = 2e6):
         """
 
         Gets the velocity parameters:
@@ -193,7 +211,8 @@ class KC_motor(AbstractMotor):
         else:
             self.msg.append("Stop - Error: couldn't close the motor.")
 
-        if self.ver: return self.msg
+        if self.ver: 
+            return self.msg
 
     def home(self):
         """
@@ -202,7 +221,7 @@ class KC_motor(AbstractMotor):
         """
         if kdc.CC_Home(self.id) == 0:
             self.msg.append("Homing started.")
-            sleep(self.pause)
+            sleep(self._pause)
 
         else:
             self.msg.append("Couldn't home.")
@@ -227,7 +246,10 @@ class KC_motor(AbstractMotor):
         # move to position
         kdc.CC_MoveAbsolute(self.id)
         self.msg.append(f"Moving to {position}")
-        sleep(self.pause)
+        sleep(self._pause)
+        
+        if self.ver:
+            return self.msg
 
     def move_to(self, position):
         """
@@ -242,6 +264,9 @@ class KC_motor(AbstractMotor):
             self.move_to_abs(abs_to_mm(position, True))
         else:
             self.msg.append("Error - position is greater than max range! {} > {}".format(position,self.max_range))
+            
+        if self.ver:
+            return self.msg
 
     def check_limits(self, mm_position):
         """
@@ -250,8 +275,8 @@ class KC_motor(AbstractMotor):
         Returns: True or False
 
         """
-        if self.max_range <= mm_position:
+#         print(mm_position)
+        if self.max_range >= mm_position:
             return True
         else:
             return False
-
