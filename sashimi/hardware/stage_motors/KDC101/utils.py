@@ -172,7 +172,7 @@ def move_to_mm(motors, end_pos, ths = 100-1e-3, verbose = False):
             sleep(motors[0]._pause)
             
             if verbose:
-                clear_output(wait=True)
+                
                 print("Moving motors..")
                 for i, p in enumerate(pos):
                     print(f"Motor  - pos = {p} - desired pos = {end_pos[i]}")
@@ -181,7 +181,7 @@ def move_to_mm(motors, end_pos, ths = 100-1e-3, verbose = False):
         
         #motor at the desired position
         if verbose:
-            clear_output(wait=True)
+            
             print("Motors position:")
             for i, p in enumerate(pos):
                     print(f"Motor  - pos = {p} - desired pos = {end_pos[i]}")
@@ -233,7 +233,7 @@ def move_to_abs(motors, end_pos, ths = 100-1e-3, verbose = False):
             sleep(motors[0]._pause)
             
             if verbose:
-                clear_output(wait=True)
+                
                 print("Moving motors..")
                 for i, p in enumerate(pos):
                     print(f"Motor  - pos = {p} - desired pos = {end_pos[i]}")
@@ -242,7 +242,7 @@ def move_to_abs(motors, end_pos, ths = 100-1e-3, verbose = False):
         
         #motor at the desired position
         if verbose:
-            clear_output(wait=True)
+            
             print("Motors position:")
             for i, p in enumerate(pos):
                     print(f"Motor  - pos = {p} - desired pos = {end_pos[i]}")
