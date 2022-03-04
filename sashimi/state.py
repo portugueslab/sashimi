@@ -250,6 +250,7 @@ def convert_save_params(
     save_settings: SaveSettings,
     scanning_settings: ZRecordingSettings,
     camera_settings: CameraSettings
+        #Todo: why did i delete the trigger settings here?
 ):
     n_planes = scanning_settings.n_planes - (
         scanning_settings.n_skip_start + scanning_settings.n_skip_end
@@ -576,6 +577,8 @@ class State:
         self.experiment_start_event.set() # bug fix
         #todo i added this because this event was set nowhere but i think in the volumetric scanning loop maybe it takes place
         #todo check if this breaks the volumetric scanning and works on ls computer
+        #todo this could also be potential 'double start' for ls, maybe add this as option for if conf.lfm
+
 
 
     def end_experiment(self):

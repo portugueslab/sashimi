@@ -254,6 +254,7 @@ class PlanarScanLoop(ScanLoop):
             return lcm(n_samples_trigger, super().n_samples_period())
 
     def update_settings(self):
+        #todo check if this is also working for planar trigger mode Normal (no lfm)
         super().update_settings()
         #this is done for preview mode in lfm
         if (
@@ -292,6 +293,7 @@ class PlanarScanLoop(ScanLoop):
             self.wait_signal.clear()
 
         else:
+            #just write the trigger for the lfm, no scanning in lateral required
             self.board.camera_trigger = self.camera_pulses.read(self.i_sample, self.n_samples)
             self.wait_signal.clear()
 

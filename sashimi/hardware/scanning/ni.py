@@ -74,7 +74,7 @@ class NIBoards(AbstractScanInterface):
     def setup_tasks(self):
         # Configure the channels
         if self.lfm:
-            # write channels are on board 1: piezo and z galvos
+            # write channels are on board 1: We just use the trigger here for triggered planar lfm aquisition
             self.write_task_z.ao_channels.add_ao_voltage_chan(
                 self.conf["z_board"]["write"]["channel"],
                 min_val=self.conf["z_board"]["write"]["min_val"],
@@ -88,7 +88,6 @@ class NIBoards(AbstractScanInterface):
                 sample_mode=AcquisitionType.CONTINUOUS,
                 samps_per_chan=self.n_samples,
             )
-
 
         else:
             # read channel is only the piezo position on board 1
