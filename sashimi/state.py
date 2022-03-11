@@ -432,6 +432,7 @@ class State:
         self.logger.log_message("initialized")
 
         self.voxel_size = None
+        print("init state")
 
     def restore_tree(self, restore_file):
         with open(restore_file, "r") as f:
