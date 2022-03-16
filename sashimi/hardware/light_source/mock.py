@@ -7,6 +7,13 @@ class MockLaser(AbstractLightSource):
         self._current = 0
         self.intensity_units = "mocks"
 
+    def set_power(self, current):
+        """Sets power of laser based on self.intensity and self.intensity_units"""
+        pass
+    
+    def close(self):
+        pass
+    
     @property
     def intensity(self):
         return self._current
@@ -22,3 +29,5 @@ class MockLaser(AbstractLightSource):
     @status.setter
     def status(self, exp_val):
         self._status = exp_val
+        
+    

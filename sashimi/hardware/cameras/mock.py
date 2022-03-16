@@ -52,6 +52,14 @@ class MockCamera(AbstractCamera):
     def roi(self, exp_val: tuple):
         self._roi = exp_val
         self.prepare_mock_image()
+        
+    @property
+    def trigger_mode(self):
+        return None
+
+    @trigger_mode.setter
+    def trigger_mode(self, exp_val):
+        pass
 
     def prepare_mock_image(self):
         self.current_mock_image = block_reduce(
@@ -76,3 +84,21 @@ class MockCamera(AbstractCamera):
         else:
             self.previous_frame_time = self.current_time
         return frames
+
+    def start_acquisition(self):
+        """
+        Allocate as many frames as will fit in 2GB of memory and start data acquisition.
+        """
+        pass
+
+    def stop_acquisition(self):
+        """
+        Stop data acquisition and release the memory allocated for frames.
+        """
+        pass
+
+    def shutdown(self):
+        """
+        Close down the connection to the camera.
+        """
+        self.stop_acquisition()
