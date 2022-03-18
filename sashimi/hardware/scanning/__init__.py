@@ -1,11 +1,13 @@
+import abc
 from contextlib import contextmanager
+from abc import ABC, abstractmethod
 
 
 class ScanningError(Exception):
     pass
 
 
-class AbstractScanInterface:
+class AbstractScanInterface(ABC):
     def __init__(self, sample_rate, n_samples, conf, *args, **kwargs):
         self.sample_rate = sample_rate
         self.n_samples = n_samples
