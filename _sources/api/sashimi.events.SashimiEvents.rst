@@ -20,12 +20,12 @@ sashimi.events.SashimiEvents
    .. autosummary::
       :inherited-members:
    
-      ~SashimiEvents.CLOSE_ALL
+      ~SashimiEvents.WAITING_FOR_TRIGGER
+      ~SashimiEvents.SEND_EXT_TRIGGER
       ~SashimiEvents.IS_SAVING
       ~SashimiEvents.NOISE_SUBTRACTION_ACTIVE
-      ~SashimiEvents.RESTART_SCANNING
       ~SashimiEvents.SAVING_STOPPED
-      ~SashimiEvents.SEND_EXT_TRIGGER
-      ~SashimiEvents.WAITING_FOR_TRIGGER
+      ~SashimiEvents.CLOSE_ALL
+      ~SashimiEvents.RESTART_SCANNING
    
    

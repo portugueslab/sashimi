@@ -15,4 +15,12 @@ sashimi.utilities.Enum
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :inherited-members:
+   
+      ~Enum.name
+      ~Enum.value
+   
    
