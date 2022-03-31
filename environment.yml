@@ -1,4 +1,4 @@
-name: sashimi
+name: sashimi2
 channels:
   - conda-forge
 dependencies:
@@ -6,9 +6,8 @@ dependencies:
   - pip
   - pyqt
   - numpy
-  - llvmlite=0.36.0
   - scipy
-  - numba
+  - numba >= 0.55.1
   - pandas
   - pytables
   - ffmpeg
