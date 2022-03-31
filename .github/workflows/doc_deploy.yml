@@ -1,4 +1,4 @@
-name: 🚀 page_deploy
+name: 🚀 Deploy Documentation
 
 on:
   push:
