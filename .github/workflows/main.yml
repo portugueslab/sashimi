@@ -1,6 +1,25 @@
-name: tests
+name: 🤖 Lint - Tests - Deploy
 
-on: push
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types:
+      - assigned
+      - unassigned
+      - labeled
+      - unlabeled
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+      - locked
+      - unlocked
+      - review_requested
+      - review_request_
+  workflow_dispatch: 
 
 jobs:
   lint:
