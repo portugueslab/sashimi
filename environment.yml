@@ -1,4 +1,4 @@
-name: sashimi2
+name: sashimi
 channels:
   - conda-forge
 dependencies:
