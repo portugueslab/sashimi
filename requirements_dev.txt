@@ -4,6 +4,6 @@ pytest
 gitpython
 coverage
 pre-commit
-black
+black==22.3.0
 flake8
 isort

@@ -1,11 +1,25 @@
-name: page_deploy
+name: 🚀 page_deploy
 
-on: push
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
-  # push:
-  #   branches:
-  #     - main
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - assigned
+      - unassigned
+      - labeled
+      - unlabeled
+      - opened
+      - edited
+      - reopened
+      - synchronize
+      - ready_for_review
+      - locked
+      - unlocked
+      - review_requested
+      - review_request_
+  workflow_dispatch: 
 
 jobs:
   deploy-book:
