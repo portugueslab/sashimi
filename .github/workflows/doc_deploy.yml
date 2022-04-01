@@ -1,9 +1,9 @@
-name: 🚀 page_deploy
+name: 🚀 Deploy Documentation
 
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     types:
       - assigned

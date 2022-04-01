@@ -1,22 +1,19 @@
-- file: index
-
-- part: Overview
+format: jb-book
+root: index
+parts:
+- caption: Overview
   chapters:
-    - file: timeline
-
-- part: Configuration
+  - file: timeline
+- caption: Configuration
   chapters:
-    - file: configuration/installation
-    - file: configuration/configuration
-
-- part: Development
+  - file: configuration/installation
+  - file: configuration/configuration
+- caption: Development
   chapters:
-    - file: development/code_organization
-
-- part: Hardware
+  - file: development/code_organization
+- caption: Hardware
   chapters:
-    - file: hardware/hardware
-
-- part: Api
+  - file: hardware/hardware
+- caption: Api
   chapters:
-    - file: api/index
+  - file: api/index
