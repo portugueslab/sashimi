@@ -12,7 +12,7 @@ with open("README.md") as f:
 
 setup(
     name="sashimi",
-    version="0.2.0",
+    version="0.2.1",
     author="Vilim Stih @portugueslab",
     author_email="vilim@neuro.mpg.de",
     packages=find_packages(),

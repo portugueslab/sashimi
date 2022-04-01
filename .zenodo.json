@@ -1,0 +1,25 @@
+{
+   "description":"<p>Software from the Portugues lab to control the hardware of a lightsheet microscope. This is a pre-release Zenodo archiving.</p>",
+   "title":"Sashimi",
+   "creators":[
+      {
+         "name":"\u0160tih, Vilim"
+      },
+      {
+         "name":"Asua, Diego"
+      },
+      {
+         "orcid":"0000-0003-4001-0564",
+         "affiliation":"Institute of Neuroscience, Technical University of Munich, Germany",
+         "name":"Petrucco, Luigi"
+      },
+      {
+         "name":"Puppo, Federico"
+      },
+      {
+         "orcid":"0000-0002-1495-9314",
+         "affiliation":"Institute of Neuroscience, Technical University of Munich, Germany",
+         "name":"Portugues, Ruben"
+      }
+   ]
+}

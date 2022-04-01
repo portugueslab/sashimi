@@ -12,5 +12,5 @@ toml
 scopecuisine>=0.1.2
 pyqtgraph
 napari
-numba
+numba >= 0.55.1
 scikit-image
