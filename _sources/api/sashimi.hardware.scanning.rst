@@ -15,6 +15,7 @@
       :nosignatures:
       :toctree:
    
+      ABC
       AbstractScanInterface
    
    
@@ -24,6 +25,7 @@
    .. rubric:: Functions
 
    
+   .. autofunction:: abstractmethod
    .. autofunction:: contextmanager
    .. autofunction:: open_abstract_interface
    

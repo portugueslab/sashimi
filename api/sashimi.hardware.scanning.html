@@ -2,7 +2,7 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.hardware.scanning.AbstractScanInterface" href="sashimi.hardware.scanning.AbstractScanInterface.html" /><link rel="prev" title="sashimi.config.Path" href="sashimi.config.Path.html" />
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.hardware.scanning.ABC" href="sashimi.hardware.scanning.ABC.html" /><link rel="prev" title="sashimi.config.Path" href="sashimi.config.Path.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.03.04"/>
         <title>sashimi.hardware.scanning - Sashimi</title>
@@ -214,6 +214,7 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">sashimi.hardware.scanning</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.ABC.html">sashimi.hardware.scanning.ABC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.AbstractScanInterface.html">sashimi.hardware.scanning.AbstractScanInterface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="sashimi.hardware.scanning.ScanningError.html">sashimi.hardware.scanning.ScanningError</a></li>
 </ul>
@@ -261,12 +262,37 @@
 <col style="width: 90%"/>
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="sashimi.hardware.scanning.AbstractScanInterface.html#sashimi.hardware.scanning.AbstractScanInterface" title="sashimi.hardware.scanning.AbstractScanInterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractScanInterface</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="sashimi.hardware.scanning.ABC.html#sashimi.hardware.scanning.ABC" title="sashimi.hardware.scanning.ABC"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ABC</span></code></a></p></td>
+<td><p>Helper class that provides a standard way to create an ABC using inheritance.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="sashimi.hardware.scanning.AbstractScanInterface.html#sashimi.hardware.scanning.AbstractScanInterface" title="sashimi.hardware.scanning.AbstractScanInterface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractScanInterface</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table></div>
 <p class="rubric">Functions</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="sashimi.hardware.scanning.abstractmethod">
+<span class="sig-prename descclassname"><span class="pre">sashimi.hardware.scanning.</span></span><span class="sig-name descname"><span class="pre">abstractmethod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">funcobj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/abc.html#abstractmethod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.hardware.scanning.abstractmethod" title="Permalink to this definition">#</a></dt>
+<dd><p>A decorator indicating abstract methods.</p>
+<p>Requires that the metaclass is ABCMeta or derived from it.  A
+class that has a metaclass derived from ABCMeta cannot be
+instantiated unless all of its abstract methods are overridden.
+The abstract methods can be called using any of the normal
+‘super’ call mechanisms.  abstractmethod() may be used to declare
+abstract methods for properties and descriptors.</p>
+<p>Usage:</p>
+<blockquote>
+<div><dl>
+<dt>class C(metaclass=ABCMeta):</dt><dd><p>@abstractmethod
+def my_abstract_method(self, …):</p>
+<blockquote>
+<div><p>…</p>
+</div></blockquote>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="sashimi.hardware.scanning.contextmanager">
 <span class="sig-prename descclassname"><span class="pre">sashimi.hardware.scanning.</span></span><span class="sig-name descname"><span class="pre">contextmanager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/contextlib.html#contextmanager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.hardware.scanning.contextmanager" title="Permalink to this definition">#</a></dt>
@@ -354,12 +380,12 @@ try:</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="sashimi.hardware.scanning.AbstractScanInterface.html">
+          <a class="next-page" href="sashimi.hardware.scanning.ABC.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">sashimi.hardware.scanning.AbstractScanInterface</div>
+                <div class="title">sashimi.hardware.scanning.ABC</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>

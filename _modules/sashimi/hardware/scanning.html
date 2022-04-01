@@ -214,6 +214,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../api/sashimi.hardware.scanning.html">sashimi.hardware.scanning</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../api/sashimi.hardware.scanning.ABC.html">sashimi.hardware.scanning.ABC</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/sashimi.hardware.scanning.AbstractScanInterface.html">sashimi.hardware.scanning.AbstractScanInterface</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../api/sashimi.hardware.scanning.ScanningError.html">sashimi.hardware.scanning.ScanningError</a></li>
 </ul>
@@ -254,73 +255,89 @@
         <article role="main">
           <h1>Source code for sashimi.hardware.scanning</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 
 
 <div class="viewcode-block" id="ScanningError"><a class="viewcode-back" href="../../../api/sashimi.hardware.scanning.ScanningError.html#sashimi.hardware.scanning.ScanningError">[docs]</a><span class="k">class</span> <span class="nc">ScanningError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="AbstractScanInterface"><a class="viewcode-back" href="../../../api/sashimi.hardware.scanning.AbstractScanInterface.html#sashimi.hardware.scanning.AbstractScanInterface">[docs]</a><span class="k">class</span> <span class="nc">AbstractScanInterface</span><span class="p">:</span>
+<div class="viewcode-block" id="AbstractScanInterface"><a class="viewcode-back" href="../../../api/sashimi.hardware.scanning.AbstractScanInterface.html#sashimi.hardware.scanning.AbstractScanInterface">[docs]</a><span class="k">class</span> <span class="nc">AbstractScanInterface</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">n_samples</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sample_rate</span> <span class="o">=</span> <span class="n">sample_rate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_samples</span> <span class="o">=</span> <span class="n">n_samples</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">conf</span> <span class="o">=</span> <span class="n">conf</span>
 
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span>
 
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
     <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">z_piezo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@z_piezo</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">z_piezo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">waveform</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">z_frontal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@z_frontal</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">z_frontal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">waveform</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">z_lateral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@z_lateral</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">z_lateral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">waveform</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">camera_trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@camera_trigger</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">camera_trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">waveform</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">xy_frontal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@xy_frontal</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">xy_frontal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">waveform</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">xy_lateral</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="nd">@xy_lateral</span><span class="o">.</span><span class="n">setter</span>
+    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">xy_lateral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">waveform</span><span class="p">):</span>
-        <span class="k">pass</span>
-
-    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">pass</span>
-
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">pass</span></div>
 
 
