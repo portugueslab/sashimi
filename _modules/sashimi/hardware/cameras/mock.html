@@ -307,6 +307,14 @@
     <span class="k">def</span> <span class="nf">roi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp_val</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_roi</span> <span class="o">=</span> <span class="n">exp_val</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">prepare_mock_image</span><span class="p">()</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trigger_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@trigger_mode</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">trigger_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exp_val</span><span class="p">):</span>
+        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">prepare_mock_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_mock_image</span> <span class="o">=</span> <span class="n">block_reduce</span><span class="p">(</span>
@@ -330,7 +338,25 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">previous_frame_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_time</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">previous_frame_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_time</span>
-        <span class="k">return</span> <span class="n">frames</span></div></div>
+        <span class="k">return</span> <span class="n">frames</span></div>
+
+<div class="viewcode-block" id="MockCamera.start_acquisition"><a class="viewcode-back" href="../../../../api/sashimi.hardware.cameras.MockCamera.html#sashimi.hardware.cameras.MockCamera.start_acquisition">[docs]</a>    <span class="k">def</span> <span class="nf">start_acquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Allocate as many frames as will fit in 2GB of memory and start data acquisition.</span>
+<span class="sd">        """</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="MockCamera.stop_acquisition"><a class="viewcode-back" href="../../../../api/sashimi.hardware.cameras.MockCamera.html#sashimi.hardware.cameras.MockCamera.stop_acquisition">[docs]</a>    <span class="k">def</span> <span class="nf">stop_acquisition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Stop data acquisition and release the memory allocated for frames.</span>
+<span class="sd">        """</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="MockCamera.shutdown"><a class="viewcode-back" href="../../../../api/sashimi.hardware.cameras.MockCamera.html#sashimi.hardware.cameras.MockCamera.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">"""</span>
+<span class="sd">        Close down the connection to the camera.</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop_acquisition</span><span class="p">()</span></div></div>
 </pre></div>
         </article>
       </div>
