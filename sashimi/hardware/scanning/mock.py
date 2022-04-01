@@ -17,8 +17,7 @@ class MockBoard(AbstractScanInterface):
 
     def write(self):
         sleep(0.05)
-        
-        
+
     @property
     def z_piezo(self):
         len_sampling = len(self.piezo_array)

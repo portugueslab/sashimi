@@ -21,9 +21,9 @@ class AbstractLightSource(ABC):
         self._status = LaserState.OFF
         self.intensity_units = None
 
-    def start(self):  #TODO: remove?
+    def start(self):
         pass
-    
+
     @abstractmethod
     def set_power(self, current):
         """Sets power of laser based on self.intensity and self.intensity_units"""

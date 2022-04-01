@@ -1,6 +1,7 @@
 from enum import Enum
 from abc import ABC, abstractmethod
 
+
 class CameraException(Exception):
     pass
 
@@ -18,7 +19,7 @@ class AbstractCamera(ABC):
     def __init__(self, camera_id, max_sensor_resolution=None):
         self.camera_id = camera_id
         self.max_sensor_resolution = max_sensor_resolution
-    
+
     @abstractmethod
     def get_frames(self):
         """
@@ -52,12 +53,12 @@ class AbstractCamera(ABC):
     @abstractmethod
     def exposure_time(self):
         return None
-    
+
     @exposure_time.setter
     @abstractmethod
     def exposure_time(self, exp_val):
         pass
-    
+
     @property
     @abstractmethod
     def binning(self):
@@ -67,7 +68,7 @@ class AbstractCamera(ABC):
     @abstractmethod
     def binning(self, exp_val):
         pass
-    
+
     @property
     @abstractmethod
     def roi(self):
@@ -77,7 +78,7 @@ class AbstractCamera(ABC):
     @abstractmethod
     def roi(self, exp_val: tuple):
         pass
-    
+
     @property
     @abstractmethod
     def trigger_mode(self):

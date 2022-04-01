@@ -52,7 +52,7 @@ class MockCamera(AbstractCamera):
     def roi(self, exp_val: tuple):
         self._roi = exp_val
         self.prepare_mock_image()
-        
+
     @property
     def trigger_mode(self):
         return None

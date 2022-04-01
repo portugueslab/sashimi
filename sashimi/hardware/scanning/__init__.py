@@ -15,7 +15,7 @@ class AbstractScanInterface(ABC):
     @abstractmethod
     def start(self):
         pass
-    
+
     @abstractmethod
     def write(self):
         pass
@@ -83,8 +83,6 @@ class AbstractScanInterface(ABC):
     @abstractmethod
     def xy_lateral(self, waveform):
         pass
-
-    
 
 
 @contextmanager
