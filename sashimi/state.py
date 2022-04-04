@@ -627,13 +627,10 @@ class State:
         return get_last_parameters(self.scanner.waveform_queue)
 
     def calculate_pulse_times(self):
-        return (
-            np.arange(
-                self.volume_setting.n_skip_start,
-                self.volume_setting.n_planes - self.volume_setting.n_skip_end,
-            )
-            / (self.volume_setting.frequency * self.volume_setting.n_planes)
-        )
+        return np.arange(
+            self.volume_setting.n_skip_start,
+            self.volume_setting.n_planes - self.volume_setting.n_skip_end,
+        ) / (self.volume_setting.frequency * self.volume_setting.n_planes)
 
     def set_trigger_mode(self, mode: bool):
         if mode:
