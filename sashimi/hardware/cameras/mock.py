@@ -96,9 +96,3 @@ class MockCamera(AbstractCamera):
         Stop data acquisition and release the memory allocated for frames.
         """
         pass
-
-    def shutdown(self):
-        """
-        Close down the connection to the camera.
-        """
-        self.stop_acquisition()

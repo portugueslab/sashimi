@@ -42,7 +42,6 @@ class AbstractCamera(ABC):
         """
         pass
 
-    @abstractmethod
     def shutdown(self):
         """
         Close down the connection to the camera.
