@@ -597,11 +597,12 @@ class State:
                 calibration_set[n_image, :, :] = current_image
                 n_image += 1
 
-        self.noise_subtraction_active.set()
         self.calibration_ref = np.mean(calibration_set, axis=0).astype(
             dtype=current_volume.dtype
         )
         self.light_source.intensity = light_intensity
+
+        self.noise_subtraction_active.set()
 
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
