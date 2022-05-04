@@ -602,7 +602,7 @@ class State:
             dtype=current_volume.dtype
         )
         self.light_source.set_power(light_intensity)
-        
+
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
     def reset_noise_subtraction(self):

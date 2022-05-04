@@ -57,7 +57,7 @@ class CoboltLaser(AbstractLightSource):
 
     def set_power(self, exp_val):
         """Sets power of laser based on self.intensity and self.intensity_units"""
-        
+
         self._current = exp_val
         self.__set_current()
 

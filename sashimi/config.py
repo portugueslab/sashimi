@@ -61,7 +61,12 @@ TEMPLATE_CONF_DICT = {
         "default_exposure": 60,
         "default_binning": 1,
     },
-    "light_source": {"name": "mock", "port": "COM4", "intensity_units": "mock", "unit_calibration":[[0,0],[1,1]]},
+    "light_source": {
+        "name": "mock",
+        "port": "COM4",
+        "intensity_units": "mock",
+        "unit_calibration": [[0, 0], [1, 1]],
+    },
     "external_communication": {"name": "stytra", "address": "tcp://O1-589:5555"},
     "notifier": "none",
     "notifier_options": {},
