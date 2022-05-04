@@ -55,18 +55,20 @@ class CoboltLaser(AbstractLightSource):
     def close(self):
         self.socket.close()
 
-    def set_power(self):
+    def set_power(self, exp_val):
         """Sets power of laser based on self.intensity and self.intensity_units"""
+        
+        self._current = exp_val
         self.__set_current()
 
     @property
     def intensity(self):
         return self._current
 
-    @intensity.setter
-    def intensity(self, exp_val):
-        self._current = exp_val
-        self.set_power()
+    # @intensity.setter
+    # def intensity(self, exp_val):
+    #     self._current = exp_val
+    #     self.set_power()
 
     @property
     def status(self):

@@ -38,10 +38,10 @@ class AbstractLightSource(ABC):
     def intensity(self):
         return None
 
-    @intensity.setter
-    @abstractmethod
-    def intensity(self, exp_val):
-        pass
+    # @intensity.setter
+    # @abstractmethod
+    # def intensity(self, exp_val):
+    #     pass
 
     @property
     @abstractmethod

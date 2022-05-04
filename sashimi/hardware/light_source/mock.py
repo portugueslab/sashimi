@@ -18,9 +18,9 @@ class MockLaser(AbstractLightSource):
     def intensity(self):
         return self._current
 
-    @intensity.setter
-    def intensity(self, exp_val):
-        self._current = exp_val
+    # @intensity.setter
+    # def intensity(self, exp_val):
+    #     self._current = exp_val
 
     @property
     def status(self):
