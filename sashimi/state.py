@@ -585,7 +585,7 @@ class State:
         light_intensity = self.light_source_settings.intensity
         self.light_source.intensity = 0
         n_image = 0
-        while n_image < n_images:
+        while n_image < n_images: # TODO : no reason not to have for loop
             current_volume = self.get_volume()
             if current_volume is not None:
                 current_image = current_volume[0, :, :]
