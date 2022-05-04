@@ -583,9 +583,9 @@ class State:
         self.noise_subtraction_active.clear()
 
         light_intensity = self.light_source_settings.intensity
-        self.light_source.intensity = 0
+        self.light_source.set_power(0)
         n_image = 0
-        while n_image < n_images: # TODO : no reason not to have for loop
+        while n_image < n_images:
             current_volume = self.get_volume()
             if current_volume is not None:
                 current_image = current_volume[0, :, :]
@@ -601,8 +601,8 @@ class State:
         self.calibration_ref = np.mean(calibration_set, axis=0).astype(
             dtype=current_volume.dtype
         )
-        self.light_source.intensity = light_intensity
-
+        self.light_source.set_power(light_intensity)
+        
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
     def reset_noise_subtraction(self):

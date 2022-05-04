@@ -29,14 +29,14 @@ class LightSourceWidget(QWidget):
         self.setLayout(self.main_layout)
         self.laser_on = False
         self.previous_current = self.state.light_source_settings.intensity
-        timer.timeout.connect(self.update_current)
+        timer.timeout.connect(self.update_power)
 
-    def update_current(self):
+    def update_power(self):
         if (
             self.laser_on
             and self.previous_current != self.state.light_source_settings.intensity
         ):
-            self.state.light_source.intensity = (
+            self.state.light_source.set_power(
                 self.state.light_source_settings.intensity
             )
         self.previous_current = self.state.light_source_settings.intensity
@@ -45,7 +45,7 @@ class LightSourceWidget(QWidget):
         self.laser_on = not self.laser_on
         if self.laser_on:
             self.btn_off.setText("OFF")
-            self.state.light_source.intensity = self.previous_current
+            self.state.light_source.set_power(self.previous_current)
         else:
             self.btn_off.setText("ON")
-            self.state.light_source.intensity = 0
+            self.state.light_source.set_power(0)
