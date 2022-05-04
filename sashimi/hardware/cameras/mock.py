@@ -79,7 +79,7 @@ class MockCamera(AbstractCamera):
             self.elapsed = (self.current_time - self.previous_frame_time) * 1e-9
             if self.elapsed >= self._exposure_time * 1e-3:
                 multiplier = np.random.randint(1, 5, 1)
-                frames.append(self.current_mock_image * multiplier)
+                frames.append(np.uint16(self.current_mock_image * multiplier))
                 self.previous_frame_time = self.current_time
         else:
             self.previous_frame_time = self.current_time
