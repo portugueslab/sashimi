@@ -387,6 +387,7 @@ class State:
         self.settings_tree = ParameterTree()
 
         self.global_state = GlobalState.PAUSED
+        self.is_exp_running = GlobalState.PAUSED
 
         self.planar_setting = PlanarScanningSettings()
         self.light_source_settings = LightSourceSettings()
@@ -554,6 +555,7 @@ class State:
 
     def start_experiment(self):
         # TODO disable the GUI except the abort button
+        self.is_exp_running = GlobalState.EXPERIMENT_RUNNING
         self.logger.log_message("started experiment")
         self.scanner.wait_signal.set()
         self.send_scansave_settings()
@@ -569,6 +571,7 @@ class State:
         self.experiment_start_event.clear()
         self.saver.save_queue.clear()
         self.send_scansave_settings()
+        self.is_exp_running = GlobalState.PAUSED
 
     def obtain_noise_average(self, n_images=50):
         """Obtains average noise of n_images to subtract to acquired,
