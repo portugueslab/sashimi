@@ -10,6 +10,7 @@ from lightparam.gui import ParameterGui
 from lightparam import Param
 from lightparam.param_qt import ParametrizedQt
 from sashimi.state import (
+    GlobalState,
     State,
     get_voxel_size,
 )
@@ -281,19 +282,35 @@ class ViewingWidget(QWidget):
         self.frame_layer.contrast_limits = self.contrast_range.contrast_range
 
     def display_drift_reference(self):
-        if self.state.drift_ref is not None:
-            self.drift_layer.visible = not self.drift_layer.visible
-        else:
-            print("Bad warning!! drift image is none")
+        print(self.state.global_state)
+        
+        if self.state.global_state != GlobalState.PAUSED and self.state.global_state != GlobalState.EXPERIMENT_RUNNING:
+            if self.state.drift_ref is not None:
+                self.drift_layer.visible = not self.drift_layer.visible
+                self.display_drift_chk.setText("Visualize Drift Reference")
+            else:
+                # print("Bad warning!! drift image is none")
+                self.display_drift_chk.setText("Visualize Drift Reference\nFailed -> Generate the Drift Reference.")
 
     def generate_drift_reference(self):
-        # if not imaging
-        self.state.obtain_drift_reference()
-        if self.state.drift_ref is not None:
-            self.drift_layer.data = self.state.drift_ref
-            self.drift_layer.visible = True
-        else:
-            print("Couldn't generate drift image!")
+        
+        if self.state.check_state():
+        
+            self.compute_drift_chk.setText("Generate Drift Reference\nComputing, please be patient.")
+            
+            if self.state.drift_ref is None:
+                self.state.obtain_drift_reference()
+                if self.state.drift_ref is not None:
+                    self.compute_drift_chk.setText("Generate Drift Reference\nSuccess.")
+                    self.drift_layer.data = self.state.drift_ref
+                    self.drift_layer.visible = True
+                else:
+                    self.compute_drift_chk.setText("Generate Drift Reference\nFailed.")
+                    # print("Couldn't generate drift image!") 
+            else:
+                self.compute_drift_chk.setText("Generate Drift Reference\nReset.")
+                self.state.reset_drift_reference()
+                self.drift_layer.visible = False
 
 
 class CameraSettingsWidget(QWidget):

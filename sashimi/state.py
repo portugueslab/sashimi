@@ -610,11 +610,13 @@ class State:
     def reset_noise_subtraction(self):
         self.calibration_ref = None
         self.noise_subtraction_active.clear()
+        
+    def reset_drift_reference(self):
+        self.drift_ref = None
 
-    def obtain_drift_reference(self, countdown=30):
+    def obtain_drift_reference(self, countdown=1000): #countdown as timer -> 3 sec? 
 
         n_vol = 0
-        countdown = 1000
         n_volumes = 5
         while n_vol < n_volumes and countdown > 0:
             current_volume = self.get_volume()
@@ -633,8 +635,8 @@ class State:
             self.drift_ref = np.sum(drift_set, axis=0).astype(
                 dtype=current_volume.dtype
             )
-        else:
-            print("looped")
+        # else:
+        #     print("looped")
 
     def get_volume(self):
         # TODO consider get_last_parameters method
@@ -642,6 +644,12 @@ class State:
             return self.dispatcher.viewer_queue.get(timeout=0.001)
         except Empty:
             return None
+        
+    def check_state(self):
+        if self.global_state != GlobalState.PAUSED and self.experiment_state != ExperimentPrepareState.EXPERIMENT_STARTED:
+            return True
+        else:
+            return False
 
     def get_save_status(self) -> Optional[SavingStatus]:
         return get_last_parameters(self.saver.saved_status_queue)
