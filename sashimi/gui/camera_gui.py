@@ -102,6 +102,19 @@ class ViewingWidget(QWidget):
             name="frame_layer",
         )
 
+        self.drift_layer = self.viewer.add_image(
+            np.zeros(
+                [
+                    1,
+                ]
+                + self.max_sensor_resolution
+            ),
+            blending="additive",
+            name="drift_layer",
+            colormap="red",
+            visible=False,
+        )
+
         # Add square ROI of size max image size:
         self.roi = self.viewer.add_shapes(
             [np.array([[0, 0], [s[0], 0], [s[0], s[1]], [0, s[1]]])],
@@ -135,8 +148,13 @@ class ViewingWidget(QWidget):
         self.contrast_range = ContrastSettings()
         self.wid_contrast_range = ParameterGui(self.contrast_range)
 
+        self.compute_drift_chk = QCheckBox("Generate Drift Reference")
+        self.display_drift_chk = QCheckBox("Visualize Drift Reference")
+
         self.bottom_layout.addWidget(self.auto_contrast_chk)
         self.bottom_layout.addWidget(self.wid_contrast_range)
+        self.bottom_layout.addWidget(self.compute_drift_chk)
+        self.bottom_layout.addWidget(self.display_drift_chk)
 
         self.bottom_layout.addStretch()
 
@@ -149,6 +167,10 @@ class ViewingWidget(QWidget):
         self.contrast_range.sig_param_changed.connect(self.set_manual_contrast)
 
         self.auto_contrast_chk.setChecked(True)
+
+        # connect drift widget
+        self.compute_drift_chk.clicked.connect(self.generate_drift_reference)
+        self.display_drift_chk.clicked.connect(self.display_drift_reference)
 
         self.state.camera_settings.sig_param_changed.connect(
             self.launch_delayed_contrast_reset
@@ -201,6 +223,7 @@ class ViewingWidget(QWidget):
 
     def refresh_image(self):
         current_image = self.state.get_volume()
+
         if current_image is None:
             return
 
@@ -208,6 +231,7 @@ class ViewingWidget(QWidget):
         if current_image.shape[0] == 1:
             self.viewer.dims.reset()
         self.frame_layer.data = current_image
+
         # self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
 
         # Check if anything changed in the image shape, which would mean that changes of the contrast
@@ -229,8 +253,10 @@ class ViewingWidget(QWidget):
         """
         if self.ndisplay_button.isChecked():
             self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
+            self.drift_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
         else:
             self.frame_layer.scale = [1.0, 1.0, 1.0]
+            self.drift_layer.scale = [1.0, 1.0, 1.0]
 
     def update_current_plane(self, _):
         self.state.current_plane = self.viewer.dims.current_step[0]
@@ -253,6 +279,21 @@ class ViewingWidget(QWidget):
 
     def set_manual_contrast(self):
         self.frame_layer.contrast_limits = self.contrast_range.contrast_range
+
+    def display_drift_reference(self):
+        if self.state.drift_ref is not None:
+            self.drift_layer.visible = not self.drift_layer.visible
+        else:
+            print("Bad warning!! drift image is none")
+
+    def generate_drift_reference(self):
+        # if not imaging
+        self.state.obtain_drift_reference()
+        if self.state.drift_ref is not None:
+            self.drift_layer.data = self.state.drift_ref
+            self.drift_layer.visible = True
+        else:
+            print("Couldn't generate drift image!")
 
 
 class CameraSettingsWidget(QWidget):

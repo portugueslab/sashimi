@@ -310,6 +310,7 @@ class State:
         self.logger = ConcurrenceLogger("main")
 
         self.calibration_ref = None
+        self.drift_ref = None
         self.waveform = None
         self.current_plane = 0
         self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
@@ -609,6 +610,31 @@ class State:
     def reset_noise_subtraction(self):
         self.calibration_ref = None
         self.noise_subtraction_active.clear()
+
+    def obtain_drift_reference(self, countdown=30):
+
+        n_vol = 0
+        countdown = 1000
+        n_volumes = 5
+        while n_vol < n_volumes and countdown > 0:
+            current_volume = self.get_volume()
+            if current_volume is not None:
+                if n_vol == 0:
+                    drift_set = np.empty(
+                        shape=(n_volumes, *current_volume.shape),
+                        dtype=current_volume.dtype,
+                    )
+                drift_set[n_vol, :, :, :] = current_volume
+                n_vol += 1
+
+            countdown -= 1
+
+        if countdown > 0:
+            self.drift_ref = np.sum(drift_set, axis=0).astype(
+                dtype=current_volume.dtype
+            )
+        else:
+            print("looped")
 
     def get_volume(self):
         # TODO consider get_last_parameters method
