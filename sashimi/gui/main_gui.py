@@ -12,7 +12,7 @@ from sashimi.gui.camera_gui import ViewingWidget, CameraSettingsWidget
 from sashimi.gui.save_gui import SaveWidget
 from sashimi.gui.status_bar import StatusBarWidget
 from sashimi.gui.top_bar import TopWidget
-from sashimi.state import GlobalState, State
+from sashimi.state import State
 
 
 class DockedWidget(QDockWidget):
@@ -45,7 +45,6 @@ class MainWindow(QMainWindow):
         self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
         self.wid_status_bar = StatusBarWidget(st, self.timer)
         self.toolbar = TopWidget(st, self.timer)
-        self.prev_exp_state = GlobalState.PAUSED
 
         self.addToolBar(Qt.TopToolBarArea, self.toolbar)
 
@@ -145,18 +144,10 @@ class MainWindow(QMainWindow):
             self.toolbar.experiment_toggle_btn.flip_icon(False)
 
         # check if experiment started or ended and update gui enabling
-        if (
-            self.st.is_exp_running == GlobalState.EXPERIMENT_RUNNING
-            and self.prev_exp_state == GlobalState.PAUSED
-        ):
+        if self.st.is_exp_started():
             self.disable_gui()
-            self.prev_exp_state = GlobalState.EXPERIMENT_RUNNING
-        elif (
-            self.st.is_exp_running == GlobalState.PAUSED
-            and self.prev_exp_state == GlobalState.EXPERIMENT_RUNNING
-        ):
+        elif self.st.is_exp_ended():
             self.enable_gui()
-            self.prev_exp_state = GlobalState.PAUSED
 
     def disable_gui(self):
         """Disable all the gui elements during the experiment"""
@@ -166,7 +157,7 @@ class MainWindow(QMainWindow):
         self.wid_scan.setEnabled(False)
         self.wid_camera.setEnabled(False)
         self.wid_save_options.setEnabled(False)
-        self.wid_display.setEnabled(False)
+        self.wid_display.auto_contrast_chk.setEnabled(False)
 
     def enable_gui(self):
         """Enables all the gui elements after the end of the experiment"""
@@ -176,7 +167,7 @@ class MainWindow(QMainWindow):
         self.wid_scan.setEnabled(True)
         self.wid_camera.setEnabled(True)
         self.wid_save_options.setEnabled(True)
-        self.wid_display.setEnabled(True)
+        self.wid_display.auto_contrast_chk.setEnabled(True)
 
 
 class StatusWidget(QTabWidget):
