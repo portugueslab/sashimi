@@ -145,29 +145,19 @@ class MainWindow(QMainWindow):
 
         # check if experiment started or ended and update gui enabling
         if self.st.is_exp_started():
-            self.disable_gui()
+            self.set_enabled_gui(enable=False)
         elif self.st.is_exp_ended():
-            self.enable_gui()
+            self.set_enabled_gui(enable=False)
 
-    def disable_gui(self):
+    def set_enabled_gui(self, enable):
         """Disable all the gui elements during the experiment"""
-        self.menuBar().setEnabled(False)
-        self.wid_laser.setEnabled(False)
-        self.wid_status.setEnabled(False)
-        self.wid_scan.setEnabled(False)
-        self.wid_camera.setEnabled(False)
-        self.wid_save_options.setEnabled(False)
-        self.wid_display.auto_contrast_chk.setEnabled(False)
-
-    def enable_gui(self):
-        """Enables all the gui elements after the end of the experiment"""
-        self.menuBar().setEnabled(True)
-        self.wid_laser.setEnabled(True)
-        self.wid_status.setEnabled(True)
-        self.wid_scan.setEnabled(True)
-        self.wid_camera.setEnabled(True)
-        self.wid_save_options.setEnabled(True)
-        self.wid_display.auto_contrast_chk.setEnabled(True)
+        self.menuBar().setEnabled(enable)
+        self.wid_laser.setEnabled(enable)
+        self.wid_status.setEnabled(enable)
+        self.wid_scan.setEnabled(enable)
+        self.wid_camera.setEnabled(enable)
+        self.wid_save_options.setEnabled(enable)
+        self.wid_display.auto_contrast_chk.setEnabled(enable)
 
 
 class StatusWidget(QTabWidget):
