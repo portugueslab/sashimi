@@ -147,7 +147,7 @@ class MainWindow(QMainWindow):
         if self.st.is_exp_started():
             self.set_enabled_gui(enable=False)
         elif self.st.is_exp_ended():
-            self.set_enabled_gui(enable=False)
+            self.set_enabled_gui(enable=True)
 
     def set_enabled_gui(self, enable):
         """Disable all the gui elements during the experiment"""
