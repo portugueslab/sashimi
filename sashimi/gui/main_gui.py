@@ -143,6 +143,22 @@ class MainWindow(QMainWindow):
             self.st.saver.saver_stopped_signal.clear()
             self.toolbar.experiment_toggle_btn.flip_icon(False)
 
+        # check if experiment started or ended and update gui enabling
+        if self.st.is_exp_started():
+            self.set_enabled_gui(enable=False)
+        elif self.st.is_exp_ended():
+            self.set_enabled_gui(enable=True)
+
+    def set_enabled_gui(self, enable):
+        """Disable all the gui elements during the experiment"""
+        self.menuBar().setEnabled(enable)
+        self.wid_laser.setEnabled(enable)
+        self.wid_status.setEnabled(enable)
+        self.wid_scan.setEnabled(enable)
+        self.wid_camera.setEnabled(enable)
+        self.wid_save_options.setEnabled(enable)
+        self.wid_display.auto_contrast_chk.setEnabled(enable)
+
 
 class StatusWidget(QTabWidget):
     def __init__(self, st: State, timer):
