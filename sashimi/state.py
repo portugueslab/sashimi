@@ -22,7 +22,8 @@ from sashimi.hardware.scanning.scanloops import (
 from sashimi.processes.external_communication import ExternalComm
 from sashimi.processes.dispatcher import VolumeDispatcher
 from sashimi.processes.logging import ConcurrenceLogger
-from multiprocessing import Event
+from sashimi.processes.activity_tracker import ActivityTracker
+from multiprocessing import Event, Queue
 import json
 from sashimi.processes.camera import (
     CameraProcess,
@@ -121,6 +122,16 @@ class ZRecordingSettings(ParametrizedQt):
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
 
+class ActivityTrackerSettings(ParametrizedQt):
+    def __init__(self):
+        super().__init__(self)
+        self.name = "scanning/activity_tracker"
+        self.roi_radius = Param(20, (1, 400.0), unit="pixels")
+        self.target_plane = Param(0, (0, 30), unit="planes")
+        self.tau_lowpass = Param(0.05, (0, 0.3))
+        self.derivative_th = Param(0.1, (0, 20))
+        self.x_roi = Param(0, (0, 1000), unit="pixels")
+        self.y_roi = Param(0, (0, 1000), unit="pixels")
 
 roi_size = [0, 0] + [
     r // conf["camera"]["default_binning"]
@@ -358,6 +369,8 @@ class State:
 
         self.experiment_duration_queue = self.multiprocessing_manager.Queue()
 
+        self.roi_activity_queue = Queue()
+
         self.external_comm = ExternalComm(
             stop_event=self.stop_event,
             experiment_start_event=self.experiment_start_event,
@@ -381,6 +394,15 @@ class State:
             saver_queue=self.saver.save_queue,
         )
 
+        self.activitytracker = ActivityTracker(
+            stop_event=self.stop_event,
+            experiment_start_event=self.experiment_start_event,
+            is_waiting_event=self.is_waiting_event,
+            duration_queue=self.experiment_duration_queue,
+            roi_activity_queue=self.roi_activity_queue,
+        )
+
+
         self.camera_settings = CameraSettings()
         self.save_settings = SaveSettings()
 
@@ -400,6 +422,7 @@ class State:
 
         self.single_plane_settings = SinglePlaneSettings()
         self.volume_setting = ZRecordingSettings()
+        self.activitytracker_settings = ActivityTrackerSettings()
         self.calibration = Calibration()
 
         for setting in [
@@ -411,6 +434,7 @@ class State:
             self.calibration.z_settings,
             self.camera_settings,
             self.save_settings,
+            self.activitytracker_settings,
         ]:
             self.settings_tree.add(setting)
 
@@ -420,7 +444,7 @@ class State:
         self.calibration.z_settings.sig_param_changed.connect(self.send_scan_settings)
         self.single_plane_settings.sig_param_changed.connect(self.send_scan_settings)
         self.volume_setting.sig_param_changed.connect(self.send_scan_settings)
-
+        self.activitytracker_settings.sig_param_changed.connect(self.send_activity_tracker_setting)
         self.save_settings.sig_param_changed.connect(self.send_scansave_settings)
 
         self.camera.start()
@@ -428,9 +452,11 @@ class State:
         self.external_comm.start()
         self.saver.start()
         self.dispatcher.start()
+        self.activitytracker.start()
 
         self.current_binning = conf["camera"]["default_binning"]
         self.send_scansave_settings()
+        self.send_activity_tracker_setting()
         self.logger.log_message("initialized")
 
         self.voxel_size = None
@@ -549,10 +575,18 @@ class State:
 
         self.scanner.parameter_queue.put(self.scan_params)
         self.external_comm.current_settings_queue.put(self.all_settings)
-
         self.voxel_size = get_voxel_size(self.volume_setting, self.camera_settings)
         self.saver.saving_parameter_queue.put(self.save_params)
         self.dispatcher.n_planes_queue.put(self.n_planes)
+
+    def send_activity_tracker_setting(self):
+        print(self.activitytracker_settings)
+        dict_to_send = {"x_roi":self.activitytracker_settings.x_roi,
+                                    "y_roi": self.activitytracker_settings.y_roi,
+        "roi_radius": self.activitytracker_settings.roi_radius,
+        "tau_lowpass": self.activitytracker_settings.tau_lowpass}
+        self.activitytracker.current_settings_queue.put(dict_to_send)
+
 
     def start_experiment(self):
         # TODO disable the GUI except the abort button

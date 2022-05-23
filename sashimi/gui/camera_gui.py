@@ -86,6 +86,8 @@ class ViewingWidget(QWidget):
         s = self.get_fullframe_size()
         self.image_shape = (1, s, s)
 
+        self.roi_actracker_position = np.array([self.state.activitytracker_settings.x_roi,
+                                                self.state.activitytracker_settings.y_roi])
         self.viewer = napari.Viewer(show=False)
         # setting napari style to sashimi's
         self.viewer.window.qt_viewer.setStyleSheet(style)
@@ -111,6 +113,18 @@ class ViewingWidget(QWidget):
             opacity=1,
             visible=False,
             name="roi_layer",
+        )
+
+        self.roi_actracker = self.viewer.add_points(
+            np.array([0, 0]),
+            blending="translucent",
+            face_color="transparent",
+            face_contrast_limits=(0, 0),
+            opacity=.5,
+            visible=True,
+            edge_width=.8,
+            edge_color='coral',
+            name="roi_actracker_layer",
         )
 
         self.main_layout = QVBoxLayout()
@@ -201,6 +215,27 @@ class ViewingWidget(QWidget):
 
     def refresh_image(self):
         current_image = self.state.get_volume()
+        if current_image is not None:
+            target_plane = self.state.activitytracker_settings.target_plane
+            target_plane = np.clip(target_plane,0,current_image.shape[0])
+            self.state.roi_activity_queue.put(current_image[target_plane, :, :].copy())
+            if np.sum(self.roi_actracker_position != np.array([self.state.activitytracker_settings.x_roi,
+                                                    self.state.activitytracker_settings.y_roi]))>0:
+                self.roi_actracker_position = np.array([self.state.activitytracker_settings.x_roi,
+                                                        self.state.activitytracker_settings.y_roi])
+                self.viewer.layers.pop(2)
+                self.roi_actracker = self.viewer.add_points(
+                    self.roi_actracker_position,
+                    blending="translucent",
+                    face_color="transparent",
+                    face_contrast_limits=(0, 0),
+                    opacity=.5,
+                    visible=True,
+                    edge_width=.8,
+                    edge_color='coral',
+                    name="roi_actracker_layer",
+                )
+
         if current_image is None:
             return
 
