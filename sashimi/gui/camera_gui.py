@@ -122,7 +122,7 @@ class ViewingWidget(QWidget):
             face_contrast_limits=(0, 0),
             opacity=.5,
             visible=True,
-            edge_width=.8,
+            edge_width=2,
             edge_color='coral',
             name="roi_actracker_layer",
         )
@@ -231,7 +231,7 @@ class ViewingWidget(QWidget):
                     face_contrast_limits=(0, 0),
                     opacity=.5,
                     visible=True,
-                    edge_width=.8,
+                    edge_width=2,
                     edge_color='coral',
                     name="roi_actracker_layer",
                 )

@@ -122,6 +122,7 @@ class ZRecordingSettings(ParametrizedQt):
         self.n_skip_start = Param(0, (0, 20))
         self.n_skip_end = Param(0, (0, 20))
 
+
 class ActivityTrackerSettings(ParametrizedQt):
     def __init__(self):
         super().__init__(self)
@@ -580,7 +581,6 @@ class State:
         self.dispatcher.n_planes_queue.put(self.n_planes)
 
     def send_activity_tracker_setting(self):
-        print(self.activitytracker_settings)
         dict_to_send = {"x_roi":self.activitytracker_settings.x_roi,
                                     "y_roi": self.activitytracker_settings.y_roi,
         "roi_radius": self.activitytracker_settings.roi_radius,

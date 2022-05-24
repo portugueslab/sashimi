@@ -6,9 +6,10 @@ import numpy as np
 from tkinter import *
 from timeit import default_timer as timer
 
-PATH_OUT = r"C:\Users\Asus\Desktop\result_fish0.h5"
-PATH_IN = r"C:\Users\Asus\Desktop\scc_protocol.h5"
-TH_CELL_ACTIVITY = 100
+PATH_OUT = r"C:\Users\portugueslab\Desktop\Ema_test\result_fish0.h5"
+PATH_IN = r"C:\Users\portugueslab\Desktop\scc_protocol.h5"
+TH_CELL_ACTIVITY = 0.1
+
 
 def create_bin_circle(arr_size, center, r):
     coords = np.ogrid[:arr_size[0], :arr_size[1]]
@@ -97,6 +98,7 @@ class ActivityTracker(Process):
                 self.finish()
 
     def actuator(self, activity_value):
+        print(activity_value)
         cl_state = np.interp(self.elapsed_t, self.protocol["t"], self.protocol["cl"])
         if cl_state == 1:
             if activity_value >= TH_CELL_ACTIVITY:
@@ -113,7 +115,6 @@ class ActivityTracker(Process):
                 self.gui.configure(bg='black')
             else:
                 self.gui.configure(bg='gray')
-        # print(self.elapsed_t,cl_state,led_state)
 
         self.t_recording.append(self.elapsed_t)
         self.activity_recording.append(self.roi_state)

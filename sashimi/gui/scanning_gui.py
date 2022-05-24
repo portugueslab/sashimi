@@ -34,7 +34,7 @@ class VolumeScanningWidget(QWidget):
         self.setLayout(QVBoxLayout())
         self.wid_volume = ParameterGui(state.volume_setting)
         self.chk_pause = QCheckBox("Pause after experiment")
-
+        self.actracker = ParameterGui(state.activitytracker_settings)
         self.wid_wave = WaveformWidget(timer=self.timer, state=self.state)
         self.wid_collapsible_wave = CollapsibleWidget(
             child=self.wid_wave, name="Piezo impulse-response waveform"
@@ -42,6 +42,7 @@ class VolumeScanningWidget(QWidget):
         self.wid_collapsible_wave.toggle_collapse()
 
         self.layout().addWidget(self.wid_volume)
+        self.layout().addWidget(self.actracker)
         self.layout().addWidget(self.chk_pause)
         self.layout().addWidget(self.wid_collapsible_wave)
 
