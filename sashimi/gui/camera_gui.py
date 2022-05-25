@@ -218,7 +218,10 @@ class ViewingWidget(QWidget):
         if current_image is not None:
             target_plane = self.state.activitytracker_settings.target_plane
             target_plane = np.clip(target_plane,0,current_image.shape[0])
-            self.state.roi_activity_queue.put(current_image[target_plane, :, :].copy())
+            try:
+                self.state.roi_activity_queue.put(current_image[target_plane, :, :].copy())
+            except:
+                pass
             if np.sum(self.roi_actracker_position != np.array([self.state.activitytracker_settings.x_roi,
                                                     self.state.activitytracker_settings.y_roi]))>0:
                 self.roi_actracker_position = np.array([self.state.activitytracker_settings.x_roi,

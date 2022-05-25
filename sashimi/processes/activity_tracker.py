@@ -6,9 +6,9 @@ import numpy as np
 from tkinter import *
 from timeit import default_timer as timer
 
-PATH_OUT = r"C:\Users\portugueslab\Desktop\Ema_test\result_fish0.h5"
+PATH_OUT = r"C:\Users\portugueslab\Desktop\Ema_test\result_fish2.h5"
 PATH_IN = r"C:\Users\portugueslab\Desktop\scc_protocol.h5"
-TH_CELL_ACTIVITY = 0.1
+TH_CELL_ACTIVITY = 0.15
 
 
 def create_bin_circle(arr_size, center, r):
@@ -59,7 +59,7 @@ class ActivityTracker(Process):
             self.creation = True
         while True:
             if self.start_comm.is_set():
-                while not self.stop_event.is_set():
+                while self.start_comm.is_set() == True:
                     if self.prev_t is None:
                         self.prev_t = timer()
                     else:
@@ -98,7 +98,7 @@ class ActivityTracker(Process):
                 self.finish()
 
     def actuator(self, activity_value):
-        print(activity_value)
+        # print(self.elapsed_t, activity_value)
         cl_state = np.interp(self.elapsed_t, self.protocol["t"], self.protocol["cl"])
         if cl_state == 1:
             if activity_value >= TH_CELL_ACTIVITY:
@@ -141,7 +141,10 @@ class ActivityTracker(Process):
         return image
 
     def finish(self):
+        print("Saving...")
         dict_to_save = {"t": self.t_recording,
+                        "roi_coord":np.array([self.current_settings["x_roi"],
+                                                               self.current_settings["y_roi"]]),
                         "cell_activity": self.activity_recording,
                         "stim": self.led_state_recording}
         fl.save(PATH_OUT, dict_to_save)
