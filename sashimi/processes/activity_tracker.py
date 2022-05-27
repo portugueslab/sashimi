@@ -6,7 +6,7 @@ import numpy as np
 from tkinter import *
 from timeit import default_timer as timer
 
-PATH_OUT = r"C:\Users\portugueslab\Desktop\Ema_test\result_fish2.h5"
+PATH_OUT = r"C:\Users\portugueslab\Desktop\Ema_test\result_fish3.npy"
 PATH_IN = r"C:\Users\portugueslab\Desktop\scc_protocol.h5"
 TH_CELL_ACTIVITY = 0.15
 
@@ -122,13 +122,11 @@ class ActivityTracker(Process):
         self.gui.update()
 
     def create_actuator(self):
-        # print("Creating actuator...")
         self.protocol = fl.load(PATH_IN)
         self.creation = True
         self.gui = Tk(className='Stimulus Display')
         self.gui.geometry("400x400")
         self.gui.configure(bg='gray')
-        # self.gui.after(0, self.run_)
         self.gui.update()
 
     def check_last_image(self):
@@ -143,8 +141,8 @@ class ActivityTracker(Process):
     def finish(self):
         print("Saving...")
         dict_to_save = {"t": self.t_recording,
-                        "roi_coord":np.array([self.current_settings["x_roi"],
-                                                               self.current_settings["y_roi"]]),
+                        "roi_coord": np.array([self.current_settings["x_roi"],
+                                               self.current_settings["y_roi"]]),
                         "cell_activity": self.activity_recording,
                         "stim": self.led_state_recording}
-        fl.save(PATH_OUT, dict_to_save)
+        np.save(PATH_OUT, dict_to_save)

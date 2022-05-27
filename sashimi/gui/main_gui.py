@@ -5,6 +5,7 @@ from sashimi.gui.scanning_gui import (
     PlanarScanningWidget,
     VolumeScanningWidget,
     SinglePlaneScanningWidget,
+    ActTrackerWidget
 )
 from sashimi.gui.light_source_gui import LightSourceWidget
 from sashimi.gui.save_settings_gui import SavingSettingsWidget
@@ -45,6 +46,7 @@ class MainWindow(QMainWindow):
         self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
         self.wid_status_bar = StatusBarWidget(st, self.timer)
         self.toolbar = TopWidget(st, self.timer)
+        self.wid_actracker = ActTrackerWidget(st)
 
         self.addToolBar(Qt.TopToolBarArea, self.toolbar)
 
@@ -63,6 +65,11 @@ class MainWindow(QMainWindow):
         self.addDockWidget(
             Qt.RightDockWidgetArea,
             DockedWidget(widget=self.wid_laser, title="Light source"),
+        )
+
+        self.addDockWidget(
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_actracker, title="Activity Tracker"),
         )
 
         self.addDockWidget(
@@ -178,7 +185,6 @@ class StatusWidget(QTabWidget):
         self.wid_calibration = CalibrationWidget(st, st.calibration, self.timer)
         self.wid_single_plane = SinglePlaneScanningWidget(st)
         self.wid_volume = VolumeScanningWidget(st, self.timer)
-
         self.addTab(self.wid_paused, self.option_dict[0])
         self.addTab(self.wid_calibration, self.option_dict[1])
         self.addTab(self.wid_single_plane, self.option_dict[2])
