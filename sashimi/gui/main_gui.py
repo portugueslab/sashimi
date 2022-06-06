@@ -158,6 +158,10 @@ class MainWindow(QMainWindow):
         self.wid_camera.setEnabled(enable)
         self.wid_save_options.setEnabled(enable)
         self.wid_display.auto_contrast_chk.setEnabled(enable)
+        self.wid_display.active_drift_chk.setEnabled(enable)
+        self.wid_display.display_drift(
+            is_exp_started=not enable
+        )  # notifies the viewing widget to display drift layer
 
 
 class StatusWidget(QTabWidget):

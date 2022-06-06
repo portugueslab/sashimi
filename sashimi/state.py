@@ -310,6 +310,8 @@ class State:
         self.logger = ConcurrenceLogger("main")
 
         self.calibration_ref = None
+        self.drift_ref = None
+        self.is_drift_active = False
         self.waveform = None
         self.current_plane = 0
         self.stop_event = LoggedEvent(self.logger, SashimiEvents.CLOSE_ALL)
@@ -555,7 +557,9 @@ class State:
         self.dispatcher.n_planes_queue.put(self.n_planes)
 
     def start_experiment(self):
-        # TODO disable the GUI except the abort button
+
+        if self.is_drift_active:
+            self.get_drift_reference()
         self.current_exp_state = GlobalState.EXPERIMENT_RUNNING
         self.logger.log_message("started experiment")
         self.scanner.wait_signal.set()
@@ -572,6 +576,7 @@ class State:
         self.experiment_start_event.clear()
         self.saver.save_queue.clear()
         self.send_scansave_settings()
+        self.reset_drift_reference()
         self.current_exp_state = GlobalState.PAUSED
 
     def is_exp_started(self) -> bool:
@@ -647,6 +652,14 @@ class State:
     def reset_noise_subtraction(self):
         self.calibration_ref = None
         self.noise_subtraction_active.clear()
+
+    def reset_drift_reference(self):
+        self.drift_ref = None
+
+    def get_drift_reference(self):
+        self.drift_ref = None
+        while self.drift_ref is None:
+            self.drift_ref = self.get_volume()
 
     def get_volume(self):
         # TODO consider get_last_parameters method
