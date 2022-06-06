@@ -4,17 +4,16 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
         <title>lightparam.core - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -241,7 +240,8 @@
           </svg>
           <span>Back to top</span>
         </a>
-        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -262,14 +262,14 @@
 
 
 <div class="viewcode-block" id="get_nested"><a class="viewcode-back" href="../../api/sashimi.config.html#sashimi.config.get_nested">[docs]</a><span class="k">def</span> <span class="nf">get_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-    <span class="sd">"""</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get value from a nested dictionary, addressing it via a list of keys</span>
 <span class="sd">    indicating the value to the path.</span>
 
 <span class="sd">    Example::</span>
 
 <span class="sd">        &gt;&gt;&gt; d = dict(a=dict(a0=0, a1=1))</span>
-<span class="sd">        &gt;&gt;&gt; get_nested(d, ['a', 'a1'])</span>
+<span class="sd">        &gt;&gt;&gt; get_nested(d, [&#39;a&#39;, &#39;a1&#39;])</span>
 <span class="sd">        1</span>
 
 <span class="sd">    If the path points to an undefined branch in the hierarchy, all required</span>
@@ -279,37 +279,37 @@
 <span class="sd">    Example:</span>
 
 <span class="sd">        &gt;&gt;&gt; d = dict(a=dict(a0=0, a1=1))</span>
-<span class="sd">        &gt;&gt;&gt; get_nested(d, ['a', 'a2', 'new_dict'])</span>
+<span class="sd">        &gt;&gt;&gt; get_nested(d, [&#39;a&#39;, &#39;a2&#39;, &#39;new_dict&#39;])</span>
 <span class="sd">        &gt;&gt;&gt; print(d)</span>
-<span class="sd">        {'a': {'a0': 0, 'a1': 1, 'a2': {'new_dict': {}}}}</span>
+<span class="sd">        {&#39;a&#39;: {&#39;a0&#39;: 0, &#39;a1&#39;: 1, &#39;a2&#39;: {&#39;new_dict&#39;: {}}}}</span>
 
 
 <span class="sd">    :param d: nested dictionary to address;</span>
 <span class="sd">    :param path: list of keys forming the path to the required entry;</span>
 <span class="sd">    :return: entry from addressed path.</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span><span class="k">lambda</span> <span class="n">d</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="n">d</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">{}),</span> <span class="n">path</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="set_nested"><a class="viewcode-back" href="../../api/sashimi.config.html#sashimi.config.set_nested">[docs]</a><span class="k">def</span> <span class="nf">set_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="sd">"""</span>
+    <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set value in a nested dictionary in an arbitrary existing or new</span>
 <span class="sd">    position of the hierarchy.</span>
 
 <span class="sd">    Example::</span>
 
 <span class="sd">        &gt;&gt;&gt; d = dict(a=dict(a0=0, a1=1))</span>
-<span class="sd">        &gt;&gt;&gt; set_nested(d, ['a', 'a1'], 0)</span>
+<span class="sd">        &gt;&gt;&gt; set_nested(d, [&#39;a&#39;, &#39;a1&#39;], 0)</span>
 <span class="sd">        &gt;&gt;&gt; print(d)</span>
-<span class="sd">        {'a': {'a1': 0, 'a0': 0}}</span>
-<span class="sd">        &gt;&gt;&gt; set_nested(d, ['a', 'a2', 'new_entry'], 2)</span>
+<span class="sd">        {&#39;a&#39;: {&#39;a1&#39;: 0, &#39;a0&#39;: 0}}</span>
+<span class="sd">        &gt;&gt;&gt; set_nested(d, [&#39;a&#39;, &#39;a2&#39;, &#39;new_entry&#39;], 2)</span>
 <span class="sd">        &gt;&gt;&gt; print(d)</span>
-<span class="sd">        {'a': {'a1': 0, 'a2': {'new_entry': 2}, 'a0': 0}}</span>
+<span class="sd">        {&#39;a&#39;: {&#39;a1&#39;: 0, &#39;a2&#39;: {&#39;new_entry&#39;: 2}, &#39;a0&#39;: 0}}</span>
 
 <span class="sd">    :param d: nested dictionary to address;</span>
 <span class="sd">    :param path: list of keys forming the path to the required entry;</span>
 <span class="sd">    :param value: value to be set;</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">get_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">path</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
@@ -384,18 +384,18 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametrized</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">"""Returns the Iterator object"""</span>
+        <span class="sd">&quot;&quot;&quot;Returns the Iterator object&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">IterParamContainer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Parametrized</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">""" Creates a parameterized class</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">tree</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates a parameterized class</span>
 
 <span class="sd">        :param name: name, with optional path separated by slashes</span>
 <span class="sd">        :param tree: a parameter-storing tree</span>
 <span class="sd">        :param params: (optional) a dictionary of params</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
 
@@ -462,14 +462,14 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">value</span><span class="p">,</span>
         <span class="n">limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">desc</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">gui</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">unit</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+        <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">scale</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">editable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">loadable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">""" A parameter</span>
+        <span class="sd">&quot;&quot;&quot; A parameter</span>
 
 <span class="sd">        :param value: default value</span>
 <span class="sd">        :param limits: minimum and maximum</span>
@@ -477,7 +477,7 @@
 <span class="sd">        :param gui: preferred gui (spin, slider, combo)</span>
 <span class="sd">        :param unit: physical unit, if existing</span>
 <span class="sd">        :param scale: for real-valued parameters linear or logarithmic</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="n">limits</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span>
@@ -491,79 +491,79 @@
         <span class="c1"># heuristics for gui</span>
         <span class="k">if</span> <span class="n">gui</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">limits</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">"combo"</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">&quot;combo&quot;</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">"check"</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">&quot;check&quot;</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">"spin"</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">&quot;spin&quot;</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">"text"</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">&quot;text&quot;</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">"range_slider"</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="s2">&quot;range_slider&quot;</span>
         <span class="k">elif</span> <span class="n">gui</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="kc">None</span>
 
 
 <span class="k">class</span> <span class="nc">ParameterTree</span><span class="p">:</span>
-    <span class="sd">""" Class for managing a multi-level tree of parameters</span>
+    <span class="sd">&quot;&quot;&quot; Class for managing a multi-level tree of parameters</span>
 
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parametrized</span><span class="p">):</span>
-        <span class="sd">""" Add new branched node to the tree.</span>
+        <span class="sd">&quot;&quot;&quot; Add new branched node to the tree.</span>
 <span class="sd">        :param parametrized:</span>
 <span class="sd">        :return:</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="n">parametrized</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parametrized</span>
 
     <span class="k">def</span> <span class="nf">deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restore_dict</span><span class="p">):</span>
-        <span class="sd">""" Restore state of the tree based on contents of a restore_dict.</span>
+        <span class="sd">&quot;&quot;&quot; Restore state of the tree based on contents of a restore_dict.</span>
 <span class="sd">        :param restore_dict: dictionary with the tree state to restore</span>
 <span class="sd">        :return:</span>
-<span class="sd">        """</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">visit_dict</span><span class="p">(</span><span class="n">restore_dict</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Get current parameterized object, if present:</span>
-                <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+                <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
                 <span class="n">loadable</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="n">k</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">loadable</span>
 
                 <span class="c1"># If we explicitly made the parameter not loadable from the restoring</span>
                 <span class="c1"># dictionary, skip. Skip also the restoring of the loadable</span>
                 <span class="c1"># attribute, which is not loadable itself:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">loadable</span> <span class="ow">or</span> <span class="n">k</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"loadable"</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">loadable</span> <span class="ow">or</span> <span class="n">k</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;loadable&quot;</span><span class="p">:</span>
                     <span class="k">continue</span>
 
                 <span class="c1"># try to stop the signal of the parameter has one, to prevent</span>
                 <span class="c1"># infinite loops:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span><span class="o">.</span><span class="n">block_signal</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span><span class="o">.</span><span class="n">block_signal</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                     <span class="k">pass</span>
 
                 <span class="c1"># Set the actual attribute, if possible:</span>
-                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])],</span> <span class="n">k</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">val</span><span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])],</span> <span class="n">k</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">val</span><span class="p">)</span>
 
                 <span class="c1"># unblock the refresh signal</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span><span class="o">.</span><span class="n">block_signal</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">k</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span><span class="o">.</span><span class="n">block_signal</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                     <span class="k">pass</span>
 
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">"Trying to restore </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">, but it is not present in the parameter tree"</span>
+                    <span class="sa">f</span><span class="s2">&quot;Trying to restore </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">, but it is not present in the parameter tree&quot;</span>
                 <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">""" Generate state dict that can be saved to restore the tree.</span>
-<span class="sd">        """</span>
+        <span class="sd">&quot;&quot;&quot; Generate state dict that can be saved to restore the tree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">set_nested</span><span class="p">(</span><span class="n">new_dict</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+            <span class="n">set_nested</span><span class="p">(</span><span class="n">new_dict</span><span class="p">,</span> <span class="n">k</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_dict</span>
 </pre></div>
         </article>
@@ -603,15 +603,16 @@
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/scripts/furo.js"></script>
     <script src="../../_static/clipboard.min.js"></script>
     <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=f31d14ad54b65d19161ba51d4ffff3a77ae00456"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
-    <script src="../../_static/sphinx-book-theme.d59cb220de22ca1c485ebbdc042f0030.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script src="../../_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
 const thebe_selector = ".thebe,.cell"
 const thebe_selector_input = "pre"

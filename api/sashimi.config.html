@@ -2,19 +2,19 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.config.Path" href="sashimi.config.Path.html" /><link rel="prev" title="sashimi.processes.logging.TextIO" href="sashimi.processes.logging.TextIO.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.config.Path" href="sashimi.config.Path.html" /><link rel="prev" title="sashimi.processes.logging.TextIO" href="sashimi.processes.logging.TextIO.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
         <title>sashimi.config - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -241,7 +241,8 @@
           </svg>
           <span>Back to top</span>
         </a>
-        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -255,25 +256,28 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="module-sashimi.config">
+          <section id="module-sashimi.config">
 <span id="sashimi-config"></span><h1>sashimi.config<a class="headerlink" href="#module-sashimi.config" title="Permalink to this headline">#</a></h1>
 <p class="rubric">Classes</p>
-<div class="table-wrapper"><table class="autosummary longtable docutils align-default">
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
 <colgroup>
-<col style="width: 10%"/>
-<col style="width: 90%"/>
+<col style="width: 10%" />
+<col style="width: 90%" />
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sashimi.config.Path.html#sashimi.config.Path" title="sashimi.config.Path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Path</span></code></a></p></td>
 <td><p>PurePath subclass that can make system calls.</p></td>
 </tr>
 </tbody>
-</table></div>
+</table>
+</div>
 <p class="rubric">Functions</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="sashimi.config.cli_edit_config">
 <span class="sig-prename descclassname"><span class="pre">sashimi.config.</span></span><span class="sig-name descname"><span class="pre">cli_edit_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PosixPath('/home/runner/.sashimi/hardware_config.toml')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/config.html#cli_edit_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.config.cli_edit_config" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="sashimi.config.get_nested">
 <span class="sig-prename descclassname"><span class="pre">sashimi.config.</span></span><span class="sig-name descname"><span class="pre">get_nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightparam/core.html#get_nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.config.get_nested" title="Permalink to this definition">#</a></dt>
@@ -281,7 +285,7 @@
 indicating the value to the path.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a1</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'a1'</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;a1&#39;</span><span class="p">])</span>
 <span class="go">1</span>
 </pre></div>
 </div>
@@ -290,9 +294,9 @@ nested keys are added to the dictionary and an empty dictionary is added
 as value at that location.</p>
 <p class="rubric">Example</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a1</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'a2'</span><span class="p">,</span> <span class="s1">'new_dict'</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;a2&#39;</span><span class="p">,</span> <span class="s1">&#39;new_dict&#39;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-<span class="go">{'a': {'a0': 0, 'a1': 1, 'a2': {'new_dict': {}}}}</span>
+<span class="go">{&#39;a&#39;: {&#39;a0&#39;: 0, &#39;a1&#39;: 1, &#39;a2&#39;: {&#39;new_dict&#39;: {}}}}</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -307,6 +311,7 @@ as value at that location.</p>
 </dd>
 </dl>
 </dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="sashimi.config.read_config">
 <span class="sig-prename descclassname"><span class="pre">sashimi.config.</span></span><span class="sig-name descname"><span class="pre">read_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PosixPath('/home/runner/.sashimi/hardware_config.toml')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/config.html#read_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.config.read_config" title="Permalink to this definition">#</a></dt>
@@ -323,6 +328,7 @@ as value at that location.</p>
 </dd>
 </dl>
 </dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="sashimi.config.set_nested">
 <span class="sig-prename descclassname"><span class="pre">sashimi.config.</span></span><span class="sig-name descname"><span class="pre">set_nested</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/lightparam/core.html#set_nested"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.config.set_nested" title="Permalink to this definition">#</a></dt>
@@ -330,12 +336,12 @@ as value at that location.</p>
 position of the hierarchy.</p>
 <p>Example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">a0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">a1</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">set_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'a1'</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">set_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;a1&#39;</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-<span class="go">{'a': {'a1': 0, 'a0': 0}}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">set_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">[</span><span class="s1">'a'</span><span class="p">,</span> <span class="s1">'a2'</span><span class="p">,</span> <span class="s1">'new_entry'</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+<span class="go">{&#39;a&#39;: {&#39;a1&#39;: 0, &#39;a0&#39;: 0}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">set_nested</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;a2&#39;</span><span class="p">,</span> <span class="s1">&#39;new_entry&#39;</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-<span class="go">{'a': {'a1': 0, 'a2': {'new_entry': 2}, 'a0': 0}}</span>
+<span class="go">{&#39;a&#39;: {&#39;a1&#39;: 0, &#39;a2&#39;: {&#39;new_entry&#39;: 2}, &#39;a0&#39;: 0}}</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -348,6 +354,7 @@ position of the hierarchy.</p>
 </dd>
 </dl>
 </dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="sashimi.config.write_config_value">
 <span class="sig-prename descclassname"><span class="pre">sashimi.config.</span></span><span class="sig-name descname"><span class="pre">write_config_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PosixPath('/home/runner/.sashimi/hardware_config.toml')</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/config.html#write_config_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.config.write_config_value" title="Permalink to this definition">#</a></dt>
@@ -364,6 +371,7 @@ sections and look directly for matching parameters names.</p>
 </dd>
 </dl>
 </dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="sashimi.config.write_default_config">
 <span class="sig-prename descclassname"><span class="pre">sashimi.config.</span></span><span class="sig-name descname"><span class="pre">write_default_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">PosixPath('/home/runner/.sashimi/hardware_config.toml')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'array_ram_MB':</span> <span class="pre">450,</span> <span class="pre">'camera':</span> <span class="pre">{'default_binning':</span> <span class="pre">1,</span> <span class="pre">'default_exposure':</span> <span class="pre">60,</span> <span class="pre">'id':</span> <span class="pre">0,</span> <span class="pre">'max_sensor_resolution':</span> <span class="pre">[2048,</span> <span class="pre">2048],</span> <span class="pre">'name':</span> <span class="pre">'mock'},</span> <span class="pre">'default_paths':</span> <span class="pre">{'data':</span> <span class="pre">'/home/runner',</span> <span class="pre">'log':</span> <span class="pre">'/home/runner/logs',</span> <span class="pre">'presets':</span> <span class="pre">'/home/runner/presets',</span> <span class="pre">'scope_instructions':</span> <span class="pre">'.'},</span> <span class="pre">'email':</span> <span class="pre">{'password':</span> <span class="pre">'foo',</span> <span class="pre">'user':</span> <span class="pre">'foo'},</span> <span class="pre">'external_communication':</span> <span class="pre">{'address':</span> <span class="pre">'tcp://O1-589:5555',</span> <span class="pre">'name':</span> <span class="pre">'stytra'},</span> <span class="pre">'light_source':</span> <span class="pre">{'intensity_units':</span> <span class="pre">'mock',</span> <span class="pre">'name':</span> <span class="pre">'mock',</span> <span class="pre">'port':</span> <span class="pre">'COM4'},</span> <span class="pre">'notifier':</span> <span class="pre">'none',</span> <span class="pre">'notifier_options':</span> <span class="pre">{},</span> <span class="pre">'piezo':</span> <span class="pre">{'scale':</span> <span class="pre">0.025},</span> <span class="pre">'sample_rate':</span> <span class="pre">40000,</span> <span class="pre">'scanning':</span> <span class="pre">'mock',</span> <span class="pre">'scopeless':</span> <span class="pre">False,</span> <span class="pre">'voxel_size':</span> <span class="pre">{'x':</span> <span class="pre">0.3,</span> <span class="pre">'y':</span> <span class="pre">0.3},</span> <span class="pre">'xy_board':</span> <span class="pre">{'write':</span> <span class="pre">{'channel':</span> <span class="pre">'Dev2/ao0:1',</span> <span class="pre">'max_val':</span> <span class="pre">10,</span> <span class="pre">'min_val':</span> <span class="pre">-</span> <span class="pre">5}},</span> <span class="pre">'z_board':</span> <span class="pre">{'read':</span> <span class="pre">{'channel':</span> <span class="pre">'Dev1/ai0:0',</span> <span class="pre">'max_val':</span> <span class="pre">10,</span> <span class="pre">'min_val':</span> <span class="pre">0},</span> <span class="pre">'sync':</span> <span class="pre">{'channel':</span> <span class="pre">'/Dev1/ao/StartTrigger'},</span> <span class="pre">'write':</span> <span class="pre">{'channel':</span> <span class="pre">'Dev1/ao0:3',</span> <span class="pre">'max_val':</span> <span class="pre">10,</span> <span class="pre">'min_val':</span> <span class="pre">-</span> <span class="pre">5}}}</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sashimi/config.html#write_default_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.config.write_default_config" title="Permalink to this definition">#</a></dt>
@@ -378,8 +386,10 @@ we don’t need to keep a confusing template config file in the repo.</p>
 </dd>
 </dl>
 </dd></dl>
-</div>
-<script type="text/x-thebe-config">
+
+</section>
+
+    <script type="text/x-thebe-config">
     {
         requestKernel: true,
         binderOptions: {
@@ -397,7 +407,7 @@ we don’t need to keep a confusing template config file in the repo.</p>
         predefinedOutput: true
     }
     </script>
-<script>kernelName = 'python3'</script>
+    <script>kernelName = 'python3'</script>
         </article>
       </div>
       <footer>
@@ -453,15 +463,16 @@ we don’t need to keep a confusing template config file in the repo.</p>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=f31d14ad54b65d19161ba51d4ffff3a77ae00456"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
-    <script src="../_static/sphinx-book-theme.d59cb220de22ca1c485ebbdc042f0030.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
 const thebe_selector = ".thebe,.cell"
 const thebe_selector_input = "pre"

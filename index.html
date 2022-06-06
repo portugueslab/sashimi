@@ -2,19 +2,19 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Timeline" href="timeline.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Timeline" href="timeline.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
         <title>Sashimi</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
-    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -241,7 +241,8 @@
           </svg>
           <span>Back to top</span>
         </a>
-        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -255,22 +256,22 @@
           </label>
         </div>
         <article role="main">
-          <div class="tex2jax_ignore mathjax_ignore section" id="welcome-to-the-sashimi-documentation">
+          <section class="tex2jax_ignore mathjax_ignore" id="welcome-to-the-sashimi-documentation">
 <h1>Welcome to the Sashimi documentation!<a class="headerlink" href="#welcome-to-the-sashimi-documentation" title="Permalink to this headline">#</a></h1>
-<img align="left" height="190" src="https://raw.githubusercontent.com/portugueslab/sashimi/master/sashimi/icons/main_icon.png" width="270"/>
-<p><img alt="tests" src="https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master">
-<a class="reference external" href="https://portugueslab.github.io/sashimi/"><img alt="Docs" src="https://img.shields.io/badge/docs-dev-brightgreen"/></a>
-<a class="reference external" href="https://coveralls.io/github/portugueslab/sashimi"><img alt="Coverage Status" src="https://coveralls.io/repos/github/portugueslab/sashimi/badge.svg"/></a>
-<a class="reference external" href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"/></a>
-<a class="reference external" href="https://doi.org/10.5281/zenodo.4122062"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.4122062.svg"/></a>
-<a class="reference external" href="https://www.python.org/"><img alt="Python 3.8" src="https://img.shields.io/badge/python-3.8-blue.svg"/></a></img></p>
+<img src="https://raw.githubusercontent.com/portugueslab/sashimi/master/sashimi/icons/main_icon.png" align="left" height="190" width="270">
+<p><img alt="tests" src="https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master" />
+<a class="reference external" href="https://portugueslab.github.io/sashimi/"><img alt="Docs" src="https://img.shields.io/badge/docs-dev-brightgreen" /></a>
+<a class="reference external" href="https://coveralls.io/github/portugueslab/sashimi"><img alt="Coverage Status" src="https://coveralls.io/repos/github/portugueslab/sashimi/badge.svg" /></a>
+<a class="reference external" href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a>
+<a class="reference external" href="https://doi.org/10.5281/zenodo.4122062"><img alt="DOI" src="https://zenodo.org/badge/DOI/10.5281/zenodo.4122062.svg" /></a>
+<a class="reference external" href="https://www.python.org/"><img alt="Python 3.8" src="https://img.shields.io/badge/python-3.8-blue.svg" /></a></p>
 <p>Sashimi is a user-friendly software for efficient control of digital scanned light sheet microscopes (DSLMs).
 It is developed by members of the <a class="reference external" href="http://www.portugueslab.com/">PortuguesLab</a>
 at the Technical University of Munich and Max Planck Institute of Neurobiology. Sashimi relies on the fast, multidimensional
 <a class="reference external" href="https://github.com/napari/napari">Napari viewer</a>.</p>
 <p>While built for a particular microscope configuration, the modular architecture allows for easy replacement of
 hardware by other vendors (we will help with and welcome contributions for supporting other cameras, boards and light sources).</p>
-<div class="section" id="table-of-contents">
+<section id="table-of-contents">
 <h2>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">#</a></h2>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
@@ -343,9 +344,10 @@ hardware by other vendors (we will help with and welcome contributions for suppo
 </li>
 </ul>
 </div>
-</div>
-</div>
-<script type="text/x-thebe-config">
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
     {
         requestKernel: true,
         binderOptions: {
@@ -363,7 +365,7 @@ hardware by other vendors (we will help with and welcome contributions for suppo
         predefinedOutput: true
     }
     </script>
-<script>kernelName = 'python3'</script>
+    <script>kernelName = 'python3'</script>
         </article>
       </div>
       <footer>
@@ -430,15 +432,16 @@ hardware by other vendors (we will help with and welcome contributions for suppo
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/scripts/furo.js"></script>
     <script src="_static/clipboard.min.js"></script>
     <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=f31d14ad54b65d19161ba51d4ffff3a77ae00456"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
-    <script src="_static/sphinx-book-theme.d59cb220de22ca1c485ebbdc042f0030.js"></script>
+    <script src="_static/design-tabs.js"></script>
+    <script src="_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
 const thebe_selector = ".thebe,.cell"
 const thebe_selector_input = "pre"

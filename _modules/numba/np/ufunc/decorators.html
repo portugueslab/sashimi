@@ -4,17 +4,16 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
         <title>numba.np.ufunc.decorators - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -241,7 +240,8 @@
           </svg>
           <span>Back to top</span>
         </a>
-        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -270,24 +270,24 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_identity</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'identity'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_cache</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'cache'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cache&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_target_implementation</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'target'</span><span class="p">,</span> <span class="s1">'cpu'</span><span class="p">)</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="s1">&#39;cpu&#39;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">target_registry</span><span class="p">[</span><span class="n">target</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Unsupported target: </span><span class="si">%s</span><span class="s2">"</span> <span class="o">%</span> <span class="n">target</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unsupported target: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">target</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Vectorize</span><span class="p">(</span><span class="n">_BaseVectorize</span><span class="p">):</span>
-    <span class="n">target_registry</span> <span class="o">=</span> <span class="n">DelayedRegistry</span><span class="p">({</span><span class="s1">'cpu'</span><span class="p">:</span> <span class="n">dufunc</span><span class="o">.</span><span class="n">DUFunc</span><span class="p">,</span>
-                                       <span class="s1">'parallel'</span><span class="p">:</span> <span class="n">ParallelUFuncBuilder</span><span class="p">,})</span>
+    <span class="n">target_registry</span> <span class="o">=</span> <span class="n">DelayedRegistry</span><span class="p">({</span><span class="s1">&#39;cpu&#39;</span><span class="p">:</span> <span class="n">dufunc</span><span class="o">.</span><span class="n">DUFunc</span><span class="p">,</span>
+                                       <span class="s1">&#39;parallel&#39;</span><span class="p">:</span> <span class="n">ParallelUFuncBuilder</span><span class="p">,})</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="n">identity</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_identity</span><span class="p">(</span><span class="n">kws</span><span class="p">)</span>
@@ -297,15 +297,15 @@
 
 
 <span class="k">class</span> <span class="nc">GUVectorize</span><span class="p">(</span><span class="n">_BaseVectorize</span><span class="p">):</span>
-    <span class="n">target_registry</span> <span class="o">=</span> <span class="n">DelayedRegistry</span><span class="p">({</span><span class="s1">'cpu'</span><span class="p">:</span> <span class="n">gufunc</span><span class="o">.</span><span class="n">GUFunc</span><span class="p">,</span>
-                                       <span class="s1">'parallel'</span><span class="p">:</span> <span class="n">ParallelGUFuncBuilder</span><span class="p">,})</span>
+    <span class="n">target_registry</span> <span class="o">=</span> <span class="n">DelayedRegistry</span><span class="p">({</span><span class="s1">&#39;cpu&#39;</span><span class="p">:</span> <span class="n">gufunc</span><span class="o">.</span><span class="n">GUFunc</span><span class="p">,</span>
+                                       <span class="s1">&#39;parallel&#39;</span><span class="p">:</span> <span class="n">ParallelGUFuncBuilder</span><span class="p">,})</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
         <span class="n">identity</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_identity</span><span class="p">(</span><span class="n">kws</span><span class="p">)</span>
         <span class="n">cache</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_cache</span><span class="p">(</span><span class="n">kws</span><span class="p">)</span>
         <span class="n">imp</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_target_implementation</span><span class="p">(</span><span class="n">kws</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">imp</span> <span class="ow">is</span> <span class="n">gufunc</span><span class="o">.</span><span class="n">GUFunc</span><span class="p">:</span>
-            <span class="n">is_dyn</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">'is_dynamic'</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="n">is_dyn</span> <span class="o">=</span> <span class="n">kws</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;is_dynamic&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">imp</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">identity</span><span class="o">=</span><span class="n">identity</span><span class="p">,</span> <span class="n">cache</span><span class="o">=</span><span class="n">cache</span><span class="p">,</span>
                        <span class="n">is_dynamic</span><span class="o">=</span><span class="n">is_dyn</span><span class="p">,</span> <span class="n">targetoptions</span><span class="o">=</span><span class="n">kws</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -314,7 +314,7 @@
 
 
 <div class="viewcode-block" id="vectorize"><a class="viewcode-back" href="../../../../api/sashimi.utilities.html#sashimi.utilities.vectorize">[docs]</a><span class="k">def</span> <span class="nf">vectorize</span><span class="p">(</span><span class="n">ftylist_or_function</span><span class="o">=</span><span class="p">(),</span> <span class="o">**</span><span class="n">kws</span><span class="p">):</span>
-    <span class="sd">"""vectorize(ftylist_or_function=(), target='cpu', identity=None, **kws)</span>
+    <span class="sd">&quot;&quot;&quot;vectorize(ftylist_or_function=(), target=&#39;cpu&#39;, identity=None, **kws)</span>
 
 <span class="sd">    A decorator that creates a Numpy ufunc object using Numba compiled</span>
 <span class="sd">    code.  When no arguments or only keyword arguments are given,</span>
@@ -337,12 +337,12 @@
 <span class="sd">    ------------</span>
 
 <span class="sd">    target: str</span>
-<span class="sd">            A string for code generation target.  Default to "cpu".</span>
+<span class="sd">            A string for code generation target.  Default to &quot;cpu&quot;.</span>
 
 <span class="sd">    identity: int, str, or None</span>
 <span class="sd">        The identity (or unit) value for the element-wise function</span>
 <span class="sd">        being implemented.  Allowed values are None (the default), 0, 1,</span>
-<span class="sd">        and "reorderable".</span>
+<span class="sd">        and &quot;reorderable&quot;.</span>
 
 <span class="sd">    cache: bool</span>
 <span class="sd">        Turns on caching.</span>
@@ -355,8 +355,8 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    -------</span>
-<span class="sd">        @vectorize(['float32(float32, float32)',</span>
-<span class="sd">                    'float64(float64, float64)'], identity=1)</span>
+<span class="sd">        @vectorize([&#39;float32(float32, float32)&#39;,</span>
+<span class="sd">                    &#39;float64(float64, float64)&#39;], identity=1)</span>
 <span class="sd">        def sum(a, b):</span>
 <span class="sd">            return a + b</span>
 
@@ -368,7 +368,7 @@
 <span class="sd">        def mul(a, b):</span>
 <span class="sd">            return a * b</span>
 
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ftylist_or_function</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="c1"># Common user mistake</span>
         <span class="n">ftylist</span> <span class="o">=</span> <span class="p">[</span><span class="n">ftylist_or_function</span><span class="p">]</span>
@@ -389,7 +389,7 @@
 
 
 <span class="k">def</span> <span class="nf">guvectorize</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">"""guvectorize(ftylist, signature, target='cpu', identity=None, **kws)</span>
+    <span class="sd">&quot;&quot;&quot;guvectorize(ftylist, signature, target=&#39;cpu&#39;, identity=None, **kws)</span>
 
 <span class="sd">    A decorator to create numpy generialized-ufunc object from Numba compiled</span>
 <span class="sd">    code.</span>
@@ -403,18 +403,18 @@
 
 <span class="sd">    signature: str</span>
 <span class="sd">        A NumPy generialized-ufunc signature.</span>
-<span class="sd">        e.g. "(m, n), (n, p)-&gt;(m, p)"</span>
+<span class="sd">        e.g. &quot;(m, n), (n, p)-&gt;(m, p)&quot;</span>
 
 <span class="sd">    identity: int, str, or None</span>
 <span class="sd">        The identity (or unit) value for the element-wise function</span>
 <span class="sd">        being implemented.  Allowed values are None (the default), 0, 1,</span>
-<span class="sd">        and "reorderable".</span>
+<span class="sd">        and &quot;reorderable&quot;.</span>
 
 <span class="sd">    cache: bool</span>
 <span class="sd">        Turns on caching.</span>
 
 <span class="sd">    target: str</span>
-<span class="sd">            A string for code generation target.  Defaults to "cpu".</span>
+<span class="sd">            A string for code generation target.  Defaults to &quot;cpu&quot;.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    --------</span>
@@ -423,24 +423,24 @@
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
-<span class="sd">        @guvectorize(['void(int32[:,:], int32[:,:], int32[:,:])',</span>
-<span class="sd">                      'void(float32[:,:], float32[:,:], float32[:,:])'],</span>
-<span class="sd">                      '(x, y),(x, y)-&gt;(x, y)')</span>
+<span class="sd">        @guvectorize([&#39;void(int32[:,:], int32[:,:], int32[:,:])&#39;,</span>
+<span class="sd">                      &#39;void(float32[:,:], float32[:,:], float32[:,:])&#39;],</span>
+<span class="sd">                      &#39;(x, y),(x, y)-&gt;(x, y)&#39;)</span>
 <span class="sd">        def add_2d_array(a, b, c):</span>
 <span class="sd">            for i in range(c.shape[0]):</span>
 <span class="sd">                for j in range(c.shape[1]):</span>
 <span class="sd">                    c[i, j] = a[i, j] + b[i, j]</span>
 
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">ftylist</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">signature</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'is_dynamic'</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;is_dynamic&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
         <span class="n">ftylist</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">signature</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">'guvectorize() takes one or two positional arguments'</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;guvectorize() takes one or two positional arguments&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ftylist</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="c1"># Common user mistake</span>
@@ -493,15 +493,16 @@
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/scripts/furo.js"></script>
     <script src="../../../../_static/clipboard.min.js"></script>
     <script src="../../../../_static/copybutton.js"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?digest=f31d14ad54b65d19161ba51d4ffff3a77ae00456"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
-    <script src="../../../../_static/sphinx-book-theme.d59cb220de22ca1c485ebbdc042f0030.js"></script>
+    <script src="../../../../_static/design-tabs.js"></script>
+    <script src="../../../../_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
 const thebe_selector = ".thebe,.cell"
 const thebe_selector_input = "pre"

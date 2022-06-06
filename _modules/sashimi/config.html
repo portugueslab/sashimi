@@ -4,17 +4,16 @@
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
         <title>sashimi.config - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -241,7 +240,8 @@
           </svg>
           <span>Back to top</span>
         </a>
-        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -261,12 +261,12 @@
 <span class="kn">import</span> <span class="nn">toml</span>
 <span class="kn">from</span> <span class="nn">lightparam</span> <span class="kn">import</span> <span class="n">set_nested</span><span class="p">,</span> <span class="n">get_nested</span>
 
-<span class="n">CONFIG_FILENAME</span> <span class="o">=</span> <span class="s2">"hardware_config.toml"</span>
-<span class="n">CONFIG_DIR_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".sashimi"</span>
+<span class="n">CONFIG_FILENAME</span> <span class="o">=</span> <span class="s2">&quot;hardware_config.toml&quot;</span>
+<span class="n">CONFIG_DIR_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;.sashimi&quot;</span>
 <span class="n">CONFIG_DIR_PATH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">PRESETS_DIR_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"presets"</span>
+<span class="n">PRESETS_DIR_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;presets&quot;</span>
 <span class="n">PRESETS_DIR_PATH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">LOGS_DIR_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">"logs"</span>
+<span class="n">LOGS_DIR_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">&quot;logs&quot;</span>
 <span class="n">LOGS_DIR_PATH</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="n">SCOPE_INSTRUCTIONS_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">()</span>
 
@@ -275,61 +275,61 @@
 <span class="c1"># 2 level dictionary for sections and values:</span>
 <span class="c1"># TODO this will obviously have to change to fit scanning declarations</span>
 <span class="n">TEMPLATE_CONF_DICT</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">"scanning"</span><span class="p">:</span> <span class="s2">"mock"</span><span class="p">,</span>
-    <span class="s2">"scopeless"</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="s2">"sample_rate"</span><span class="p">:</span> <span class="mi">40000</span><span class="p">,</span>
-    <span class="s2">"voxel_size"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"x"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
-        <span class="s2">"y"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+    <span class="s2">&quot;scanning&quot;</span><span class="p">:</span> <span class="s2">&quot;mock&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;scopeless&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;sample_rate&quot;</span><span class="p">:</span> <span class="mi">40000</span><span class="p">,</span>
+    <span class="s2">&quot;voxel_size&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">"default_paths"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"data"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()),</span>
-        <span class="s2">"presets"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">PRESETS_DIR_PATH</span><span class="p">),</span>
-        <span class="s2">"log"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">LOGS_DIR_PATH</span><span class="p">),</span>
-        <span class="s2">"scope_instructions"</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">SCOPE_INSTRUCTIONS_PATH</span><span class="p">),</span>
+    <span class="s2">&quot;default_paths&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()),</span>
+        <span class="s2">&quot;presets&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">PRESETS_DIR_PATH</span><span class="p">),</span>
+        <span class="s2">&quot;log&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">LOGS_DIR_PATH</span><span class="p">),</span>
+        <span class="s2">&quot;scope_instructions&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">SCOPE_INSTRUCTIONS_PATH</span><span class="p">),</span>
     <span class="p">},</span>
-    <span class="s2">"z_board"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"read"</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">"channel"</span><span class="p">:</span> <span class="s2">"Dev1/ai0:0"</span><span class="p">,</span>
-            <span class="s2">"min_val"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-            <span class="s2">"max_val"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">&quot;z_board&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;read&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;channel&quot;</span><span class="p">:</span> <span class="s2">&quot;Dev1/ai0:0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;min_val&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;max_val&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">"write"</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">"channel"</span><span class="p">:</span> <span class="s2">"Dev1/ao0:3"</span><span class="p">,</span>
-            <span class="s2">"min_val"</span><span class="p">:</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span>
-            <span class="s2">"max_val"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="s2">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;channel&quot;</span><span class="p">:</span> <span class="s2">&quot;Dev1/ao0:3&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;min_val&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span>
+            <span class="s2">&quot;max_val&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="s2">"sync"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"channel"</span><span class="p">:</span> <span class="s2">"/Dev1/ao/StartTrigger"</span><span class="p">},</span>
+        <span class="s2">&quot;sync&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;channel&quot;</span><span class="p">:</span> <span class="s2">&quot;/Dev1/ao/StartTrigger&quot;</span><span class="p">},</span>
     <span class="p">},</span>
-    <span class="s2">"piezo"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"scale"</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">40</span><span class="p">,</span>
+    <span class="s2">&quot;piezo&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">/</span> <span class="mi">40</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">"email"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"user"</span><span class="p">:</span> <span class="s2">"foo"</span><span class="p">,</span> <span class="s2">"password"</span><span class="p">:</span> <span class="s2">"foo"</span><span class="p">},</span>
-    <span class="s2">"xy_board"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"write"</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">"channel"</span><span class="p">:</span> <span class="s2">"Dev2/ao0:1"</span><span class="p">,</span>
-            <span class="s2">"min_val"</span><span class="p">:</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span>
-            <span class="s2">"max_val"</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="s2">&quot;foo&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;xy_board&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;write&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;channel&quot;</span><span class="p">:</span> <span class="s2">&quot;Dev2/ao0:1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;min_val&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span>
+            <span class="s2">&quot;max_val&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">},</span>
-    <span class="s2">"camera"</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">"id"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"mock"</span><span class="p">,</span>
-        <span class="s2">"max_sensor_resolution"</span><span class="p">:</span> <span class="p">[</span><span class="mi">2048</span><span class="p">,</span> <span class="mi">2048</span><span class="p">],</span>
-        <span class="s2">"default_exposure"</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
-        <span class="s2">"default_binning"</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="s2">&quot;camera&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;mock&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;max_sensor_resolution&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2048</span><span class="p">,</span> <span class="mi">2048</span><span class="p">],</span>
+        <span class="s2">&quot;default_exposure&quot;</span><span class="p">:</span> <span class="mi">60</span><span class="p">,</span>
+        <span class="s2">&quot;default_binning&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">},</span>
-    <span class="s2">"light_source"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"mock"</span><span class="p">,</span> <span class="s2">"port"</span><span class="p">:</span> <span class="s2">"COM4"</span><span class="p">,</span> <span class="s2">"intensity_units"</span><span class="p">:</span> <span class="s2">"mock"</span><span class="p">},</span>
-    <span class="s2">"external_communication"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="s2">"stytra"</span><span class="p">,</span> <span class="s2">"address"</span><span class="p">:</span> <span class="s2">"tcp://O1-589:5555"</span><span class="p">},</span>
-    <span class="s2">"notifier"</span><span class="p">:</span> <span class="s2">"none"</span><span class="p">,</span>
-    <span class="s2">"notifier_options"</span><span class="p">:</span> <span class="p">{},</span>
-    <span class="s2">"array_ram_MB"</span><span class="p">:</span> <span class="mi">450</span><span class="p">,</span>
+    <span class="s2">&quot;light_source&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;mock&quot;</span><span class="p">,</span> <span class="s2">&quot;port&quot;</span><span class="p">:</span> <span class="s2">&quot;COM4&quot;</span><span class="p">,</span> <span class="s2">&quot;intensity_units&quot;</span><span class="p">:</span> <span class="s2">&quot;mock&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;external_communication&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;stytra&quot;</span><span class="p">,</span> <span class="s2">&quot;address&quot;</span><span class="p">:</span> <span class="s2">&quot;tcp://O1-589:5555&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;notifier&quot;</span><span class="p">:</span> <span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;notifier_options&quot;</span><span class="p">:</span> <span class="p">{},</span>
+    <span class="s2">&quot;array_ram_MB&quot;</span><span class="p">:</span> <span class="mi">450</span><span class="p">,</span>
 <span class="p">}</span>
 
 
 <div class="viewcode-block" id="write_default_config"><a class="viewcode-back" href="../../api/sashimi.config.html#sashimi.config.write_default_config">[docs]</a><span class="k">def</span> <span class="nf">write_default_config</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">CONFIG_PATH</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="n">TEMPLATE_CONF_DICT</span><span class="p">):</span>
-    <span class="sd">"""Write configuration file at first repo usage. In this way,</span>
-<span class="sd">    we don't need to keep a confusing template config file in the repo.</span>
+    <span class="sd">&quot;&quot;&quot;Write configuration file at first repo usage. In this way,</span>
+<span class="sd">    we don&#39;t need to keep a confusing template config file in the repo.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -338,14 +338,14 @@
 <span class="sd">    template : dict</span>
 <span class="sd">        Template of the config file to be written (optional).</span>
 
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">toml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="read_config"><a class="viewcode-back" href="../../api/sashimi.config.html#sashimi.config.read_config">[docs]</a><span class="k">def</span> <span class="nf">read_config</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">CONFIG_PATH</span><span class="p">):</span>
-    <span class="sd">"""Read Sashimi config.</span>
+    <span class="sd">&quot;&quot;&quot;Read Sashimi config.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -356,7 +356,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    ConfigParser object</span>
 <span class="sd">        sashimi configuration</span>
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># If no config file exists yet, write the default one:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">file_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
@@ -366,20 +366,20 @@
 
 
 <div class="viewcode-block" id="write_config_value"><a class="viewcode-back" href="../../api/sashimi.config.html#sashimi.config.write_config_value">[docs]</a><span class="k">def</span> <span class="nf">write_config_value</span><span class="p">(</span><span class="n">dict_path</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="n">CONFIG_PATH</span><span class="p">):</span>
-    <span class="sd">"""Write a new value in the config file. To make things simple, ignore</span>
+    <span class="sd">&quot;&quot;&quot;Write a new value in the config file. To make things simple, ignore</span>
 <span class="sd">    sections and look directly for matching parameters names.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dict_path : str or list of strings</span>
 <span class="sd">        Full path of the section to configure</span>
-<span class="sd">        (e.g., ["piezo", "position_read", "min_val"])</span>
+<span class="sd">        (e.g., [&quot;piezo&quot;, &quot;position_read&quot;, &quot;min_val&quot;])</span>
 <span class="sd">    val :</span>
 <span class="sd">        New value.</span>
 <span class="sd">    file_path : Path object</span>
 <span class="sd">        Path of the config file (optional).</span>
 
-<span class="sd">    """</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Ensure path to entry is always a string:</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">dict_path</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">dict_path</span> <span class="o">=</span> <span class="p">[</span><span class="n">dict_path</span><span class="p">]</span>
@@ -389,26 +389,26 @@
     <span class="n">set_nested</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">dict_path</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
 
     <span class="c1"># Write:</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">toml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span></div>
 
 
 <span class="nd">@click</span><span class="o">.</span><span class="n">command</span><span class="p">()</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">"command"</span><span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"-n"</span><span class="p">,</span> <span class="s2">"--name"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Path (section/name) of parameter to be changed"</span><span class="p">)</span>
-<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">"-v"</span><span class="p">,</span> <span class="s2">"--val"</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">"Value of parameter to be changed"</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">argument</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-n&quot;</span><span class="p">,</span> <span class="s2">&quot;--name&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path (section/name) of parameter to be changed&quot;</span><span class="p">)</span>
+<span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;-v&quot;</span><span class="p">,</span> <span class="s2">&quot;--val&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Value of parameter to be changed&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span>
-    <span class="s2">"-p"</span><span class="p">,</span>
-    <span class="s2">"--file_path"</span><span class="p">,</span>
+    <span class="s2">&quot;-p&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;--file_path&quot;</span><span class="p">,</span>
     <span class="n">default</span><span class="o">=</span><span class="n">CONFIG_PATH</span><span class="p">,</span>
-    <span class="n">help</span><span class="o">=</span><span class="s2">"Path to the config file (optional)"</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Path to the config file (optional)&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="k">def</span> <span class="nf">cli_modify_config</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">val</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="n">CONFIG_PATH</span><span class="p">):</span>
     <span class="n">file_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="s2">"edit"</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;edit&quot;</span><span class="p">:</span>
         <span class="n">cli_edit_config</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">val</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
 
-    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s2">"show"</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">command</span> <span class="o">==</span> <span class="s2">&quot;show&quot;</span><span class="p">:</span>
         <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">_print_config</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">))</span>
 
 
@@ -417,7 +417,7 @@
 
     <span class="c1"># Cast the type of the previous variable</span>
     <span class="c1"># (to avoid overwriting values with strings)</span>
-    <span class="n">dict_path</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+    <span class="n">dict_path</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
     <span class="n">old_val</span> <span class="o">=</span> <span class="n">get_nested</span><span class="p">(</span><span class="n">conf</span><span class="p">,</span> <span class="n">dict_path</span><span class="p">)</span>
     <span class="n">val</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">old_val</span><span class="p">)(</span><span class="n">val</span><span class="p">)</span>  <span class="c1"># Convert to keep the same type</span>
 
@@ -425,7 +425,7 @@
 
 
 <span class="k">def</span> <span class="nf">_print_config</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">CONFIG_PATH</span><span class="p">):</span>
-    <span class="sd">"""Return configuration string for printing."""</span>
+    <span class="sd">&quot;&quot;&quot;Return configuration string for printing.&quot;&quot;&quot;</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">read_config</span><span class="p">(</span><span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">toml</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
@@ -466,15 +466,16 @@
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/scripts/furo.js"></script>
     <script src="../../_static/clipboard.min.js"></script>
     <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=f31d14ad54b65d19161ba51d4ffff3a77ae00456"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
-    <script src="../../_static/sphinx-book-theme.d59cb220de22ca1c485ebbdc042f0030.js"></script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script src="../../_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
 const thebe_selector = ".thebe,.cell"
 const thebe_selector_input = "pre"

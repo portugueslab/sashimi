@@ -2,19 +2,19 @@
 <html class="no-js">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.processes.logging.Process" href="sashimi.processes.logging.Process.html" /><link rel="prev" title="sashimi.processes.logging.LoggingProcess" href="sashimi.processes.logging.LoggingProcess.html" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.processes.logging.Process" href="sashimi.processes.logging.Process.html" /><link rel="prev" title="sashimi.processes.logging.LoggingProcess" href="sashimi.processes.logging.LoggingProcess.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.04.07"/>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.06.04.1"/>
         <title>sashimi.processes.logging.Path - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=68f4518137b9aefe99b631505a2064c3c42c9852" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -241,7 +241,8 @@
           </svg>
           <span>Back to top</span>
         </a>
-        <div class="content-icon-container"><div class="theme-toggle-container theme-toggle-content">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -255,7 +256,7 @@
           </label>
         </div>
         <article role="main">
-          <div class="section" id="sashimi-processes-logging-path">
+          <section id="sashimi-processes-logging-path">
 <h1>sashimi.processes.logging.Path<a class="headerlink" href="#sashimi-processes-logging-path" title="Permalink to this headline">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path">
@@ -277,125 +278,148 @@ even if the path doesn’t point to anything.</p>
 <p>No normalization is done, i.e. all ‘.’ and ‘..’ will be kept along.
 Use resolve() to get the canonical path to a file.</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.anchor">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">anchor</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.anchor" title="Permalink to this definition">#</a></dt>
 <dd><p>The concatenation of the drive and root, or ‘’.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.as_posix">
 <span class="sig-name descname"><span class="pre">as_posix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.logging.Path.as_posix" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the string representation of the path with forward (/)
 slashes.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.as_uri">
 <span class="sig-name descname"><span class="pre">as_uri</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.logging.Path.as_uri" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the path as a ‘file’ URI.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.chmod">
 <span class="sig-name descname"><span class="pre">chmod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.chmod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.chmod" title="Permalink to this definition">#</a></dt>
 <dd><p>Change the permissions of the path, like os.chmod().</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.cwd">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cwd</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.cwd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.cwd" title="Permalink to this definition">#</a></dt>
 <dd><p>Return a new path pointing to the current working directory
 (as returned by os.getcwd()).</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.drive">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">drive</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.drive" title="Permalink to this definition">#</a></dt>
 <dd><p>The drive prefix (letter or UNC path), if any.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.exists">
 <span class="sig-name descname"><span class="pre">exists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.exists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.exists" title="Permalink to this definition">#</a></dt>
 <dd><p>Whether this path exists.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.expanduser">
 <span class="sig-name descname"><span class="pre">expanduser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.expanduser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.expanduser" title="Permalink to this definition">#</a></dt>
 <dd><p>Return a new path with expanded ~ and ~user constructs
 (as returned by os.path.expanduser)</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.glob">
 <span class="sig-name descname"><span class="pre">glob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.glob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.glob" title="Permalink to this definition">#</a></dt>
 <dd><p>Iterate over this subtree and yield all existing files (of any
 kind, including directories) matching the given relative pattern.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.group">
 <span class="sig-name descname"><span class="pre">group</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.group" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the group name of the file gid.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.home">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">home</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.home"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.home" title="Permalink to this definition">#</a></dt>
 <dd><p>Return a new path pointing to the user’s home directory (as
 returned by os.path.expanduser(‘~’)).</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_absolute">
 <span class="sig-name descname"><span class="pre">is_absolute</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.logging.Path.is_absolute" title="Permalink to this definition">#</a></dt>
 <dd><p>True if the path is absolute (has both a root and, if applicable,
 a drive).</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_block_device">
 <span class="sig-name descname"><span class="pre">is_block_device</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.is_block_device"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.is_block_device" title="Permalink to this definition">#</a></dt>
 <dd><p>Whether this path is a block device.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_char_device">
 <span class="sig-name descname"><span class="pre">is_char_device</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.is_char_device"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.is_char_device" title="Permalink to this definition">#</a></dt>
 <dd><p>Whether this path is a character device.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_dir">
 <span class="sig-name descname"><span class="pre">is_dir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.is_dir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.is_dir" title="Permalink to this definition">#</a></dt>
 <dd><p>Whether this path is a directory.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_fifo">
 <span class="sig-name descname"><span class="pre">is_fifo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.is_fifo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.is_fifo" title="Permalink to this definition">#</a></dt>
 <dd><p>Whether this path is a FIFO.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_file">
 <span class="sig-name descname"><span class="pre">is_file</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.is_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.is_file" title="Permalink to this definition">#</a></dt>
 <dd><p>Whether this path is a regular file (also True for symlinks pointing
 to regular files).</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_mount">
 <span class="sig-name descname"><span class="pre">is_mount</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.is_mount"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.is_mount" title="Permalink to this definition">#</a></dt>
 <dd><p>Check if this path is a POSIX mount point</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_reserved">
 <span class="sig-name descname"><span class="pre">is_reserved</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.logging.Path.is_reserved" title="Permalink to this definition">#</a></dt>
 <dd><p>Return True if the path contains one of the special names reserved
 by the system, if any.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_socket">
 <span class="sig-name descname"><span class="pre">is_socket</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.is_socket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.is_socket" title="Permalink to this definition">#</a></dt>
 <dd><p>Whether this path is a socket.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.is_symlink">
 <span class="sig-name descname"><span class="pre">is_symlink</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.is_symlink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.is_symlink" title="Permalink to this definition">#</a></dt>
 <dd><p>Whether this path is a symbolic link.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.iterdir">
 <span class="sig-name descname"><span class="pre">iterdir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.iterdir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.iterdir" title="Permalink to this definition">#</a></dt>
 <dd><p>Iterate over the files in this directory.  Does not yield any
 result for the special paths ‘.’ and ‘..’.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.joinpath">
 <span class="sig-name descname"><span class="pre">joinpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.logging.Path.joinpath" title="Permalink to this definition">#</a></dt>
@@ -404,12 +428,14 @@ new path representing either a subpath (if all arguments are relative
 paths) or a totally different path (if one of the arguments is
 anchored).</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.lchmod">
 <span class="sig-name descname"><span class="pre">lchmod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.lchmod"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.lchmod" title="Permalink to this definition">#</a></dt>
 <dd><p>Like chmod(), except if the path points to a symlink, the symlink’s
 permissions are changed, rather than its target’s.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.link_to">
 <span class="sig-name descname"><span class="pre">link_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.link_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.link_to" title="Permalink to this definition">#</a></dt>
@@ -419,64 +445,76 @@ despite the implication of the function and argument names. The order
 of arguments (target, link) is the reverse of Path.symlink_to, but
 matches that of os.link.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.lstat">
 <span class="sig-name descname"><span class="pre">lstat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.lstat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.lstat" title="Permalink to this definition">#</a></dt>
 <dd><p>Like stat(), except if the path points to a symlink, the symlink’s
 status information is returned, rather than its target’s.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.match">
 <span class="sig-name descname"><span class="pre">match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_pattern</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.logging.Path.match" title="Permalink to this definition">#</a></dt>
 <dd><p>Return True if this path matches the given pattern.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.mkdir">
 <span class="sig-name descname"><span class="pre">mkdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">511</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exist_ok</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.mkdir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.mkdir" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a new directory at this given path.</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.name">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.name" title="Permalink to this definition">#</a></dt>
 <dd><p>The final path component, if any.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.open">
 <span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffering</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.open"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.open" title="Permalink to this definition">#</a></dt>
 <dd><p>Open the file pointed by this path and return a file object, as
 the built-in open() function does.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.owner">
 <span class="sig-name descname"><span class="pre">owner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.owner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.owner" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the login name of the file owner.</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.parent">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parent</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.parent" title="Permalink to this definition">#</a></dt>
 <dd><p>The logical parent of the path.</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.parents">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parents</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.parents" title="Permalink to this definition">#</a></dt>
 <dd><p>A sequence of this path’s logical parents.</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.parts">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">parts</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.parts" title="Permalink to this definition">#</a></dt>
 <dd><p>An object providing sequence-like access to the
 components in the filesystem path.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.read_bytes">
 <span class="sig-name descname"><span class="pre">read_bytes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.read_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.read_bytes" title="Permalink to this definition">#</a></dt>
 <dd><p>Open the file in bytes mode, read it, and close the file.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.read_text">
 <span class="sig-name descname"><span class="pre">read_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.read_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.read_text" title="Permalink to this definition">#</a></dt>
 <dd><p>Open the file in text mode, read it, and close the file.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.relative_to">
 <span class="sig-name descname"><span class="pre">relative_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.logging.Path.relative_to" title="Permalink to this definition">#</a></dt>
@@ -484,6 +522,7 @@ components in the filesystem path.</p>
 arguments.  If the operation is not possible (because this is not
 a subpath of the other path), raise ValueError.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.rename">
 <span class="sig-name descname"><span class="pre">rename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.rename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.rename" title="Permalink to this definition">#</a></dt>
@@ -493,6 +532,7 @@ interpreted relative to the current working directory, <em>not</em> the
 directory of the Path object.</p>
 <p>Returns the new Path instance pointing to the target path.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.replace">
 <span class="sig-name descname"><span class="pre">replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.replace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.replace" title="Permalink to this definition">#</a></dt>
@@ -502,6 +542,7 @@ interpreted relative to the current working directory, <em>not</em> the
 directory of the Path object.</p>
 <p>Returns the new Path instance pointing to the target path.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.resolve">
 <span class="sig-name descname"><span class="pre">resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.resolve" title="Permalink to this definition">#</a></dt>
@@ -509,6 +550,7 @@ directory of the Path object.</p>
 normalizing it (for example turning slashes into backslashes under
 Windows).</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.rglob">
 <span class="sig-name descname"><span class="pre">rglob</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.rglob"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.rglob" title="Permalink to this definition">#</a></dt>
@@ -516,67 +558,79 @@ Windows).</p>
 directories) matching the given relative pattern, anywhere in
 this subtree.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.rmdir">
 <span class="sig-name descname"><span class="pre">rmdir</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.rmdir"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.rmdir" title="Permalink to this definition">#</a></dt>
 <dd><p>Remove this directory.  The directory must be empty.</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.root">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">root</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.root" title="Permalink to this definition">#</a></dt>
 <dd><p>The root of the path, if any.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.samefile">
 <span class="sig-name descname"><span class="pre">samefile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other_path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.samefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.samefile" title="Permalink to this definition">#</a></dt>
 <dd><p>Return whether other_path is the same or not as this file
 (as returned by os.path.samefile()).</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.stat">
 <span class="sig-name descname"><span class="pre">stat</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.stat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.stat" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the result of the stat() system call on this path, like
 os.stat() does.</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.stem">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stem</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.stem" title="Permalink to this definition">#</a></dt>
 <dd><p>The final path component, minus its last suffix.</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.suffix">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">suffix</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.suffix" title="Permalink to this definition">#</a></dt>
 <dd><p>The final component’s last suffix, if any.</p>
 <p>This includes the leading period. For example: ‘.txt’</p>
 </dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.suffixes">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">suffixes</span></span><a class="headerlink" href="#sashimi.processes.logging.Path.suffixes" title="Permalink to this definition">#</a></dt>
 <dd><p>A list of the final component’s suffixes, if any.</p>
 <p>These include the leading periods. For example: [‘.tar’, ‘.gz’]</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.symlink_to">
 <span class="sig-name descname"><span class="pre">symlink_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_is_directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.symlink_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.symlink_to" title="Permalink to this definition">#</a></dt>
 <dd><p>Make this path a symlink pointing to the target path.
 Note the order of arguments (link, target) is the reverse of os.symlink.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.touch">
 <span class="sig-name descname"><span class="pre">touch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">438</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exist_ok</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.touch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.touch" title="Permalink to this definition">#</a></dt>
 <dd><p>Create this file with the given access mode, if it doesn’t exist.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.unlink">
 <span class="sig-name descname"><span class="pre">unlink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">missing_ok</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.unlink"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.unlink" title="Permalink to this definition">#</a></dt>
 <dd><p>Remove this file or link.
 If the path is a directory, use rmdir() instead.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.with_name">
 <span class="sig-name descname"><span class="pre">with_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.logging.Path.with_name" title="Permalink to this definition">#</a></dt>
 <dd><p>Return a new path with the file name changed.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.with_suffix">
 <span class="sig-name descname"><span class="pre">with_suffix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suffix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sashimi.processes.logging.Path.with_suffix" title="Permalink to this definition">#</a></dt>
@@ -584,19 +638,24 @@ If the path is a directory, use rmdir() instead.</p>
 has no suffix, add given suffix.  If the given suffix is an empty
 string, remove the suffix from the path.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.write_bytes">
 <span class="sig-name descname"><span class="pre">write_bytes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.write_bytes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.write_bytes" title="Permalink to this definition">#</a></dt>
 <dd><p>Open the file in bytes mode, write to it, and close the file.</p>
 </dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="sashimi.processes.logging.Path.write_text">
 <span class="sig-name descname"><span class="pre">write_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pathlib.html#Path.write_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.processes.logging.Path.write_text" title="Permalink to this definition">#</a></dt>
 <dd><p>Open the file in text mode, write to it, and close the file.</p>
 </dd></dl>
+
 </dd></dl>
-</div>
-<script type="text/x-thebe-config">
+
+</section>
+
+    <script type="text/x-thebe-config">
     {
         requestKernel: true,
         binderOptions: {
@@ -614,7 +673,7 @@ string, remove the suffix from the path.</p>
         predefinedOutput: true
     }
     </script>
-<script>kernelName = 'python3'</script>
+    <script>kernelName = 'python3'</script>
         </article>
       </div>
       <footer>
@@ -670,15 +729,16 @@ string, remove the suffix from the path.</p>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=f31d14ad54b65d19161ba51d4ffff3a77ae00456"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
-    <script src="../_static/sphinx-book-theme.d59cb220de22ca1c485ebbdc042f0030.js"></script>
+    <script src="../_static/design-tabs.js"></script>
+    <script src="../_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
 const thebe_selector = ".thebe,.cell"
 const thebe_selector_input = "pre"
