@@ -146,8 +146,11 @@ class MainWindow(QMainWindow):
         # check if experiment started or ended and update gui enabling
         if self.st.is_exp_started():
             self.set_enabled_gui(enable=False)
+            self.wid_display.is_exp_started = True
+            
         elif self.st.is_exp_ended():
             self.set_enabled_gui(enable=True)
+            self.wid_display.is_exp_ended = True
 
     def set_enabled_gui(self, enable):
         """Disable all the gui elements during the experiment"""
@@ -159,9 +162,7 @@ class MainWindow(QMainWindow):
         self.wid_save_options.setEnabled(enable)
         self.wid_display.auto_contrast_chk.setEnabled(enable)
         self.wid_display.active_drift_chk.setEnabled(enable)
-        self.wid_display.display_drift(
-            is_exp_started=not enable
-        )  # notifies the viewing widget to display drift layer
+
 
 
 class StatusWidget(QTabWidget):

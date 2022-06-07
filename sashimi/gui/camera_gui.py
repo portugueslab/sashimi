@@ -82,6 +82,10 @@ class ViewingWidget(QWidget):
         self.refresh_display = True
         self.is_first_frame = True
         self.auto_contrast = True
+        self.is_exp_started = False
+        self.is_exp_ended = False
+        
+        self.is_drift_active = False
 
         s = self.get_fullframe_size()
         self.image_shape = (1, s, s)
@@ -100,6 +104,7 @@ class ViewingWidget(QWidget):
             ),
             blending="translucent",
             name="frame_layer",
+            visible=True,
         )
 
         self.drift_layer = self.viewer.add_image(
@@ -150,11 +155,13 @@ class ViewingWidget(QWidget):
 
         self.active_drift_chk = QCheckBox("Activate Drift Reference")
         self.display_drift_chk = QCheckBox("Visualize/Hide Drift Reference")
+        self.display_frame_chk = QCheckBox("Visualize/Hide Frame Reference")
 
         self.bottom_layout.addWidget(self.auto_contrast_chk)
         self.bottom_layout.addWidget(self.wid_contrast_range)
         self.bottom_layout.addWidget(self.active_drift_chk)
         self.bottom_layout.addWidget(self.display_drift_chk)
+        self.bottom_layout.addWidget(self.display_frame_chk)
 
         self.bottom_layout.addStretch()
 
@@ -169,11 +176,13 @@ class ViewingWidget(QWidget):
         # connect drift widget
         self.active_drift_chk.clicked.connect(self.activate_drift_reference)
         self.display_drift_chk.clicked.connect(self.display_drift_reference)
+        self.display_frame_chk.clicked.connect(self.display_frame_reference)
         self.display_drift_chk.setEnabled(
             False
         )  # only enabled if drift reference is activated
 
         self.auto_contrast_chk.setChecked(True)
+        self.display_frame_chk.setChecked(True)
 
         self.state.camera_settings.sig_param_changed.connect(
             self.launch_delayed_contrast_reset
@@ -235,6 +244,14 @@ class ViewingWidget(QWidget):
         self.frame_layer.data = current_image
         # self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
 
+        if self.is_exp_started:
+            self.display_drift(frame = current_image, is_exp_running=True)
+            self.is_exp_started = False
+        elif self.is_exp_ended:
+            self.display_drift(is_exp_running=False)
+            self.is_exp_ended = False
+        
+        
         # Check if anything changed in the image shape, which would mean that changes of the contrast
         # are required (in case a parameter update was missed).
         if self.is_first_frame or self.image_shape != current_image.shape:
@@ -282,22 +299,26 @@ class ViewingWidget(QWidget):
         self.frame_layer.contrast_limits = self.contrast_range.contrast_range
 
     def activate_drift_reference(self):
-        self.state.is_drift_active = not self.state.is_drift_active
+        # self.state.is_drift_active = not self.state.is_drift_active
+        self.is_drift_active = not self.is_drift_active
 
     def display_drift_reference(self):
-        if self.state.drift_ref is not None:
+        if self.drift_layer.data is not None:
             self.drift_layer.visible = not self.drift_layer.visible
         else:
             print("Error: drift was inactive before start of acquisition")
-
-    def display_drift(self, is_exp_started=False):
-        if (
-            is_exp_started
-            and self.state.is_drift_active
-            and self.state.drift_ref is not None
+            
+    def display_frame_reference(self):
+        self.frame_layer.visible = not self.frame_layer.visible
+        
+    def display_drift(self, frame = None, is_exp_running = False):
+        if (is_exp_running
+            and self.is_drift_active
+            and frame is not None
         ):
             # set layer data
-            self.drift_layer.data = self.state.drift_ref
+            self.drift_layer.data = frame
+            self.drift_layer.contrast_limits= self.frame_layer.contrast_limits
             # set buttons
             self.display_drift_chk.setEnabled(True)
             self.display_drift_chk.setChecked(True)
@@ -310,7 +331,8 @@ class ViewingWidget(QWidget):
             # set layer visibility
             self.drift_layer.visible = False
             # reset drift image
-            self.state.reset_drift_reference()
+            self.drift_layer.data = np.zeros([2,2])
+
 
 
 class CameraSettingsWidget(QWidget):
