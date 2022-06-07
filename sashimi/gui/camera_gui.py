@@ -84,7 +84,6 @@ class ViewingWidget(QWidget):
         self.auto_contrast = True
         self.is_exp_started = False
         self.is_exp_ended = False
-        
         self.is_drift_active = False
 
         s = self.get_fullframe_size()
@@ -107,6 +106,7 @@ class ViewingWidget(QWidget):
             visible=True,
         )
 
+        # create drift layer and set it as not visible
         self.drift_layer = self.viewer.add_image(
             np.zeros(
                 [
@@ -244,14 +244,14 @@ class ViewingWidget(QWidget):
         self.frame_layer.data = current_image
         # self.frame_layer.scale = [self.voxel_size[0] / self.voxel_size[1], 1.0, 1.0]
 
+        # If experiment is started/ended call the display drift function
         if self.is_exp_started:
-            self.display_drift(frame = current_image, is_exp_running=True)
+            self.display_drift(frame=current_image, is_exp_running=True)
             self.is_exp_started = False
         elif self.is_exp_ended:
             self.display_drift(is_exp_running=False)
             self.is_exp_ended = False
-        
-        
+
         # Check if anything changed in the image shape, which would mean that changes of the contrast
         # are required (in case a parameter update was missed).
         if self.is_first_frame or self.image_shape != current_image.shape:
@@ -298,27 +298,43 @@ class ViewingWidget(QWidget):
     def set_manual_contrast(self):
         self.frame_layer.contrast_limits = self.contrast_range.contrast_range
 
-    def activate_drift_reference(self):
-        # self.state.is_drift_active = not self.state.is_drift_active
+    def activate_drift_reference(self) -> None:
+        """
+        If active the first volume during the experiment
+        will be saved and overlayed to the viewer
+        """
         self.is_drift_active = not self.is_drift_active
 
-    def display_drift_reference(self):
-        if self.drift_layer.data is not None:
+    def display_drift_reference(self) -> None:
+        """
+        Toggles the visualization of the drift layer on/off
+        """
+        # if not None or empty
+        if self.drift_layer.data is not None or np.any(self.drift_layer.data):
             self.drift_layer.visible = not self.drift_layer.visible
-        else:
-            print("Error: drift was inactive before start of acquisition")
-            
-    def display_frame_reference(self):
+
+    def display_frame_reference(self) -> None:
+        """
+        Toggles the visualization of the main layer on/off
+        """
         self.frame_layer.visible = not self.frame_layer.visible
-        
-    def display_drift(self, frame = None, is_exp_running = False):
-        if (is_exp_running
-            and self.is_drift_active
-            and frame is not None
-        ):
+
+    def display_drift(self, frame=None, is_exp_running=False) -> None:
+        """
+        If the conditions are right displays the drift layer,
+        else it will disable the buttons and reset the drift layer
+
+        Args:
+            frame (np.ndarray): current image used to refresh the viewer after the experiment started.
+                                Defaults to None.
+            is_exp_running (bool): check to discriminate between start and end of the experiment.
+                                            Defaults to False.
+        """
+        # if experiment started, button is selected and frame has been generated
+        if is_exp_running and self.is_drift_active and frame is not None:
             # set layer data
             self.drift_layer.data = frame
-            self.drift_layer.contrast_limits= self.frame_layer.contrast_limits
+            self.drift_layer.contrast_limits = self.frame_layer.contrast_limits
             # set buttons
             self.display_drift_chk.setEnabled(True)
             self.display_drift_chk.setChecked(True)
@@ -331,8 +347,7 @@ class ViewingWidget(QWidget):
             # set layer visibility
             self.drift_layer.visible = False
             # reset drift image
-            self.drift_layer.data = np.zeros([2,2])
-
+            self.drift_layer.data = np.zeros([2, 2])
 
 
 class CameraSettingsWidget(QWidget):

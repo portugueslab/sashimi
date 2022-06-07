@@ -554,8 +554,11 @@ class State:
         self.saver.saving_parameter_queue.put(self.save_params)
         self.dispatcher.n_planes_queue.put(self.n_planes)
 
-    def start_experiment(self):
-
+    def start_experiment(self) -> None:
+        """
+        Sets all the signals and cleans the queue
+        to trigger the start of the experiment
+        """
         self.current_exp_state = GlobalState.EXPERIMENT_RUNNING
         self.logger.log_message("started experiment")
         self.scanner.wait_signal.set()
@@ -566,7 +569,11 @@ class State:
         time.sleep(0.01)
         self.is_saving_event.set()
 
-    def end_experiment(self):
+    def end_experiment(self) -> None:
+        """
+        Sets all the signals and cleans the queue
+        to trigger the end of the experiment
+        """
         self.logger.log_message("experiment ended")
         self.is_saving_event.clear()
         self.experiment_start_event.clear()
@@ -577,7 +584,7 @@ class State:
     def is_exp_started(self) -> bool:
         """
         check if the experiment has started:
-        looks for tha change in the value hold by current_exp_running
+        looks for tha change in the value hold by current_exp_state
 
         Returns:
             bool
@@ -594,7 +601,7 @@ class State:
     def is_exp_ended(self) -> bool:
         """
         check if the experiment has ended:
-        looks for tha change in the value hold by current_exp_running
+        looks for tha change in the value hold by current_exp_state
 
         Returns:
             bool
@@ -645,6 +652,7 @@ class State:
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
     def reset_noise_subtraction(self):
+
         self.calibration_ref = None
         self.noise_subtraction_active.clear()
 
