@@ -110,7 +110,9 @@ class ViewingWidget(QWidget):
         self.drift_layer = self.viewer.add_image(
             np.zeros(
                 [
-                    1, 5, 5,
+                    1,
+                    5,
+                    5,
                 ]
             ),
             blending="additive",
@@ -176,7 +178,7 @@ class ViewingWidget(QWidget):
         self.active_drift_chk.clicked.connect(self.activate_drift_reference)
         self.display_drift_chk.clicked.connect(self.display_drift_reference)
         self.display_frame_chk.clicked.connect(self.display_frame_reference)
-        
+
         self.display_frame_chk.setChecked(True)
         self.display_frame_chk.setEnabled(False)
         self.display_drift_chk.setEnabled(
@@ -184,7 +186,6 @@ class ViewingWidget(QWidget):
         )  # only enabled if drift reference is activated
 
         self.auto_contrast_chk.setChecked(True)
-        
 
         self.state.camera_settings.sig_param_changed.connect(
             self.launch_delayed_contrast_reset
@@ -338,7 +339,7 @@ class ViewingWidget(QWidget):
             self.drift_layer.data = frame
             self.drift_layer.contrast_limits = self.frame_layer.contrast_limits
             # set buttons
-            #-> drift is active -> all buttons on
+            # -> drift is active -> all buttons on
             self.display_drift_chk.setEnabled(True)
             self.display_drift_chk.setChecked(True)
             self.display_frame_chk.setChecked(True)
@@ -350,11 +351,11 @@ class ViewingWidget(QWidget):
             # -> drift inactive all buttons off
             self.display_drift_chk.setEnabled(False)
             self.display_drift_chk.setChecked(False)
-            self.display_frame_chk.setChecked(True)  #live view on
+            self.display_frame_chk.setChecked(True)  # live view on
             self.display_frame_chk.setEnabled(False)
             # set layer visibility
             self.drift_layer.visible = False
-            self.frame_layer.visible = True #live view on
+            self.frame_layer.visible = True  # live view on
             # reset drift image
             self.drift_layer.data = self.frame_layer.data * 0
 
