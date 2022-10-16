@@ -3,12 +3,12 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="FAQ" href="FAQ.html" /><link rel="prev" title="The structure of Sashimi" href="structure.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Code organization" href="../development/code_organization.html" /><link rel="prev" title="Installation" href="installation.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.15"/>
-        <title>Features - Sashimi</title>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+        <title>Configuring Sashimi - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
@@ -164,34 +164,21 @@
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../timeline.html">Timeline</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="structure.html">The structure of Sashimi</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Configuring Sashimi</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuring Sashimi</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware_support.html">Hardware support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/GUI.html">GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/calibration.html">Calibration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/planar_mode.html">Planar mode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../user_guide/volume_mode.html">Volume mode</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/code_architecture.html">Code architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/hardware_control.html">Hardware Control</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/multiprocessing.html">Multiprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/gui.html">GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/modes.html">Modes Panel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/scanning.html">Scanning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/code_organization.html">Code organization</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hardware</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope hardware</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Api</span></p>
 <ul>
@@ -255,7 +242,8 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -269,60 +257,41 @@
           </label>
         </div>
         <article role="main">
-          <section class="tex2jax_ignore mathjax_ignore" id="features">
-<h1>Features<a class="headerlink" href="#features" title="Permalink to this headline">#</a></h1>
-<p>Thanks to the modular structure of Sashimi many hardware components can be switched easily by writing a custom python script to interface them with the software.
-This allows to update the hardware and improve the performances over time.</p>
-<section id="core-functionality">
-<h2>Core Functionality<a class="headerlink" href="#core-functionality" title="Permalink to this headline">#</a></h2>
-<section id="calibration">
-<h3>Calibration<a class="headerlink" href="#calibration" title="Permalink to this headline">#</a></h3>
-<p>Sashimi has an integrate calibration mode that allows the user to synch the sheet of light with the distance from the objective.
-This is achieved by moving the sheet of light at multiple depths of the piezo (see hardware section for more informations on the specific components) and saving the points in which the image in the viewer is focused.
-Once saved, the software will move the lightsheet of the correct amount for any given piezo to keep the sample in focus.</p>
-<div class="admonition hint">
-<p class="admonition-title">Hint</p>
-<p>If you intend to image a certain range in z, make sure to acquire calibration points slightly beyond your working range.</p>
+          <section class="tex2jax_ignore mathjax_ignore" id="configuring-sashimi">
+<h1>Configuring Sashimi<a class="headerlink" href="#configuring-sashimi" title="Permalink to this headline">#</a></h1>
+<p>Sashimi includes the <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> module that lets you interact with the hardware and software
+settings from command line. You can display the current configuration of the system.:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config show
+</pre></div>
 </div>
-<div class="admonition hint">
-<p class="admonition-title">Hint</p>
-<p>More calibration points will allow the software to compute a more correct estimate.</p>
+<p>You can ask sashimi for help:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi --help
+</pre></div>
 </div>
-</section>
-<section id="planar-acquisition">
-<h3>Planar Acquisition<a class="headerlink" href="#planar-acquisition" title="Permalink to this headline">#</a></h3>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This mode is still under construction and doesn’t fully work yet!</p>
+<p>More information on its usage can be found by asking <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> for help:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config --help
+</pre></div>
 </div>
-<p>Sashimi offers the possibility acquire images of only one plane with this specific mode.  The only input necessary is the position at which to place the objective, the software will use this position and the calibration point to move the sheet of light at the correct distance to keep the image in focus.</p>
-</section>
-<section id="volumetric-acquisition">
-<h3>Volumetric Acquisition<a class="headerlink" href="#volumetric-acquisition" title="Permalink to this headline">#</a></h3>
-<p>The core functionality of Sashimi is the volumetric acquisition.
-It allows to select a range in the <em>z</em> axis and acquire <em>n</em> planes at a desired <em>volume_rate</em>.
-Depending on the mazimum framerate of the camera, the exposure time, and the number of planes per volume, this mode allows for fast acquisition of entire volumes.<br />
-With the hardware described in the next sections, a volume rate of 5Hz with 20 planes.</p>
-</section>
-</section>
-<section id="additional-features">
-<h2>Additional Features<a class="headerlink" href="#additional-features" title="Permalink to this headline">#</a></h2>
-<section id="d-visualization">
-<h3>3D Visualization<a class="headerlink" href="#d-visualization" title="Permalink to this headline">#</a></h3>
-<p>The Sashimi viewer is built around the <a class="reference external" href="https://napari.org">Napari</a> viewer.<br />
-This allows to easily visualize the data stream in real time, both as an overlay of multiple planes and as a 3D volume.
-This allows the user to comprehensively inspect the data on the go, without the need to wait for the end of the acquisition.</p>
-</section>
-<section id="drift-visualization">
-<h3>Drift Visualization<a class="headerlink" href="#drift-visualization" title="Permalink to this headline">#</a></h3>
-<p>In the visualization widget there is an option to toggle on the drift visualization. This saves the first volume/plane of any acquisition and overlays it on top of the live feed.
-This allows the user to see if the sample has moved during the acquisition.
-This phenomenon can happen when a sample is embedded in agarose, but the widget can still be used as a useful comparison to the beginning of the acquisition.</p>
-</section>
-<section id="noise-filtering">
-<h3>Noise Filtering<a class="headerlink" href="#noise-filtering" title="Permalink to this headline">#</a></h3>
-<p>During the calibration phase it’s possible to activate a noise filter which will compute the sensor average noise and subtract it to each frame acquired by the camera.</p>
-</section>
+<p>You can add and modify parameters just from the command line. For example, to set the piezo waveform readout channel to <code class="docutils literal notranslate"><span class="pre">Dev1/ao0:0</span></code> just run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n z_board.write.channel -v Dev1/ao0:0
+</pre></div>
+</div>
+<p>Or to modify the minimum and maximum voltage (in Volts) of the channel:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n piezo.position_write.min_val -v 0
+sashimi-config edit -n piezo.position_write.max_val -v 10
+</pre></div>
+</div>
+<section id="starting-the-software-from-command-line">
+<h2>Starting the software from command line<a class="headerlink" href="#starting-the-software-from-command-line" title="Permalink to this headline">#</a></h2>
+<p>Open a new anaconda prompt and activate your environment like above. Then run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi
+</pre></div>
+</div>
+<p>Add the option <code class="docutils literal notranslate"><span class="pre">--scopeless</span></code>:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi --scopeless
+</pre></div>
+</div>
+<p>If you want to run the software with mock hardware, such as for debugging or developing.</p>
 </section>
 </section>
 
@@ -339,7 +308,7 @@ This phenomenon can happen when a sample is embedded in agarose, but the widget 
         },
         kernelOptions: {
             kernelName: "python3",
-            path: "./overview"
+            path: "./configuration"
         },
         predefinedOutput: true
     }
@@ -350,23 +319,23 @@ This phenomenon can happen when a sample is embedded in agarose, but the widget 
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="FAQ.html">
+          <a class="next-page" href="../development/code_organization.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">FAQ</div>
+                <div class="title">Code organization</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="structure.html">
+          <a class="prev-page" href="installation.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">The structure of Sashimi</div>
+                <div class="title">Installation</div>
                 
               </div>
             </a>
@@ -402,19 +371,8 @@ This phenomenon can happen when a sample is embedded in agarose, but the widget 
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Features</a><ul>
-<li><a class="reference internal" href="#core-functionality">Core Functionality</a><ul>
-<li><a class="reference internal" href="#calibration">Calibration</a></li>
-<li><a class="reference internal" href="#planar-acquisition">Planar Acquisition</a></li>
-<li><a class="reference internal" href="#volumetric-acquisition">Volumetric Acquisition</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#additional-features">Additional Features</a><ul>
-<li><a class="reference internal" href="#d-visualization">3D Visualization</a></li>
-<li><a class="reference internal" href="#drift-visualization">Drift Visualization</a></li>
-<li><a class="reference internal" href="#noise-filtering">Noise Filtering</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">Configuring Sashimi</a><ul>
+<li><a class="reference internal" href="#starting-the-software-from-command-line">Starting the software from command line</a></li>
 </ul>
 </li>
 </ul>

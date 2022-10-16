@@ -3,12 +3,12 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="GUI" href="GUI.html" /><link rel="prev" title="Configuring Sashimi" href="configuration.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Microscope hardware" href="../hardware/hardware.html" /><link rel="prev" title="Configuring Sashimi" href="../configuration/configuration.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.15"/>
-        <title>Hardware support - Sashimi</title>
+    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+        <title>Code organization - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=9ec31e2665bf879c1d47d93a8ec4893870ee1e45" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
@@ -165,33 +165,20 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../overview/intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../overview/structure.html">The structure of Sashimi</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../overview/features.html">Features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../overview/FAQ.html">FAQ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../timeline.html">Timeline</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring Sashimi</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Hardware support</a></li>
-<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="calibration.html">Calibration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="planar_mode.html">Planar mode</a></li>
-<li class="toctree-l1"><a class="reference internal" href="volume_mode.html">Volume mode</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
+<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/code_architecture.html">Code architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/hardware_control.html">Hardware Control</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/multiprocessing.html">Multiprocessing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/gui.html">GUI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/modes.html">Modes Panel</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../developer_guide/scanning.html">Scanning</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../configuration/configuration.html">Configuring Sashimi</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Code organization</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hardware</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope hardware</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Api</span></p>
 <ul>
@@ -255,7 +242,8 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -269,22 +257,12 @@
           </label>
         </div>
         <article role="main">
-          <section class="tex2jax_ignore mathjax_ignore" id="hardware-support">
-<h1>Hardware support<a class="headerlink" href="#hardware-support" title="Permalink to this headline">#</a></h1>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>UNDER CONSTRUCTION</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>                               <span class="n">___</span>
-                       <span class="o">/======/</span>   
-               <span class="n">____</span>    <span class="o">//</span>      \<span class="n">___</span>
-               <span class="o">|</span> \\  <span class="o">//</span>           
-       <span class="o">|</span><span class="n">_______</span><span class="o">|</span><span class="n">__</span><span class="o">|</span><span class="n">_</span><span class="o">//</span>            
-       <span class="n">_L_____________</span>\<span class="n">o</span>           
-     <span class="n">__</span><span class="p">(</span><span class="n">CCCCCCCCCCCCCC</span><span class="p">)</span><span class="n">____________</span>
-
-</pre></div>
-</div>
-</div>
+          <section class="tex2jax_ignore mathjax_ignore" id="code-organization">
+<h1>Code organization<a class="headerlink" href="#code-organization" title="Permalink to this headline">#</a></h1>
+<p>Sashimi controls up to three hardware entities:
+IO boards that control scanning, a camera and a a light source
+(stage control might be added at a later, ahem, stage).</p>
+<p>For each, an interface is defined that gives expected functionality.</p>
 </section>
 
     <script type="text/x-thebe-config">
@@ -300,7 +278,7 @@
         },
         kernelOptions: {
             kernelName: "python3",
-            path: "./user_guide"
+            path: "./development"
         },
         predefinedOutput: true
     }
@@ -311,16 +289,16 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="GUI.html">
+          <a class="next-page" href="../hardware/hardware.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">GUI</div>
+                <div class="title">Microscope hardware</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="configuration.html">
+          <a class="prev-page" href="../configuration/configuration.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
