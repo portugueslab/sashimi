@@ -1,8 +1,8 @@
-from sashimi.gui.main_gui import MainWindow
-from sashimi.state import State, TriggerSettings
-import qdarkstyle
-from PyQt5.QtCore import Qt
-from split_dataset import SplitDataset
+# from sashimi.gui.main_gui import MainWindow
+# from sashimi.state import State, TriggerSettings
+# import qdarkstyle
+# from PyQt5.QtCore import Qt
+# from split_dataset import SplitDataset
 
 
 class MockEvt:
