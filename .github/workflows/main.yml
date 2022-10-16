@@ -44,8 +44,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
-        python-version: [3.8.6]
+        os: [macos-latest, ubuntu-latest]
+        python-version: [3.8.6, 3.9]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
