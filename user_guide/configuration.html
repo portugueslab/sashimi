@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Configuring Sashimi" href="configuration.html" /><link rel="prev" title="Timeline" href="../timeline.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Setting up the Lighsheet" href="usage_example.html" /><link rel="prev" title="Installation" href="installation.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
-        <title>Installation - Sashimi</title>
+        <title>Configuring Sashimi - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
@@ -165,20 +165,32 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../timeline.html">Timeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/structure.html">The structure of Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/FAQ.html">FAQ</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage_example.html">Setting up the Lighsheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware_support.html">Hardware support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="calibration.html">Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planar_mode.html">Planar mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="volume_mode.html">Volume mode</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../development/code_organization.html">Code organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/code_architecture.html">Code architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/hardware_control.html">Hardware Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/multiprocessing.html">Multiprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/scanning.html">Scanning</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hardware</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope Hardware</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Api</span></p>
 <ul>
@@ -224,6 +236,10 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/references.html">Bibliography</a></li>
+</ul>
 
 </div>
 </div>
@@ -257,37 +273,41 @@
           </label>
         </div>
         <article role="main">
-          <section class="tex2jax_ignore mathjax_ignore" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h1>
-<p><a class="reference external" href="https://www.anaconda.com/">Install the latest Anaconda</a> distribution of Python 3.</p>
-<p>Clone this repository and navigate to the main folder <code class="docutils literal notranslate"><span class="pre">../sashimi</span></code></p>
-<section id="recommended-create-a-new-environment">
-<h2>Recommended: Create a new environment<a class="headerlink" href="#recommended-create-a-new-environment" title="Permalink to this headline">#</a></h2>
-<p>It is a good practice to create an environment for every project. The provided <code class="docutils literal notranslate"><span class="pre">environment.yml</span></code> sets up almost all required dependencies (see below).</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda env create -f {path to environment.yml}
+          <section class="tex2jax_ignore mathjax_ignore" id="configuring-sashimi">
+<h1>Configuring Sashimi<a class="headerlink" href="#configuring-sashimi" title="Permalink to this headline">#</a></h1>
+<p>Sashimi includes the <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> module that lets you interact with the hardware and software
+settings from command line. You can display the current configuration of the system.:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config show
 </pre></div>
 </div>
-<p>You can activate the environment by running:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>conda activate sashimi
+<p>You can ask sashimi for help:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi --help
 </pre></div>
 </div>
-<p>After this you moght have to install two extra dependencies for controlling a Cobolt laser:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install pyvisa
-pip install pyvisa-py
+<p>More information on its usage can be found by asking <code class="docutils literal notranslate"><span class="pre">sashimi-config</span></code> for help:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config --help
 </pre></div>
 </div>
-</section>
-<section id="install-with-pip">
-<h2>Install with pip<a class="headerlink" href="#install-with-pip" title="Permalink to this headline">#</a></h2>
-<p>For a non-editable installation run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install .
+<p>You can add and modify parameters just from the command line. For example, to set the piezo waveform readout channel to <code class="docutils literal notranslate"><span class="pre">Dev1/ao0:0</span></code> just run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n z_board.write.channel -v Dev1/ao0:0
 </pre></div>
 </div>
-<p>Otherwise, if you want to contribute to the project as a developer, for editable installation run:</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install -e .
+<p>Or to modify the minimum and maximum voltage (in Volts) of the channel:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi-config edit -n piezo.position_write.min_val -v 0
+sashimi-config edit -n piezo.position_write.max_val -v 10
 </pre></div>
 </div>
-<p>Now you are ready to go!</p>
+<section id="starting-the-software-from-command-line">
+<h2>Starting the software from command line<a class="headerlink" href="#starting-the-software-from-command-line" title="Permalink to this headline">#</a></h2>
+<p>Open a new anaconda prompt and activate your environment like above. Then run:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi
+</pre></div>
+</div>
+<p>Add the option <code class="docutils literal notranslate"><span class="pre">--scopeless</span></code>:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>sashimi --scopeless
+</pre></div>
+</div>
+<p>If you want to run the software with mock hardware, such as for debugging or developing.</p>
 </section>
 </section>
 
@@ -304,7 +324,7 @@ pip install pyvisa-py
         },
         kernelOptions: {
             kernelName: "python3",
-            path: "./configuration"
+            path: "./user_guide"
         },
         predefinedOutput: true
     }
@@ -315,23 +335,23 @@ pip install pyvisa-py
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="configuration.html">
+          <a class="next-page" href="usage_example.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Configuring Sashimi</div>
+                <div class="title">Setting up the Lighsheet</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../timeline.html">
+          <a class="prev-page" href="installation.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Timeline</div>
+                <div class="title">Installation</div>
                 
               </div>
             </a>
@@ -367,9 +387,8 @@ pip install pyvisa-py
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Installation</a><ul>
-<li><a class="reference internal" href="#recommended-create-a-new-environment">Recommended: Create a new environment</a></li>
-<li><a class="reference internal" href="#install-with-pip">Install with pip</a></li>
+<li><a class="reference internal" href="#">Configuring Sashimi</a><ul>
+<li><a class="reference internal" href="#starting-the-software-from-command-line">Starting the software from command line</a></li>
 </ul>
 </li>
 </ul>

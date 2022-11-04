@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Timeline" href="timeline.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Introduction" href="overview/intro.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
         <title>Sashimi</title>
@@ -165,20 +165,32 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="timeline.html">Timeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview/intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview/structure.html">The structure of Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview/features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview/FAQ.html">FAQ</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="configuration/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configuration/configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/usage_example.html">Setting up the Lighsheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/hardware_support.html">Hardware support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/calibration.html">Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/planar_mode.html">Planar mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/volume_mode.html">Volume mode</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="development/code_organization.html">Code organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/code_architecture.html">Code architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/hardware_control.html">Hardware Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/multiprocessing.html">Multiprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/scanning.html">Scanning</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hardware</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="hardware/hardware.html">Microscope hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware/hardware.html">Microscope Hardware</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Api</span></p>
 <ul>
@@ -224,6 +236,10 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview/references.html">Bibliography</a></li>
+</ul>
 
 </div>
 </div>
@@ -258,9 +274,9 @@
         </div>
         <article role="main">
           <section class="tex2jax_ignore mathjax_ignore" id="welcome-to-the-sashimi-documentation">
-<h1>Welcome to the Sashimi documentation!<a class="headerlink" href="#welcome-to-the-sashimi-documentation" title="Permalink to this headline">#</a></h1>
-<img src="https://raw.githubusercontent.com/portugueslab/sashimi/master/sashimi/icons/main_icon.png" align="left" height="190" width="270">
-<p><img alt="tests" src="https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master" />
+<h1>Welcome to the Sashimi documentation<a class="headerlink" href="#welcome-to-the-sashimi-documentation" title="Permalink to this headline">#</a></h1>
+<a class="bg-primary mb-1 reference internal image-reference" href="https://raw.githubusercontent.com/portugueslab/sashimi/master/sashimi/icons/main_icon.png"><img alt="fishy" class="bg-primary mb-1 align-left" src="https://raw.githubusercontent.com/portugueslab/sashimi/master/sashimi/icons/main_icon.png" style="width: 300px;" /></a>
+<p><a class="reference external" href="https://portugueslab.github.io/sashimi/"><img alt="tests" src="https://github.com/portugueslab/sashimi/workflows/tests/badge.svg?branch=master" /></a>
 <a class="reference external" href="https://portugueslab.github.io/sashimi/"><img alt="Docs" src="https://img.shields.io/badge/docs-dev-brightgreen" /></a>
 <a class="reference external" href="https://coveralls.io/github/portugueslab/sashimi"><img alt="Coverage Status" src="https://coveralls.io/repos/github/portugueslab/sashimi/badge.svg" /></a>
 <a class="reference external" href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg" /></a>
@@ -277,26 +293,38 @@ hardware by other vendors (we will help with and welcome contributions for suppo
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="timeline.html">Timeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview/intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview/structure.html">The structure of Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview/features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview/FAQ.html">FAQ</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="configuration/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="configuration/configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/usage_example.html">Setting up the Lighsheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/hardware_support.html">Hardware support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/calibration.html">Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/planar_mode.html">Planar mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/volume_mode.html">Volume mode</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="development/code_organization.html">Code organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/code_architecture.html">Code architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/hardware_control.html">Hardware Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/multiprocessing.html">Multiprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer_guide/scanning.html">Scanning</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Hardware</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="hardware/hardware.html">Microscope hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hardware/hardware.html">Microscope Hardware</a></li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
@@ -345,6 +373,12 @@ hardware by other vendors (we will help with and welcome contributions for suppo
 </li>
 </ul>
 </div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview/references.html">Bibliography</a></li>
+</ul>
+</div>
 </section>
 </section>
 
@@ -372,12 +406,12 @@ hardware by other vendors (we will help with and welcome contributions for suppo
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="timeline.html">
+          <a class="next-page" href="overview/intro.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Timeline</div>
+                <div class="title">Introduction</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -414,7 +448,7 @@ hardware by other vendors (we will help with and welcome contributions for suppo
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Welcome to the Sashimi documentation!</a><ul>
+<li><a class="reference internal" href="#">Welcome to the Sashimi documentation</a><ul>
 <li><a class="reference internal" href="#table-of-contents">Table of Contents</a><ul>
 </ul>
 </li>

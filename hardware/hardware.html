@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API Reference" href="../api/index.html" /><link rel="prev" title="Code organization" href="../development/code_organization.html" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="API Reference" href="../api/index.html" /><link rel="prev" title="Scanning" href="../developer_guide/scanning.html" />
 
     <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
-        <title>Microscope hardware - Sashimi</title>
+        <title>Microscope Hardware - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
@@ -165,20 +165,32 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../timeline.html">Timeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/structure.html">The structure of Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/FAQ.html">FAQ</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../configuration/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../configuration/configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/usage_example.html">Setting up the Lighsheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware_support.html">Hardware support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/calibration.html">Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/planar_mode.html">Planar mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/volume_mode.html">Volume mode</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../development/code_organization.html">Code organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/code_architecture.html">Code architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/hardware_control.html">Hardware Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/multiprocessing.html">Multiprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/scanning.html">Scanning</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hardware</span></p>
 <ul class="current">
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Microscope hardware</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Microscope Hardware</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Api</span></p>
 <ul>
@@ -224,6 +236,10 @@
 </ul>
 </li>
 </ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/references.html">Bibliography</a></li>
+</ul>
 
 </div>
 </div>
@@ -258,15 +274,142 @@
         </div>
         <article role="main">
           <section class="tex2jax_ignore mathjax_ignore" id="microscope-hardware">
-<h1>Microscope hardware<a class="headerlink" href="#microscope-hardware" title="Permalink to this headline">#</a></h1>
-<p>Sashimi was built for a two-beam
-digitally-scanning lightsheet microscope used for brain imaging
-zebrafish larvae and drosophila.</p>
-<section id="schema">
-<h2>Schema<a class="headerlink" href="#schema" title="Permalink to this headline">#</a></h2>
+<h1>Microscope Hardware<a class="headerlink" href="#microscope-hardware" title="Permalink to this headline">#</a></h1>
+<p>Sashimi was built for a two-beam digitally-scanning lightsheet microscope used for brain imaging zebrafish larvae and drosophila.</p>
+<section id="digitally-scanned-light-sheet-microscopy-dlsm">
+<h2>Digitally Scanned Light-sheet Microscopy (DLSM)<a class="headerlink" href="#digitally-scanned-light-sheet-microscopy-dlsm" title="Permalink to this headline">#</a></h2>
+<p>Light sheet fluorescence microscopy (LSFM) is a microscopy technique that uses a thin sheet of light to illuminate a fluorescent sample. The main advantages of this technique are the high resolution in z, thanks to the optical sectioning of the sample, and that it decreases the bleaching of fluorescent samples since not all the fluorophores of the sample are excited at the same time. In a digitally scanned light-sheet microscope the light sheet is created by moving a laser beam horizontally hundreds of times per second (normally at a frequency between 200Hz and 1kHz). The sheet of light can then be moved vertically to acquire volumetric data.</p>
+<p>The overall simplified structure consists of a laser beam, which is split into two separate beams, and sent to multiple mirrors until it is redirected to two galvanometric mirrors (see the excitation path setup in <a class="reference internal" href="#sashimi-hw-top"><span class="std std-ref">figure</span></a>). This structure is specific to our setup since we need two excitation paths in order to image the whole brain of a zebrafish while trying not to hit the eyes with the laser beam. This can be easily achieved with two sheets of light, one coming from the front of the fish and the second one coming from the side.</p>
+<figure class="align-default" id="sashimi-hw-top">
+<a class="reference internal image-reference" href="../_images/hw_top.png"><img alt="../_images/hw_top.png" src="../_images/hw_top.png" style="height: 500px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 14 </span><span class="caption-text">Sashimi excitation paths</span><a class="headerlink" href="#sashimi-hw-top" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<p>Each side has two galvanometric mirrors which can move the beam horizontally and vertically. The horizontal motion generates the light sheet, while the vertical one moves the light sheet across the sample. After the galvanometric mirrors, the beam of light goes through multiple lenses to collimate and expand the beam and finally passes through an objective. The point where the waist of the beam is the thinnest is the optimal location at which to construct the imaging path. It is important to note that both beams should meet and align where the waist is thinnest (see <a class="reference internal" href="#light-sheet-setup"><span class="std std-ref">fig</span></a>) since that is where the maximum z-resolution can be achieved.</p>
+<figure class="align-default" id="light-sheet-setup">
+<a class="reference internal image-reference" href="../_images/Light-sheet-setup.png"><img alt="../_images/Light-sheet-setup.png" src="../_images/Light-sheet-setup.png" style="height: 500px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 15 </span><span class="caption-text">A simple example of a ligth-sheet setup [<a class="reference external" href="../overview/references.html#id3">3</a>]</span><a class="headerlink" href="#light-sheet-setup" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<p>The imaging path comprises a camera, tube lens, imaging objective, piezo, and filter. The camera, tube lens, and objective must be at a constant distance relative to each other (the distance depends on the focal distance of the tube lens) and are therefore mounted on a fixed railing system that can be moved as a whole piece. The GFP filter ensures that only the photons at the right wavelength are collected by the camera, and consequently filters out any unwanted noise. The piezo allows the objective to move vertically in a synchronized way with the galvanometric mirrors, generating the vertical scanning of the sheet of light (see <a class="reference internal" href="#sashimi-hw-side"><span class="std std-ref">fig</span></a>). This synchronous motion ensures that the sheet of light and the focal plane of the camera are always matching.</p>
+<figure class="align-default" id="sashimi-hw-side">
+<a class="reference internal image-reference" href="../_images/hw_side.png"><img alt="../_images/hw_side.png" src="../_images/hw_side.png" style="height: 500px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 16 </span><span class="caption-text">Simplified schematic of the the imaging path and one excitation path of a light-sheet</span><a class="headerlink" href="#sashimi-hw-side" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
 </section>
-<section id="parts-list-and-alternatives">
-<h2>Parts list and alternatives<a class="headerlink" href="#parts-list-and-alternatives" title="Permalink to this headline">#</a></h2>
+<section id="hardware-components">
+<h2>Hardware Components<a class="headerlink" href="#hardware-components" title="Permalink to this headline">#</a></h2>
+<p>The main components of a light-sheet are the camera, galvanometric mirrors, laser beam, lenses, objective, piezo-objective positioner, GFP filter, and stage.</p>
+<section id="camera">
+<h3>Camera<a class="headerlink" href="#camera" title="Permalink to this headline">#</a></h3>
+<p>The camera we used for our implementation is the ORCA Flash 4 from Hamamatsu.  It allows for fast imaging acquisition, in combination with a large sensor that can acquire large field images. Depending on the frame size the camera can achieve various frequencies (see <a class="reference internal" href="#sashimi-cam"><span class="std std-ref">table</span></a>).</p>
+<figure class="align-default" id="sashimi-cam">
+<a class="reference internal image-reference" href="../_images/camera.jpg"><img alt="../_images/camera.jpg" src="../_images/camera.jpg" style="width: 500px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 17 </span><span class="caption-text">Hamamatsu camera specifications</span><a class="headerlink" href="#sashimi-cam" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="galvanometric-mirrors">
+<h3>Galvanometric mirrors<a class="headerlink" href="#galvanometric-mirrors" title="Permalink to this headline">#</a></h3>
+<p>Galvanometric mirrors (see <a class="reference internal" href="#sashimi-galvo1"><span class="std std-ref">fig</span></a> and <a class="reference internal" href="#sashimi-galvo2"><span class="std std-ref">fig</span></a>) are used to move the laser beam both vertically and horizontally. The horizontal fast motion (200-1000Hz) generates a light sheet, while the slow vertical motion (1-20Hz) allows for volumetric imaging. Being a two-beam light-sheet, there are two excitation light paths (frontal and lateral) from which the sample is illuminated.</p>
+<p>Therefore, there are four galvanometric mirrors, two of which are bigger in size and are used for slower motion, and two that are smaller and move at faster speeds. Each side has one of a kind, the bigger one for vertical motion and the smaller one for horizontal motion.</p>
+<figure class="align-default" id="sashimi-galvo1">
+<a class="reference internal image-reference" href="../_images/galvo1.jpg"><img alt="../_images/galvo1.jpg" src="../_images/galvo1.jpg" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 18 </span><span class="caption-text">Galvanometric mirror controller</span><a class="headerlink" href="#sashimi-galvo1" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+<figure class="align-default" id="sashimi-galvo2">
+<a class="reference internal image-reference" href="../_images/galvo2.jpg"><img alt="../_images/galvo2.jpg" src="../_images/galvo2.jpg" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 19 </span><span class="caption-text">Galvanometric mirror</span><a class="headerlink" href="#sashimi-galvo2" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="laser">
+<h3>Laser<a class="headerlink" href="#laser" title="Permalink to this headline">#</a></h3>
+<p>The laser must be chosen with a wavelength that excites the set of fluorophores present in the samples you desire to image. In our setup, we use the Cobolt from Hubner Photonics with a wavelength of 488 nm (see <a class="reference internal" href="#sashimi-laser"><span class="std std-ref">fig</span></a>).</p>
+<figure class="align-default" id="sashimi-laser">
+<a class="reference internal image-reference" href="../_images/cobolt.jpg"><img alt="../_images/cobolt.jpg" src="../_images/cobolt.jpg" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 20 </span><span class="caption-text">Cobolt laser</span><a class="headerlink" href="#sashimi-laser" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="lenses">
+<h3>Lenses<a class="headerlink" href="#lenses" title="Permalink to this headline">#</a></h3>
+<p>The lenses used are specific to the setup and depend on the distances the light needs to travel. In our setup, each excitation path has one scan lens and a tube lens. With the addition of another tube lens for the acquisition path.</p>
+</section>
+<section id="objectives">
+<h3>Objectives<a class="headerlink" href="#objectives" title="Permalink to this headline">#</a></h3>
+<p>The setup has a total of 3 objectives, 2 for the excitation path and one for the acquisition path:</p>
+<ul class="simple">
+<li><p>4x 0.28 NA Objective (for excitation).</p></li>
+<li><p>20x Objective (for collection).</p></li>
+</ul>
+</section>
+<section id="piezo-objective-positioner">
+<h3>Piezo-objective Positioner<a class="headerlink" href="#piezo-objective-positioner" title="Permalink to this headline">#</a></h3>
+<p>The piezoelectric objective positioner (see <a class="reference internal" href="#sashimi-piezo"><span class="std std-ref">fig</span></a>) is a component attached to the acquisition objective that moves vertically with a range of 600 micrometers. The piezo must be fast enough to be synched with the vertical galvanometric mirrors so that during the acquisition the distance between the objective and the light sheet does not change, thus, keeping the correct focus distance.</p>
+<figure class="align-default" id="sashimi-piezo">
+<a class="reference internal image-reference" href="../_images/piezo.jpg"><img alt="../_images/piezo.jpg" src="../_images/piezo.jpg" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 21 </span><span class="caption-text">Piezo-objective positioner from Piezosystemjana</span><a class="headerlink" href="#sashimi-piezo" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="gfp-filter">
+<h3>GFP filter<a class="headerlink" href="#gfp-filter" title="Permalink to this headline">#</a></h3>
+<p>The emission filter (see <a class="reference internal" href="#sashimi-filter"><span class="std std-ref">fig</span></a>) simply filters out light coming at it with wavelengths outside of its working range. This allows it to filter out any unwanted light and to keep only the photons coming from the illuminated sample.</p>
+<figure class="align-default" id="sashimi-filter">
+<a class="reference internal image-reference" href="../_images/filter.jpg"><img alt="../_images/filter.jpg" src="../_images/filter.jpg" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 22 </span><span class="caption-text">GFP emission filter with a center wavelengh of 525 nm</span><a class="headerlink" href="#sashimi-filter" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="stage">
+<h3>Stage<a class="headerlink" href="#stage" title="Permalink to this headline">#</a></h3>
+<p>To move the sample precisely in the optimal location we use a 3D moving stage (see <a class="reference internal" href="#sashimi-stage"><span class="std std-ref">fig</span></a>).  This allows for precise manual adjustment in x,y,z.</p>
+<figure class="align-default" id="sashimi-stage">
+<a class="reference internal image-reference" href="../_images/stage.jpg"><img alt="../_images/stage.jpg" src="../_images/stage.jpg" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 23 </span><span class="caption-text">Stage to precisely maneuver the sample chamber</span><a class="headerlink" href="#sashimi-stage" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="ni-board">
+<h3>NI Board<a class="headerlink" href="#ni-board" title="Permalink to this headline">#</a></h3>
+<p>The Ni board (see <a class="reference internal" href="#sashimi-ni"><span class="std std-ref">fig</span></a>) is a multifunction input/output device with multiple channels that allow for the independent triggering of single channels as well as synched output for multiple devices (e.g. the piezo and galvos waveforms). It is used to relay the control of the galvanometric mirrors, the piezo-objective positioner, and the camera trigger.</p>
+<figure class="align-default" id="sashimi-ni">
+<a class="reference internal image-reference" href="../_images/ni.png"><img alt="../_images/ni.png" src="../_images/ni.png" style="width: 300px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 24 </span><span class="caption-text">Multi I/O NI board</span><a class="headerlink" href="#sashimi-ni" title="Permalink to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="parts-list">
+<h2>Parts list<a class="headerlink" href="#parts-list" title="Permalink to this headline">#</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>UNDER CONSTRUCTION</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>                               <span class="n">___</span>
+                       <span class="o">/======/</span>   
+               <span class="n">____</span>    <span class="o">//</span>      \<span class="n">___</span>
+               <span class="o">|</span> \\  <span class="o">//</span>           
+       <span class="o">|</span><span class="n">_______</span><span class="o">|</span><span class="n">__</span><span class="o">|</span><span class="n">_</span><span class="o">//</span>            
+       <span class="n">_L_____________</span>\<span class="n">o</span>           
+     <span class="n">__</span><span class="p">(</span><span class="n">CCCCCCCCCCCCCC</span><span class="p">)</span><span class="n">____________</span>
+
+</pre></div>
+</div>
+</div>
 </section>
 </section>
 
@@ -303,14 +446,14 @@ zebrafish larvae and drosophila.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../development/code_organization.html">
+          <a class="prev-page" href="../developer_guide/scanning.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Code organization</div>
+                <div class="title">Scanning</div>
                 
               </div>
             </a>
@@ -346,9 +489,21 @@ zebrafish larvae and drosophila.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Microscope hardware</a><ul>
-<li><a class="reference internal" href="#schema">Schema</a></li>
-<li><a class="reference internal" href="#parts-list-and-alternatives">Parts list and alternatives</a></li>
+<li><a class="reference internal" href="#">Microscope Hardware</a><ul>
+<li><a class="reference internal" href="#digitally-scanned-light-sheet-microscopy-dlsm">Digitally Scanned Light-sheet Microscopy (DLSM)</a></li>
+<li><a class="reference internal" href="#hardware-components">Hardware Components</a><ul>
+<li><a class="reference internal" href="#camera">Camera</a></li>
+<li><a class="reference internal" href="#galvanometric-mirrors">Galvanometric mirrors</a></li>
+<li><a class="reference internal" href="#laser">Laser</a></li>
+<li><a class="reference internal" href="#lenses">Lenses</a></li>
+<li><a class="reference internal" href="#objectives">Objectives</a></li>
+<li><a class="reference internal" href="#piezo-objective-positioner">Piezo-objective Positioner</a></li>
+<li><a class="reference internal" href="#gfp-filter">GFP filter</a></li>
+<li><a class="reference internal" href="#stage">Stage</a></li>
+<li><a class="reference internal" href="#ni-board">NI Board</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#parts-list">Parts list</a></li>
 </ul>
 </li>
 </ul>

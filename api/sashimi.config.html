@@ -165,20 +165,32 @@
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
   <p class="caption" role="heading"><span class="caption-text">Overview</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../timeline.html">Timeline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/structure.html">The structure of Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../overview/FAQ.html">FAQ</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Configuration</span></p>
+<p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../configuration/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../configuration/configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/configuration.html">Configuring Sashimi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/usage_example.html">Setting up the Lighsheet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/hardware_support.html">Hardware support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/GUI.html">GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/calibration.html">Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/planar_mode.html">Planar mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/volume_mode.html">Volume mode</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Development</span></p>
+<p class="caption" role="heading"><span class="caption-text">Developer Guide</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../development/code_organization.html">Code organization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/code_architecture.html">Code architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/hardware_control.html">Hardware Control</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/multiprocessing.html">Multiprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developer_guide/scanning.html">Scanning</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hardware</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../hardware/hardware.html">Microscope Hardware</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Api</span></p>
 <ul class="current">
@@ -223,6 +235,10 @@
 </li>
 </ul>
 </li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview/references.html">Bibliography</a></li>
 </ul>
 
 </div>
@@ -364,7 +380,7 @@ sections and look directly for matching parameters names.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dict_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><em>list of strings</em>) – Full path of the section to configure
+<li><p><strong>dict_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><em>list of strings</em>) – Full path of the section to configure
 (e.g., [“piezo”, “position_read”, “min_val”])</p></li>
 <li><p><strong>val</strong> – New value.</p></li>
 <li><p><strong>file_path</strong> (<em>Path object</em>) – Path of the config file (optional).</p></li>
@@ -382,7 +398,7 @@ we don’t need to keep a confusing template config file in the repo.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>file_path</strong> (<em>Path object</em>) – Path of the config file (optional).</p></li>
-<li><p><strong>template</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – Template of the config file to be written (optional).</p></li>
+<li><p><strong>template</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – Template of the config file to be written (optional).</p></li>
 </ul>
 </dd>
 </dl>
