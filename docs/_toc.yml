@@ -3,17 +3,33 @@ root: index
 parts:
 - caption: Overview
   chapters:
-  - file: timeline
-- caption: Configuration
+  - file: overview/intro
+  - file: overview/structure
+  - file: overview/features
+  - file: overview/FAQ
+- caption: User Guide
   chapters:
-  - file: configuration/installation
-  - file: configuration/configuration
-- caption: Development
+  - file: user_guide/installation
+  - file: user_guide/configuration
+  - file: user_guide/usage_example
+  - file: user_guide/hardware_support
+  - file: user_guide/GUI
+  - file: user_guide/calibration
+  - file: user_guide/planar_mode
+  - file: user_guide/volume_mode
+- caption: Developer Guide
   chapters:
-  - file: development/code_organization
+  - file: developer_guide/code_architecture
+  - file: developer_guide/hardware_control
+  - file: developer_guide/multiprocessing
+  - file: developer_guide/modes
+  - file: developer_guide/scanning
 - caption: Hardware
   chapters:
   - file: hardware/hardware
 - caption: Api
   chapters:
   - file: api/index
+- caption: References
+  chapters:
+  - file: overview/references

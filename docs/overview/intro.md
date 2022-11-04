@@ -1,0 +1,9 @@
+# Introduction
+
+## What is Sashimi?
+
+Sashimi is a user-friendly software for efficient control of digital scanned light-sheet microscopes (DSLMs). It is an open-source software, written in Python, and designed to efficiently acquire data at high speeds, without compromising the readability and organization of the code base. It is designed for the imaging of embedded larvae zebrafish and provides in-built modules to work in synch with another software, [Stytra](https://www.portugueslab.com/stytra/) [[1](references.html#id1)],[[2](references.html#id2)], which is used for behavioral tracking and stimulus presentation. Despite being designed for a specific hardware configuration, its modular and decoupled structure allows for easy replacement and upgrade of hardware components. The aim of Sashimi is to provide a user-friendly and efficient base for light-sheet imaging that can be used as is, or customized and enriched as much as desired. We describe here the architecture of Sashimi, with its various components and the way they work together while striving for a decoupled structure. We also provide a brief proof of concept of how to acquire a dataset and pre-process it to better visualize links between behavior and neural activity.
+
+## Digitally Scanned Light-sheet Microscopy (DSLM)
+
+Light sheet fluorescence microscopy (LSFM) is a microscopy technique that uses a thin sheet of light to illuminate a fluorescent sample. The main advantages of this technique are the high resolution in z, thanks to the optical sectioning of the sample, and that it decreases the bleaching of fluorescent samples since not all the fluorophores of the sample are excited at the same time. In a digitally scanned light-sheet microscope the light sheet is created by moving a laser beam horizontally hundreds of times per second (normally at a frequency between 200Hz and 1kHz). The sheet of light can then be moved vertically to acquire volumetric data.
