@@ -1,20 +1,20 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="sashimi.utilities.Enum" href="sashimi.utilities.Enum.html" /><link rel="prev" title="sashimi.hardware.cameras.MockCamera" href="sashimi.hardware.cameras.MockCamera.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.0.2 and Furo 2023.03.27 -->
         <title>sashimi.utilities - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -158,7 +158,7 @@
   <span class="sidebar-brand-text">Sashimi</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -274,14 +274,10 @@
         </div>
         <article role="main">
           <section id="module-sashimi.utilities">
-<span id="sashimi-utilities"></span><h1>sashimi.utilities<a class="headerlink" href="#module-sashimi.utilities" title="Permalink to this headline">#</a></h1>
+<span id="sashimi-utilities"></span><h1>sashimi.utilities<a class="headerlink" href="#module-sashimi.utilities" title="Permalink to this heading">#</a></h1>
 <p class="rubric">Classes</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sashimi.utilities.Enum.html#sashimi.utilities.Enum" title="sashimi.utilities.Enum"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Enum</span></code></a></p></td>
 <td><p>Generic enumeration.</p></td>
@@ -347,12 +343,12 @@ dataclass.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="sashimi.utilities.vectorize">
 <span class="sig-prename descclassname"><span class="pre">sashimi.utilities.</span></span><span class="sig-name descname"><span class="pre">vectorize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ftylist_or_function</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/numba/np/ufunc/decorators.html#vectorize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sashimi.utilities.vectorize" title="Permalink to this definition">#</a></dt>
-<dd><p>A decorator that creates a Numpy ufunc object using Numba compiled
+<dd><p>A decorator that creates a NumPy ufunc object using Numba compiled
 code.  When no arguments or only keyword arguments are given,
 vectorize will return a Numba dynamic ufunc (DUFunc) object, where
 compilation/specialization may occur at call-time.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ftylist_or_function</strong> (<em>function</em><em> or </em><em>iterable</em>) – <p>When the first argument is a function, signatures are dealt
 with at call-time.</p>
 <p>When the first argument is an iterable of type signatures,
@@ -361,22 +357,22 @@ the function type, signatures are finalized at decoration
 time.</p>
 </p>
 </dd>
-<dt class="field-even">Keyword Arguments</dt>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – A string for code generation target.  Default to “cpu”.</p></li>
-<li><p><strong>identity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><em>None</em></a>) – The identity (or unit) value for the element-wise function
+<li><p><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a>) – A string for code generation target.  Default to “cpu”.</p></li>
+<li><p><strong>identity</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><em>str</em></a><em>, or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.12)"><em>None</em></a>) – The identity (or unit) value for the element-wise function
 being implemented.  Allowed values are None (the default), 0, 1,
 and “reorderable”.</p></li>
-<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – Turns on caching.</p></li>
+<li><p><strong>cache</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – Turns on caching.</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A NumPy universal function</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
 <dl class="simple">
-<dt>&#64;vectorize([‘float32(float32, float32)’,</dt><dd><p>‘float64(float64, float64)’], identity=1)</p>
+<dt>&#64;vectorize([‘float32(float32, float32)’,</dt><dd><p>‘float64(float64, float64)’], identity=0)</p>
 </dd>
 <dt>def sum(a, b):</dt><dd><p>return a + b</p>
 </dd>
@@ -396,10 +392,6 @@ def mul(a, b):</p>
 <p class="rubric">Exceptions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="sashimi.utilities.Empty.html#sashimi.utilities.Empty" title="sashimi.utilities.Empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Empty</span></code></a></p></td>
 <td><p>Exception raised by Queue.get(block=0)/get_nowait().</p></td>
@@ -421,7 +413,7 @@ def mul(a, b):</p>
             mode: "python"
         },
         kernelOptions: {
-            kernelName: "python3",
+            name: "python3",
             path: "./api"
         },
         predefinedOutput: true
@@ -465,9 +457,7 @@ def mul(a, b):</p>
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -500,15 +490,16 @@ def mul(a, b):</p>
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/design-tabs.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"

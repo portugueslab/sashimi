@@ -1,20 +1,20 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Calibration" href="calibration.html" /><link rel="prev" title="Hardware support" href="hardware_support.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.0.2 and Furo 2023.03.27 -->
         <title>GUI - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -158,7 +158,7 @@
   <span class="sidebar-brand-text">Sashimi</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -274,13 +274,13 @@
         </div>
         <article role="main">
           <section class="tex2jax_ignore mathjax_ignore" id="gui">
-<h1>GUI<a class="headerlink" href="#gui" title="Permalink to this headline">#</a></h1>
+<h1>GUI<a class="headerlink" href="#gui" title="Permalink to this heading">#</a></h1>
 <p>The GUI is structured in four main sections <a class="reference internal" href="#sashimi-gui"><span class="std std-ref">fig</span></a>:</p>
-<ol class="simple">
-<li><p>The top <a class="reference external" href="#progress-bar">progress bar</a></p></li>
-<li><p>The right <a class="reference external" href="#settings-panel">settings panel</a></p></li>
-<li><p>The central <a class="reference external" href="#viewer-panel">viewer panel</a></p></li>
-<li><p>The left <a class="reference external" href="#mode-panel">mode panel</a></p></li>
+<ol class="arabic simple">
+<li><p>The top <span class="xref myst">progress bar</span></p></li>
+<li><p>The right <span class="xref myst">settings panel</span></p></li>
+<li><p>The central <span class="xref myst">viewer panel</span></p></li>
+<li><p>The left <span class="xref myst">mode panel</span></p></li>
 </ol>
 <figure class="align-default" id="sashimi-gui">
 <a class="reference internal image-reference" href="../_images/sashimi_gui.png"><img alt="../_images/sashimi_gui.png" src="../_images/sashimi_gui.png" style="height: 500px;" /></a>
@@ -289,13 +289,13 @@
 </figcaption>
 </figure>
 <section id="progress-bar">
-<h2>Progress Bar<a class="headerlink" href="#progress-bar" title="Permalink to this headline">#</a></h2>
+<h2>Progress Bar<a class="headerlink" href="#progress-bar" title="Permalink to this heading">#</a></h2>
 <p>The progress bar (see <a class="reference internal" href="#sashimi-gui"><span class="std std-ref">fig</span></a> box 1) has two important functions, firstly it displays to the user the number of volumes acquired and how many are left, giving feedback on the progress of the acquisition.</p>
 <p>Secondly, it gets the user input for the start, stop, and pause of the experiment. When the button to start the experiment is pressed the GUI interface communicates with the main process (<code class="docutils literal notranslate"><span class="pre">State</span></code> class) and signals to start the experiment routine. During the experiment, the GUI pings the state to get the saving status (available in the state class through the saving process) and updates the feedback progress bar.</p>
 </section>
 <section id="settings-panel">
-<h2>Settings Panel<a class="headerlink" href="#settings-panel" title="Permalink to this headline">#</a></h2>
-<p>The right settings panel is a column that hosts four settings widgets (see <a class="reference internal" href="#sashimi-gui"><span class="std std-ref">fig</span></a> box 2). These are all instantiated as children of a standardized widget factory called lightparam [<a class="reference external" href="../overview/references.html#id6">6</a>] and are defined inside the main process which sends each input value to their relative processes. The upper widget is for the scanning settings and allows for modification of the frontal and lateral horizontal galvos frequency and range (see <a class="reference internal" href="#gui-sett-scan"><span class="std std-ref">fig</span></a>).</p>
+<h2>Settings Panel<a class="headerlink" href="#settings-panel" title="Permalink to this heading">#</a></h2>
+<p>The right settings panel is a column that hosts four settings widgets (see <a class="reference internal" href="#sashimi-gui"><span class="std std-ref">fig</span></a> box 2). These are all instantiated as children of a standardized widget factory called lightparam [<span class="xref myst">6</span>] and are defined inside the main process which sends each input value to their relative processes. The upper widget is for the scanning settings and allows for modification of the frontal and lateral horizontal galvos frequency and range (see <a class="reference internal" href="#gui-sett-scan"><span class="std std-ref">fig</span></a>).</p>
 <figure class="align-default" id="gui-sett-scan">
 <a class="reference internal image-reference" href="../_images/gui_sett_scan.png"><img alt="../_images/gui_sett_scan.png" src="../_images/gui_sett_scan.png" style="height: 200px;" /></a>
 <figcaption>
@@ -324,9 +324,9 @@
 </figure>
 </section>
 <section id="viewer-panel">
-<h2>Viewer Panel<a class="headerlink" href="#viewer-panel" title="Permalink to this headline">#</a></h2>
+<h2>Viewer Panel<a class="headerlink" href="#viewer-panel" title="Permalink to this heading">#</a></h2>
 <p>The viewer panel is the main panel in the program, it is a Napari viewer with additional custom functionality (see <a class="reference internal" href="#sashimi-gui"><span class="std std-ref">fig</span></a> section 3). It is used by the program to display the live view from the camera, both in 2D and 3D, and has several settings at the bottom:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p>A button to toggle the 3D mode view on/off.</p></li>
 <li><p>A button to reset the view.</p></li>
 <li><p>A slider to manually adjust the contrast.</p></li>
@@ -351,9 +351,9 @@
 </figure>
 </section>
 <section id="mode-panel">
-<h2>Mode Panel<a class="headerlink" href="#mode-panel" title="Permalink to this headline">#</a></h2>
+<h2>Mode Panel<a class="headerlink" href="#mode-panel" title="Permalink to this heading">#</a></h2>
 <p>The mode panel (see <a class="reference internal" href="#sashimi-gui"><span class="std std-ref">fig</span></a> section 4) holds most of the core functionality for the control and setup of the experiment. It is divided into 4 different menus which define different states in which the program is:</p>
-<ol class="simple">
+<ol class="arabic simple">
 <li><p><strong>Pause</strong>: is the home page of the software, in this mode, the viewer is paused and no additional settings are provided.</p></li>
 <li><p><a class="reference internal" href="calibration.html"><span class="doc std std-doc"><strong>Calibration</strong></span></a>: this is the calibration mode, it allows the user to calibrate the relation between piezo and vertical galvos in order to obtain a focused image.</p></li>
 <li><p><a class="reference internal" href="planar_mode.html"><span class="doc std std-doc"><strong>Planar</strong></span></a>: allows for planar data acquisition, and exploration of the specimen by adjusting the piezo and moving through the z-axis.</p></li>
@@ -374,7 +374,7 @@
             mode: "python"
         },
         kernelOptions: {
-            kernelName: "python3",
+            name: "python3",
             path: "./user_guide"
         },
         predefinedOutput: true
@@ -418,9 +418,7 @@
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -457,15 +455,16 @@
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/design-tabs.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"

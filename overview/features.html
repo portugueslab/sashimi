@@ -1,20 +1,20 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="FAQ" href="FAQ.html" /><link rel="prev" title="The structure of Sashimi" href="structure.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.0.2 and Furo 2023.03.27 -->
         <title>Features - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -158,7 +158,7 @@
   <span class="sidebar-brand-text">Sashimi</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -274,13 +274,13 @@
         </div>
         <article role="main">
           <section class="tex2jax_ignore mathjax_ignore" id="features">
-<h1>Features<a class="headerlink" href="#features" title="Permalink to this headline">#</a></h1>
+<h1>Features<a class="headerlink" href="#features" title="Permalink to this heading">#</a></h1>
 <p>Thanks to the modular structure of Sashimi many hardware components can be switched easily by writing a custom python script to interface them with the software.
 This allows to update the hardware and improve the performances over time.</p>
 <section id="core-functionality">
-<h2>Core Functionality<a class="headerlink" href="#core-functionality" title="Permalink to this headline">#</a></h2>
+<h2>Core Functionality<a class="headerlink" href="#core-functionality" title="Permalink to this heading">#</a></h2>
 <section id="calibration">
-<h3>Calibration<a class="headerlink" href="#calibration" title="Permalink to this headline">#</a></h3>
+<h3>Calibration<a class="headerlink" href="#calibration" title="Permalink to this heading">#</a></h3>
 <p>Sashimi has an integrate calibration mode that allows the user to synch the sheet of light with the distance from the objective.
 This is achieved by moving the sheet of light at multiple depths of the piezo (see hardware section for more informations on the specific components) and saving the points in which the image in the viewer is focused.
 Once saved, the software will move the lightsheet of the correct amount for any given piezo to keep the sample in focus.</p>
@@ -294,7 +294,7 @@ Once saved, the software will move the lightsheet of the correct amount for any 
 </div>
 </section>
 <section id="planar-acquisition">
-<h3>Planar Acquisition<a class="headerlink" href="#planar-acquisition" title="Permalink to this headline">#</a></h3>
+<h3>Planar Acquisition<a class="headerlink" href="#planar-acquisition" title="Permalink to this heading">#</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This mode is still under construction and doesn’t fully work yet!</p>
@@ -302,7 +302,7 @@ Once saved, the software will move the lightsheet of the correct amount for any 
 <p>Sashimi offers the possibility acquire images of only one plane with this specific mode.  The only input necessary is the position at which to place the objective, the software will use this position and the calibration point to move the sheet of light at the correct distance to keep the image in focus.</p>
 </section>
 <section id="volumetric-acquisition">
-<h3>Volumetric Acquisition<a class="headerlink" href="#volumetric-acquisition" title="Permalink to this headline">#</a></h3>
+<h3>Volumetric Acquisition<a class="headerlink" href="#volumetric-acquisition" title="Permalink to this heading">#</a></h3>
 <p>The core functionality of Sashimi is the volumetric acquisition.
 It allows to select a range in the <em>z</em> axis and acquire <em>n</em> planes at a desired <em>volume_rate</em>.
 Depending on the mazimum framerate of the camera, the exposure time, and the number of planes per volume, this mode allows for fast acquisition of entire volumes.<br />
@@ -310,21 +310,21 @@ With the hardware described in the next sections, a volume rate of 5Hz with 20 p
 </section>
 </section>
 <section id="additional-features">
-<h2>Additional Features<a class="headerlink" href="#additional-features" title="Permalink to this headline">#</a></h2>
+<h2>Additional Features<a class="headerlink" href="#additional-features" title="Permalink to this heading">#</a></h2>
 <section id="d-visualization">
-<h3>3D Visualization<a class="headerlink" href="#d-visualization" title="Permalink to this headline">#</a></h3>
+<h3>3D Visualization<a class="headerlink" href="#d-visualization" title="Permalink to this heading">#</a></h3>
 <p>The Sashimi viewer is built around the <a class="reference external" href="https://napari.org">Napari</a> viewer.<br />
 This allows to easily visualize the data stream in real time, both as an overlay of multiple planes and as a 3D volume.
 This allows the user to comprehensively inspect the data on the go, without the need to wait for the end of the acquisition.</p>
 </section>
 <section id="drift-visualization">
-<h3>Drift Visualization<a class="headerlink" href="#drift-visualization" title="Permalink to this headline">#</a></h3>
+<h3>Drift Visualization<a class="headerlink" href="#drift-visualization" title="Permalink to this heading">#</a></h3>
 <p>In the visualization widget there is an option to toggle on the drift visualization. This saves the first volume/plane of any acquisition and overlays it on top of the live feed.
 This allows the user to see if the sample has moved during the acquisition.
 This phenomenon can happen when a sample is embedded in agarose, but the widget can still be used as a useful comparison to the beginning of the acquisition.</p>
 </section>
 <section id="noise-filtering">
-<h3>Noise Filtering<a class="headerlink" href="#noise-filtering" title="Permalink to this headline">#</a></h3>
+<h3>Noise Filtering<a class="headerlink" href="#noise-filtering" title="Permalink to this heading">#</a></h3>
 <p>During the calibration phase it’s possible to activate a noise filter which will compute the sensor average noise and subtract it to each frame acquired by the camera.</p>
 </section>
 </section>
@@ -342,7 +342,7 @@ This phenomenon can happen when a sample is embedded in agarose, but the widget 
             mode: "python"
         },
         kernelOptions: {
-            kernelName: "python3",
+            name: "python3",
             path: "./overview"
         },
         predefinedOutput: true
@@ -386,9 +386,7 @@ This phenomenon can happen when a sample is embedded in agarose, but the widget 
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -433,15 +431,16 @@ This phenomenon can happen when a sample is embedded in agarose, but the widget 
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/design-tabs.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"

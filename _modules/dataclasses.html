@@ -1,19 +1,19 @@
 <!doctype html>
-<html class="no-js">
+<html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" />
 
-    <meta name="generator" content="sphinx-4.5.0, furo 2022.09.29"/>
+    <!-- Generated with Sphinx 5.0.2 and Furo 2023.03.27 -->
         <title>dataclasses - Sashimi</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=d81277517bee4d6b0349d71bb2661d4890b5617c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/design-style.b7bb847fb20b106c3d81b95245e65545.min.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
     
@@ -157,7 +157,7 @@
   <span class="sidebar-brand-text">Sashimi</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -593,7 +593,7 @@
 <span class="c1"># function whose type depends on its parameters.</span>
 <span class="k">def</span> <span class="nf">field</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">MISSING</span><span class="p">,</span> <span class="n">default_factory</span><span class="o">=</span><span class="n">MISSING</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
           <span class="nb">hash</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compare</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return an object to identify dataclass fields.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an object to identify dataclass fields.</span>
 
 <span class="sd">    default is the default value of the field.  default_factory is a</span>
 <span class="sd">    0-argument function called to initialize a field&#39;s value.  If init</span>
@@ -622,7 +622,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">fields</span><span class="p">:</span>
         <span class="k">return</span> <span class="s1">&#39;()&#39;</span>
     <span class="c1"># Note the trailing comma, needed if this turns out to be a 1-tuple.</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">obj_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">])</span><span class="si">}</span><span class="s1">,)&#39;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">obj_name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">f</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">fields</span><span class="p">])</span><span class="si">}</span><span class="s1">,)&#39;</span>
 
 
 <span class="c1"># This function&#39;s logic is copied from &quot;recursive_repr&quot; function in</span>
@@ -1269,7 +1269,7 @@
 
 <span class="k">def</span> <span class="nf">dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
               <span class="n">unsafe_hash</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">frozen</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns the same class as was passed in, with dunder methods</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the same class as was passed in, with dunder methods</span>
 <span class="sd">    added based on the fields defined in the class.</span>
 
 <span class="sd">    Examines PEP 526 __annotations__ to determine fields.</span>
@@ -1294,7 +1294,7 @@
 
 
 <span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">class_or_instance</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return a tuple describing the fields of this dataclass.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a tuple describing the fields of this dataclass.</span>
 
 <span class="sd">    Accepts a dataclass or an instance of one. Tuple elements are of</span>
 <span class="sd">    type Field.</span>
@@ -1312,19 +1312,19 @@
 
 
 <span class="k">def</span> <span class="nf">_is_dataclass_instance</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns True if obj is an instance of a dataclass.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns True if obj is an instance of a dataclass.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="n">_FIELDS</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="is_dataclass"><a class="viewcode-back" href="../api/sashimi.utilities.html#sashimi.utilities.is_dataclass">[docs]</a><span class="k">def</span> <span class="nf">is_dataclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Returns True if obj is a dataclass or an instance of a</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns True if obj is a dataclass or an instance of a</span>
 <span class="sd">    dataclass.&quot;&quot;&quot;</span>
     <span class="bp">cls</span> <span class="o">=</span> <span class="n">obj</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_FIELDS</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="asdict"><a class="viewcode-back" href="../api/sashimi.utilities.html#sashimi.utilities.asdict">[docs]</a><span class="k">def</span> <span class="nf">asdict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">dict_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the fields of a dataclass instance as a new dictionary mapping</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the fields of a dataclass instance as a new dictionary mapping</span>
 <span class="sd">    field names to field values.</span>
 
 <span class="sd">    Example usage:</span>
@@ -1389,7 +1389,7 @@
 
 
 <span class="k">def</span> <span class="nf">astuple</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">tuple_factory</span><span class="o">=</span><span class="nb">tuple</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return the fields of a dataclass instance as a new tuple of field values.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the fields of a dataclass instance as a new tuple of field values.</span>
 
 <span class="sd">    Example usage::</span>
 
@@ -1442,7 +1442,7 @@
 <span class="k">def</span> <span class="nf">make_dataclass</span><span class="p">(</span><span class="n">cls_name</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bases</span><span class="o">=</span><span class="p">(),</span> <span class="n">namespace</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                    <span class="nb">repr</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">eq</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unsafe_hash</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                    <span class="n">frozen</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return a new dynamically created dataclass.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a new dynamically created dataclass.</span>
 
 <span class="sd">    The dataclass name will be &#39;cls_name&#39;.  &#39;fields&#39; is an iterable</span>
 <span class="sd">    of either (name), (name, type) or (name, type, Field) objects. If type is</span>
@@ -1506,7 +1506,7 @@
 
 
 <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">changes</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return a new object replacing specified fields with new values.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a new object replacing specified fields with new values.</span>
 
 <span class="sd">    This is especially useful for frozen classes.  Example usage:</span>
 
@@ -1586,9 +1586,7 @@
             
           </div>
           <div class="right-details">
-            <div class="icons">
-              
-            </div>
+            
           </div>
         </div>
         
@@ -1603,15 +1601,16 @@
 </div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
-    <script src="../_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
     <script>let toggleHintShow = 'Click to show';</script>
     <script>let toggleHintHide = 'Click to hide';</script>
     <script>let toggleOpenOnPrint = 'true';</script>
     <script src="../_static/togglebutton.js"></script>
-    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="../_static/design-tabs.js"></script>
     <script src="../_static/scripts/furo.js"></script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
