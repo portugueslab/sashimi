@@ -123,7 +123,7 @@ def write_config_value(dict_path, val, file_path=CONFIG_PATH):
 
     """
     # Ensure path to entry is always a string:
-    if type(dict_path) == str:
+    if type(dict_path) is str:
         dict_path = [dict_path]
 
     # Read and set:

@@ -52,7 +52,7 @@ def clean_json(d):
         return clean_json(asdict(d))
     elif type(d) in [tuple, list]:
         # json seems to have issues serializing np.int32:
-        if type(d[0]) == np.int32:
+        if type(d[0]) is np.int32:
             d = [int(i) for i in d]
         return d
     else:
