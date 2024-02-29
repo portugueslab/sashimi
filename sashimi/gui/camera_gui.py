@@ -65,7 +65,7 @@ class ViewingWidget(QWidget):
 
     _DELAY_REFRESH_COUNT = 10
 
-    def __init__(self, state: State, timer: QTimer, style: str):
+    def __init__(self, state: State, timer: QTimer, style: str, viewer: napari.Viewer):
         super().__init__()
         self.state = state
         timer.timeout.connect(self.refresh)
@@ -89,7 +89,7 @@ class ViewingWidget(QWidget):
         s = self.get_fullframe_size()
         self.image_shape = (1, s, s)
 
-        self.viewer = napari.Viewer(show=False)
+        self.viewer = viewer
         # setting napari style to sashimi's
         self.viewer.window.qt_viewer.setStyleSheet(style)
 
