@@ -228,7 +228,6 @@ def get_voxel_size(
     scanning_settings: Union[ZRecordingSettings, SinglePlaneSettings],
     camera_settings: CameraSettings,
 ):
-
     binning = int(camera_settings.binning)
 
     if isinstance(scanning_settings, SinglePlaneSettings):
@@ -266,6 +265,9 @@ def convert_save_params(
         notification_email=str(save_settings.notification_email),
         volumerate=scanning_settings.frequency,
         voxel_size=get_voxel_size(scanning_settings, camera_settings),
+        crop=[
+            int(item) for item in camera_settings.roi
+        ],  # int conversion makes it json serializable
     )
 
 
@@ -669,7 +671,6 @@ class State:
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
     def reset_noise_subtraction(self):
-
         self.calibration_ref = None
         self.noise_subtraction_active.clear()
 
