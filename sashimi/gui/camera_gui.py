@@ -241,6 +241,24 @@ class ViewingWidget(QWidget):
         if current_image is None:
             return
 
+        # Dirty place to add an alignment cross, but it's not going to be merged anyway.
+        # What is added here does not get included in the recording.
+        # Image is: (1, x, y).
+        cross_grey_value = 65535  # it's 16 bit.
+        print(current_image.shape)
+        if current_image.shape[1] % 2 == 0:
+            middle = int(np.floor(current_image.shape[1] / 2))
+            current_image[:, middle:middle+1, :] = cross_grey_value
+        else:
+            current_image[:, int(current_image.shape[1] / 2), :] = cross_grey_value
+
+        if current_image.shape[2] % 2 == 0:
+            middle = int(np.floor(current_image.shape[2] / 2))
+            current_image[:, :, middle:middle+1] = cross_grey_value
+
+        else:
+            current_image[:, :, int(current_image.shape[2] / 2)] = cross_grey_value
+
         # If not volumetric or out of range, reset indexes:
         if current_image.shape[0] == 1:
             self.viewer.dims.reset()
