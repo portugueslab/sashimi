@@ -111,7 +111,6 @@ class ScanLoop:
         logger: ConcurrenceLogger,
         trigger_exp_from_scanner,
     ):
-
         self.sample_rate = sample_rate
         self.n_samples = n_samples
 
@@ -286,7 +285,8 @@ class TriggeredPlanarScanLoop(ScanLoop):
 
     def loop_condition(self):
         return (
-            super().loop_condition() and self.parameters.state == ScanningState.TRIGGERED_PLANAR
+            super().loop_condition()
+            and self.parameters.state == ScanningState.TRIGGERED_PLANAR
         )
 
     def n_samples_period(self):
@@ -342,7 +342,9 @@ class TriggeredPlanarScanLoop(ScanLoop):
                 self.logger.log_message("Camera was off")
                 # calculate how many samples are remaining until we are in a new period
                 if self.i_sample == 0:
-                    camera_pulses = self.camera_pulses.read(self.i_sample, self.n_samples)
+                    camera_pulses = self.camera_pulses.read(
+                        self.i_sample, self.n_samples
+                    )
                     self.camera_was_off = False
                     self.wait_signal.clear()
                 else:

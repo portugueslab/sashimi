@@ -228,7 +228,6 @@ def get_voxel_size(
     scanning_settings: Union[ZRecordingSettings, SinglePlaneSettings],
     camera_settings: CameraSettings,
 ):
-
     binning = int(camera_settings.binning)
 
     if isinstance(scanning_settings, SinglePlaneSettings):
@@ -668,7 +667,6 @@ class State:
         self.dispatcher.calibration_ref_queue.put(self.calibration_ref)
 
     def reset_noise_subtraction(self):
-
         self.calibration_ref = None
         self.noise_subtraction_active.clear()
 
