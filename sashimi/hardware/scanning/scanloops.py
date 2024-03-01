@@ -22,6 +22,7 @@ class ScanningState(Enum):
     PAUSED = 1
     PLANAR = 2
     VOLUMETRIC = 3
+    TRIGGERED_PLANAR = 4
 
 
 class ExperimentPrepareState(Enum):
@@ -256,6 +257,108 @@ class PlanarScanLoop(ScanLoop):
         super().fill_arrays()
 
         self.wait_signal.clear()
+
+
+class TriggeredPlanarScanLoop(ScanLoop):
+    """Class for controlling the planar scanning mode, where we image only one plane and
+    do not control the piezo and vertical galvo."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        buffer_len = int(round(self.sample_rate / self.parameters.triggering.frequency))
+        self.camera_pulses = RollingBuffer(buffer_len)
+        set_impulses(
+            self.camera_pulses.buffer,
+            1,
+            n_skip_start=0,
+            n_skip_end=0,
+        )
+        self.current_frequency = self.parameters.triggering.frequency
+        self.camera_on = False
+        self.trigger_exp_start = False
+        self.camera_was_off = True
+        self.wait_signal.set()
+
+    def initialize(self):
+        super().initialize()
+        self.camera_on = False
+        self.wait_signal.set()
+
+    def loop_condition(self):
+        return (
+            super().loop_condition() and self.parameters.state == ScanningState.TRIGGERED_PLANAR
+        )
+
+    def n_samples_period(self):
+        if (
+            self.parameters.triggering.frequency is None
+            or self.parameters.triggering.frequency == 0
+        ):
+            return super().n_samples_period()
+        else:
+            n_samples_trigger = int(
+                round(self.sample_rate / self.parameters.triggering.frequency)
+            )
+            return max(n_samples_trigger, super().n_samples_period())
+
+    def update_settings(self):
+        updated = super().update_settings()
+        if not updated and not self.first_update:
+            return False
+
+        if self.parameters.state != ScanningState.TRIGGERED_PLANAR:
+            return True
+
+        if self.parameters != self.old_parameters:
+            self.initialize()
+
+        if not self.camera_on and self.n_samples_read > self.n_samples_period():
+            self.camera_on = True
+            self.trigger_exp_start = True
+        elif not self.camera_on:
+            self.wait_signal.set()
+        return True
+
+    def fill_arrays(self):
+        # Fill the z values
+        self.board.z_piezo = self.parameters.z.piezo
+        if isinstance(self.parameters.z, ZManual):
+            self.board.z_lateral = self.parameters.z.lateral
+            self.board.z_frontal = self.parameters.z.frontal
+        elif isinstance(self.parameters.z, ZSynced):
+            self.board.z_lateral = calc_sync(
+                self.parameters.z.piezo, self.parameters.z.lateral_sync
+            )
+            self.board.z_frontal = calc_sync(
+                self.parameters.z.piezo, self.parameters.z.frontal_sync
+            )
+
+        super().fill_arrays()
+
+        camera_pulses = 0
+        if self.camera_on:
+            self.logger.log_message("I")
+            if self.camera_was_off:
+                self.logger.log_message("Camera was off")
+                # calculate how many samples are remaining until we are in a new period
+                if self.i_sample == 0:
+                    camera_pulses = self.camera_pulses.read(self.i_sample, self.n_samples)
+                    self.camera_was_off = False
+                    self.wait_signal.clear()
+                else:
+                    n_to_next_start = self.n_samples_period() - self.i_sample
+                    if n_to_next_start < self.n_samples:
+                        camera_pulses = self.camera_pulses.read(
+                            self.i_sample, self.n_samples
+                        ).copy()
+                        camera_pulses[:n_to_next_start] = 0
+                        self.camera_was_off = False
+                        self.wait_signal.clear()
+            else:
+                camera_pulses = self.camera_pulses.read(self.i_sample, self.n_samples)
+                self.wait_signal.clear()
+
+        self.board.camera_trigger = camera_pulses
 
 
 class VolumetricScanLoop(ScanLoop):

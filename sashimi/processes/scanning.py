@@ -5,6 +5,7 @@ from sashimi.hardware.scanning.scanloops import (
     ScanningState,
     ScanParameters,
     PlanarScanLoop,
+    TriggeredPlanarScanLoop,
     VolumetricScanLoop,
 )
 from sashimi.hardware.scanning import ScanningError
@@ -96,6 +97,8 @@ class ScannerProcess(LoggingProcess):
             with configurator(self.sample_rate, self.n_samples, conf) as board:
                 if self.parameters.state == ScanningState.PLANAR:
                     loop = PlanarScanLoop
+                elif self.parameters.state == ScanningState.TRIGGERED_PLANAR:
+                    loop = TriggeredPlanarScanLoop
                 elif self.parameters.state == ScanningState.VOLUMETRIC:
                     loop = VolumetricScanLoop
 
