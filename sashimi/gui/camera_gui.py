@@ -245,7 +245,6 @@ class ViewingWidget(QWidget):
         # What is added here does not get included in the recording.
         # Image is: (1, x, y).
         cross_grey_value = 65535  # it's 16 bit.
-        print(current_image.shape)
         if current_image.shape[1] % 2 == 0:
             middle = int(np.floor(current_image.shape[1] / 2))
             current_image[:, middle:middle+1, :] = cross_grey_value
@@ -258,6 +257,25 @@ class ViewingWidget(QWidget):
 
         else:
             current_image[:, :, int(current_image.shape[2] / 2)] = cross_grey_value
+            
+        # Add small stripes to indicate steps as well.
+        middle = [x // 2 for x in current_image.shape[1:]]  # Ignore that there might not be an exact middle.
+        distances = [np.array(range(0, x, 10)) for x in middle]
+        big_distances = [np.array(range(0, x, 100)).astype(np.uint16) for x in middle]
+
+        # Put a stripe in all directions.
+        half_len = 25
+        current_image[:, middle[0] + distances[0], middle[1] - half_len:middle[1] + half_len] = cross_grey_value
+        current_image[:, middle[0] - distances[0], middle[1] - half_len:middle[1] + half_len] = cross_grey_value
+        current_image[:, middle[0] - half_len:middle[0] + half_len, middle[1] + distances[1]] = cross_grey_value
+        current_image[:, middle[0] - half_len:middle[0] + half_len, middle[1] - distances[1]] = cross_grey_value
+
+        # Put a *big* stripe in all directions.
+        half_len = 50
+        current_image[:, middle[0] + big_distances[0], middle[1] - half_len:middle[1] + half_len] = cross_grey_value
+        current_image[:, middle[0] - big_distances[0], middle[1] - half_len:middle[1] + half_len] = cross_grey_value
+        current_image[:, middle[0] - half_len:middle[0] + half_len, middle[1] + big_distances[1]] = cross_grey_value
+        current_image[:, middle[0] - half_len:middle[0] + half_len, middle[1] - big_distances[1]] = cross_grey_value
 
         # If not volumetric or out of range, reset indexes:
         if current_image.shape[0] == 1:
