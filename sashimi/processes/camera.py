@@ -178,7 +178,6 @@ class CameraProcess(LoggingProcess):
             # if no frames are received (either this loop is in between frames
             # or we are in the waining period)
             if frames:
-
                 for frame in frames:
                     self.logger.log_message(
                         "received frame of shape " + str(frame.shape)

@@ -110,7 +110,6 @@ class ScanLoop:
         logger: ConcurrenceLogger,
         trigger_exp_from_scanner,
     ):
-
         self.sample_rate = sample_rate
         self.n_samples = n_samples
 

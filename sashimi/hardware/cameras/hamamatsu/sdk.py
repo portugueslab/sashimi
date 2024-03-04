@@ -44,6 +44,7 @@ DCAMBUF_ATTACHKIND_FRAME = 0
 
 # Hamamatsu structures.
 
+
 ## DCAMAPI_INIT
 #
 # The dcam initialization structure

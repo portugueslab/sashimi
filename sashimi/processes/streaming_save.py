@@ -28,6 +28,7 @@ class SavingParameters:
     notification_email: str = "None"
     volumerate: float = 1
     voxel_size: tuple = (1, 1, 1)
+    crop: tuple = (0, 0, None, None)
 
 
 @dataclass
@@ -175,8 +176,7 @@ class StackSaver(LoggingProcess):
                         self.save_parameters.chunk_size,
                         *self.current_data.shape[1:],
                     ),
-                    "crop_start": [0, 0, 0, 0],
-                    "crop_end": [0, 0, 0, 0],
+                    "crop": self.save_parameters.crop,  # order of params here is [hpos, vpos, hsize, vsize,]
                     "padding": [0, 0, 0, 0],
                     "voxel_size": self.save_parameters.voxel_size,
                 },
