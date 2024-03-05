@@ -277,7 +277,7 @@ def convert_single_plane_params(
     calibration: Calibration,
 ):
     return ScanParameters(
-        state=ScanningState.PLANAR,
+        state=ScanningState.TRIGGERED_PLANAR,
         xy=convert_planar_params(planar),
         z=ZSynced(
             piezo=single_plane_setting.piezo,
@@ -537,7 +537,6 @@ class State:
         camera_params.trigger_mode = (
             TriggerMode.FREE
             if self.global_state == GlobalState.PREVIEW
-            or self.global_state == GlobalState.PLANAR_PREVIEW
             else TriggerMode.EXTERNAL_TRIGGER
         )
         if self.global_state == GlobalState.PAUSED:
