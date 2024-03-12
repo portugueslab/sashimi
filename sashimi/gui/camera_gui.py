@@ -24,6 +24,8 @@ from sashimi.config import read_config
 from enum import Enum
 from multiprocessing import Queue
 
+from numba import njit
+
 conf = read_config()
 
 
@@ -89,18 +91,16 @@ class ViewingWidget(QWidget):
         s = self.get_fullframe_size()
         self.image_shape = (1, s, s)
 
+        # Collect pixels to draw on.
+        self.draw_pixels = np.empty((0, 2), np.int16)
+
         self.viewer = napari.Viewer(show=False)
         # setting napari style to sashimi's
         self.viewer.window.qt_viewer.setStyleSheet(style)
 
         # Add image layer that will be used to show frames/volumes:
         self.frame_layer = self.viewer.add_image(
-            np.zeros(
-                [
-                    1,
-                ]
-                + self.max_sensor_resolution
-            ),
+            np.zeros([1,] + self.max_sensor_resolution),
             blending="translucent",
             name="frame_layer",
             visible=True,
@@ -108,13 +108,7 @@ class ViewingWidget(QWidget):
 
         # create drift layer and set it as not visible
         self.drift_layer = self.viewer.add_image(
-            np.zeros(
-                [
-                    1,
-                    5,
-                    5,
-                ]
-            ),
+            np.zeros([1, 5, 5,]),
             blending="additive",
             name="drift_layer",
             colormap="red",
@@ -204,10 +198,7 @@ class ViewingWidget(QWidget):
 
     @property
     def voxel_size(self):
-        return get_voxel_size(
-            self.state.volume_setting,
-            self.state.camera_settings,
-        )
+        return get_voxel_size(self.state.volume_setting, self.state.camera_settings,)
 
     def refresh(self) -> None:
         """Main refresh loop called by timeout of the main timer."""
@@ -236,6 +227,64 @@ class ViewingWidget(QWidget):
         """
         self.count_from_change = 0
 
+    @staticmethod
+    @njit(parallel=True)
+    def get_circle_indices(img_shape, diameter):
+        # We can narrowly define the area to check
+        # by removing the indices of the smallest
+        # square that confines the circle and the
+        # bigger square inside the circle.
+        # Furthermore, we only need to get one
+        # quadrant, everything else can be done
+        # with simple operations on the indices.
+        indices = np.empty((0, 2), np.int16)  # Max value: 32768
+        middle = [
+            x // 2 for x in img_shape
+        ]  # Ignore that there might not be an exact middle.
+        radius = diameter // 2
+
+        upper_x = radius + 1
+        upper_y = radius + 1
+
+        lower_x = int(np.floor((radius * np.sqrt(2) / 2)))
+        lower_y = int(np.floor((radius * np.sqrt(2) / 2)))
+
+        lower_x_range = np.arange(lower_x)
+        lower_y_range = np.arange(lower_y)
+        upper_x_range = np.arange(lower_x, upper_x)
+        upper_y_range = np.arange(lower_y, upper_y)
+
+        # Now we use three combinations to get the three
+        # rectangles containing the circle.
+        # Corner square:
+        for x in upper_x_range:
+            for y in upper_y_range:
+                if np.round(np.sqrt((x ** 2) + (y ** 2))) == radius:
+                    i = middle[0] + x
+                    j = middle[1] + y
+                    new_ind = np.array([[i, j], [-i, j], [i, -j], [-i, -j]], np.int16)
+                    indices = np.concatenate((indices, new_ind), axis=0)
+
+        # X rectangle:
+        for x in lower_x_range:
+            for y in upper_y_range:
+                if np.round(np.sqrt((x ** 2) + (y ** 2))) == radius:
+                    i = middle[0] + x
+                    j = middle[1] + y
+                    new_ind = np.array([[i, j], [-i, j], [i, -j], [-i, -j]], np.int16)
+                    indices = np.concatenate((indices, new_ind), axis=0)
+
+        # Y rectangle:
+        for x in upper_x_range:
+            for y in lower_y_range:
+                if np.round(np.sqrt((x ** 2) + (y ** 2))) == radius:
+                    i = middle[0] + x
+                    j = middle[1] + y
+                    new_ind = np.array([[i, j], [-i, j], [i, -j], [-i, -j]], np.int16)
+                    indices = np.concatenate((indices, new_ind), axis=0)
+
+        return indices
+
     def refresh_image(self):
         current_image = self.state.get_volume()
         if current_image is None:
@@ -247,35 +296,85 @@ class ViewingWidget(QWidget):
         cross_grey_value = 65535  # it's 16 bit.
         if current_image.shape[1] % 2 == 0:
             middle = int(np.floor(current_image.shape[1] / 2))
-            current_image[:, middle:middle+1, :] = cross_grey_value
+            current_image[:, middle : middle + 1, :] = cross_grey_value
         else:
             current_image[:, int(current_image.shape[1] / 2), :] = cross_grey_value
 
         if current_image.shape[2] % 2 == 0:
             middle = int(np.floor(current_image.shape[2] / 2))
-            current_image[:, :, middle:middle+1] = cross_grey_value
+            current_image[:, :, middle : middle + 1] = cross_grey_value
 
         else:
             current_image[:, :, int(current_image.shape[2] / 2)] = cross_grey_value
-            
+
         # Add small stripes to indicate steps as well.
-        middle = [x // 2 for x in current_image.shape[1:]]  # Ignore that there might not be an exact middle.
+        middle = [
+            x // 2 for x in current_image.shape[1:]
+        ]  # Ignore that there might not be an exact middle.
         distances = [np.array(range(0, x, 10)) for x in middle]
         big_distances = [np.array(range(0, x, 100)).astype(np.uint16) for x in middle]
 
         # Put a stripe in all directions.
         half_len = 25
-        current_image[:, middle[0] + distances[0], middle[1] - half_len:middle[1] + half_len] = cross_grey_value
-        current_image[:, middle[0] - distances[0], middle[1] - half_len:middle[1] + half_len] = cross_grey_value
-        current_image[:, middle[0] - half_len:middle[0] + half_len, middle[1] + distances[1]] = cross_grey_value
-        current_image[:, middle[0] - half_len:middle[0] + half_len, middle[1] - distances[1]] = cross_grey_value
+        current_image[
+            :, middle[0] + distances[0], middle[1] - half_len : middle[1] + half_len
+        ] = cross_grey_value
+        current_image[
+            :, middle[0] - distances[0], middle[1] - half_len : middle[1] + half_len
+        ] = cross_grey_value
+        current_image[
+            :, middle[0] - half_len : middle[0] + half_len, middle[1] + distances[1]
+        ] = cross_grey_value
+        current_image[
+            :, middle[0] - half_len : middle[0] + half_len, middle[1] - distances[1]
+        ] = cross_grey_value
 
         # Put a *big* stripe in all directions.
         half_len = 50
-        current_image[:, middle[0] + big_distances[0], middle[1] - half_len:middle[1] + half_len] = cross_grey_value
-        current_image[:, middle[0] - big_distances[0], middle[1] - half_len:middle[1] + half_len] = cross_grey_value
-        current_image[:, middle[0] - half_len:middle[0] + half_len, middle[1] + big_distances[1]] = cross_grey_value
-        current_image[:, middle[0] - half_len:middle[0] + half_len, middle[1] - big_distances[1]] = cross_grey_value
+        current_image[
+            :, middle[0] + big_distances[0], middle[1] - half_len : middle[1] + half_len
+        ] = cross_grey_value
+        current_image[
+            :, middle[0] - big_distances[0], middle[1] - half_len : middle[1] + half_len
+        ] = cross_grey_value
+        current_image[
+            :, middle[0] - half_len : middle[0] + half_len, middle[1] + big_distances[1]
+        ] = cross_grey_value
+        current_image[
+            :, middle[0] - half_len : middle[0] + half_len, middle[1] - big_distances[1]
+        ] = cross_grey_value
+
+        # Add the vertical bar that blocks zero-order light.
+        current_image[:, :, middle[1] - 110]
+        current_image[:, :, middle[1] + 110]
+
+        # Only do the computations once.
+        if self.draw_pixels.shape[0] == 0:
+            # Add stimulation circle to the image.
+            indices = self.get_circle_indices(
+                current_image.shape[1:], 1003
+            )  # 1003 was manually calculated.
+            self.draw_pixels = np.concatenate((self.draw_pixels, indices), axis=0)
+
+            # Add the two halve-circles which are part of the zero-order block.
+            halve_indices = self.get_circle_indices(current_image.shape[1:], 221)
+            is_left_halve = (
+                halve_indices[:, 1] > middle[1]
+            )  # Allows us to negate for right_halve.
+            left_halve = halve_indices[is_left_halve]
+            right_halve = halve_indices[~is_left_halve]
+
+            # Move the circles to the edge of the bar.
+            left_halve[:, 1] += 110
+            right_halve[:, 1] -= 110
+
+            self.draw_pixels = np.concatenate((self.draw_pixels, left_halve), axis=0)
+            self.draw_pixels = np.concatenate((self.draw_pixels, right_halve), axis=0)
+
+        # Draw circle based on pixels.
+        current_image[
+            :, self.draw_pixels[:, 0], self.draw_pixels[:, 1]
+        ] = cross_grey_value
 
         # If not volumetric or out of range, reset indexes:
         if current_image.shape[0] == 1:
