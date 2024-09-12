@@ -13,6 +13,7 @@ from sashimi.gui.save_gui import SaveWidget
 from sashimi.gui.status_bar import StatusBarWidget
 from sashimi.gui.top_bar import TopWidget
 from sashimi.state import State
+from sashimi.gui.stage_gui import StageMotorWidget
 
 
 class DockedWidget(QDockWidget):
@@ -45,6 +46,7 @@ class MainWindow(QMainWindow):
         self.wid_camera = CameraSettingsWidget(st, self.wid_display, self.timer)
         self.wid_status_bar = StatusBarWidget(st, self.timer)
         self.toolbar = TopWidget(st, self.timer)
+        self.wid_stage = StageMotorWidget(st)
 
         self.addToolBar(Qt.TopToolBarArea, self.toolbar)
 
@@ -58,6 +60,11 @@ class MainWindow(QMainWindow):
         self.addDockWidget(
             Qt.RightDockWidgetArea,
             DockedWidget(widget=self.wid_scan, title="Scanning settings"),
+        )
+
+        self.addDockWidget(
+            Qt.RightDockWidgetArea,
+            DockedWidget(widget=self.wid_stage, title="Stage Motors"),
         )
 
         self.addDockWidget(
@@ -121,6 +128,7 @@ class MainWindow(QMainWindow):
         # TODO should be possible with lightparam, when it's implemented there remove here
         self.wid_laser.wid_settings.refresh_widgets()
         self.wid_scan.wid_planar.refresh_widgets()
+        self.wid_stage.wid_settings.refresh_widgets()
         self.wid_status.wid_volume.wid_volume.refresh_widgets()
         self.wid_status.wid_calibration.refresh_widgets()
         self.wid_status.wid_single_plane.wid_singleplane.refresh_widgets()
