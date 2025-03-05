@@ -389,6 +389,8 @@ class State:
             noise_subtraction_on=self.noise_subtraction_active,
             camera_queue=self.camera.image_queue,
             saver_queue=self.saver.save_queue,
+            time_queue=self.camera.time_queue,
+            timestamp_queue=self.saver.timestamp_queue,
         )
 
         self.camera_settings = CameraSettings()

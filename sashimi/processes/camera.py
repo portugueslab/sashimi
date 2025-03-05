@@ -3,6 +3,7 @@ from enum import Enum
 from dataclasses import dataclass
 from queue import Empty
 from datetime import datetime
+from time import perf_counter, time
 from arrayqueues.shared_arrays import ArrayQueue
 
 from sashimi.processes.logging import LoggingProcess
@@ -114,6 +115,7 @@ class CameraProcess(LoggingProcess):
         self.wait_event = wait_event.new_reference(self.logger)
         self.experiment_trigger_event = exp_trigger_event.new_reference(self.logger)
         self.image_queue = ArrayQueue(max_mbytes=max_queue_size)
+        self.time_queue = Queue()
         self.camera_id = camera_id
         self.camera = None
         self.parameters = CamParameters()
@@ -174,6 +176,7 @@ class CameraProcess(LoggingProcess):
         ):
             is_waiting = self.wait_event.is_set()
             frames = self.camera.get_frames()
+            timestamp = (perf_counter(), time())
 
             # if no frames are received (either this loop is in between frames
             # or we are in the waining period)
@@ -189,6 +192,7 @@ class CameraProcess(LoggingProcess):
                         self.experiment_trigger_event.set()
                         # TODO do not crash here if queue is full
                     self.image_queue.put(frame)
+                    self.time_queue.put(timestamp)
                     self.was_waiting = is_waiting
                     self.update_framerate()
 

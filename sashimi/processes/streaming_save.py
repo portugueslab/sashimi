@@ -1,5 +1,6 @@
 from multiprocessing import Queue
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from queue import Empty
@@ -51,6 +52,7 @@ class StackSaver(LoggingProcess):
         super().__init__(name="saver")
         self.stop_event = stop_event.new_reference(self.logger)
         self.save_queue = ArrayQueue(max_mbytes=max_queue_size)
+        self.timestamp_queue = Queue()
         self.saving_signal = is_saving_event
         self.saver_stopped_signal = LoggedEvent(
             self.logger, SashimiEvents.SAVING_STOPPED
@@ -64,6 +66,8 @@ class StackSaver(LoggingProcess):
         self.i_volume = 0
         self.n_volumes = 10
         self.current_data = None
+        self.current_time = None
+        self.time_started = None
         self.saved_status_queue = Queue()
         self.frame_shape = None
         self.dtype = np.uint16
@@ -95,6 +99,7 @@ class StackSaver(LoggingProcess):
         self.i_chunk = 0
         self.i_volume = 0
         self.current_data = None
+        self.current_time = None
 
         while (
             self.i_volume < self.n_volumes
@@ -104,8 +109,9 @@ class StackSaver(LoggingProcess):
             self.receive_save_parameters()
             try:
                 frame = self.save_queue.get(timeout=0.01)
+                timestamp = self.timestamp_queue.get(timeout=0.01)
                 self.logger.log_message("received volume")
-                self.fill_dataset(frame)
+                self.fill_dataset(frame, timestamp)
             except Empty:
                 pass
 
@@ -128,15 +134,18 @@ class StackSaver(LoggingProcess):
         self.i_volume = 0
         self.save_parameters = None
 
-    def fill_dataset(self, volume):
+    def fill_dataset(self, volume, timestamp):
         if self.current_data is None:
             self.calculate_optimal_size(volume)
             self.current_data = np.empty(
                 (self.save_parameters.chunk_size, *volume.shape),
                 dtype=self.dtype,
             )
+            self.current_time = np.empty(self.n_volumes)
+            self.time_started = timestamp[1]
 
         self.current_data[self.i_in_chunk, :, :, :] = volume
+        self.current_time[self.i_volume] = timestamp[0]
 
         self.i_volume += 1
         self.i_in_chunk += 1
@@ -182,6 +191,13 @@ class StackSaver(LoggingProcess):
                 },
                 f,
             )
+        fl.save(
+            Path(self.save_parameters.output_dir) / "time.h5",
+            {
+                "started": datetime.fromtimestamp(self.time_started),
+                "time": self.current_time - self.current_time[0],
+            },
+        )
 
     def save_chunk(self):
         self.logger.log_message("saved chunk")

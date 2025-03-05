@@ -34,6 +34,8 @@ class VolumeDispatcher(LoggingProcess):
         noise_subtraction_on: Event,
         camera_queue: ArrayQueue,
         saver_queue: ArrayQueue,
+        time_queue: Queue,
+        timestamp_queue: Queue,
         max_queue_size=1200,
     ):
         super().__init__(name="dispatcher")
@@ -44,6 +46,9 @@ class VolumeDispatcher(LoggingProcess):
 
         self.camera_queue = camera_queue
         self.saver_queue = saver_queue
+        self.current_time = None
+        self.time_queue = time_queue
+        self.timestamp_queue = timestamp_queue
         self.n_planes_queue = Queue()
         self.viewer_queue = ArrayQueue(max_mbytes=max_queue_size)
         self.calibration_ref_queue = ArrayQueue()
@@ -87,6 +92,7 @@ class VolumeDispatcher(LoggingProcess):
             pass  # volume has been dropped from the viewer
         if self.saving_signal.is_set():
             self.saver_queue.put(self.volume_buffer)
+            self.timestamp_queue.put(self.current_time)
 
     def get_frame(self):
         if self.wait_signal.is_set():
@@ -97,10 +103,15 @@ class VolumeDispatcher(LoggingProcess):
                     _ = self.camera_queue.get(timeout=TIMEOUT_S, block=False)
                 except Empty:
                     pass
+                try:
+                    _ = self.time_queue.get(timeout=TIMEOUT_S, block=False)
+                except Empty:
+                    pass
             self.logger.log_message("wait over")
             self.i_plane = 0
         try:
             current_frame = self.camera_queue.get(timeout=TIMEOUT_S, block=False)
+            self.current_time = self.time_queue.get(timeout=TIMEOUT_S, block=False)
             self.process_frame(current_frame)
         except Empty:
             pass
